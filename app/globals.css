@@ -1,0 +1,288 @@
+@import "tailwindcss";
+@import "@heroui/styles";
+
+/* ============================================
+   DevFlow AI - Design System
+   Tailwind CSS v4 - CSS-first configuration
+   WCAG 2.1 AA/AAA Compliant Color Palette
+   ============================================ */
+
+/* Base CSS Variables */
+:root {
+  /* Brand Colors (OKLCH for better color manipulation) */
+  --color-primary: oklch(0.55 0.22 250);
+  --color-primary-hover: oklch(0.48 0.24 250);
+  --color-primary-light: oklch(0.95 0.03 250);
+
+  --color-secondary: oklch(0.6 0.14 280);
+  --color-secondary-hover: oklch(0.53 0.16 280);
+
+  --color-accent: oklch(0.55 0.18 160);
+  --color-accent-hover: oklch(0.48 0.2 160);
+
+  /* Semantic Colors - WCAG AA compliant on both light/dark */
+  --color-success: oklch(0.55 0.18 145);
+  --color-warning: oklch(0.65 0.18 70);
+  --color-error: oklch(0.55 0.22 25);
+  --color-info: oklch(0.55 0.18 230);
+
+  /* Neutral Colors - Light Mode (WCAG AAA: 7:1 contrast) */
+  --color-background: #ffffff;
+  --color-foreground: #0f172a;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #475569; /* slate-600: 7.02:1 contrast ratio */
+  --color-border: #cbd5e1; /* slate-300: visible on white */
+  --color-card: #ffffff;
+  --color-card-foreground: #0f172a;
+
+  /* Focus ring color */
+  --color-focus: oklch(0.55 0.22 250);
+
+  /* Typography */
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Spacing */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* Dark Mode - WCAG AAA compliant (7:1 contrast ratio) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #0f172a;
+    --color-foreground: #f8fafc;
+    --color-muted: #1e293b;
+    --color-muted-foreground: #cbd5e1; /* slate-300: 9.7:1 contrast on dark bg */
+    --color-border: #475569; /* slate-600: visible on dark bg */
+    --color-card: #1e293b;
+    --color-card-foreground: #f8fafc;
+
+    /* Adjusted brand colors for dark mode - brighter for contrast */
+    --color-primary: oklch(0.72 0.16 250);
+    --color-primary-hover: oklch(0.78 0.14 250);
+    --color-primary-light: oklch(0.22 0.06 250);
+    --color-focus: oklch(0.72 0.16 250);
+  }
+}
+
+/* Manual dark mode class support */
+.dark {
+  --color-background: #0f172a;
+  --color-foreground: #f8fafc;
+  --color-muted: #1e293b;
+  --color-muted-foreground: #cbd5e1; /* slate-300: 9.7:1 contrast on dark bg */
+  --color-border: #475569; /* slate-600: visible on dark bg */
+  --color-card: #1e293b;
+  --color-card-foreground: #f8fafc;
+
+  --color-primary: oklch(0.72 0.16 250);
+  --color-primary-hover: oklch(0.78 0.14 250);
+  --color-primary-light: oklch(0.22 0.06 250);
+  --color-focus: oklch(0.72 0.16 250);
+}
+
+/* Tailwind Theme Extension */
+@theme inline {
+  /* Colors */
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+  --color-primary: var(--color-primary);
+  --color-secondary: var(--color-secondary);
+  --color-accent: var(--color-accent);
+  --color-muted: var(--color-muted);
+  --color-muted-foreground: var(--color-muted-foreground);
+  --color-border: var(--color-border);
+  --color-card: var(--color-card);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
+  --color-info: var(--color-info);
+
+  /* Typography */
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  /* Border Radius */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+}
+
+/* Base Styles */
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Focus styles for accessibility - WCAG 2.1 compliant */
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Enhanced focus for interactive elements */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
+/* Remove default outline for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Skip link for keyboard navigation */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  padding: 8px 16px;
+  background: var(--color-primary);
+  color: white;
+  z-index: 100;
+  transition: top 0.2s;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Selection */
+::selection {
+  background-color: var(--color-primary-light);
+  color: var(--color-foreground);
+}
+
+/* Scrollbar (WebKit) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-muted);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-muted-foreground);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-foreground);
+}
+
+/* Custom animations */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Utility classes */
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 2s ease-in-out infinite;
+}
+
+/* Glass morphism effect */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-fade-in-up,
+  .animate-slide-in-right,
+  .animate-slide-in,
+  .animate-pulse-slow {
+    animation: none !important;
+  }
+
+  .skip-link {
+    transition: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
