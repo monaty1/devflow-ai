@@ -1,14 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { Card, Button } from "@heroui/react";
 import {
   FileJson,
-  Copy,
-  Check,
   AlertCircle,
   Sparkles,
-  Download,
   Trash2,
   Code2,
   FileCode,
@@ -16,6 +12,7 @@ import {
   Wand2,
 } from "lucide-react";
 import { useDtoMatic } from "@/hooks/use-dto-matic";
+import { CopyButton } from "@/components/shared/copy-button";
 import type { GenerationMode, NamingConvention } from "@/types/dto-matic";
 
 const MODE_OPTIONS: { id: GenerationMode; label: string; description: string }[] = [
@@ -59,24 +56,8 @@ export default function DtoMaticPage() {
     formatInput,
     loadExample,
     reset,
-    copyToClipboard,
-    copyAllFiles,
     isValidJson,
   } = useDtoMatic();
-
-  const [copied, setCopied] = useState<string | null>(null);
-
-  const handleCopy = async (text: string, id: string) => {
-    await copyToClipboard(text);
-    setCopied(id);
-    setTimeout(() => setCopied(null), 2000);
-  };
-
-  const handleCopyAll = async () => {
-    await copyAllFiles();
-    setCopied("all");
-    setTimeout(() => setCopied(null), 2000);
-  };
 
   const isJsonValid = !jsonInput.trim() || isValidJson(jsonInput);
 
@@ -296,18 +277,10 @@ export default function DtoMaticPage() {
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-semibold">Generated Code</h2>
             {result && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onPress={handleCopyAll}
-              >
-                {copied === "all" ? (
-                  <Check className="mr-1 size-4 text-green-500" />
-                ) : (
-                  <Download className="mr-1 size-4" />
-                )}
-                Copy All
-              </Button>
+              <CopyButton
+                getText={() => result.files.map((f) => `// === ${f.name} ===\n\n${f.content}`).join("\n\n")}
+                label="Copy All"
+              />
             )}
           </div>
 
@@ -357,18 +330,7 @@ export default function DtoMaticPage() {
               {/* Code Display */}
               {selectedFile && (
                 <div className="relative flex-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onPress={() => handleCopy(selectedFile.content, selectedFile.id)}
-                    className="absolute right-2 top-2 z-10"
-                  >
-                    {copied === selectedFile.id ? (
-                      <Check className="size-4 text-green-500" />
-                    ) : (
-                      <Copy className="size-4" />
-                    )}
-                  </Button>
+                  <CopyButton text={selectedFile.content} className="absolute right-2 top-2 z-10" />
                   <pre className="max-h-[500px] overflow-auto rounded-lg bg-muted/50 p-4 font-mono text-sm">
                     <code>{selectedFile.content}</code>
                   </pre>

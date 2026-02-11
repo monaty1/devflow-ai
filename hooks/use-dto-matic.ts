@@ -127,20 +127,6 @@ export function useDtoMatic() {
     }
   }, [updateConfig]);
 
-  const copyToClipboard = useCallback(async (text: string) => {
-    await navigator.clipboard.writeText(text);
-  }, []);
-
-  const copyAllFiles = useCallback(async () => {
-    if (!result) return;
-
-    const allContent = result.files
-      .map((f) => `// === ${f.name} ===\n\n${f.content}`)
-      .join("\n\n");
-
-    await navigator.clipboard.writeText(allContent);
-  }, [result]);
-
   const selectedFile = result?.files.find((f) => f.id === selectedFileId) ?? null;
 
   return {
@@ -166,9 +152,6 @@ export function useDtoMatic() {
     loadExample,
     reset,
     clearHistory,
-    copyToClipboard,
-    copyAllFiles,
-
     // Utilities
     isValidJson,
   };

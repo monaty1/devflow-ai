@@ -120,10 +120,6 @@ export function useVariableNameWizard() {
     setGenerationResult(null);
   }, []);
 
-  const copyToClipboard = useCallback(async (text: string) => {
-    await navigator.clipboard.writeText(text);
-  }, []);
-
   const expand = useCallback(() => {
     if (!input.trim()) return;
     const expanded = expandAbbreviations(input);
@@ -184,7 +180,6 @@ export function useVariableNameWizard() {
     reset,
     clearHistory,
     loadFromHistory,
-    copyToClipboard,
     expand,
     abbreviate,
     applyConversion,

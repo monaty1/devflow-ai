@@ -140,10 +140,6 @@ export function useBase64() {
     setResult(null);
   }, []);
 
-  const copyToClipboard = useCallback(async (text: string) => {
-    await navigator.clipboard.writeText(text);
-  }, []);
-
   const applyOutput = useCallback(() => {
     if (result?.output) {
       setInput(result.output);
@@ -198,7 +194,6 @@ export function useBase64() {
     reset,
     clearHistory,
     loadFromHistory,
-    copyToClipboard,
     applyOutput,
     toDataUrl,
     fromDataUrl,

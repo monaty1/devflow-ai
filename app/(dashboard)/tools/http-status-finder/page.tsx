@@ -1,15 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import { Card, Button } from "@heroui/react";
 import {
   Globe,
   Search,
-  Copy,
-  Check,
   X,
 } from "lucide-react";
 import { useHttpStatusFinder } from "@/hooks/use-http-status-finder";
+import { CopyButton } from "@/components/shared/copy-button";
 import { getCategoryInfo } from "@/lib/application/http-status-finder";
 import type { HttpStatusCategory, HttpStatusCode } from "@/types/http-status-finder";
 
@@ -32,17 +30,12 @@ const CATEGORY_COLORS: Record<HttpStatusCategory, string> = {
 
 function StatusCodeCard({
   status,
-  onCopy,
-  copied,
   onSelect,
 }: {
   status: HttpStatusCode;
-  onCopy: (text: string, id: string) => void;
-  copied: string | null;
   onSelect: (code: HttpStatusCode) => void;
 }) {
   const colorClass = CATEGORY_COLORS[status.category];
-  const copyId = `code-${status.code}`;
 
   return (
     <button
@@ -63,21 +56,12 @@ function StatusCodeCard({
             <p className="text-sm text-muted-foreground line-clamp-2">{status.description}</p>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onCopy(`${status.code} ${status.name}`, copyId);
-          }}
+        <span
+          onClick={(e) => e.stopPropagation()}
           className="shrink-0"
-          aria-label="Copy to clipboard"
         >
-          {copied === copyId ? (
-            <Check className="size-4 text-green-500" />
-          ) : (
-            <Copy className="size-4 text-muted-foreground" />
-          )}
-        </button>
+          <CopyButton text={`${status.code} ${status.name}`} />
+        </span>
       </div>
     </Card>
     </button>
@@ -95,16 +79,7 @@ export default function HttpStatusFinderPage() {
     setCategoryFilter,
     setSelectedCode,
     clearSearch,
-    copyToClipboard,
   } = useHttpStatusFinder();
-
-  const [copied, setCopied] = useState<string | null>(null);
-
-  const handleCopy = async (text: string, id: string) => {
-    await copyToClipboard(text);
-    setCopied(id);
-    setTimeout(() => setCopied(null), 2000);
-  };
 
   const displayCodes = query.trim() || categoryFilter ? results.codes : commonCodes;
   const activeCategory = categoryFilter ?? "all";
@@ -233,8 +208,6 @@ export default function HttpStatusFinderPage() {
               <StatusCodeCard
                 key={status.code}
                 status={status}
-                onCopy={handleCopy}
-                copied={copied}
                 onSelect={setSelectedCode}
               />
             ))}

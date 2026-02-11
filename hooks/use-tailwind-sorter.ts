@@ -91,10 +91,6 @@ export function useTailwindSorter() {
     setResult(null);
   }, []);
 
-  const copyToClipboard = useCallback(async (text: string) => {
-    await navigator.clipboard.writeText(text);
-  }, []);
-
   const applyToInput = useCallback(() => {
     if (result) {
       setInput(result.output);
@@ -121,7 +117,6 @@ export function useTailwindSorter() {
     reset,
     clearHistory,
     loadFromHistory,
-    copyToClipboard,
     applyToInput,
   };
 }

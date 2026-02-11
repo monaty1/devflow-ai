@@ -83,10 +83,6 @@ export function useGitCommitGenerator() {
     setParsedCommit(null);
   }, []);
 
-  const copyToClipboard = useCallback(async (text: string) => {
-    await navigator.clipboard.writeText(text);
-  }, []);
-
   const loadFromHistory = useCallback((item: HistoryItem) => {
     setParseInput(item.message);
     const parsed = parseCommitMessage(item.message);
@@ -112,7 +108,6 @@ export function useGitCommitGenerator() {
     getSuggestions,
     reset,
     clearHistory,
-    copyToClipboard,
     loadFromHistory,
   };
 }

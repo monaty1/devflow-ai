@@ -130,10 +130,6 @@ export function useJsonFormatter() {
     setResult(null);
   }, []);
 
-  const copyToClipboard = useCallback(async (text: string) => {
-    await navigator.clipboard.writeText(text);
-  }, []);
-
   const applyOutput = useCallback(() => {
     if (result?.output) {
       setInput(result.output);
@@ -170,7 +166,6 @@ export function useJsonFormatter() {
     reset,
     clearHistory,
     loadFromHistory,
-    copyToClipboard,
     applyOutput,
   };
 }

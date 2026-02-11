@@ -48,10 +48,6 @@ export function useHttpStatusFinder() {
     setSelectedCode(null);
   }, []);
 
-  const copyToClipboard = useCallback(async (text: string) => {
-    await navigator.clipboard.writeText(text);
-  }, []);
-
   return {
     // State
     query,
@@ -70,6 +66,5 @@ export function useHttpStatusFinder() {
     search,
     clearSearch,
     clearHistory,
-    copyToClipboard,
   };
 }

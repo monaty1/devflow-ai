@@ -1,22 +1,13 @@
 "use client";
 
 import { Card, Button } from "@heroui/react";
-import { RotateCcw, Copy } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { useTokenVisualizer } from "@/hooks/use-token-visualizer";
-import { useToast } from "@/hooks/use-toast";
+import { CopyButton } from "@/components/shared/copy-button";
 import { formatCost } from "@/lib/application/cost-calculator";
 
 export default function TokenVisualizerPage() {
   const { input, setInput, visualization, reset } = useTokenVisualizer();
-  const { addToast } = useToast();
-
-  const handleCopy = () => {
-    if (!visualization) return;
-    navigator.clipboard.writeText(
-      `Tokens: ${visualization.totalTokens}\nInput: ${visualization.input}\nGPT-4 Cost: ${formatCost(visualization.estimatedCost.gpt4)}\nClaude Cost: ${formatCost(visualization.estimatedCost.claude)}`
-    );
-    addToast("Copied to clipboard!", "success");
-  };
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -32,10 +23,13 @@ export default function TokenVisualizerPage() {
         </div>
         <div className="flex gap-2">
           {visualization && (
-            <Button variant="outline" size="sm" onPress={handleCopy} className="gap-2">
-              <Copy className="size-4" />
-              Copy
-            </Button>
+            <CopyButton
+              getText={() =>
+                `Tokens: ${visualization.totalTokens}\nInput: ${visualization.input}\nGPT-4 Cost: ${formatCost(visualization.estimatedCost.gpt4)}\nClaude Cost: ${formatCost(visualization.estimatedCost.claude)}`
+              }
+              label="Copy"
+              variant="outline"
+            />
           )}
           <Button variant="outline" size="sm" onPress={reset} className="gap-2">
             <RotateCcw className="size-4" />

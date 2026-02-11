@@ -1,11 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { Card, Button } from "@heroui/react";
 import {
   Binary,
-  Copy,
-  Check,
   AlertCircle,
   Sparkles,
   Trash2,
@@ -16,6 +13,7 @@ import {
   Link2,
 } from "lucide-react";
 import { useBase64 } from "@/hooks/use-base64";
+import { CopyButton } from "@/components/shared/copy-button";
 import type { Base64Mode, Base64Variant } from "@/types/base64";
 
 const MODE_OPTIONS: { id: Base64Mode; label: string; icon: React.ElementType }[] = [
@@ -42,18 +40,9 @@ export default function Base64Page() {
     process,
     loadExample,
     reset,
-    copyToClipboard,
     applyOutput,
     toDataUrl,
   } = useBase64();
-
-  const [copied, setCopied] = useState<string | null>(null);
-
-  const handleCopy = async (text: string, id: string) => {
-    await copyToClipboard(text);
-    setCopied(id);
-    setTimeout(() => setCopied(null), 2000);
-  };
 
   const dataUrl = result?.isValid && mode === "encode" ? toDataUrl("text/plain") : "";
 
@@ -258,19 +247,7 @@ export default function Base64Page() {
 
               {/* Output */}
               <div className="relative flex-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onPress={() => handleCopy(result.output, "output")}
-                  className="absolute right-2 top-2 z-10"
-                  aria-label="Copy to clipboard"
-                >
-                  {copied === "output" ? (
-                    <Check className="size-4 text-green-500" />
-                  ) : (
-                    <Copy className="size-4" />
-                  )}
-                </Button>
+                <CopyButton text={result.output} className="absolute right-2 top-2 z-10" />
                 <pre className="max-h-[300px] overflow-auto rounded-lg bg-muted/50 p-4 font-mono text-sm break-all whitespace-pre-wrap">
                   <code>{result.output}</code>
                 </pre>
@@ -284,17 +261,7 @@ export default function Base64Page() {
                       <Link2 className="size-4" />
                       Data URL
                     </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onPress={() => handleCopy(dataUrl, "dataurl")}
-                    >
-                      {copied === "dataurl" ? (
-                        <Check className="size-4 text-green-500" />
-                      ) : (
-                        <Copy className="size-4" />
-                      )}
-                    </Button>
+                    <CopyButton text={dataUrl} />
                   </div>
                   <pre className="max-h-24 overflow-auto rounded-lg bg-muted/50 p-3 font-mono text-xs break-all">
                     <code>{dataUrl}</code>

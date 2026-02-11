@@ -1,17 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import { Card, Button } from "@heroui/react";
 import {
   Regex,
   Sparkles,
   FlaskConical,
-  Copy,
-  Check,
   AlertCircle,
   Trash2,
 } from "lucide-react";
 import { useRegexHumanizer } from "@/hooks/use-regex-humanizer";
+import { CopyButton } from "@/components/shared/copy-button";
 import type { RegexMode } from "@/types/regex-humanizer";
 
 const TABS: { id: RegexMode; label: string; icon: typeof Regex }[] = [
@@ -55,14 +53,6 @@ export default function RegexHumanizerPage() {
     loadPreset,
     isValidRegex,
   } = useRegexHumanizer();
-
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async (text: string) => {
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const handleSubmit = () => {
     if (mode === "explain") explain();
@@ -274,24 +264,14 @@ export default function RegexHumanizerPage() {
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-semibold">Result</h2>
             {(analysis || generatedPattern || testResult) && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onPress={() =>
-                  handleCopy(
-                    analysis?.explanation ||
-                      generatedPattern ||
-                      JSON.stringify(testResult, null, 2) ||
-                      ""
-                  )
+              <CopyButton
+                getText={() =>
+                  analysis?.explanation ||
+                  generatedPattern ||
+                  JSON.stringify(testResult, null, 2) ||
+                  ""
                 }
-              >
-                {copied ? (
-                  <Check className="size-4 text-green-500" />
-                ) : (
-                  <Copy className="size-4" />
-                )}
-              </Button>
+              />
             )}
           </div>
 

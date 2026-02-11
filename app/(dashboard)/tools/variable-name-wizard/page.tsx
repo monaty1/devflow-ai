@@ -4,8 +4,6 @@ import { useState } from "react";
 import { Card, Button } from "@heroui/react";
 import {
   Wand2,
-  Copy,
-  Check,
   ArrowRight,
   History,
   Trash2,
@@ -17,6 +15,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { useVariableNameWizard } from "@/hooks/use-variable-name-wizard";
+import { CopyButton } from "@/components/shared/copy-button";
 import {
   CONVENTION_LABELS,
   CONVENTION_EXAMPLES,
@@ -66,21 +65,13 @@ export default function VariableNameWizardPage() {
     reset,
     clearHistory,
     loadFromHistory,
-    copyToClipboard,
     expand,
     abbreviate,
     applyConversion,
     applySuggestion,
   } = useVariableNameWizard();
 
-  const [copiedConvention, setCopiedConvention] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
-
-  const handleCopy = async (text: string, convention: string) => {
-    await copyToClipboard(text);
-    setCopiedConvention(convention);
-    setTimeout(() => setCopiedConvention(null), 2000);
-  };
 
   const handleAction = () => {
     if (mode === "convert") {
@@ -357,17 +348,7 @@ export default function VariableNameWizardPage() {
                         <code className="block truncate font-mono font-medium">{value}</code>
                       </div>
                       <div className="ml-2 flex shrink-0 gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onPress={() => handleCopy(value, convention)}
-                        >
-                          {copiedConvention === convention ? (
-                            <Check className="size-4 text-green-500" />
-                          ) : (
-                            <Copy className="size-4" />
-                          )}
-                        </Button>
+                        <CopyButton text={value} />
                         <Button
                           variant="ghost"
                           size="sm"
@@ -433,18 +414,7 @@ export default function VariableNameWizardPage() {
                         {suggestion.reasoning}
                       </p>
                       <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onPress={() => handleCopy(suggestion.name, suggestion.id)}
-                        >
-                          {copiedConvention === suggestion.id ? (
-                            <Check className="mr-1 size-4 text-green-500" />
-                          ) : (
-                            <Copy className="mr-1 size-4" />
-                          )}
-                          Copy
-                        </Button>
+                        <CopyButton text={suggestion.name} label="Copy" variant="outline" />
                         <Button
                           variant="outline"
                           size="sm"

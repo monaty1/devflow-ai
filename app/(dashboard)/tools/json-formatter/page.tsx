@@ -4,8 +4,6 @@ import { useState } from "react";
 import { Card, Button } from "@heroui/react";
 import {
   Braces,
-  Copy,
-  Check,
   AlertCircle,
   Sparkles,
   Trash2,
@@ -17,6 +15,7 @@ import {
   Wand2,
 } from "lucide-react";
 import { useJsonFormatter } from "@/hooks/use-json-formatter";
+import { CopyButton } from "@/components/shared/copy-button";
 import type { JsonFormatMode } from "@/types/json-formatter";
 
 const MODE_OPTIONS: { id: JsonFormatMode; label: string; icon: React.ElementType }[] = [
@@ -44,18 +43,10 @@ export default function JsonFormatterPage() {
     compare,
     loadExample,
     reset,
-    copyToClipboard,
     applyOutput,
   } = useJsonFormatter();
 
-  const [copied, setCopied] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"output" | "paths" | "typescript" | "compare">("output");
-
-  const handleCopy = async (text: string, id: string) => {
-    await copyToClipboard(text);
-    setCopied(id);
-    setTimeout(() => setCopied(null), 2000);
-  };
 
   const paths = inputValidation.isValid ? getPaths() : [];
   const tsOutput = inputValidation.isValid ? toTypeScript("Root") : "";
@@ -272,19 +263,7 @@ export default function JsonFormatterPage() {
                       </div>
                     )}
 
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onPress={() => handleCopy(result.output, "output")}
-                      className="absolute right-2 top-2 z-10"
-                      aria-label="Copy to clipboard"
-                    >
-                      {copied === "output" ? (
-                        <Check className="size-4 text-green-500" />
-                      ) : (
-                        <Copy className="size-4" />
-                      )}
-                    </Button>
+                    <CopyButton text={result.output} className="absolute right-2 top-2 z-10" />
                     <pre className="max-h-[400px] overflow-auto rounded-lg bg-muted/50 p-4 font-mono text-sm">
                       <code>{result.output || "Valid JSON"}</code>
                     </pre>
@@ -304,18 +283,7 @@ export default function JsonFormatterPage() {
               <div className="relative">
                 {paths.length > 0 ? (
                   <>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onPress={() => handleCopy(paths.map(p => p.path).join("\n"), "paths")}
-                      className="absolute right-2 top-2 z-10"
-                    >
-                      {copied === "paths" ? (
-                        <Check className="size-4 text-green-500" />
-                      ) : (
-                        <Copy className="size-4" />
-                      )}
-                    </Button>
+                    <CopyButton getText={() => paths.map(p => p.path).join("\n")} className="absolute right-2 top-2 z-10" />
                     <div className="max-h-[400px] overflow-auto rounded-lg bg-muted/50 p-4">
                       {paths.map((p, i) => (
                         <div key={i} className="flex items-center gap-2 py-1 font-mono text-sm">
@@ -341,18 +309,7 @@ export default function JsonFormatterPage() {
               <div className="relative">
                 {tsOutput ? (
                   <>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onPress={() => handleCopy(tsOutput, "typescript")}
-                      className="absolute right-2 top-2 z-10"
-                    >
-                      {copied === "typescript" ? (
-                        <Check className="size-4 text-green-500" />
-                      ) : (
-                        <Copy className="size-4" />
-                      )}
-                    </Button>
+                    <CopyButton text={tsOutput} className="absolute right-2 top-2 z-10" />
                     <pre className="max-h-[400px] overflow-auto rounded-lg bg-muted/50 p-4 font-mono text-sm">
                       <code>{tsOutput}</code>
                     </pre>

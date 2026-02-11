@@ -4,8 +4,6 @@ import { useState } from "react";
 import { Card, Button } from "@heroui/react";
 import {
   Palette,
-  Copy,
-  Check,
   AlertCircle,
   Trash2,
   History,
@@ -16,6 +14,7 @@ import {
   FileText,
 } from "lucide-react";
 import { useTailwindSorter } from "@/hooks/use-tailwind-sorter";
+import { CopyButton } from "@/components/shared/copy-button";
 import { CATEGORY_LABELS, type OutputFormat } from "@/types/tailwind-sorter";
 
 const OUTPUT_FORMATS: { id: OutputFormat; label: string; description: string }[] = [
@@ -39,27 +38,10 @@ export default function TailwindSorterPage() {
     reset,
     clearHistory,
     loadFromHistory,
-    copyToClipboard,
     applyToInput,
   } = useTailwindSorter();
 
-  const [copiedInput, setCopiedInput] = useState(false);
-  const [copiedOutput, setCopiedOutput] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-
-  const handleCopyOutput = async () => {
-    if (result) {
-      await copyToClipboard(result.output);
-      setCopiedOutput(true);
-      setTimeout(() => setCopiedOutput(false), 2000);
-    }
-  };
-
-  const handleCopyInput = async () => {
-    await copyToClipboard(input);
-    setCopiedInput(true);
-    setTimeout(() => setCopiedInput(false), 2000);
-  };
 
   return (
     <div className="space-y-6">
@@ -122,14 +104,7 @@ export default function TailwindSorterPage() {
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Input classes</h2>
               <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onPress={handleCopyInput} isDisabled={!input}>
-                  {copiedInput ? (
-                    <Check className="mr-1 size-4 text-green-500" />
-                  ) : (
-                    <Copy className="mr-1 size-4" />
-                  )}
-                  Copy
-                </Button>
+                <CopyButton text={input} label="Copy" isDisabled={!input} />
                 <Button variant="ghost" size="sm" onPress={reset} isDisabled={!input}>
                   <RotateCcw className="mr-1 size-4" />
                   Clear
@@ -262,19 +237,7 @@ export default function TailwindSorterPage() {
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Sorted result</h2>
               <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onPress={handleCopyOutput}
-                  isDisabled={!result}
-                >
-                  {copiedOutput ? (
-                    <Check className="mr-1 size-4 text-green-500" />
-                  ) : (
-                    <Copy className="mr-1 size-4" />
-                  )}
-                  Copy
-                </Button>
+                <CopyButton getText={() => result?.output ?? ""} label="Copy" isDisabled={!result} />
                 <Button
                   variant="ghost"
                   size="sm"

@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Card, Button } from "@heroui/react";
 import {
   Fingerprint,
-  Copy,
   Check,
   Trash2,
   Sparkles,
@@ -12,6 +11,7 @@ import {
   Info,
 } from "lucide-react";
 import { useUuidGenerator } from "@/hooks/use-uuid-generator";
+import { CopyButton } from "@/components/shared/copy-button";
 import type { UuidVersion, UuidFormat } from "@/types/uuid-generator";
 
 const VERSION_OPTIONS: { id: UuidVersion; label: string; description: string }[] = [
@@ -45,17 +45,9 @@ export default function UuidGeneratorPage() {
     parse,
     loadExample,
     reset,
-    copyToClipboard,
   } = useUuidGenerator();
 
-  const [copied, setCopied] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"generate" | "validate" | "parse">("generate");
-
-  const handleCopy = async (text: string, id: string) => {
-    await copyToClipboard(text);
-    setCopied(id);
-    setTimeout(() => setCopied(null), 2000);
-  };
 
   const validationResult = validateInput.trim() ? validate() : null;
 
@@ -185,18 +177,7 @@ export default function UuidGeneratorPage() {
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Resultado</h2>
               {result && result.uuids.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onPress={() => handleCopy(result.uuids.join("\n"), "all")}
-                >
-                  {copied === "all" ? (
-                    <Check className="mr-1 size-4 text-green-500" />
-                  ) : (
-                    <Copy className="mr-1 size-4" />
-                  )}
-                  Copiar todo
-                </Button>
+                <CopyButton getText={() => result.uuids.join("\n")} label="Copiar todo" />
               )}
             </div>
 
@@ -217,18 +198,10 @@ export default function UuidGeneratorPage() {
                       className="group flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2"
                     >
                       <code className="break-all font-mono text-sm">{uuid}</code>
-                      <button
-                        type="button"
-                        onClick={() => handleCopy(uuid, `uuid-${i}`)}
+                      <CopyButton
+                        text={uuid}
                         className="ml-2 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100"
-                        aria-label="Copy to clipboard"
-                      >
-                        {copied === `uuid-${i}` ? (
-                          <Check className="size-4 text-green-500" />
-                        ) : (
-                          <Copy className="size-4 text-muted-foreground" />
-                        )}
-                      </button>
+                      />
                     </div>
                   ))}
                 </div>

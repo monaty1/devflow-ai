@@ -4,7 +4,6 @@ import { useState, useMemo } from "react";
 import { Card, Button } from "@heroui/react";
 import {
   GitCommitHorizontal,
-  Copy,
   Check,
   Trash2,
   Sparkles,
@@ -13,6 +12,7 @@ import {
   History,
 } from "lucide-react";
 import { useGitCommitGenerator } from "@/hooks/use-git-commit-generator";
+import { CopyButton } from "@/components/shared/copy-button";
 import { COMMIT_TYPES, validateCommitMessage } from "@/lib/application/git-commit-generator";
 
 export default function GitCommitGeneratorPage() {
@@ -30,19 +30,11 @@ export default function GitCommitGeneratorPage() {
     getSuggestions,
     reset,
     clearHistory,
-    copyToClipboard,
     loadFromHistory,
   } = useGitCommitGenerator();
 
-  const [copied, setCopied] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"generate" | "parse" | "history">("generate");
   const [isBreaking, setIsBreaking] = useState(false);
-
-  const handleCopy = async (text: string, id: string) => {
-    await copyToClipboard(text);
-    setCopied(id);
-    setTimeout(() => setCopied(null), 2000);
-  };
 
   const scopeSuggestions = useMemo(
     () => getSuggestions(config.description),
@@ -264,18 +256,7 @@ export default function GitCommitGeneratorPage() {
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Vista Previa</h2>
               {result && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onPress={() => handleCopy(result.message, "message")}
-                >
-                  {copied === "message" ? (
-                    <Check className="mr-1 size-4 text-green-500" />
-                  ) : (
-                    <Copy className="mr-1 size-4" />
-                  )}
-                  Copiar
-                </Button>
+                <CopyButton text={result.message} label="Copiar" />
               )}
             </div>
 

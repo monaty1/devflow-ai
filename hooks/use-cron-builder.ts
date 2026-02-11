@@ -118,10 +118,6 @@ export function useCronBuilder() {
     setExpression(DEFAULT_CRON);
   }, [setExpression]);
 
-  const copyToClipboard = useCallback(async (text: string) => {
-    await navigator.clipboard.writeText(text);
-  }, []);
-
   return {
     // State
     expression,
@@ -144,6 +140,5 @@ export function useCronBuilder() {
     loadFromHistory,
     clearHistory,
     reset,
-    copyToClipboard,
   };
 }

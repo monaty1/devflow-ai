@@ -85,10 +85,6 @@ export function useUuidGenerator() {
     setParsedInfo(null);
   }, []);
 
-  const copyToClipboard = useCallback(async (text: string) => {
-    await navigator.clipboard.writeText(text);
-  }, []);
-
   return {
     // State
     config,
@@ -110,6 +106,5 @@ export function useUuidGenerator() {
     loadExample,
     reset,
     clearHistory,
-    copyToClipboard,
   };
 }

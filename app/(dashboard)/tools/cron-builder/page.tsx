@@ -4,8 +4,6 @@ import { useState } from "react";
 import { Card, Button } from "@heroui/react";
 import {
   Clock,
-  Copy,
-  Check,
   AlertCircle,
   Calendar,
   Zap,
@@ -16,6 +14,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useCronBuilder } from "@/hooks/use-cron-builder";
+import { CopyButton } from "@/components/shared/copy-button";
 import type { CronField } from "@/types/cron-builder";
 import { CRON_FIELD_LABELS, CRON_FIELD_RANGES } from "@/types/cron-builder";
 
@@ -37,17 +36,9 @@ export default function CronBuilderPage() {
     loadFromHistory,
     clearHistory,
     reset,
-    copyToClipboard,
   } = useCronBuilder();
 
-  const [copied, setCopied] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-
-  const handleCopy = async () => {
-    await copyToClipboard(rawExpression);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const handleSave = () => {
     saveToHistory();
@@ -143,14 +134,7 @@ export default function CronBuilderPage() {
                   <Save className="mr-1 size-4" />
                   Guardar
                 </Button>
-                <Button variant="ghost" size="sm" onPress={handleCopy}>
-                  {copied ? (
-                    <Check className="mr-1 size-4 text-green-500" />
-                  ) : (
-                    <Copy className="mr-1 size-4" />
-                  )}
-                  Copiar
-                </Button>
+                <CopyButton text={rawExpression} label="Copiar" />
               </div>
             </div>
 
