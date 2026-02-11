@@ -1,25 +1,57 @@
 "use client";
 
+import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import NextLink from "next/link";
 import type { ReactNode } from "react";
 import {
-  LayoutDashboard,
   Wrench,
   Heart,
   Clock,
   Settings,
   Sparkles,
+  Sun,
+  Moon,
+  Monitor,
+  Menu,
+  X,
 } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useTranslation } from "@/hooks/use-translation";
 import { cn } from "@/lib/utils";
 
-const NAV_ITEMS = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/tools", label: "Tools", icon: Wrench },
-  { href: "/favorites", label: "Favorites", icon: Heart },
-  { href: "/history", label: "History", icon: Clock },
-  { href: "/settings", label: "Settings", icon: Settings },
-] as const;
+const subscribeNoop = () => () => {};
+const getTrue = () => true;
+const getFalse = () => false;
+
+function useIsMounted() {
+  return useSyncExternalStore(subscribeNoop, getTrue, getFalse);
+}
+
+function SidebarThemeToggle() {
+  const { theme, setTheme } = useTheme();
+  const mounted = useIsMounted();
+
+  if (!mounted) {
+    return <div className="h-9" />;
+  }
+
+  const nextTheme = theme === "light" ? "dark" : theme === "dark" ? "system" : "light";
+  const Icon = theme === "light" ? Sun : theme === "dark" ? Moon : Monitor;
+  const label = theme === "light" ? "Light mode" : theme === "dark" ? "Dark mode" : "System theme";
+
+  return (
+    <button
+      type="button"
+      onClick={() => setTheme(nextTheme)}
+      className="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      aria-label={label}
+    >
+      <Icon className="size-5" />
+      <span className="capitalize">{theme ?? "system"}</span>
+    </button>
+  );
+}
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -27,58 +59,161 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname();
+  const { t } = useTranslation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const closeSidebar = useCallback(() => setSidebarOpen(false), []);
+
+  // Close sidebar on route change
+  useEffect(() => {
+    closeSidebar(); // eslint-disable-line react-hooks/set-state-in-effect -- intentional: sync sidebar with route
+  }, [pathname, closeSidebar]);
+
+  // Close sidebar on Escape key
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape" && sidebarOpen) {
+        closeSidebar();
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [sidebarOpen, closeSidebar]);
+
+  // Prevent body scroll when sidebar is open on mobile
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [sidebarOpen]);
+
+  const NAV_ITEMS = [
+    { href: "/tools", label: t("sidebar.tools"), icon: Wrench },
+    { href: "/favorites", label: t("sidebar.favorites"), icon: Heart },
+    { href: "/history", label: t("sidebar.history"), icon: Clock },
+    { href: "/settings", label: t("sidebar.settings"), icon: Settings },
+  ] as const;
+
+  const sidebarContent = (
+    <>
+      {/* Logo */}
+      <div className="border-b border-border p-6">
+        <NextLink
+          href="/"
+          className="flex items-center gap-2 text-xl font-bold text-foreground"
+        >
+          <Sparkles className="size-6 text-primary" />
+          <span>DevFlow AI</span>
+        </NextLink>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 space-y-1 p-4" aria-label="Dashboard navigation">
+        {NAV_ITEMS.map((item) => {
+          const isActive =
+            pathname === item.href || pathname.startsWith(item.href + "/");
+
+          return (
+            <NextLink
+              key={item.href}
+              href={item.href}
+              aria-current={isActive ? "page" : undefined}
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors",
+                isActive
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              )}
+            >
+              <item.icon className="size-5" />
+              {item.label}
+            </NextLink>
+          );
+        })}
+      </nav>
+
+      {/* Footer */}
+      <div className="space-y-1 border-t border-border p-4">
+        <SidebarThemeToggle />
+        <p className="px-4 text-xs text-muted-foreground">
+          {t("sidebar.freeOpenSource")}
+        </p>
+      </div>
+    </>
+  );
 
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar */}
-      <aside className="flex w-64 flex-col border-r border-border bg-card" aria-label="Dashboard sidebar">
-        {/* Logo */}
-        <div className="border-b border-border p-6">
-          <NextLink
-            href="/"
-            className="flex items-center gap-2 text-xl font-bold text-foreground"
-          >
-            <Sparkles className="size-6 text-primary" />
-            <span>DevFlow AI</span>
-          </NextLink>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-4" aria-label="Dashboard navigation">
-          {NAV_ITEMS.map((item) => {
-            const isActive =
-              pathname === item.href ||
-              (item.href !== "/dashboard" && pathname.startsWith(item.href));
-
-            return (
-              <NextLink
-                key={item.href}
-                href={item.href}
-                aria-current={isActive ? "page" : undefined}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
-              >
-                <item.icon className="size-5" />
-                {item.label}
-              </NextLink>
-            );
-          })}
-        </nav>
-
-        {/* Footer */}
-        <div className="border-t border-border p-4">
-          <p className="px-4 text-xs text-muted-foreground">
-            Free & Open Source
-          </p>
-        </div>
+      {/* Desktop Sidebar */}
+      <aside
+        className="hidden w-64 flex-col border-r border-border bg-card md:flex"
+        aria-label="Dashboard sidebar"
+      >
+        {sidebarContent}
       </aside>
 
-      {/* Main Content */}
-      <main id="main-content" className="flex-1 overflow-auto bg-background p-8">{children}</main>
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={closeSidebar}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Mobile Sidebar Drawer */}
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-border bg-card transition-transform duration-300 ease-in-out md:hidden",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+        aria-label="Dashboard sidebar"
+      >
+        {/* Close button */}
+        <button
+          type="button"
+          onClick={closeSidebar}
+          className="absolute right-3 top-5 rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+          aria-label="Close sidebar"
+        >
+          <X className="size-5" />
+        </button>
+        {sidebarContent}
+      </aside>
+
+      {/* Main area */}
+      <div className="flex flex-1 flex-col">
+        {/* Mobile Header */}
+        <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-3 md:hidden">
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(true)}
+            className="rounded-lg p-2 text-foreground hover:bg-muted"
+            aria-expanded={sidebarOpen}
+            aria-controls="mobile-sidebar"
+            aria-label="Open sidebar"
+          >
+            <Menu className="size-5" />
+          </button>
+          <NextLink
+            href="/"
+            className="flex items-center gap-2 text-lg font-bold text-foreground"
+          >
+            <Sparkles className="size-5 text-primary" />
+            <span>DevFlow AI</span>
+          </NextLink>
+        </header>
+
+        {/* Main Content */}
+        <main id="main-content" className="flex-1 overflow-auto bg-background p-4 md:p-8">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "@heroui/styles";
 
+/* HeroUI v2 theme plugin — required for v2 components (Table, Pagination) */
+@plugin "../heroui-v2-plugin.js";
+
 /* ============================================
    DevFlow AI - Design System
    Tailwind CSS v4 - CSS-first configuration
@@ -30,7 +33,7 @@
   --color-background: #ffffff;
   --color-foreground: #0f172a;
   --color-muted: #f1f5f9;
-  --color-muted-foreground: #475569; /* slate-600: 7.02:1 contrast ratio */
+  --color-muted-foreground: #1e293b; /* slate-800: 12.6:1 on white — WCAG AAA */
   --color-border: #cbd5e1; /* slate-300: visible on white */
   --color-card: #ffffff;
   --color-card-foreground: #0f172a;
@@ -54,26 +57,7 @@
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
-/* Dark Mode - WCAG AAA compliant (7:1 contrast ratio) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: #0f172a;
-    --color-foreground: #f8fafc;
-    --color-muted: #1e293b;
-    --color-muted-foreground: #cbd5e1; /* slate-300: 9.7:1 contrast on dark bg */
-    --color-border: #475569; /* slate-600: visible on dark bg */
-    --color-card: #1e293b;
-    --color-card-foreground: #f8fafc;
-
-    /* Adjusted brand colors for dark mode - brighter for contrast */
-    --color-primary: oklch(0.72 0.16 250);
-    --color-primary-hover: oklch(0.78 0.14 250);
-    --color-primary-light: oklch(0.22 0.06 250);
-    --color-focus: oklch(0.72 0.16 250);
-  }
-}
-
-/* Manual dark mode class support */
+/* Dark Mode - managed by next-themes via .dark class */
 .dark {
   --color-background: #0f172a;
   --color-foreground: #f8fafc;
@@ -165,6 +149,18 @@ select:focus-visible,
 
 .skip-link:focus {
   top: 0;
+}
+
+/* Cursor pointer for all interactive elements */
+button,
+a,
+[role="button"],
+[role="switch"],
+[role="tab"],
+select,
+summary,
+label[for] {
+  cursor: pointer;
 }
 
 /* Selection */

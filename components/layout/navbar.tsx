@@ -1,20 +1,67 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import NextLink from "next/link";
 import { Button, linkVariants } from "@heroui/react";
-import { Menu, X, Sparkles } from "lucide-react";
+import { Menu, X, Sparkles, Sun, Moon, Monitor, Github } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useTranslation } from "@/hooks/use-translation";
+import { useLocaleStore } from "@/lib/stores/locale-store";
 import { cn } from "@/lib/utils";
 
-const navLinks = [
-  { href: "/tools", label: "Tools" },
-  { href: "/docs", label: "Docs" },
-  { href: "https://github.com/devflowai/devflowai", label: "GitHub", external: true },
-] as const;
+function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+
+  if (!mounted) {
+    return <div className="size-9" />;
+  }
+
+  const nextTheme = theme === "light" ? "dark" : theme === "dark" ? "system" : "light";
+  const Icon = theme === "light" ? Sun : theme === "dark" ? Moon : Monitor;
+  const label = theme === "light" ? "Light mode" : theme === "dark" ? "Dark mode" : "System theme";
+
+  return (
+    <button
+      type="button"
+      onClick={() => setTheme(nextTheme)}
+      className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      aria-label={label}
+    >
+      <Icon className="size-5" />
+    </button>
+  );
+}
+
+function LocaleToggle() {
+  const locale = useLocaleStore((s) => s.locale);
+  const setLocale = useLocaleStore((s) => s.setLocale);
+
+  return (
+    <button
+      type="button"
+      onClick={() => setLocale(locale === "en" ? "es" : "en")}
+      className="inline-flex size-9 items-center justify-center rounded-md text-lg transition-colors hover:bg-muted"
+      aria-label={`Switch to ${locale === "en" ? "Spanish" : "English"}`}
+    >
+      <span role="img" aria-hidden="true">{locale === "en" ? "\u{1F1EA}\u{1F1F8}" : "\u{1F1EC}\u{1F1E7}"}</span>
+    </button>
+  );
+}
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const linkStyles = linkVariants();
+  const { t } = useTranslation();
+
+  const navLinks = [
+    { href: "/tools", label: t("nav.tools") },
+    { href: "/docs", label: t("nav.docs") },
+  ] as const;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -36,21 +83,29 @@ export function Navbar() {
               href={link.href}
               className={cn(
                 linkStyles.base(),
-                "text-muted-foreground transition-colors hover:text-foreground"
+                "cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
               )}
-              {...("external" in link && link.external
-                ? { target: "_blank", rel: "noopener noreferrer" }
-                : {})}
             >
               {link.label}
             </NextLink>
           ))}
         </div>
 
-        {/* Desktop CTA */}
-        <div className="hidden items-center gap-3 md:flex">
-          <Button size="sm">
-            <NextLink href="/dashboard">Open Dashboard</NextLink>
+        {/* Desktop CTA + Toggles */}
+        <div className="hidden items-center gap-1 md:flex">
+          <LocaleToggle />
+          <ThemeToggle />
+          <NextLink
+            href="https://github.com/albertoguinda/devflow-ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex size-9 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            aria-label="GitHub"
+          >
+            <Github className="size-5" />
+          </NextLink>
+          <Button size="sm" className="ml-2 w-[140px] cursor-pointer justify-center">
+            <NextLink href="/tools">{t("nav.openDashboard")}</NextLink>
           </Button>
         </div>
 
@@ -75,19 +130,29 @@ export function Navbar() {
               <NextLink
                 key={link.href}
                 href={link.href}
-                className="block py-2 text-muted-foreground transition-colors hover:text-foreground"
+                className="block cursor-pointer py-2 text-muted-foreground transition-colors hover:text-foreground"
                 onClick={() => setIsMenuOpen(false)}
-                {...("external" in link && link.external
-                  ? { target: "_blank", rel: "noopener noreferrer" }
-                  : {})}
               >
                 {link.label}
               </NextLink>
             ))}
-            <div className="pt-4">
-              <Button fullWidth>
-                <NextLink href="/dashboard" onClick={() => setIsMenuOpen(false)}>
-                  Open Dashboard
+            <div className="flex items-center gap-2 border-t border-border pt-4">
+              <LocaleToggle />
+              <ThemeToggle />
+              <NextLink
+                href="https://github.com/albertoguinda/devflow-ai"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex size-9 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                aria-label="GitHub"
+              >
+                <Github className="size-5" />
+              </NextLink>
+            </div>
+            <div>
+              <Button fullWidth className="cursor-pointer">
+                <NextLink href="/tools" onClick={() => setIsMenuOpen(false)}>
+                  {t("nav.openDashboard")}
                 </NextLink>
               </Button>
             </div>

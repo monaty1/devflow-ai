@@ -19,7 +19,6 @@ import {
   Fingerprint,
   GitCommitHorizontal,
   Globe,
-  Star,
 } from "lucide-react";
 import { useFavorites } from "@/lib/context";
 import type { Tool } from "@/types/tools";
@@ -53,7 +52,7 @@ export function ToolCard({ tool }: ToolCardProps) {
   const IconComponent = ICON_MAP[tool.icon];
 
   return (
-    <Card className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+    <Card className="group relative cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
       {/* Color Banner */}
       <div className={cn("h-2 bg-gradient-to-r", tool.color)} />
 
@@ -78,7 +77,7 @@ export function ToolCard({ tool }: ToolCardProps) {
             variant="ghost"
             size="sm"
             onPress={() => toggleFavorite(tool.id)}
-            className="opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100"
+            className="relative z-10 cursor-pointer opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100"
             aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
           >
             <Heart
@@ -110,17 +109,11 @@ export function ToolCard({ tool }: ToolCardProps) {
           ))}
         </div>
 
-        {/* Footer: Rating + Free Badge */}
-        <div className="flex items-center justify-between">
-          <span className="flex items-center gap-1 text-sm text-muted-foreground">
-            <Star className="size-4 fill-amber-500 text-amber-500" />
-            {tool.rating} ({tool.usersCount.toLocaleString()})
+        {/* Footer: Category */}
+        <div className="flex items-center">
+          <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground capitalize">
+            {tool.category}
           </span>
-          {tool.isFree && (
-            <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-900 dark:bg-green-900 dark:text-green-200">
-              Free
-            </span>
-          )}
         </div>
       </div>
 

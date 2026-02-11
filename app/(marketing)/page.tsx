@@ -7,6 +7,7 @@ import {
   useScrollReveal,
   useCounter,
 } from "@/hooks/use-gsap";
+import { useTranslation } from "@/hooks/use-translation";
 import { FeatureCard } from "@/components/ui/feature-card";
 import {
   FileSearch,
@@ -54,6 +55,7 @@ export default function HomePage() {
   const featuresRef = useStaggerIn("> *", 0.3);
   const statsRef = useScrollReveal();
   const ctaRef = useScrollReveal();
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen">
@@ -69,36 +71,35 @@ export default function HomePage() {
             {/* Badge */}
             <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-900 dark:bg-blue-900/30 dark:text-blue-200">
               <Zap className="size-4" />
-              AI-Powered · Free · Open Source
+              {t("home.badge")}
             </span>
 
             {/* Title */}
             <h1 className="text-5xl font-bold leading-tight text-foreground md:text-7xl">
-              The Developer Toolkit
+              {t("home.title1")}
               <span className="block text-foreground bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                for AI Development
+                {t("home.title2")}
               </span>
             </h1>
 
             {/* Subtitle */}
             <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
-              Analyze prompts, review code, calculate costs, and manage context.
-              Everything you need to build AI applications faster.
+              {t("home.subtitle")}
             </p>
 
             {/* CTAs */}
             <div className="flex flex-col justify-center gap-4 pt-4 sm:flex-row">
               <Link
-                href="/dashboard"
-                className="inline-flex h-12 items-center justify-center rounded-lg bg-blue-600 px-8 text-base font-semibold text-white transition-colors hover:bg-blue-700"
+                href="/tools"
+                className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg bg-blue-600 px-8 text-base font-semibold text-white transition-colors hover:bg-blue-700"
               >
-                Get Started Free
+                {t("home.getStarted")}
               </Link>
               <Link
                 href="/tools"
-                className="inline-flex h-12 items-center justify-center rounded-lg border border-border px-8 text-base font-medium transition-colors hover:bg-muted"
+                className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg border border-border px-8 text-base font-medium transition-colors hover:bg-muted"
               >
-                View All Tools
+                {t("home.viewTools")}
               </Link>
             </div>
           </div>
@@ -110,10 +111,10 @@ export default function HomePage() {
         <h2 className="sr-only">Project Stats</h2>
         <div className="mx-auto grid max-w-4xl grid-cols-2 gap-6 md:grid-cols-4">
           {[
-            { label: "Free Tools", value: 15, emoji: "⚡" },
-            { label: "100% Open Source", value: 100, emoji: "💻" },
-            { label: "No API Key Required", value: 0, emoji: "🔓" },
-            { label: "GitHub Stars", value: 500, emoji: "⭐" },
+            { label: t("home.freeTools"), value: 15, emoji: "⚡" },
+            { label: t("home.openSource"), value: 100, emoji: "💻" },
+            { label: t("home.noApiKey"), value: 0, emoji: "🔓" },
+            { label: t("home.githubStars"), value: 500, emoji: "⭐" },
           ].map((stat) => (
             <div
               key={stat.label}
@@ -131,9 +132,9 @@ export default function HomePage() {
       <section className="border-t border-border bg-muted/30 py-20">
         <div className="container mx-auto px-4">
           <div className="mb-12 text-center">
-            <h2 className="mb-3 text-4xl font-bold">15 Powerful Tools</h2>
+            <h2 className="mb-3 text-4xl font-bold">{t("home.powerfulTools")}</h2>
             <p className="text-muted-foreground">
-              Free & open source. Everything you need in one place.
+              {t("home.powerfulToolsDesc")}
             </p>
           </div>
 
@@ -161,9 +162,9 @@ export default function HomePage() {
       <section className="py-20">
         <div className="container mx-auto max-w-5xl px-4">
           <div className="mb-12 text-center">
-            <h2 className="mb-3 text-4xl font-bold">Why DevFlow AI?</h2>
+            <h2 className="mb-3 text-4xl font-bold">{t("home.whyTitle")}</h2>
             <p className="text-muted-foreground">
-              Built by developers, for developers
+              {t("home.whySubtitle")}
             </p>
           </div>
 
@@ -171,21 +172,18 @@ export default function HomePage() {
             {[
               {
                 icon: Shield,
-                title: "Security First",
-                description:
-                  "Detect prompt injection, jailbreak attempts and data exfiltration before they reach your API.",
+                title: t("home.securityTitle"),
+                description: t("home.securityDesc"),
               },
               {
                 icon: TrendingUp,
-                title: "Cost Optimized",
-                description:
-                  "Find the cheapest model for your use case. Save up to 60% on AI API costs.",
+                title: t("home.costTitle"),
+                description: t("home.costDesc"),
               },
               {
                 icon: Zap,
-                title: "Developer Experience",
-                description:
-                  "Clean UI, fast feedback, no unnecessary complexity. Ship faster.",
+                title: t("home.dxTitle"),
+                description: t("home.dxDesc"),
               },
             ].map((item) => (
               <div key={item.title} className="p-6 text-center">
@@ -206,26 +204,25 @@ export default function HomePage() {
       <section ref={ctaRef} className="container mx-auto px-4 py-24">
         <div className="mx-auto max-w-3xl rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 p-12 text-center">
           <h2 className="mb-4 text-3xl font-bold text-white">
-            Free & Open Source. For Developers.
+            {t("home.ctaTitle")}
           </h2>
-          <p className="mb-8 text-blue-100">
-            No signup required. No API keys needed. Just open and use.
-            Contribute on GitHub.
+          <p className="mb-8 text-white/90">
+            {t("home.ctaSubtitle")}
           </p>
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
             <Link
               href="/tools"
-              className="inline-flex h-12 items-center justify-center rounded-lg bg-white px-8 font-semibold text-blue-600 transition-colors hover:bg-blue-50"
+              className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg bg-white px-8 font-semibold text-blue-600 transition-colors hover:bg-blue-50"
             >
-              Start Using Now
+              {t("home.startUsing")}
             </Link>
             <Link
-              href="https://github.com/devflowai/devflowai"
+              href="https://github.com/albertoguinda/devflow-ai"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-12 items-center justify-center rounded-lg border-2 border-white px-8 font-semibold text-white transition-colors hover:bg-white/10"
+              className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg border-2 border-white px-8 font-semibold text-white transition-colors hover:bg-white/10"
             >
-              Star on GitHub
+              {t("home.starGithub")}
             </Link>
           </div>
         </div>
@@ -234,14 +231,23 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © 2026 DevFlow AI · Free & Open Source · Built with Next.js 16 ·{" "}
+          © 2026 DevFlow AI ·{" "}
           <Link
-            href="https://github.com/devflowai/devflowai"
+            href="https://www.linkedin.com/in/albertoguindasevilla/"
             target="_blank"
             rel="noopener noreferrer"
             className="underline hover:text-foreground"
           >
-            View on GitHub
+            Alberto Guinda
+          </Link>
+          {" "}· {t("home.footerFreeOS")} ·{" "}
+          <Link
+            href="https://github.com/albertoguinda/devflow-ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-foreground"
+          >
+            {t("home.starGithub")}
           </Link>
         </div>
       </footer>

@@ -1,37 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { Card, Button } from "@heroui/react";
+import { useTheme } from "next-themes";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/hooks/use-translation";
+import { useLocaleStore } from "@/lib/stores/locale-store";
 
 interface Settings {
-  theme: string;
   notifications: boolean;
-  language: string;
 }
 
 function getInitialSettings(): Settings {
   if (typeof window === "undefined") {
-    return { theme: "system", notifications: true, language: "en" };
+    return { notifications: true };
   }
   try {
     const stored = localStorage.getItem("devflow-settings");
     if (stored) {
-      return JSON.parse(stored) as Settings;
+      const parsed = JSON.parse(stored) as Record<string, unknown>;
+      return {
+        notifications: (parsed["notifications"] as boolean | undefined) ?? true,
+      };
     }
   } catch {
     // Ignore parse errors
   }
-  return { theme: "system", notifications: true, language: "en" };
+  return { notifications: true };
 }
 
 export default function SettingsPage() {
   const { addToast } = useToast();
+  const { theme, setTheme } = useTheme();
+  const { t } = useTranslation();
+  const locale = useLocaleStore((s) => s.locale);
+  const setLocale = useLocaleStore((s) => s.setLocale);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
   const [settings, setSettings] = useState<Settings>(() => getInitialSettings());
 
   const handleSave = () => {
     localStorage.setItem("devflow-settings", JSON.stringify(settings));
-    addToast("Settings saved!", "success");
+    addToast(t("settings.saved"), "success");
   };
 
   const handleClearData = () => {
@@ -41,7 +54,7 @@ export default function SettingsPage() {
       "devflow-context-windows",
     ];
     keys.forEach((key) => localStorage.removeItem(key));
-    addToast("All data cleared", "info");
+    addToast(t("settings.cleared"), "info");
   };
 
   return (
@@ -49,35 +62,36 @@ export default function SettingsPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Settings
+          {t("settings.title")}
         </h1>
         <p className="mt-1 text-muted-foreground">
-          Manage your preferences
+          {t("settings.subtitle")}
         </p>
       </div>
 
       {/* Preferences */}
       <Card className="p-6">
-        <h2 className="mb-6 text-lg font-semibold">Preferences</h2>
+        <h2 className="mb-6 text-lg font-semibold">{t("settings.preferences")}</h2>
         <div className="space-y-6">
           {/* Theme */}
           <div>
             <label className="mb-2 block text-sm font-medium text-muted-foreground">
-              Theme
+              {t("settings.theme")}
             </label>
             <div className="flex gap-3">
-              {(["light", "dark", "system"] as const).map((t) => (
+              {(["light", "dark", "system"] as const).map((themeOption) => (
                 <button
-                  key={t}
+                  key={themeOption}
                   type="button"
-                  onClick={() => setSettings({ ...settings, theme: t })}
+                  onClick={() => setTheme(themeOption)}
                   className={`flex-1 rounded-lg border-2 p-3 text-sm font-medium capitalize transition-colors ${
-                    settings.theme === t
+                    mounted && theme === themeOption
                       ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
                       : "border-border text-muted-foreground hover:border-muted-foreground/50"
                   }`}
                 >
-                  {t === "light" ? "☀️" : t === "dark" ? "🌙" : "💻"} {t}
+                  {themeOption === "light" ? "☀️" : themeOption === "dark" ? "🌙" : "💻"}{" "}
+                  {t(`settings.${themeOption}`)}
                 </button>
               ))}
             </div>
@@ -87,10 +101,10 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p id="notifications-label" className="text-sm font-medium text-foreground">
-                Toast Notifications
+                {t("settings.notifications")}
               </p>
               <p className="text-xs text-muted-foreground">
-                Show alerts for actions
+                {t("settings.notificationsDesc")}
               </p>
             </div>
             <button
@@ -116,24 +130,21 @@ export default function SettingsPage() {
           {/* Language */}
           <div>
             <label htmlFor="settings-language" className="mb-2 block text-sm font-medium text-muted-foreground">
-              Language
+              {t("settings.language")}
             </label>
             <select
               id="settings-language"
-              value={settings.language}
-              onChange={(e) =>
-                setSettings({ ...settings, language: e.target.value })
-              }
+              value={locale}
+              onChange={(e) => setLocale(e.target.value as "en" | "es")}
               className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
             >
               <option value="en">English</option>
               <option value="es">Español</option>
-              <option value="fr">Français</option>
             </select>
           </div>
 
           <Button onPress={handleSave} className="w-full">
-            Save Preferences
+            {t("settings.save")}
           </Button>
         </div>
       </Card>
@@ -141,14 +152,13 @@ export default function SettingsPage() {
       {/* Danger Zone */}
       <Card className="border-red-200 p-6 dark:border-red-900/50">
         <h2 className="mb-4 text-lg font-semibold text-red-600 dark:text-red-400">
-          Danger Zone
+          {t("settings.dangerZone")}
         </h2>
         <p className="mb-4 text-sm text-muted-foreground">
-          This will permanently delete all your local data including prompt
-          history, favorites, and context windows.
+          {t("settings.dangerDesc")}
         </p>
         <Button variant="outline" onPress={handleClearData} className="text-red-600 border-red-200 hover:bg-red-50 dark:border-red-900/50 dark:hover:bg-red-900/20">
-          Clear All Data
+          {t("settings.clearAll")}
         </Button>
       </Card>
     </div>

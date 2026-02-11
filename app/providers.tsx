@@ -1,8 +1,37 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { ThemeProvider } from "next-themes";
+import { HeroUIProvider } from "@heroui/system";
 import { FavoritesProvider } from "@/lib/context";
 import { ToastProvider } from "@/components/shared/toast-container";
+import { useLocaleStore } from "@/lib/stores/locale-store";
+
+function HtmlLangSync() {
+  const locale = useLocaleStore((s) => s.locale);
+
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
+
+  return null;
+}
+
+function ConsoleEasterEgg() {
+  useEffect(() => {
+    console.log(
+      "%c DevFlow AI %c PARA VOSOTROS, DEVELOPERS ",
+      "background:#2563eb;color:#fff;font-size:20px;font-weight:bold;padding:8px 12px;border-radius:6px 0 0 6px;",
+      "background:#7c3aed;color:#fff;font-size:20px;font-weight:bold;padding:8px 12px;border-radius:0 6px 6px 0;",
+    );
+    console.log(
+      "%cContribute → https://github.com/albertoguinda/devflow-ai",
+      "color:#94a3b8;font-size:13px;padding:4px 0;",
+    );
+  }, []);
+
+  return null;
+}
 
 interface ProvidersProps {
   children: ReactNode;
@@ -10,8 +39,16 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <FavoritesProvider>
-      <ToastProvider>{children}</ToastProvider>
-    </FavoritesProvider>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      <HeroUIProvider>
+        <FavoritesProvider>
+          <ToastProvider>
+            <HtmlLangSync />
+            <ConsoleEasterEgg />
+            {children}
+          </ToastProvider>
+        </FavoritesProvider>
+      </HeroUIProvider>
+    </ThemeProvider>
   );
 }
