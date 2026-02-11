@@ -14,26 +14,9 @@ import {
 import { ToolHeader } from "@/components/shared/tool-header";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { useDtoMatic } from "@/hooks/use-dto-matic";
+import { useTranslation } from "@/hooks/use-translation";
 import { CopyButton } from "@/components/shared/copy-button";
 import type { GenerationMode, NamingConvention } from "@/types/dto-matic";
-
-const MODE_OPTIONS: { id: GenerationMode; label: string; description: string }[] = [
-  {
-    id: "quick",
-    label: "Quick",
-    description: "Interface DTO only",
-  },
-  {
-    id: "clean-arch",
-    label: "Clean Arch",
-    description: "DTO + Entity + Mapper",
-  },
-  {
-    id: "zod",
-    label: "Zod",
-    description: "Validation schema",
-  },
-];
 
 const NAMING_OPTIONS: { id: NamingConvention; label: string }[] = [
   { id: "camelCase", label: "camelCase" },
@@ -42,6 +25,14 @@ const NAMING_OPTIONS: { id: NamingConvention; label: string }[] = [
 ];
 
 export default function DtoMaticPage() {
+  const { t } = useTranslation();
+
+  const MODE_OPTIONS: { id: GenerationMode; label: string; description: string }[] = [
+    { id: "quick", label: "Quick", description: t("dtoMatic.modeQuickDesc") },
+    { id: "clean-arch", label: "Clean Arch", description: t("dtoMatic.modeCleanArchDesc") },
+    { id: "zod", label: "Zod", description: t("dtoMatic.modeZodDesc") },
+  ];
+
   const {
     jsonInput,
     config,
@@ -69,8 +60,8 @@ export default function DtoMaticPage() {
       <ToolHeader
         icon={FileJson}
         gradient="from-green-500 to-emerald-600"
-        title="DTO-Matic"
-        description="JSON to TypeScript: Interface + Entity + Mapper in seconds"
+        title={t("dtoMatic.title")}
+        description={t("dtoMatic.description")}
       />
 
       {/* Mode Selector */}
@@ -97,15 +88,15 @@ export default function DtoMaticPage() {
         <div className="space-y-4">
           <Card className="p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Input JSON</h2>
+              <h2 className="text-lg font-semibold">{t("dtoMatic.inputJson")}</h2>
               <div className="flex gap-2">
                 <Button variant="ghost" size="sm" onPress={loadExample}>
                   <Wand2 className="mr-1 size-4" />
-                  Example
+                  {t("dtoMatic.example")}
                 </Button>
                 <Button variant="ghost" size="sm" onPress={formatInput}>
                   <Code2 className="mr-1 size-4" />
-                  Format
+                  {t("dtoMatic.format")}
                 </Button>
               </div>
             </div>
@@ -127,7 +118,7 @@ export default function DtoMaticPage() {
             {!isJsonValid && (
               <div role="alert" className="mt-2 flex items-center gap-2 text-sm text-red-500">
                 <AlertCircle className="size-4" />
-                Invalid JSON. Check the syntax.
+                {t("dtoMatic.invalidJson")}
               </div>
             )}
 
@@ -141,20 +132,20 @@ export default function DtoMaticPage() {
 
           {/* Configuration */}
           <Card className="p-6">
-            <h3 className="mb-4 font-semibold">Configuration</h3>
+            <h3 className="mb-4 font-semibold">{t("common.configuration")}</h3>
 
             <div className="space-y-4">
               {/* Root Name */}
               <div>
                 <label htmlFor="dto-root-name" className="mb-1 block text-sm font-medium text-muted-foreground">
-                  Root type name
+                  {t("dtoMatic.rootTypeName")}
                 </label>
                 <input
                   id="dto-root-name"
                   type="text"
                   value={config.rootName}
                   onChange={(e) => updateConfig("rootName", e.target.value)}
-                  placeholder="User, Product, Response..."
+                  placeholder={t("dtoMatic.rootPlaceholder")}
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
@@ -162,7 +153,7 @@ export default function DtoMaticPage() {
               {/* Naming Convention */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-muted-foreground">
-                  Naming convention
+                  {t("dtoMatic.namingConvention")}
                 </label>
                 <div className="flex gap-2">
                   {NAMING_OPTIONS.map((opt) => (
@@ -191,7 +182,7 @@ export default function DtoMaticPage() {
                     onChange={(e) => updateConfig("optionalFields", e.target.checked)}
                     className="size-4 rounded border-border accent-primary"
                   />
-                  <span className="text-sm">Optional fields</span>
+                  <span className="text-sm">{t("dtoMatic.optionalFields")}</span>
                 </label>
 
                 <label className="flex cursor-pointer items-center gap-2">
@@ -201,7 +192,7 @@ export default function DtoMaticPage() {
                     onChange={(e) => updateConfig("detectDates", e.target.checked)}
                     className="size-4 rounded border-border accent-primary"
                   />
-                  <span className="text-sm">Detect dates</span>
+                  <span className="text-sm">{t("dtoMatic.detectDates")}</span>
                 </label>
 
                 <label className="flex cursor-pointer items-center gap-2">
@@ -211,7 +202,7 @@ export default function DtoMaticPage() {
                     onChange={(e) => updateConfig("exportTypes", e.target.checked)}
                     className="size-4 rounded border-border accent-primary"
                   />
-                  <span className="text-sm">Export types</span>
+                  <span className="text-sm">{t("dtoMatic.exportTypes")}</span>
                 </label>
 
                 <label className="flex cursor-pointer items-center gap-2">
@@ -221,7 +212,7 @@ export default function DtoMaticPage() {
                     onChange={(e) => updateConfig("readonlyEntities", e.target.checked)}
                     className="size-4 rounded border-border accent-primary"
                   />
-                  <span className="text-sm">Readonly entities</span>
+                  <span className="text-sm">{t("dtoMatic.readonlyEntities")}</span>
                 </label>
 
                 {config.mode === "clean-arch" && (
@@ -232,7 +223,7 @@ export default function DtoMaticPage() {
                       onChange={(e) => updateConfig("generateMappers", e.target.checked)}
                       className="size-4 rounded border-border accent-primary"
                     />
-                    <span className="text-sm">Generate Mappers</span>
+                    <span className="text-sm">{t("dtoMatic.generateMappers")}</span>
                   </label>
                 )}
 
@@ -243,7 +234,7 @@ export default function DtoMaticPage() {
                     onChange={(e) => updateConfig("generateZod", e.target.checked)}
                     className="size-4 rounded border-border accent-primary"
                   />
-                  <span className="text-sm">Generate Zod</span>
+                  <span className="text-sm">{t("dtoMatic.generateZod")}</span>
                 </label>
               </div>
             </div>
@@ -256,7 +247,7 @@ export default function DtoMaticPage() {
                 className="flex-1"
               >
                 <Sparkles className="mr-2 size-4" />
-                Generate Code
+                {t("dtoMatic.generateCode")}
               </Button>
               <Button variant="outline" onPress={reset}>
                 <Trash2 className="size-4" />
@@ -268,11 +259,11 @@ export default function DtoMaticPage() {
         {/* Output Panel */}
         <Card className="flex flex-col p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Generated Code</h2>
+            <h2 className="text-lg font-semibold">{t("dtoMatic.generatedCode")}</h2>
             {result && (
               <CopyButton
                 getText={() => result.files.map((f) => `// === ${f.name} ===\n\n${f.content}`).join("\n\n")}
-                label="Copy All"
+                label={t("dtoMatic.copyAll")}
               />
             )}
           </div>
@@ -281,15 +272,15 @@ export default function DtoMaticPage() {
             <div className="flex flex-1 flex-col">
               {/* Stats */}
               <div className="mb-4 flex flex-wrap gap-2">
-                <StatusBadge variant="success">{result.stats.totalTypes} tipos</StatusBadge>
+                <StatusBadge variant="success">{t("dtoMatic.types", { count: result.stats.totalTypes })}</StatusBadge>
                 {result.stats.nestedObjects > 0 && (
-                  <StatusBadge variant="info">{result.stats.nestedObjects} nested</StatusBadge>
+                  <StatusBadge variant="info">{t("dtoMatic.nested", { count: result.stats.nestedObjects })}</StatusBadge>
                 )}
                 {result.stats.arrays > 0 && (
-                  <StatusBadge variant="purple">{result.stats.arrays} arrays</StatusBadge>
+                  <StatusBadge variant="purple">{t("dtoMatic.arrays", { count: result.stats.arrays })}</StatusBadge>
                 )}
                 {result.stats.dateFields > 0 && (
-                  <StatusBadge variant="warning">{result.stats.dateFields} dates</StatusBadge>
+                  <StatusBadge variant="warning">{t("dtoMatic.dates", { count: result.stats.dateFields })}</StatusBadge>
                 )}
               </div>
 
@@ -326,10 +317,10 @@ export default function DtoMaticPage() {
             <div className="flex flex-1 flex-col items-center justify-center py-16 text-center">
               <FolderTree className="mb-4 size-12 text-muted-foreground/30" />
               <p className="text-muted-foreground">
-                Paste your JSON and generate TypeScript code instantly
+                {t("dtoMatic.emptyState")}
               </p>
               <p className="mt-2 text-sm text-muted-foreground/70">
-                Supports nested objects, arrays, dates and more
+                {t("dtoMatic.emptyStateHint")}
               </p>
             </div>
           )}

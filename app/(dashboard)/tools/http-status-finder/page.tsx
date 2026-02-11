@@ -7,19 +7,13 @@ import {
   X,
 } from "lucide-react";
 import { useHttpStatusFinder } from "@/hooks/use-http-status-finder";
+import { useTranslation } from "@/hooks/use-translation";
 import { CopyButton } from "@/components/shared/copy-button";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { getCategoryInfo } from "@/lib/application/http-status-finder";
 import type { HttpStatusCategory, HttpStatusCode } from "@/types/http-status-finder";
 
-const CATEGORY_TABS: { id: HttpStatusCategory | "all"; label: string }[] = [
-  { id: "all", label: "Todos" },
-  { id: "1xx", label: "1xx" },
-  { id: "2xx", label: "2xx" },
-  { id: "3xx", label: "3xx" },
-  { id: "4xx", label: "4xx" },
-  { id: "5xx", label: "5xx" },
-];
+const CATEGORY_IDS: (HttpStatusCategory | "all")[] = ["all", "1xx", "2xx", "3xx", "4xx", "5xx"];
 
 const CATEGORY_COLORS: Record<HttpStatusCategory, string> = {
   "1xx": "bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200",
@@ -81,6 +75,7 @@ export default function HttpStatusFinderPage() {
     setSelectedCode,
     clearSearch,
   } = useHttpStatusFinder();
+  const { t } = useTranslation();
 
   const displayCodes = query.trim() || categoryFilter ? results.codes : commonCodes;
   const activeCategory = categoryFilter ?? "all";
@@ -91,21 +86,21 @@ export default function HttpStatusFinderPage() {
       <ToolHeader
         icon={Globe}
         gradient="from-cyan-500 to-blue-600"
-        title="HTTP Status Finder"
-        description="Busca y aprende sobre códigos de estado HTTP"
+        title={t("httpStatus.title")}
+        description={t("httpStatus.description")}
       />
 
       {/* Search */}
       <Card className="p-6">
         <div className="relative">
-          <label htmlFor="http-status-search" className="sr-only">Search HTTP status codes</label>
+          <label htmlFor="http-status-search" className="sr-only">{t("httpStatus.searchLabel")}</label>
           <Search className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
           <input
             id="http-status-search"
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar por código (404) o nombre (not found)..."
+            placeholder={t("httpStatus.searchPlaceholder")}
             className="w-full rounded-lg border border-border bg-background py-3 pl-10 pr-10 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
           {query && (
@@ -122,23 +117,23 @@ export default function HttpStatusFinderPage() {
 
         {/* Category Tabs */}
         <div className="mt-4 flex flex-wrap gap-2">
-          {CATEGORY_TABS.map((tab) => {
-            const isActive = activeCategory === tab.id;
+          {CATEGORY_IDS.map((id) => {
+            const isActive = activeCategory === id;
             return (
               <button
-                key={tab.id}
+                key={id}
                 type="button"
-                onClick={() => setCategoryFilter(tab.id === "all" ? null : (tab.id as HttpStatusCategory))}
+                onClick={() => setCategoryFilter(id === "all" ? null : (id as HttpStatusCategory))}
                 className={`rounded-lg border-2 px-3 py-1.5 text-sm font-medium transition-all ${
                   isActive
                     ? "border-primary bg-primary/10"
                     : "border-border hover:border-primary/50"
                 }`}
               >
-                {tab.label}
-                {tab.id !== "all" && (
+                {id === "all" ? t("httpStatus.all") : id}
+                {id !== "all" && (
                   <span className="ml-1 text-xs text-muted-foreground">
-                    {getCategoryInfo(tab.id as HttpStatusCategory).label}
+                    {getCategoryInfo(id as HttpStatusCategory).label}
                   </span>
                 )}
               </button>
@@ -169,15 +164,15 @@ export default function HttpStatusFinderPage() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-lg bg-muted/50 px-4 py-3">
-              <span className="text-xs font-medium text-muted-foreground">Descripción</span>
+              <span className="text-xs font-medium text-muted-foreground">{t("httpStatus.descriptionLabel")}</span>
               <p className="mt-1 text-sm">{selectedCode.description}</p>
             </div>
             <div className="rounded-lg bg-muted/50 px-4 py-3">
-              <span className="text-xs font-medium text-muted-foreground">Cuándo usar</span>
+              <span className="text-xs font-medium text-muted-foreground">{t("httpStatus.whenToUse")}</span>
               <p className="mt-1 text-sm">{selectedCode.whenToUse}</p>
             </div>
             <div className="rounded-lg bg-muted/50 px-4 py-3 sm:col-span-2">
-              <span className="text-xs font-medium text-muted-foreground">Ejemplo</span>
+              <span className="text-xs font-medium text-muted-foreground">{t("httpStatus.example")}</span>
               <p className="mt-1 font-mono text-sm">{selectedCode.example}</p>
             </div>
           </div>
@@ -189,8 +184,8 @@ export default function HttpStatusFinderPage() {
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-medium text-muted-foreground">
             {query.trim() || categoryFilter
-              ? `${displayCodes.length} resultado${displayCodes.length !== 1 ? "s" : ""}`
-              : "Códigos más comunes"}
+              ? t(displayCodes.length !== 1 ? "httpStatus.resultCountPlural" : "httpStatus.resultCount", { count: displayCodes.length })
+              : t("httpStatus.mostCommon")}
           </h2>
         </div>
 
@@ -208,10 +203,10 @@ export default function HttpStatusFinderPage() {
           <Card className="p-12 text-center">
             <Globe className="mx-auto mb-4 size-12 text-muted-foreground/30" />
             <p className="text-muted-foreground">
-              No se encontraron códigos para &ldquo;{query}&rdquo;
+              {t("httpStatus.noResults", { query })}
             </p>
             <p className="mt-2 text-sm text-muted-foreground/70">
-              Intenta con un número (404) o una palabra clave (not found)
+              {t("httpStatus.noResultsHint")}
             </p>
           </Card>
         )}

@@ -13,22 +13,25 @@ import {
   Link2,
 } from "lucide-react";
 import { useBase64 } from "@/hooks/use-base64";
+import { useTranslation } from "@/hooks/use-translation";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { CopyButton } from "@/components/shared/copy-button";
 import { ToolHeader } from "@/components/shared/tool-header";
 import type { Base64Mode, Base64Variant } from "@/types/base64";
 
-const MODE_OPTIONS: { id: Base64Mode; label: string; icon: React.ElementType }[] = [
-  { id: "encode", label: "Encode", icon: Lock },
-  { id: "decode", label: "Decode", icon: Unlock },
-];
-
-const VARIANT_OPTIONS: { id: Base64Variant; label: string; description: string }[] = [
-  { id: "standard", label: "Standard", description: "RFC 4648 with +/=" },
-  { id: "url-safe", label: "URL-Safe", description: "RFC 4648 with -_" },
-];
-
 export default function Base64Page() {
+  const { t } = useTranslation();
+
+  const MODE_OPTIONS: { id: Base64Mode; label: string; icon: React.ElementType }[] = [
+    { id: "encode", label: t("base64.encode"), icon: Lock },
+    { id: "decode", label: t("base64.decode"), icon: Unlock },
+  ];
+
+  const VARIANT_OPTIONS: { id: Base64Variant; label: string; description: string }[] = [
+    { id: "standard", label: t("base64.standard"), description: t("base64.standardDesc") },
+    { id: "url-safe", label: t("base64.urlSafe"), description: t("base64.urlSafeDesc") },
+  ];
+
   const {
     input,
     mode,
@@ -54,8 +57,8 @@ export default function Base64Page() {
       <ToolHeader
         icon={Binary}
         gradient="from-indigo-500 to-blue-600"
-        title="Base64 Encoder/Decoder"
-        description="Encode and decode Base64 with URL-safe variant support"
+        title={t("base64.title")}
+        description={t("base64.description")}
       />
 
       {/* Mode Selector */}
@@ -84,7 +87,7 @@ export default function Base64Page() {
           <Card className="p-6">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">
-                {mode === "encode" ? "Text to Encode" : "Base64 to Decode"}
+                {mode === "encode" ? t("base64.inputEncode") : t("base64.inputDecode")}
               </h2>
               <div className="flex gap-2">
                 <Button
@@ -93,20 +96,20 @@ export default function Base64Page() {
                   onPress={() => loadExample(mode === "encode" ? "text" : "encoded")}
                 >
                   <Wand2 className="mr-1 size-4" />
-                  Example
+                  {t("base64.example")}
                 </Button>
               </div>
             </div>
 
             <textarea
               id="base64-input"
-              aria-label={mode === "encode" ? "Text to encode" : "Base64 to decode"}
+              aria-label={mode === "encode" ? t("base64.inputEncode") : t("base64.inputDecode")}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={
                 mode === "encode"
-                  ? "Enter text to encode..."
-                  : "Paste Base64 to decode..."
+                  ? t("base64.placeholderEncode")
+                  : t("base64.placeholderDecode")
               }
               rows={10}
               className={`w-full resize-none rounded-lg border bg-background px-4 py-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 ${
@@ -125,21 +128,21 @@ export default function Base64Page() {
 
             {/* Input Stats */}
             <div className="mt-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
-              <span>{inputStats.characters} characters</span>
-              <span>{inputStats.bytes} bytes</span>
-              <span>{inputStats.lines} lines</span>
+              <span>{t("base64.characters", { count: inputStats.characters })}</span>
+              <span>{t("base64.bytes", { count: inputStats.bytes })}</span>
+              <span>{t("base64.lines", { count: inputStats.lines })}</span>
             </div>
           </Card>
 
           {/* Configuration */}
           <Card className="p-6">
-            <h3 className="mb-4 font-semibold">Configuration</h3>
+            <h3 className="mb-4 font-semibold">{t("common.configuration")}</h3>
 
             <div className="space-y-4">
               {/* Variant Selection */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-muted-foreground">
-                  Base64 Variant
+                  {t("base64.variant")}
                 </label>
                 <div className="flex gap-2">
                   {VARIANT_OPTIONS.map((opt) => (
@@ -170,13 +173,13 @@ export default function Base64Page() {
                       onChange={(e) => updateConfig("lineBreaks", e.target.checked)}
                       className="size-4 rounded border-border accent-primary"
                     />
-                    <span className="text-sm">Add line breaks</span>
+                    <span className="text-sm">{t("base64.lineBreaks")}</span>
                   </label>
 
                   {config.lineBreaks && (
                     <div>
                       <label className="mb-1 block text-sm text-muted-foreground">
-                        Line length
+                        {t("base64.lineLength")}
                       </label>
                       <input
                         type="number"
@@ -202,7 +205,7 @@ export default function Base64Page() {
                 className="flex-1"
               >
                 <Sparkles className="mr-2 size-4" />
-                {mode === "encode" ? "Encode" : "Decode"}
+                {mode === "encode" ? t("base64.encode") : t("base64.decode")}
               </Button>
               <Button variant="outline" onPress={reset}>
                 <Trash2 className="size-4" />
@@ -214,11 +217,11 @@ export default function Base64Page() {
         {/* Output Panel */}
         <Card className="flex flex-col p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Output</h2>
+            <h2 className="text-lg font-semibold">{t("base64.output")}</h2>
             {result?.output && (
               <Button variant="ghost" size="sm" onPress={applyOutput}>
                 <ArrowRightLeft className="mr-1 size-4" />
-                Swap
+                {t("base64.swap")}
               </Button>
             )}
           </div>
@@ -227,9 +230,9 @@ export default function Base64Page() {
             <div className="flex flex-1 flex-col">
               {/* Stats */}
               <div className="mb-3 flex flex-wrap gap-2">
-                <StatusBadge variant="info">{result.stats.outputLength} chars</StatusBadge>
-                <StatusBadge variant="success">{result.stats.outputBytes} bytes</StatusBadge>
-                <StatusBadge variant="purple">{(result.stats.compressionRatio * 100).toFixed(0)}% size ratio</StatusBadge>
+                <StatusBadge variant="info">{t("base64.chars", { count: result.stats.outputLength })}</StatusBadge>
+                <StatusBadge variant="success">{t("base64.bytes", { count: result.stats.outputBytes })}</StatusBadge>
+                <StatusBadge variant="purple">{t("base64.sizeRatio", { ratio: (result.stats.compressionRatio * 100).toFixed(0) })}</StatusBadge>
               </div>
 
               {/* Output */}
@@ -246,7 +249,7 @@ export default function Base64Page() {
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
                       <Link2 className="size-4" />
-                      Data URL
+                      {t("base64.dataUrl")}
                     </span>
                     <CopyButton text={dataUrl} />
                   </div>
@@ -265,12 +268,10 @@ export default function Base64Page() {
             <div className="flex flex-1 flex-col items-center justify-center py-16 text-center">
               <Binary className="mb-4 size-12 text-muted-foreground/30" />
               <p className="text-muted-foreground">
-                {mode === "encode"
-                  ? "Enter text and click Encode"
-                  : "Paste Base64 and click Decode"}
+                {t("base64.emptyState")}
               </p>
               <p className="mt-2 text-sm text-muted-foreground/70">
-                Supports Unicode, URL-safe variant, and data URLs
+                {t("base64.emptyStateHint")}
               </p>
             </div>
           )}
