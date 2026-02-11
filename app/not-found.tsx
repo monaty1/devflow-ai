@@ -1,23 +1,23 @@
-import NextLink from "next/link";
-import { Button } from "@heroui/react";
-import { Home } from "lucide-react";
+import Link from "next/link";
+import { Sparkles } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4">
-      <h1 className="text-8xl font-bold text-muted-foreground/20">404</h1>
-      <h2 className="mt-4 text-2xl font-bold text-foreground">
-        Page Not Found
-      </h2>
-      <p className="mt-2 text-muted-foreground">
-        The page you&apos;re looking for doesn&apos;t exist.
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 text-center">
+      <Sparkles className="mb-6 size-12 text-primary" />
+      <h1 className="mb-2 text-6xl font-bold text-foreground">404</h1>
+      <p className="mb-1 text-xl text-muted-foreground">
+        Te has salido del mapa.
       </p>
-      <Button size="lg" className="mt-8 gap-2">
-        <NextLink href="/" className="flex items-center gap-2">
-          <Home className="size-4" />
-          Back to Home
-        </NextLink>
-      </Button>
+      <p className="mb-8 text-sm text-muted-foreground/70">
+        Para vosotros, developers.
+      </p>
+      <Link
+        href="/tools"
+        className="inline-flex h-11 cursor-pointer items-center justify-center rounded-lg bg-primary px-6 text-sm font-medium text-white transition-colors hover:bg-primary/90"
+      >
+        Volver a las herramientas
+      </Link>
     </div>
   );
 }
