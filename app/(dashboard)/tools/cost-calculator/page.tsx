@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useCostCalculator } from "@/hooks/use-cost-calculator";
 import { formatCost } from "@/lib/application/cost-calculator";
+import { ToolHeader } from "@/components/shared/tool-header";
 import { AI_MODELS, PROVIDER_LABELS } from "@/config/ai-models";
 import type { CostCalculation } from "@/types/cost-calculator";
 
@@ -403,20 +404,16 @@ export default function CostCalculatorPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            API Cost Calculator
-          </h1>
-          <p className="mt-1 text-muted-foreground">
-            Compare costs across AI providers
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onPress={reset} className="gap-2">
-          <RotateCcw className="size-4" />
-          Reset
-        </Button>
-      </div>
+      <ToolHeader
+        title="API Cost Calculator"
+        description="Compare costs across AI providers"
+        actions={
+          <Button variant="outline" size="sm" onPress={reset} className="gap-2">
+            <RotateCcw className="size-4" />
+            Reset
+          </Button>
+        }
+      />
 
       {/* View Toggle */}
       <div className="flex gap-2">

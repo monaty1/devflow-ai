@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useUuidGenerator } from "@/hooks/use-uuid-generator";
 import { CopyButton } from "@/components/shared/copy-button";
+import { ToolHeader } from "@/components/shared/tool-header";
 import type { UuidVersion, UuidFormat } from "@/types/uuid-generator";
 
 const VERSION_OPTIONS: { id: UuidVersion; label: string; description: string }[] = [
@@ -54,21 +55,12 @@ export default function UuidGeneratorPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-3">
-          <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600">
-            <Fingerprint className="size-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              UUID Generator
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Genera, valida y analiza UUIDs en todos los formatos
-            </p>
-          </div>
-        </div>
-      </div>
+      <ToolHeader
+        icon={Fingerprint}
+        gradient="from-teal-500 to-emerald-600"
+        title="UUID Generator"
+        description="Genera, valida y analiza UUIDs en todos los formatos"
+      />
 
       {/* Tab Selector */}
       <div className="flex flex-wrap gap-2">

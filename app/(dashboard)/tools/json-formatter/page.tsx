@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useJsonFormatter } from "@/hooks/use-json-formatter";
 import { CopyButton } from "@/components/shared/copy-button";
+import { ToolHeader } from "@/components/shared/tool-header";
 import type { JsonFormatMode } from "@/types/json-formatter";
 
 const MODE_OPTIONS: { id: JsonFormatMode; label: string; icon: React.ElementType }[] = [
@@ -55,21 +56,12 @@ export default function JsonFormatterPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-3">
-          <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-yellow-500 to-amber-600">
-            <Braces className="size-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              JSON Formatter
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Format, minify, validate, and transform JSON instantly
-            </p>
-          </div>
-        </div>
-      </div>
+      <ToolHeader
+        icon={Braces}
+        gradient="from-yellow-500 to-amber-600"
+        title="JSON Formatter"
+        description="Format, minify, validate, and transform JSON instantly"
+      />
 
       {/* Mode Selector */}
       <div className="flex flex-wrap gap-3">

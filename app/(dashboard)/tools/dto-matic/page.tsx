@@ -11,6 +11,7 @@ import {
   FolderTree,
   Wand2,
 } from "lucide-react";
+import { ToolHeader } from "@/components/shared/tool-header";
 import { useDtoMatic } from "@/hooks/use-dto-matic";
 import { CopyButton } from "@/components/shared/copy-button";
 import type { GenerationMode, NamingConvention } from "@/types/dto-matic";
@@ -64,21 +65,12 @@ export default function DtoMaticPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-3">
-          <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600">
-            <FileJson className="size-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              DTO-Matic
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              JSON to TypeScript: Interface + Entity + Mapper in seconds
-            </p>
-          </div>
-        </div>
-      </div>
+      <ToolHeader
+        icon={FileJson}
+        gradient="from-green-500 to-emerald-600"
+        title="DTO-Matic"
+        description="JSON to TypeScript: Interface + Entity + Mapper in seconds"
+      />
 
       {/* Mode Selector */}
       <div className="flex flex-wrap gap-3">

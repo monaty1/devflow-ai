@@ -11,3 +11,4 @@ export { StatusBadge } from "./status-badge";
 export { ShareButtons } from "./share-buttons";
 export { GiscusComments } from "./giscus-comments";
 export { CopyButton } from "./copy-button";
+export { ToolHeader } from "./tool-header";

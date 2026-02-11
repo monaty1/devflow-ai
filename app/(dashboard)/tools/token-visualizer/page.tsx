@@ -4,6 +4,7 @@ import { Card, Button } from "@heroui/react";
 import { RotateCcw } from "lucide-react";
 import { useTokenVisualizer } from "@/hooks/use-token-visualizer";
 import { CopyButton } from "@/components/shared/copy-button";
+import { ToolHeader } from "@/components/shared/tool-header";
 import { formatCost } from "@/lib/application/cost-calculator";
 
 export default function TokenVisualizerPage() {
@@ -12,31 +13,27 @@ export default function TokenVisualizerPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Token Visualizer
-          </h1>
-          <p className="mt-1 text-muted-foreground">
-            See how AI models tokenize your text in real-time
-          </p>
-        </div>
-        <div className="flex gap-2">
-          {visualization && (
-            <CopyButton
-              getText={() =>
-                `Tokens: ${visualization.totalTokens}\nInput: ${visualization.input}\nGPT-4 Cost: ${formatCost(visualization.estimatedCost.gpt4)}\nClaude Cost: ${formatCost(visualization.estimatedCost.claude)}`
-              }
-              label="Copy"
-              variant="outline"
-            />
-          )}
-          <Button variant="outline" size="sm" onPress={reset} className="gap-2">
-            <RotateCcw className="size-4" />
-            Reset
-          </Button>
-        </div>
-      </div>
+      <ToolHeader
+        title="Token Visualizer"
+        description="See how AI models tokenize your text in real-time"
+        actions={
+          <div className="flex gap-2">
+            {visualization && (
+              <CopyButton
+                getText={() =>
+                  `Tokens: ${visualization.totalTokens}\nInput: ${visualization.input}\nGPT-4 Cost: ${formatCost(visualization.estimatedCost.gpt4)}\nClaude Cost: ${formatCost(visualization.estimatedCost.claude)}`
+                }
+                label="Copy"
+                variant="outline"
+              />
+            )}
+            <Button variant="outline" size="sm" onPress={reset} className="gap-2">
+              <RotateCcw className="size-4" />
+              Reset
+            </Button>
+          </div>
+        }
+      />
 
       {/* Input */}
       <Card className="p-6">

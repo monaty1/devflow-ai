@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { ToolCard } from "@/components/tools";
 import { TOOLS_DATA } from "@/config/tools-data";
 import { useTranslation } from "@/hooks/use-translation";
+import { ToolHeader } from "@/components/shared/tool-header";
 import type { ToolCategory } from "@/types/tools";
 
 export default function ToolsPage() {
@@ -34,14 +35,10 @@ export default function ToolsPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          {t("tools.title")}
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          {t("tools.subtitle")}
-        </p>
-      </div>
+      <ToolHeader
+        title={t("tools.title")}
+        description={t("tools.subtitle")}
+      />
 
       {/* Search + Filters */}
       <div className="space-y-4">

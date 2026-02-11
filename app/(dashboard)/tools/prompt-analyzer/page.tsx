@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { usePromptAnalyzer } from "@/hooks/use-prompt-analyzer";
 import { useToast } from "@/hooks/use-toast";
+import { ToolHeader } from "@/components/shared/tool-header";
 import { ScoreBadge } from "@/components/tools/score-badge";
 import { SecurityFlagsList } from "@/components/tools/security-flag";
 import { PromptAnalyzerSkeleton } from "@/components/shared/skeletons";
@@ -70,14 +71,10 @@ export default function PromptAnalyzerPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Prompt Analyzer
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Analyze your prompts for quality, clarity, and security issues
-        </p>
-      </div>
+      <ToolHeader
+        title="Prompt Analyzer"
+        description="Analyze your prompts for quality, clarity, and security issues"
+      />
 
       {/* Input Section */}
       <Card className="p-6">

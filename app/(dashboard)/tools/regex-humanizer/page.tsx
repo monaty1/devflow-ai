@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useRegexHumanizer } from "@/hooks/use-regex-humanizer";
 import { CopyButton } from "@/components/shared/copy-button";
+import { ToolHeader } from "@/components/shared/tool-header";
 import type { RegexMode } from "@/types/regex-humanizer";
 
 const TABS: { id: RegexMode; label: string; icon: typeof Regex }[] = [
@@ -63,21 +64,12 @@ export default function RegexHumanizerPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-3">
-          <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600">
-            <Regex className="size-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              Regex Humanizer
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Explain regex in plain English, generate patterns from descriptions
-            </p>
-          </div>
-        </div>
-      </div>
+      <ToolHeader
+        icon={Regex}
+        gradient="from-cyan-500 to-blue-600"
+        title="Regex Humanizer"
+        description="Explain regex in plain English, generate patterns from descriptions"
+      />
 
       {/* Tabs */}
       <div className="flex gap-2 border-b border-border pb-4">

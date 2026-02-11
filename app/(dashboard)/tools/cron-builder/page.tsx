@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useCronBuilder } from "@/hooks/use-cron-builder";
 import { CopyButton } from "@/components/shared/copy-button";
+import { ToolHeader } from "@/components/shared/tool-header";
 import type { CronField } from "@/types/cron-builder";
 import { CRON_FIELD_LABELS, CRON_FIELD_RANGES } from "@/types/cron-builder";
 
@@ -47,21 +48,12 @@ export default function CronBuilderPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-3">
-          <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600">
-            <Clock className="size-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              Cron Builder
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Construye expresiones cron visualmente, sin memorizar sintaxis
-            </p>
-          </div>
-        </div>
-      </div>
+      <ToolHeader
+        icon={Clock}
+        gradient="from-violet-500 to-purple-600"
+        title="Cron Builder"
+        description="Construye expresiones cron visualmente, sin memorizar sintaxis"
+      />
 
       {/* Presets */}
       <Card className="p-4">

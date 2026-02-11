@@ -5,6 +5,7 @@ import { Card, Button } from "@heroui/react";
 import { Plus, Trash2, Download, FolderPlus } from "lucide-react";
 import { useContextManager } from "@/hooks/use-context-manager";
 import { useToast } from "@/hooks/use-toast";
+import { ToolHeader } from "@/components/shared/tool-header";
 import type { DocumentType, Priority } from "@/types/context-manager";
 
 const PRIORITY_COLORS: Record<Priority, string> = {
@@ -98,20 +99,16 @@ export default function ContextManagerPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Context Manager
-          </h1>
-          <p className="mt-1 text-muted-foreground">
-            Organize and export your LLM context windows
-          </p>
-        </div>
-        <Button onPress={() => setShowCreateWindow(true)} aria-expanded={showCreateWindow} className="gap-2">
-          <FolderPlus className="size-4" />
-          New Window
-        </Button>
-      </div>
+      <ToolHeader
+        title="Context Manager"
+        description="Organize and export your LLM context windows"
+        actions={
+          <Button onPress={() => setShowCreateWindow(true)} aria-expanded={showCreateWindow} className="gap-2">
+            <FolderPlus className="size-4" />
+            New Window
+          </Button>
+        }
+      />
 
       {/* Create Window Form */}
       {showCreateWindow && (

@@ -5,6 +5,7 @@ import { Card, Button } from "@heroui/react";
 import { RotateCcw, AlertTriangle, CheckCircle, Info } from "lucide-react";
 import { useCodeReview } from "@/hooks/use-code-review";
 import { useToast } from "@/hooks/use-toast";
+import { ToolHeader } from "@/components/shared/tool-header";
 import type { SupportedLanguage, CodeIssue } from "@/types/code-review";
 
 const LANGUAGES: { value: SupportedLanguage; label: string }[] = [
@@ -68,20 +69,16 @@ export default function CodeReviewPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Code Review Assistant
-          </h1>
-          <p className="mt-1 text-muted-foreground">
-            Automated code quality and security analysis
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onPress={handleReset} className="gap-2">
-          <RotateCcw className="size-4" />
-          Reset
-        </Button>
-      </div>
+      <ToolHeader
+        title="Code Review Assistant"
+        description="Automated code quality and security analysis"
+        actions={
+          <Button variant="outline" size="sm" onPress={handleReset} className="gap-2">
+            <RotateCcw className="size-4" />
+            Reset
+          </Button>
+        }
+      />
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Input Panel */}

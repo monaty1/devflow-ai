@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useTailwindSorter } from "@/hooks/use-tailwind-sorter";
 import { CopyButton } from "@/components/shared/copy-button";
+import { ToolHeader } from "@/components/shared/tool-header";
 import { CATEGORY_LABELS, type OutputFormat } from "@/types/tailwind-sorter";
 
 const OUTPUT_FORMATS: { id: OutputFormat; label: string; description: string }[] = [
@@ -46,21 +47,12 @@ export default function TailwindSorterPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-3">
-          <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-cyan-600">
-            <Palette className="size-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              Tailwind Sorter
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Sort and organize your Tailwind CSS classes automatically
-            </p>
-          </div>
-        </div>
-      </div>
+      <ToolHeader
+        icon={Palette}
+        gradient="from-sky-500 to-cyan-600"
+        title="Tailwind Sorter"
+        description="Sort and organize your Tailwind CSS classes automatically"
+      />
 
       {/* Quick Actions */}
       <Card className="p-4">

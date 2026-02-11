@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useBase64 } from "@/hooks/use-base64";
 import { CopyButton } from "@/components/shared/copy-button";
+import { ToolHeader } from "@/components/shared/tool-header";
 import type { Base64Mode, Base64Variant } from "@/types/base64";
 
 const MODE_OPTIONS: { id: Base64Mode; label: string; icon: React.ElementType }[] = [
@@ -49,21 +50,12 @@ export default function Base64Page() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-3">
-          <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600">
-            <Binary className="size-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              Base64 Encoder/Decoder
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Encode and decode Base64 with URL-safe variant support
-            </p>
-          </div>
-        </div>
-      </div>
+      <ToolHeader
+        icon={Binary}
+        gradient="from-indigo-500 to-blue-600"
+        title="Base64 Encoder/Decoder"
+        description="Encode and decode Base64 with URL-safe variant support"
+      />
 
       {/* Mode Selector */}
       <div className="flex flex-wrap gap-3">

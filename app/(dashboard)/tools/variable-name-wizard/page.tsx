@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useVariableNameWizard } from "@/hooks/use-variable-name-wizard";
 import { CopyButton } from "@/components/shared/copy-button";
+import { ToolHeader } from "@/components/shared/tool-header";
 import {
   CONVENTION_LABELS,
   CONVENTION_EXAMPLES,
@@ -84,21 +85,12 @@ export default function VariableNameWizardPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-3">
-          <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-fuchsia-500 to-pink-600">
-            <Wand2 className="size-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              Variable Name Wizard
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Generate and convert variable names between naming conventions
-            </p>
-          </div>
-        </div>
-      </div>
+      <ToolHeader
+        icon={Wand2}
+        gradient="from-fuchsia-500 to-pink-600"
+        title="Variable Name Wizard"
+        description="Generate and convert variable names between naming conventions"
+      />
 
       {/* Mode Toggle */}
       <Card className="p-4">

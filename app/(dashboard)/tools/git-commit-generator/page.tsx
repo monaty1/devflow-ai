@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useGitCommitGenerator } from "@/hooks/use-git-commit-generator";
 import { CopyButton } from "@/components/shared/copy-button";
+import { ToolHeader } from "@/components/shared/tool-header";
 import { COMMIT_TYPES, validateCommitMessage } from "@/lib/application/git-commit-generator";
 
 export default function GitCommitGeneratorPage() {
@@ -51,21 +52,12 @@ export default function GitCommitGeneratorPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-3">
-          <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-red-600">
-            <GitCommitHorizontal className="size-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              Git Commit Generator
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Genera mensajes de commit siguiendo Conventional Commits
-            </p>
-          </div>
-        </div>
-      </div>
+      <ToolHeader
+        icon={GitCommitHorizontal}
+        gradient="from-orange-500 to-red-600"
+        title="Git Commit Generator"
+        description="Genera mensajes de commit siguiendo Conventional Commits"
+      />
 
       {/* Tab Selector */}
       <div className="flex flex-wrap gap-2">

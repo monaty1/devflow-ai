@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useHttpStatusFinder } from "@/hooks/use-http-status-finder";
 import { CopyButton } from "@/components/shared/copy-button";
+import { ToolHeader } from "@/components/shared/tool-header";
 import { getCategoryInfo } from "@/lib/application/http-status-finder";
 import type { HttpStatusCategory, HttpStatusCode } from "@/types/http-status-finder";
 
@@ -87,21 +88,12 @@ export default function HttpStatusFinderPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-3">
-          <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600">
-            <Globe className="size-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              HTTP Status Finder
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Busca y aprende sobre códigos de estado HTTP
-            </p>
-          </div>
-        </div>
-      </div>
+      <ToolHeader
+        icon={Globe}
+        gradient="from-cyan-500 to-blue-600"
+        title="HTTP Status Finder"
+        description="Busca y aprende sobre códigos de estado HTTP"
+      />
 
       {/* Search */}
       <Card className="p-6">
