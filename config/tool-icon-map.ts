@@ -1,0 +1,36 @@
+import {
+  FileSearch,
+  Code2,
+  Calculator,
+  Eye,
+  FolderKanban,
+  Regex,
+  FileJson,
+  Clock,
+  Palette,
+  Wand2,
+  Braces,
+  Binary,
+  Fingerprint,
+  GitCommitHorizontal,
+  Globe,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
+export const TOOL_ICON_MAP: Record<string, LucideIcon> = {
+  FileSearch,
+  Code2,
+  Calculator,
+  Eye,
+  FolderKanban,
+  Regex,
+  FileJson,
+  Clock,
+  Palette,
+  Wand2,
+  Braces,
+  Binary,
+  Fingerprint,
+  GitCommitHorizontal,
+  Globe,
+};

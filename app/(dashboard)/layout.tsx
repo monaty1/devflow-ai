@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import NextLink from "next/link";
 import type { ReactNode } from "react";
@@ -10,48 +10,12 @@ import {
   Clock,
   Settings,
   Sparkles,
-  Sun,
-  Moon,
-  Monitor,
   Menu,
   X,
 } from "lucide-react";
-import { useTheme } from "next-themes";
 import { useTranslation } from "@/hooks/use-translation";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { cn } from "@/lib/utils";
-
-const subscribeNoop = () => () => {};
-const getTrue = () => true;
-const getFalse = () => false;
-
-function useIsMounted() {
-  return useSyncExternalStore(subscribeNoop, getTrue, getFalse);
-}
-
-function SidebarThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  const mounted = useIsMounted();
-
-  if (!mounted) {
-    return <div className="h-9" />;
-  }
-
-  const nextTheme = theme === "light" ? "dark" : theme === "dark" ? "system" : "light";
-  const Icon = theme === "light" ? Sun : theme === "dark" ? Moon : Monitor;
-  const label = theme === "light" ? "Light mode" : theme === "dark" ? "Dark mode" : "System theme";
-
-  return (
-    <button
-      type="button"
-      onClick={() => setTheme(nextTheme)}
-      className="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-      aria-label={label}
-    >
-      <Icon className="size-5" />
-      <span className="capitalize">{theme ?? "system"}</span>
-    </button>
-  );
-}
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -139,7 +103,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Footer */}
       <div className="space-y-1 border-t border-border p-4">
-        <SidebarThemeToggle />
+        <ThemeToggle variant="full" />
         <p className="px-4 text-xs text-muted-foreground">
           {t("sidebar.freeOpenSource")}
         </p>

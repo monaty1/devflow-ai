@@ -2,45 +2,11 @@
 
 import NextLink from "next/link";
 import { Card, Button } from "@heroui/react";
-import {
-  Heart,
-  FileSearch,
-  Code2,
-  Calculator,
-  Eye,
-  FolderKanban,
-  Regex,
-  FileJson,
-  Clock,
-  Palette,
-  Wand2,
-  Braces,
-  Binary,
-  Fingerprint,
-  GitCommitHorizontal,
-  Globe,
-} from "lucide-react";
+import { Heart } from "lucide-react";
 import { useFavorites } from "@/lib/context";
+import { TOOL_ICON_MAP } from "@/config/tool-icon-map";
 import type { Tool } from "@/types/tools";
 import { cn } from "@/lib/utils";
-
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  FileSearch,
-  Code2,
-  Calculator,
-  Eye,
-  FolderKanban,
-  Regex,
-  FileJson,
-  Clock,
-  Palette,
-  Wand2,
-  Braces,
-  Binary,
-  Fingerprint,
-  GitCommitHorizontal,
-  Globe,
-};
 
 interface ToolCardProps {
   tool: Tool;
@@ -49,7 +15,7 @@ interface ToolCardProps {
 export function ToolCard({ tool }: ToolCardProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const favorited = isFavorite(tool.id);
-  const IconComponent = ICON_MAP[tool.icon];
+  const IconComponent = TOOL_ICON_MAP[tool.icon];
 
   return (
     <Card className="group relative cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">

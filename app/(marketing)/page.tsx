@@ -10,45 +10,12 @@ import {
 import { useTranslation } from "@/hooks/use-translation";
 import { FeatureCard } from "@/components/ui/feature-card";
 import {
-  FileSearch,
-  Code2,
-  Calculator,
-  Eye,
-  FolderKanban,
-  Regex,
-  FileJson,
-  Clock,
-  Palette,
-  Wand2,
-  Braces,
-  Binary,
-  Fingerprint,
-  GitCommitHorizontal,
-  Globe,
   Zap,
   Shield,
   TrendingUp,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { TOOLS_DATA } from "@/config/tools-data";
-
-const ICON_MAP: Record<string, LucideIcon> = {
-  FileSearch,
-  Code2,
-  Calculator,
-  Eye,
-  FolderKanban,
-  Regex,
-  FileJson,
-  Clock,
-  Palette,
-  Wand2,
-  Braces,
-  Binary,
-  Fingerprint,
-  GitCommitHorizontal,
-  Globe,
-};
+import { TOOL_ICON_MAP } from "@/config/tool-icon-map";
 
 export default function HomePage() {
   const heroRef = useFadeIn(0);
@@ -143,7 +110,7 @@ export default function HomePage() {
             className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3"
           >
             {TOOLS_DATA.map((tool) => {
-              const Icon = ICON_MAP[tool.icon];
+              const Icon = TOOL_ICON_MAP[tool.icon];
               if (!Icon) return null;
               return (
                 <FeatureCard

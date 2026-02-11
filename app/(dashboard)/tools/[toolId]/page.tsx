@@ -9,25 +9,13 @@ import {
   ArrowLeft,
   Star,
   Users,
-  FileSearch,
-  Code2,
-  Calculator,
-  Eye,
-  FolderKanban,
   Check,
 } from "lucide-react";
 import { useFavorites } from "@/lib/context";
 import { useTranslation } from "@/hooks/use-translation";
 import { getToolBySlug } from "@/config/tools-data";
+import { TOOL_ICON_MAP } from "@/config/tool-icon-map";
 import { cn } from "@/lib/utils";
-
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  FileSearch,
-  Code2,
-  Calculator,
-  Eye,
-  FolderKanban,
-};
 
 interface ToolDetailPageProps {
   params: Promise<{ toolId: string }>;
@@ -44,7 +32,7 @@ export default function ToolDetailPage({ params }: ToolDetailPageProps) {
   }
 
   const favorited = isFavorite(tool.id);
-  const IconComponent = ICON_MAP[tool.icon];
+  const IconComponent = TOOL_ICON_MAP[tool.icon];
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">

@@ -1,41 +1,13 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState } from "react";
 import NextLink from "next/link";
 import { Button, linkVariants } from "@heroui/react";
-import { Menu, X, Sparkles, Sun, Moon, Monitor, Github } from "lucide-react";
-import { useTheme } from "next-themes";
+import { Menu, X, Sparkles, Github } from "lucide-react";
 import { useTranslation } from "@/hooks/use-translation";
 import { useLocaleStore } from "@/lib/stores/locale-store";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { cn } from "@/lib/utils";
-
-function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  const mounted = useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false,
-  );
-
-  if (!mounted) {
-    return <div className="size-9" />;
-  }
-
-  const nextTheme = theme === "light" ? "dark" : theme === "dark" ? "system" : "light";
-  const Icon = theme === "light" ? Sun : theme === "dark" ? Moon : Monitor;
-  const label = theme === "light" ? "Light mode" : theme === "dark" ? "Dark mode" : "System theme";
-
-  return (
-    <button
-      type="button"
-      onClick={() => setTheme(nextTheme)}
-      className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-      aria-label={label}
-    >
-      <Icon className="size-5" />
-    </button>
-  );
-}
 
 function LocaleToggle() {
   const locale = useLocaleStore((s) => s.locale);
