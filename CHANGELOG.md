@@ -5,6 +5,16 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-02-11
+
+### Refactored
+- **useToolHistory<T> generic hook** — Replaced ~440 lines of duplicated localStorage history logic across 11 hooks
+- **CopyButton shared component** — Self-contained clipboard button with auto-reset, replaced ~400 lines across 11 pages and 9 hooks
+- **ToolHeader shared component** — Unified two header patterns (icon+gradient and simple) across 16 tool pages
+- **StatusBadge consolidation** — Added purple variant, replaced ~15 inline badge spans across 5 pages
+- **Centralized ICON_MAP** — Single source of truth in `config/tool-icon-map.ts`, removed 3 duplicated maps
+- **Shared ThemeToggle** — Unified compact/full variants in `components/shared/theme-toggle.tsx`
+
 ## [1.1.0] - 2026-02-11
 
 ### Added
@@ -74,5 +84,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[1.2.0]: https://github.com/albertoguinda/devflow-ai/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/albertoguinda/devflow-ai/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/albertoguinda/devflow-ai/releases/tag/v1.0.0
