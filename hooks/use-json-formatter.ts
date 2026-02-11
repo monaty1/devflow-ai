@@ -15,9 +15,7 @@ import {
   compareJson,
   EXAMPLE_JSON,
 } from "@/lib/application/json-formatter";
-
-const HISTORY_KEY = "devflow-json-formatter-history";
-const MAX_HISTORY = 10;
+import { useToolHistory } from "@/hooks/use-tool-history";
 
 interface HistoryItem {
   id: string;
@@ -26,32 +24,14 @@ interface HistoryItem {
   timestamp: string;
 }
 
-function loadHistory(): HistoryItem[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const stored = localStorage.getItem(HISTORY_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveHistory(history: HistoryItem[]): void {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
-  } catch {
-    // Ignore storage errors
-  }
-}
-
 export function useJsonFormatter() {
   const [input, setInput] = useState("");
   const [mode, setMode] = useState<JsonFormatMode>("format");
   const [config, setConfig] = useState<JsonFormatterConfig>(DEFAULT_FORMATTER_CONFIG);
   const [result, setResult] = useState<JsonFormatResult | null>(null);
   const [compareInput, setCompareInput] = useState("");
-  const [history, setHistory] = useState<HistoryItem[]>(loadHistory);
+  const { history, addToHistory: addItemToHistory, clearHistory } =
+    useToolHistory<HistoryItem>("devflow-json-formatter-history", 10);
 
   // Computed values
   const inputValidation = useMemo(() => {
@@ -76,13 +56,8 @@ export function useJsonFormatter() {
       mode: inputMode,
       timestamp: new Date().toISOString(),
     };
-
-    setHistory((prev) => {
-      const updated = [newItem, ...prev].slice(0, MAX_HISTORY);
-      saveHistory(updated);
-      return updated;
-    });
-  }, []);
+    addItemToHistory(newItem);
+  }, [addItemToHistory]);
 
   const process = useCallback(() => {
     if (!inputValidation.isValid) return;
@@ -147,13 +122,6 @@ export function useJsonFormatter() {
     setInput("");
     setResult(null);
     setCompareInput("");
-  }, []);
-
-  const clearHistory = useCallback(() => {
-    setHistory([]);
-    if (typeof window !== "undefined") {
-      localStorage.removeItem(HISTORY_KEY);
-    }
   }, []);
 
   const loadFromHistory = useCallback((item: HistoryItem) => {

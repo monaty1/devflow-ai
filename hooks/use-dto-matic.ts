@@ -12,9 +12,7 @@ import {
   formatJson,
   EXAMPLE_JSON,
 } from "@/lib/application/dto-matic";
-
-const HISTORY_KEY = "devflow-dto-matic-history";
-const MAX_HISTORY = 10;
+import { useToolHistory } from "@/hooks/use-tool-history";
 
 interface HistoryItem {
   id: string;
@@ -22,25 +20,6 @@ interface HistoryItem {
   mode: GenerationMode;
   timestamp: string;
   filesCount: number;
-}
-
-function loadHistory(): HistoryItem[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const stored = localStorage.getItem(HISTORY_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveHistory(history: HistoryItem[]): void {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
-  } catch {
-    // Ignore storage errors
-  }
 }
 
 export function useDtoMatic() {
@@ -60,7 +39,8 @@ export function useDtoMatic() {
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [history, setHistory] = useState<HistoryItem[]>(loadHistory);
+  const { history, addToHistory: addItemToHistory, clearHistory } =
+    useToolHistory<HistoryItem>("devflow-dto-matic-history", 10);
 
   const addToHistory = useCallback((genResult: GenerationResult) => {
     const newItem: HistoryItem = {
@@ -70,13 +50,8 @@ export function useDtoMatic() {
       timestamp: genResult.generatedAt,
       filesCount: genResult.files.length,
     };
-
-    setHistory((prev) => {
-      const updated = [newItem, ...prev].slice(0, MAX_HISTORY);
-      saveHistory(updated);
-      return updated;
-    });
-  }, []);
+    addItemToHistory(newItem);
+  }, [addItemToHistory]);
 
   const generate = useCallback(() => {
     if (!jsonInput.trim()) {
@@ -151,13 +126,6 @@ export function useDtoMatic() {
       updateConfig("generateZod", true);
     }
   }, [updateConfig]);
-
-  const clearHistory = useCallback(() => {
-    setHistory([]);
-    if (typeof window !== "undefined") {
-      localStorage.removeItem(HISTORY_KEY);
-    }
-  }, []);
 
   const copyToClipboard = useCallback(async (text: string) => {
     await navigator.clipboard.writeText(text);

@@ -20,34 +20,13 @@ import {
   convertTo,
   EXAMPLE_INPUTS,
 } from "@/lib/application/variable-name-wizard";
-
-const HISTORY_KEY = "devflow-variable-wizard-history";
-const MAX_HISTORY = 10;
+import { useToolHistory } from "@/hooks/use-tool-history";
 
 interface HistoryItem {
   id: string;
   input: string;
   mode: "convert" | "generate";
   timestamp: string;
-}
-
-function loadHistory(): HistoryItem[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const stored = localStorage.getItem(HISTORY_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveHistory(history: HistoryItem[]): void {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
-  } catch {
-    // Ignore storage errors
-  }
 }
 
 export function useVariableNameWizard() {
@@ -57,7 +36,8 @@ export function useVariableNameWizard() {
   const [config, setConfig] = useState<WizardConfig>(DEFAULT_WIZARD_CONFIG);
   const [conversionResult, setConversionResult] = useState<ConversionResult | null>(null);
   const [generationResult, setGenerationResult] = useState<GenerationResult | null>(null);
-  const [history, setHistory] = useState<HistoryItem[]>(loadHistory);
+  const { history, addToHistory: addItemToHistory, clearHistory } =
+    useToolHistory<HistoryItem>("devflow-variable-wizard-history", 10);
 
   // Computed values
   const inputStats = useMemo(() => {
@@ -82,13 +62,8 @@ export function useVariableNameWizard() {
       mode: inputMode,
       timestamp: new Date().toISOString(),
     };
-
-    setHistory((prev) => {
-      const updated = [newItem, ...prev].slice(0, MAX_HISTORY);
-      saveHistory(updated);
-      return updated;
-    });
-  }, []);
+    addItemToHistory(newItem);
+  }, [addItemToHistory]);
 
   const convert = useCallback(() => {
     if (!isValidInput(input)) return;
@@ -136,13 +111,6 @@ export function useVariableNameWizard() {
     setInput("");
     setConversionResult(null);
     setGenerationResult(null);
-  }, []);
-
-  const clearHistory = useCallback(() => {
-    setHistory([]);
-    if (typeof window !== "undefined") {
-      localStorage.removeItem(HISTORY_KEY);
-    }
   }, []);
 
   const loadFromHistory = useCallback((item: HistoryItem) => {

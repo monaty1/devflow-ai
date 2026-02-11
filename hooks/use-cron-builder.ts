@@ -14,9 +14,7 @@ import {
   calculateNextExecutions,
   CRON_PRESETS,
 } from "@/lib/application/cron-builder";
-
-const HISTORY_KEY = "devflow-cron-history";
-const MAX_HISTORY = 15;
+import { useToolHistory } from "@/hooks/use-tool-history";
 
 interface HistoryItem {
   id: string;
@@ -25,29 +23,11 @@ interface HistoryItem {
   timestamp: string;
 }
 
-function loadHistory(): HistoryItem[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const stored = localStorage.getItem(HISTORY_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveHistory(history: HistoryItem[]): void {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
-  } catch {
-    // Ignore storage errors
-  }
-}
-
 export function useCronBuilder() {
   const [expression, setExpressionState] = useState<CronExpression>(DEFAULT_CRON);
   const [rawExpression, setRawExpression] = useState(buildExpression(DEFAULT_CRON));
-  const [history, setHistory] = useState<HistoryItem[]>(loadHistory);
+  const { history, addToHistory: addItemToHistory, clearHistory } =
+    useToolHistory<HistoryItem>("devflow-cron-history", 15);
   const [isManualMode, setIsManualMode] = useState(false);
 
   // Compute derived state using useMemo (not useEffect + setState)
@@ -116,15 +96,8 @@ export function useCronBuilder() {
       description: desc,
       timestamp: new Date().toISOString(),
     };
-
-    setHistory((prev) => {
-      // Avoid duplicates
-      const filtered = prev.filter((h) => h.expression !== expr);
-      const updated = [newItem, ...filtered].slice(0, MAX_HISTORY);
-      saveHistory(updated);
-      return updated;
-    });
-  }, []);
+    addItemToHistory(newItem);
+  }, [addItemToHistory]);
 
   const saveToHistory = useCallback(() => {
     if (validation.isValid && explanation) {
@@ -140,13 +113,6 @@ export function useCronBuilder() {
       setRawExpressionManual(item.expression);
     }
   }, [setExpression, setRawExpressionManual]);
-
-  const clearHistory = useCallback(() => {
-    setHistory([]);
-    if (typeof window !== "undefined") {
-      localStorage.removeItem(HISTORY_KEY);
-    }
-  }, []);
 
   const reset = useCallback(() => {
     setExpression(DEFAULT_CRON);

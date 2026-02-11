@@ -13,34 +13,13 @@ import {
   isValidRegex,
   COMMON_PATTERNS,
 } from "@/lib/application/regex-humanizer";
-
-const HISTORY_KEY = "devflow-regex-history";
-const MAX_HISTORY = 20;
+import { useToolHistory } from "@/hooks/use-tool-history";
 
 interface RegexHistoryItem {
   id: string;
   pattern: string;
   mode: RegexMode;
   timestamp: string;
-}
-
-function loadHistory(): RegexHistoryItem[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const stored = localStorage.getItem(HISTORY_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveHistory(history: RegexHistoryItem[]): void {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
-  } catch {
-    // Ignore storage errors
-  }
 }
 
 export function useRegexHumanizer() {
@@ -53,7 +32,8 @@ export function useRegexHumanizer() {
   const [testResult, setTestResult] = useState<TestResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [history, setHistory] = useState<RegexHistoryItem[]>(loadHistory);
+  const { history, addToHistory: addItemToHistory, clearHistory } =
+    useToolHistory<RegexHistoryItem>("devflow-regex-history", 20);
 
   const addToHistory = useCallback(
     (patternValue: string, modeValue: RegexMode) => {
@@ -63,16 +43,9 @@ export function useRegexHumanizer() {
         mode: modeValue,
         timestamp: new Date().toISOString(),
       };
-
-      setHistory((prev) => {
-        // Avoid duplicates
-        const filtered = prev.filter((h) => h.pattern !== patternValue);
-        const updated = [newItem, ...filtered].slice(0, MAX_HISTORY);
-        saveHistory(updated);
-        return updated;
-      });
+      addItemToHistory(newItem);
     },
-    []
+    [addItemToHistory],
   );
 
   const explain = useCallback(() => {
@@ -159,13 +132,6 @@ export function useRegexHumanizer() {
       setAnalysis(null);
       setTestResult(null);
       setError(null);
-    }
-  }, []);
-
-  const clearHistory = useCallback(() => {
-    setHistory([]);
-    if (typeof window !== "undefined") {
-      localStorage.removeItem(HISTORY_KEY);
     }
   }, []);
 

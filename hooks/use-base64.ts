@@ -16,9 +16,7 @@ import {
   dataUrlToBase64,
   EXAMPLE_BASE64,
 } from "@/lib/application/base64";
-
-const HISTORY_KEY = "devflow-base64-history";
-const MAX_HISTORY = 10;
+import { useToolHistory } from "@/hooks/use-tool-history";
 
 interface HistoryItem {
   id: string;
@@ -27,31 +25,13 @@ interface HistoryItem {
   timestamp: string;
 }
 
-function loadHistory(): HistoryItem[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const stored = localStorage.getItem(HISTORY_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveHistory(history: HistoryItem[]): void {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
-  } catch {
-    // Ignore storage errors
-  }
-}
-
 export function useBase64() {
   const [input, setInput] = useState("");
   const [mode, setMode] = useState<Base64Mode>("encode");
   const [config, setConfig] = useState<Base64Config>(DEFAULT_BASE64_CONFIG);
   const [result, setResult] = useState<Base64Result | null>(null);
-  const [history, setHistory] = useState<HistoryItem[]>(loadHistory);
+  const { history, addToHistory: addItemToHistory, clearHistory } =
+    useToolHistory<HistoryItem>("devflow-base64-history", 10);
 
   // Computed values
   const inputStats = useMemo(() => {
@@ -80,13 +60,8 @@ export function useBase64() {
       mode: inputMode,
       timestamp: new Date().toISOString(),
     };
-
-    setHistory((prev) => {
-      const updated = [newItem, ...prev].slice(0, MAX_HISTORY);
-      saveHistory(updated);
-      return updated;
-    });
-  }, []);
+    addItemToHistory(newItem);
+  }, [addItemToHistory]);
 
   const process = useCallback(() => {
     if (!input.trim()) return;
@@ -157,13 +132,6 @@ export function useBase64() {
   const reset = useCallback(() => {
     setInput("");
     setResult(null);
-  }, []);
-
-  const clearHistory = useCallback(() => {
-    setHistory([]);
-    if (typeof window !== "undefined") {
-      localStorage.removeItem(HISTORY_KEY);
-    }
   }, []);
 
   const loadFromHistory = useCallback((item: HistoryItem) => {

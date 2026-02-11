@@ -15,9 +15,7 @@ import {
   parseUuid,
   EXAMPLE_UUIDS,
 } from "@/lib/application/uuid-generator";
-
-const HISTORY_KEY = "devflow-uuid-generator-history";
-const MAX_HISTORY = 50;
+import { useToolHistory } from "@/hooks/use-tool-history";
 
 interface HistoryItem {
   id: string;
@@ -27,32 +25,14 @@ interface HistoryItem {
   timestamp: string;
 }
 
-function loadHistory(): HistoryItem[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const stored = localStorage.getItem(HISTORY_KEY);
-    return stored ? (JSON.parse(stored) as HistoryItem[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveHistory(history: HistoryItem[]): void {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
-  } catch {
-    // Ignore storage errors
-  }
-}
-
 export function useUuidGenerator() {
   const [config, setConfig] = useState<UuidConfig>(DEFAULT_UUID_CONFIG);
   const [result, setResult] = useState<UuidResult | null>(null);
   const [validateInput, setValidateInput] = useState("");
   const [parseInput, setParseInput] = useState("");
   const [parsedInfo, setParsedInfo] = useState<UuidInfo | null>(null);
-  const [history, setHistory] = useState<HistoryItem[]>(loadHistory);
+  const { history, addToHistory: addItemToHistory, clearHistory } =
+    useToolHistory<HistoryItem>("devflow-uuid-generator-history", 50);
 
   const addToHistory = useCallback((cfg: UuidConfig) => {
     const newItem: HistoryItem = {
@@ -62,13 +42,8 @@ export function useUuidGenerator() {
       quantity: cfg.quantity,
       timestamp: new Date().toISOString(),
     };
-
-    setHistory((prev) => {
-      const updated = [newItem, ...prev].slice(0, MAX_HISTORY);
-      saveHistory(updated);
-      return updated;
-    });
-  }, []);
+    addItemToHistory(newItem);
+  }, [addItemToHistory]);
 
   const generate = useCallback(() => {
     const genResult = processUuidGeneration(config);
@@ -108,13 +83,6 @@ export function useUuidGenerator() {
     setValidateInput("");
     setParseInput("");
     setParsedInfo(null);
-  }, []);
-
-  const clearHistory = useCallback(() => {
-    setHistory([]);
-    if (typeof window !== "undefined") {
-      localStorage.removeItem(HISTORY_KEY);
-    }
   }, []);
 
   const copyToClipboard = useCallback(async (text: string) => {

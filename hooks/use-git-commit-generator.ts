@@ -14,9 +14,7 @@ import {
   suggestScope,
   EXAMPLE_COMMITS,
 } from "@/lib/application/git-commit-generator";
-
-const HISTORY_KEY = "devflow-git-commit-generator-history";
-const MAX_HISTORY = 10;
+import { useToolHistory } from "@/hooks/use-tool-history";
 
 interface HistoryItem {
   id: string;
@@ -25,31 +23,13 @@ interface HistoryItem {
   timestamp: string;
 }
 
-function loadHistory(): HistoryItem[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const stored = localStorage.getItem(HISTORY_KEY);
-    return stored ? (JSON.parse(stored) as HistoryItem[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveHistory(history: HistoryItem[]): void {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
-  } catch {
-    // Ignore storage errors
-  }
-}
-
 export function useGitCommitGenerator() {
   const [config, setConfig] = useState<CommitConfig>(DEFAULT_COMMIT_CONFIG);
   const [result, setResult] = useState<CommitResult | null>(null);
   const [parseInput, setParseInput] = useState("");
   const [parsedCommit, setParsedCommit] = useState<ParsedCommit | null>(null);
-  const [history, setHistory] = useState<HistoryItem[]>(loadHistory);
+  const { history, addToHistory: addItemToHistory, clearHistory } =
+    useToolHistory<HistoryItem>("devflow-git-commit-generator-history", 10);
 
   const addToHistory = useCallback((commitResult: CommitResult) => {
     const newItem: HistoryItem = {
@@ -58,13 +38,8 @@ export function useGitCommitGenerator() {
       type: commitResult.type,
       timestamp: commitResult.timestamp,
     };
-
-    setHistory((prev) => {
-      const updated = [newItem, ...prev].slice(0, MAX_HISTORY);
-      saveHistory(updated);
-      return updated;
-    });
-  }, []);
+    addItemToHistory(newItem);
+  }, [addItemToHistory]);
 
   const generate = useCallback(() => {
     if (!config.description.trim()) return;
@@ -106,13 +81,6 @@ export function useGitCommitGenerator() {
     setResult(null);
     setParseInput("");
     setParsedCommit(null);
-  }, []);
-
-  const clearHistory = useCallback(() => {
-    setHistory([]);
-    if (typeof window !== "undefined") {
-      localStorage.removeItem(HISTORY_KEY);
-    }
   }, []);
 
   const copyToClipboard = useCallback(async (text: string) => {

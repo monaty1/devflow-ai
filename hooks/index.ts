@@ -1,3 +1,4 @@
+export { useToolHistory } from "./use-tool-history";
 export { usePromptAnalyzer } from "./use-prompt-analyzer";
 export { useToast, ToastContext, useToastState } from "./use-toast";
 export type { Toast, ToastType } from "./use-toast";
