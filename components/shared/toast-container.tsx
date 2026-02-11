@@ -13,9 +13,9 @@ const TOAST_STYLES: Record<
   { bg: string; icon: typeof CheckCircle; iconColor: string }
 > = {
   success: {
-    bg: "bg-green-100 border-green-200 dark:bg-green-900/30 dark:border-green-800",
+    bg: "bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800",
     icon: CheckCircle,
-    iconColor: "text-green-900 dark:text-green-200",
+    iconColor: "text-green-800 dark:text-green-300",
   },
   error: {
     bg: "bg-red-100 border-red-200 dark:bg-red-900/30 dark:border-red-800",

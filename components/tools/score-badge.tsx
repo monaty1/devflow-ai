@@ -42,8 +42,16 @@ export function ScoreBadge({
   useEffect(() => {
     if (!animate || !progressRef.current || !scoreRef.current) return;
 
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const progressCircle = progressRef.current;
     const scoreElement = scoreRef.current;
+
+    if (prefersReducedMotion) {
+      // Skip animation, set final values immediately
+      progressCircle.style.strokeDashoffset = String(targetOffset);
+      scoreElement.textContent = String(score);
+      return;
+    }
 
     // Animate progress circle from 0 to target
     gsap.fromTo(

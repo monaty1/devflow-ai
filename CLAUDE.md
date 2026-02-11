@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-DevFlow AI is a collection of browser-based developer utility tools built with Next.js 16 (App Router), React 19, TypeScript (maximum strict mode), Tailwind CSS v4, and HeroUI v3 beta. All tool logic executes locally in the browser — no external API calls at runtime.
+DevFlow AI is a collection of browser-based developer utility tools built with Next.js 16 (App Router), React 19, TypeScript (maximum strict mode), Tailwind CSS v4, and HeroUI v3 beta. All core tool logic executes locally in the browser. OpenAI and Anthropic SDKs are optional dependencies for AI-enhanced features — no API keys are required for base functionality.
 
 ## Commands
 
@@ -47,7 +47,7 @@ Clean Architecture with three layers. Dependencies flow inward: Presentation →
 
 ### Provider Nesting (app/layout.tsx → providers.tsx)
 
-`FavoritesProvider > ToastProvider > ErrorBoundary`
+`ThemeProvider > FavoritesProvider > ToastProvider` (+ `HtmlLangSync` for i18n)
 
 ### Design Principles
 
@@ -84,7 +84,19 @@ const MAX_HISTORY = 50;
 - **Icons**: `lucide-react` exclusively.
 - **Utility**: `cn()` from `lib/utils.ts` (clsx + tailwind-merge) for conditional class merging.
 - **Fonts**: Geist Sans + Geist Mono via `next/font/google`.
+- **State management**: Zustand for global state (`lib/stores/`). Local component state managed in hooks with localStorage persistence.
+- **Forms**: React Hook Form + Zod v4 for validation.
+- **Dark mode**: `next-themes` with `class` attribute strategy, system preference detection.
+- **Animations**: Framer Motion and GSAP.
+- **Tokenization**: tiktoken for token counting in AI-related tools.
 - **Path aliases**: `@/*` maps to project root (e.g., `@/lib/application/base64`, `@/types/tools`).
+
+## Internationalization
+
+- Locale files in `locales/` (en.json, es.json).
+- Zustand store: `lib/stores/locale-store.ts`.
+- Hook: `hooks/use-translation.ts`.
+- HTML `lang` attribute synced via `HtmlLangSync` in providers.
 
 ## Git Conventions
 

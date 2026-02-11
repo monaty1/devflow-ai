@@ -15,21 +15,21 @@ const FLAG_LABELS: Record<SecurityFlagType, string> = {
 
 const SEVERITY_STYLES = {
   critical: {
-    bg: "bg-red-100 dark:bg-red-900/30",
-    text: "text-red-900 dark:text-red-200",
-    border: "border-red-200 dark:border-red-800",
+    bg: "bg-red-50 dark:bg-red-950/40",
+    text: "text-red-800 dark:text-red-200",
+    border: "border-red-300 dark:border-red-800",
     Icon: AlertTriangle,
   },
   warning: {
-    bg: "bg-yellow-100 dark:bg-yellow-900/30",
-    text: "text-yellow-900 dark:text-yellow-200",
-    border: "border-yellow-200 dark:border-yellow-800",
+    bg: "bg-amber-50 dark:bg-amber-950/40",
+    text: "text-amber-900 dark:text-amber-200",
+    border: "border-amber-300 dark:border-amber-800",
     Icon: AlertCircle,
   },
   info: {
-    bg: "bg-blue-100 dark:bg-blue-900/30",
+    bg: "bg-blue-50 dark:bg-blue-950/40",
     text: "text-blue-900 dark:text-blue-200",
-    border: "border-blue-200 dark:border-blue-800",
+    border: "border-blue-300 dark:border-blue-800",
     Icon: Info,
   },
 };
@@ -67,9 +67,9 @@ interface SecurityFlagsListProps {
 export function SecurityFlagsList({ flags }: SecurityFlagsListProps) {
   if (flags.length === 0) {
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-100 p-4 dark:border-green-800 dark:bg-green-900/30">
-        <Info className="size-5 text-green-900 dark:text-green-200" />
-        <span className="text-green-900 dark:text-green-200">No security issues detected</span>
+      <div role="status" className="flex items-center gap-2 rounded-lg border border-green-300 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950">
+        <Info className="size-5 text-green-800 dark:text-green-200" />
+        <span className="text-green-800 dark:text-green-200">No security issues detected</span>
       </div>
     );
   }
