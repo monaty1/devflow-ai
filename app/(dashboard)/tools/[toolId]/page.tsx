@@ -17,6 +17,7 @@ import {
   Check,
 } from "lucide-react";
 import { useFavorites } from "@/lib/context";
+import { useTranslation } from "@/hooks/use-translation";
 import { getToolBySlug } from "@/config/tools-data";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +37,7 @@ export default function ToolDetailPage({ params }: ToolDetailPageProps) {
   const { toolId } = use(params);
   const tool = getToolBySlug(toolId);
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { t } = useTranslation();
 
   if (!tool) {
     return notFound();
@@ -52,7 +54,7 @@ export default function ToolDetailPage({ params }: ToolDetailPageProps) {
         className="inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
-        Back to Tools
+        {t("common.backToTools")}
       </NextLink>
 
       {/* Header Card */}
@@ -88,8 +90,8 @@ export default function ToolDetailPage({ params }: ToolDetailPageProps) {
                     {tool.usersCount.toLocaleString()} users
                   </span>
                   {tool.isFree && (
-                    <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900 dark:text-green-300">
-                      Free
+                    <span className="rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-950 dark:text-green-300">
+                      {t("tools.free")}
                     </span>
                   )}
                 </div>
@@ -136,7 +138,7 @@ export default function ToolDetailPage({ params }: ToolDetailPageProps) {
           {/* Features List */}
           <div className="mb-8">
             <h2 className="mb-4 text-lg font-semibold text-foreground">
-              Features
+              {t("common.features")}
             </h2>
             <div className="grid gap-2 sm:grid-cols-2">
               {tool.features.map((feature) => (
@@ -153,7 +155,7 @@ export default function ToolDetailPage({ params }: ToolDetailPageProps) {
 
           {/* CTA Button */}
           <Button size="lg" className="w-full">
-            Launch {tool.name}
+            {t("common.launch", { name: tool.name })}
           </Button>
         </div>
       </Card>

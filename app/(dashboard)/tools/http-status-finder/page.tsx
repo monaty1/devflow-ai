@@ -24,7 +24,7 @@ const CATEGORY_TABS: { id: HttpStatusCategory | "all"; label: string }[] = [
 
 const CATEGORY_COLORS: Record<HttpStatusCategory, string> = {
   "1xx": "bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200",
-  "2xx": "bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200",
+  "2xx": "bg-green-50 text-green-800 dark:bg-green-950 dark:text-green-300",
   "3xx": "bg-yellow-100 text-yellow-900 dark:bg-yellow-900/30 dark:text-yellow-200",
   "4xx": "bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200",
   "5xx": "bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-200",

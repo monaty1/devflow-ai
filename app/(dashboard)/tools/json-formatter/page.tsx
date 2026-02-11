@@ -105,7 +105,7 @@ export default function JsonFormatterPage() {
         <div className="space-y-4">
           <Card className="p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Input JSON</h2>
+              <label htmlFor="json-input" className="text-lg font-semibold">Input JSON</label>
               <div className="flex gap-2">
                 <Button variant="ghost" size="sm" onPress={() => loadExample("simple")}>
                   <Wand2 className="mr-1 size-4" />
@@ -120,20 +120,21 @@ export default function JsonFormatterPage() {
 
             <textarea
               id="json-input"
-              aria-label="JSON input"
+              aria-invalid={input ? !inputValidation.isValid : undefined}
+              aria-describedby={input && !inputValidation.isValid ? "json-input-error" : undefined}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder='{"name": "John", "age": 30, "email": "john@example.com"}'
               rows={14}
-              className={`w-full resize-none rounded-lg border bg-background px-4 py-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 ${
+              className={`w-full resize-none rounded-lg border bg-background px-4 py-3 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 ${
                 input && !inputValidation.isValid
-                  ? "border-red-500 focus:border-red-500"
-                  : "border-border focus:border-primary"
+                  ? "border-red-500 focus-visible:border-red-500"
+                  : "border-border focus-visible:border-primary"
               }`}
             />
 
             {input && !inputValidation.isValid && inputValidation.error && (
-              <div role="alert" className="mt-2 flex items-center gap-2 text-sm text-red-500">
+              <div id="json-input-error" role="alert" className="mt-2 flex items-center gap-2 text-sm text-red-500">
                 <AlertCircle className="size-4" />
                 Line {inputValidation.error.line}, Col {inputValidation.error.column}:{" "}
                 {inputValidation.error.message}
@@ -254,17 +255,17 @@ export default function JsonFormatterPage() {
                     {/* Stats */}
                     {result.isValid && (
                       <div className="mb-3 flex flex-wrap gap-2">
-                        <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-900 dark:bg-blue-900/30 dark:text-blue-200">
+                        <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-900 dark:bg-blue-950 dark:text-blue-200">
                           {result.stats.keys} keys
                         </span>
-                        <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-900 dark:bg-green-900/30 dark:text-green-200">
+                        <span className="rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-900 dark:bg-green-950 dark:text-green-200">
                           depth {result.stats.depth}
                         </span>
-                        <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-900 dark:bg-purple-900/30 dark:text-purple-200">
+                        <span className="rounded-full bg-purple-50 px-2 py-0.5 text-xs font-medium text-purple-900 dark:bg-purple-950 dark:text-purple-200">
                           {result.stats.sizeBytes} bytes
                         </span>
                         {result.stats.arrays > 0 && (
-                          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900 dark:bg-amber-900/30 dark:text-amber-200">
+                          <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-900 dark:bg-amber-950 dark:text-amber-200">
                             {result.stats.arrays} arrays
                           </span>
                         )}
@@ -369,8 +370,11 @@ export default function JsonFormatterPage() {
 
             {activeTab === "compare" && (
               <div className="space-y-4">
+                <label htmlFor="json-compare" className="block text-sm font-medium text-muted-foreground">
+                  Second JSON to compare
+                </label>
                 <textarea
-                  aria-label="Second JSON to compare"
+                  id="json-compare"
                   value={compareInput}
                   onChange={(e) => setCompareInput(e.target.value)}
                   placeholder="Paste second JSON to compare..."

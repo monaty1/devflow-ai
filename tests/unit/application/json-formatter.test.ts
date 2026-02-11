@@ -98,7 +98,7 @@ describe("JSON Formatter", () => {
     it("should handle arrays", () => {
       const obj = { arr: [{ z: 1, a: 2 }] };
       const sorted = sortObjectKeys(obj) as Record<string, unknown[]>;
-      const innerObj = sorted.arr[0] as Record<string, number>;
+      const innerObj = sorted["arr"]![0] as Record<string, number>;
       const keys = Object.keys(innerObj);
       expect(keys).toEqual(["a", "z"]);
     });
@@ -144,7 +144,7 @@ describe("JSON Formatter", () => {
   describe("extractJsonPaths", () => {
     it("should extract root path", () => {
       const paths = extractJsonPaths('{"name": "John"}');
-      expect(paths[0].path).toBe("$");
+      expect(paths[0]!.path).toBe("$");
     });
 
     it("should extract nested paths", () => {

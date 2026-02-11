@@ -55,7 +55,7 @@ describe("Base64 Encoder/Decoder", () => {
       });
       expect(result).toContain("\n");
       const lines = result.split("\n");
-      expect(lines[0].length).toBeLessThanOrEqual(20);
+      expect(lines[0]!.length).toBeLessThanOrEqual(20);
     });
   });
 

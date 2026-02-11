@@ -315,7 +315,7 @@ export default function DtoMaticPage() {
             <div className="flex flex-1 flex-col">
               {/* Stats */}
               <div className="mb-4 flex flex-wrap gap-2">
-                <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-900 dark:bg-green-900/30 dark:text-green-200">
+                <span className="rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-950 dark:text-green-300">
                   {result.stats.totalTypes} tipos
                 </span>
                 {result.stats.nestedObjects > 0 && (

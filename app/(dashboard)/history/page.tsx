@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { Card, Button } from "@heroui/react";
 import { Trash2, Search, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/hooks/use-translation";
 
 interface HistoryItem {
   id: string;
@@ -75,7 +76,7 @@ const TOOL_COLORS: Record<string, string> = {
   "Token Visualizer": "bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-200",
   "Context Manager": "bg-rose-100 text-rose-900 dark:bg-rose-900/30 dark:text-rose-200",
   "Regex Humanizer": "bg-cyan-100 text-cyan-900 dark:bg-cyan-900/30 dark:text-cyan-200",
-  "DTO-Matic": "bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200",
+  "DTO-Matic": "bg-green-50 text-green-800 dark:bg-green-950 dark:text-green-300",
   "Cron Builder": "bg-violet-100 text-violet-900 dark:bg-violet-900/30 dark:text-violet-200",
   "Tailwind Sorter": "bg-sky-100 text-sky-900 dark:bg-sky-900/30 dark:text-sky-200",
   "Variable Name Wizard": "bg-fuchsia-100 text-fuchsia-900 dark:bg-fuchsia-900/30 dark:text-fuchsia-200",
@@ -93,6 +94,7 @@ export default function HistoryPage() {
   const [toolFilter, setToolFilter] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>(getInitialHistory);
   const { addToast } = useToast();
+  const { t } = useTranslation();
 
   const toolLabels = useMemo(() => {
     const labels = new Set(history.map((item) => item.toolLabel));
@@ -120,7 +122,7 @@ export default function HistoryPage() {
       localStorage.removeItem(tool.key);
     }
     setHistory([]);
-    addToast("History cleared", "info");
+    addToast(t("history.cleared"), "info");
   };
 
   return (
@@ -130,16 +132,16 @@ export default function HistoryPage() {
         <div>
           <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight text-foreground">
             <Clock className="size-8" />
-            History
+            {t("history.title")}
           </h1>
           <p className="mt-1 text-muted-foreground">
-            {history.length} items in your history
+            {t("history.items", { count: history.length })}
           </p>
         </div>
         {history.length > 0 && (
           <Button variant="ghost" size="sm" onPress={clearAll} className="gap-2">
             <Trash2 className="size-4" />
-            Clear All
+            {t("history.clearAll")}
           </Button>
         )}
       </div>
@@ -152,7 +154,7 @@ export default function HistoryPage() {
           <input
             id="history-search"
             type="text"
-            placeholder="Search history..."
+            placeholder={t("history.search")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-lg border border-border bg-background py-2 pl-10 pr-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -215,12 +217,12 @@ export default function HistoryPage() {
         <Card className="p-16 text-center">
           <p className="mb-4 text-5xl">📭</p>
           <p className="text-foreground">
-            {search || toolFilter ? "No results found" : "No history yet"}
+            {search || toolFilter ? t("history.noResults") : t("history.noHistory")}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
             {search || toolFilter
-              ? "Try a different search or filter"
-              : "Start using tools to build your history"}
+              ? t("history.noResultsHint")
+              : t("history.noHistoryHint")}
           </p>
         </Card>
       )}

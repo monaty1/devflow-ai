@@ -8,17 +8,17 @@ import { useToast } from "@/hooks/use-toast";
 import type { DocumentType, Priority } from "@/types/context-manager";
 
 const PRIORITY_COLORS: Record<Priority, string> = {
-  high: "bg-red-100 text-red-900 dark:bg-red-900 dark:text-red-200",
-  medium: "bg-amber-100 text-amber-900 dark:bg-amber-900 dark:text-amber-200",
-  low: "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-200",
+  high: "bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-200",
+  medium: "bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
+  low: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
 };
 
 const TYPE_COLORS: Record<DocumentType, string> = {
-  code: "bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-200",
-  documentation: "bg-purple-100 text-purple-900 dark:bg-purple-900 dark:text-purple-200",
-  api: "bg-emerald-100 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-200",
-  notes: "bg-amber-100 text-amber-900 dark:bg-amber-900 dark:text-amber-200",
-  other: "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-200",
+  code: "bg-blue-50 text-blue-900 dark:bg-blue-950 dark:text-blue-200",
+  documentation: "bg-purple-50 text-purple-900 dark:bg-purple-950 dark:text-purple-200",
+  api: "bg-emerald-50 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200",
+  notes: "bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
+  other: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
 };
 
 export default function ContextManagerPage() {
@@ -107,7 +107,7 @@ export default function ContextManagerPage() {
             Organize and export your LLM context windows
           </p>
         </div>
-        <Button onPress={() => setShowCreateWindow(true)} className="gap-2">
+        <Button onPress={() => setShowCreateWindow(true)} aria-expanded={showCreateWindow} className="gap-2">
           <FolderPlus className="size-4" />
           New Window
         </Button>
@@ -117,13 +117,14 @@ export default function ContextManagerPage() {
       {showCreateWindow && (
         <Card className="border-2 border-primary/30 p-4">
           <div className="flex gap-3">
+            <label htmlFor="new-window-name" className="sr-only">Window name</label>
             <input
+              id="new-window-name"
               type="text"
               value={newWindowName}
               onChange={(e) => setNewWindowName(e.target.value)}
               placeholder="Window name..."
-              aria-label="New window name"
-              className="flex-1 rounded-lg border border-border bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="flex-1 rounded-lg border border-border bg-background px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
               autoFocus
               onKeyDown={(e) => e.key === "Enter" && handleCreateWindow()}
             />
@@ -157,10 +158,11 @@ export default function ContextManagerPage() {
                 </p>
               ) : (
                 windows.map((window) => (
-                  <div
+                  <button
                     key={window.id}
+                    type="button"
                     onClick={() => setActiveWindowId(window.id)}
-                    className={`flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 transition-colors ${
+                    className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-colors ${
                       window.id === activeWindowId
                         ? "bg-primary/10 text-primary"
                         : "hover:bg-muted"
@@ -169,7 +171,7 @@ export default function ContextManagerPage() {
                     <span className="truncate text-sm font-medium">
                       {window.name}
                     </span>
-                    <div className="flex items-center gap-1">
+                    <span className="flex items-center gap-1">
                       <span className="text-xs text-muted-foreground">
                         {window.documents.length}
                       </span>
@@ -185,8 +187,8 @@ export default function ContextManagerPage() {
                       >
                         <Trash2 className="size-3.5" />
                       </button>
-                    </div>
-                  </div>
+                    </span>
+                  </button>
                 ))
               )}
             </Card.Content>
@@ -211,6 +213,7 @@ export default function ContextManagerPage() {
                     variant="outline"
                     size="sm"
                     onPress={() => setShowAddDoc(true)}
+                    aria-expanded={showAddDoc}
                     className="gap-2"
                   >
                     <Plus className="size-4" />
@@ -275,69 +278,94 @@ export default function ContextManagerPage() {
                     <Card.Title>New Document</Card.Title>
                   </Card.Header>
                   <Card.Content className="space-y-3 p-0">
-                    <input
-                      type="text"
-                      value={docForm.title}
-                      onChange={(e) =>
-                        setDocForm((prev) => ({ ...prev, title: e.target.value }))
-                      }
-                      placeholder="Document title..."
-                      aria-label="Document title"
-                      className="w-full rounded-lg border border-border bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    />
-                    <div className="grid grid-cols-3 gap-3">
-                      <select
-                        value={docForm.type}
-                        aria-label="Document type"
-                        onChange={(e) =>
-                          setDocForm((prev) => ({
-                            ...prev,
-                            type: e.target.value as DocumentType,
-                          }))
-                        }
-                        className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                      >
-                        <option value="code">Code</option>
-                        <option value="documentation">Documentation</option>
-                        <option value="api">API</option>
-                        <option value="notes">Notes</option>
-                        <option value="other">Other</option>
-                      </select>
-                      <select
-                        value={docForm.priority}
-                        aria-label="Document priority"
-                        onChange={(e) =>
-                          setDocForm((prev) => ({
-                            ...prev,
-                            priority: e.target.value as Priority,
-                          }))
-                        }
-                        className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                      >
-                        <option value="high">High Priority</option>
-                        <option value="medium">Medium Priority</option>
-                        <option value="low">Low Priority</option>
-                      </select>
+                    <div>
+                      <label htmlFor="doc-title" className="mb-1 block text-sm font-medium text-muted-foreground">
+                        Title
+                      </label>
                       <input
+                        id="doc-title"
                         type="text"
-                        value={docForm.tags}
+                        value={docForm.title}
                         onChange={(e) =>
-                          setDocForm((prev) => ({ ...prev, tags: e.target.value }))
+                          setDocForm((prev) => ({ ...prev, title: e.target.value }))
                         }
-                        placeholder="Tags (comma separated)"
-                        aria-label="Document tags"
-                        className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        placeholder="Document title..."
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
                       />
                     </div>
-                    <textarea
-                      value={docForm.content}
-                      onChange={(e) =>
-                        setDocForm((prev) => ({ ...prev, content: e.target.value }))
-                      }
-                      placeholder="Document content..."
-                      aria-label="Document content"
-                      className="h-32 w-full resize-none rounded-lg border border-border bg-background p-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    />
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <label htmlFor="doc-type" className="mb-1 block text-sm font-medium text-muted-foreground">
+                          Type
+                        </label>
+                        <select
+                          id="doc-type"
+                          value={docForm.type}
+                          onChange={(e) =>
+                            setDocForm((prev) => ({
+                              ...prev,
+                              type: e.target.value as DocumentType,
+                            }))
+                          }
+                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                        >
+                          <option value="code">Code</option>
+                          <option value="documentation">Documentation</option>
+                          <option value="api">API</option>
+                          <option value="notes">Notes</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label htmlFor="doc-priority" className="mb-1 block text-sm font-medium text-muted-foreground">
+                          Priority
+                        </label>
+                        <select
+                          id="doc-priority"
+                          value={docForm.priority}
+                          onChange={(e) =>
+                            setDocForm((prev) => ({
+                              ...prev,
+                              priority: e.target.value as Priority,
+                            }))
+                          }
+                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                        >
+                          <option value="high">High Priority</option>
+                          <option value="medium">Medium Priority</option>
+                          <option value="low">Low Priority</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label htmlFor="doc-tags" className="mb-1 block text-sm font-medium text-muted-foreground">
+                          Tags
+                        </label>
+                        <input
+                          id="doc-tags"
+                          type="text"
+                          value={docForm.tags}
+                          onChange={(e) =>
+                            setDocForm((prev) => ({ ...prev, tags: e.target.value }))
+                          }
+                          placeholder="Comma separated"
+                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label htmlFor="doc-content" className="mb-1 block text-sm font-medium text-muted-foreground">
+                        Content
+                      </label>
+                      <textarea
+                        id="doc-content"
+                        value={docForm.content}
+                        onChange={(e) =>
+                          setDocForm((prev) => ({ ...prev, content: e.target.value }))
+                        }
+                        placeholder="Document content..."
+                        className="h-32 w-full resize-none rounded-lg border border-border bg-background p-3 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                      />
+                    </div>
                     <div className="flex justify-end gap-2">
                       <Button
                         variant="ghost"

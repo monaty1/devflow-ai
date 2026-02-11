@@ -206,7 +206,7 @@ export default function UuidGeneratorPage() {
                   <span className="rounded-full bg-blue-100 px-2 py-0.5 font-medium text-blue-900 dark:bg-blue-900/30 dark:text-blue-200">
                     {result.version.toUpperCase()}
                   </span>
-                  <span className="rounded-full bg-green-100 px-2 py-0.5 font-medium text-green-900 dark:bg-green-900/30 dark:text-green-200">
+                  <span className="rounded-full bg-green-50 px-2 py-0.5 font-medium text-green-800 dark:bg-green-950 dark:text-green-300">
                     {result.uuids.length} UUID{result.uuids.length > 1 ? "s" : ""}
                   </span>
                 </div>
@@ -263,7 +263,7 @@ export default function UuidGeneratorPage() {
               <div
                 className={`flex items-center gap-2 rounded-lg px-4 py-3 ${
                   validationResult.isValid
-                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                    ? "bg-green-50 text-green-800 dark:bg-green-950 dark:text-green-300"
                     : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
                 }`}
               >
@@ -330,7 +330,7 @@ export default function UuidGeneratorPage() {
               <div
                 className={`flex items-center gap-2 rounded-lg px-4 py-3 ${
                   parsedInfo.isValid
-                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                    ? "bg-green-50 text-green-800 dark:bg-green-950 dark:text-green-300"
                     : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
                 }`}
               >

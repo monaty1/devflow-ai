@@ -25,7 +25,7 @@ const TOKEN_COLORS: Record<string, string> = {
   anchor: "bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200",
   group: "bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200",
   quantifier: "bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-200",
-  charClass: "bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-200",
+  charClass: "bg-green-50 text-green-800 dark:bg-green-950 dark:text-green-300",
   escape: "bg-gray-100 text-gray-900 dark:bg-gray-700/30 dark:text-gray-200",
   literal: "text-foreground",
   alternation: "bg-pink-100 text-pink-900 dark:bg-pink-900/30 dark:text-pink-200",

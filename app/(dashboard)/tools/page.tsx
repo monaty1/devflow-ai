@@ -4,20 +4,22 @@ import { useState, useMemo } from "react";
 import { Search } from "lucide-react";
 import { ToolCard } from "@/components/tools";
 import { TOOLS_DATA } from "@/config/tools-data";
+import { useTranslation } from "@/hooks/use-translation";
 import type { ToolCategory } from "@/types/tools";
-
-const CATEGORIES: { label: string; value: ToolCategory | "all" }[] = [
-  { label: "All", value: "all" },
-  { label: "Analysis", value: "analysis" },
-  { label: "Review", value: "review" },
-  { label: "Calculation", value: "calculation" },
-  { label: "Visualization", value: "visualization" },
-  { label: "Management", value: "management" },
-];
 
 export default function ToolsPage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<ToolCategory | "all">("all");
+  const { t } = useTranslation();
+
+  const CATEGORIES: { label: string; value: ToolCategory | "all" }[] = [
+    { label: t("tools.all"), value: "all" },
+    { label: t("tools.analysis"), value: "analysis" },
+    { label: t("tools.review"), value: "review" },
+    { label: t("tools.calculation"), value: "calculation" },
+    { label: t("tools.visualization"), value: "visualization" },
+    { label: t("tools.management"), value: "management" },
+  ];
 
   const filteredTools = useMemo(() => {
     return TOOLS_DATA.filter((tool) => {
@@ -34,10 +36,10 @@ export default function ToolsPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Developer Tools
+          {t("tools.title")}
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Browse and discover AI-powered tools for your development workflow
+          {t("tools.subtitle")}
         </p>
       </div>
 
@@ -47,7 +49,7 @@ export default function ToolsPage() {
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search tools..."
+            placeholder={t("tools.search")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-lg border border-border bg-background py-2 pl-10 pr-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -82,9 +84,9 @@ export default function ToolsPage() {
         </div>
       ) : (
         <div className="py-16 text-center">
-          <p className="text-lg text-muted-foreground">No tools found</p>
+          <p className="text-lg text-muted-foreground">{t("tools.noResults")}</p>
           <p className="mt-1 text-sm text-muted-foreground/70">
-            Try adjusting your search or filters
+            {t("tools.noResultsHint")}
           </p>
         </div>
       )}

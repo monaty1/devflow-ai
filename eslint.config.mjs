@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // External files
     "system_prompts_leaks-main/**",
+    // Generated coverage reports
+    "coverage/**",
   ]),
 ]);
 
