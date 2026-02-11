@@ -12,6 +12,7 @@ import {
   History,
 } from "lucide-react";
 import { useGitCommitGenerator } from "@/hooks/use-git-commit-generator";
+import { useTranslation } from "@/hooks/use-translation";
 import { CopyButton } from "@/components/shared/copy-button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ToolHeader } from "@/components/shared/tool-header";
@@ -35,6 +36,7 @@ export default function GitCommitGeneratorPage() {
     loadFromHistory,
   } = useGitCommitGenerator();
 
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"generate" | "parse" | "history">("generate");
   const [isBreaking, setIsBreaking] = useState(false);
 
@@ -56,18 +58,18 @@ export default function GitCommitGeneratorPage() {
       <ToolHeader
         icon={GitCommitHorizontal}
         gradient="from-orange-500 to-red-600"
-        title="Git Commit Generator"
-        description="Genera mensajes de commit siguiendo Conventional Commits"
+        title={t("gitCommit.title")}
+        description={t("gitCommit.description")}
       />
 
       {/* Tab Selector */}
       <div className="flex flex-wrap gap-2">
         {(
           [
-            { id: "generate", label: "Generar", icon: Sparkles },
-            { id: "parse", label: "Analizar", icon: Search },
-            { id: "history", label: "Historial", icon: History },
-          ] as const
+            { id: "generate" as const, label: t("gitCommit.tabGenerate"), icon: Sparkles },
+            { id: "parse" as const, label: t("gitCommit.tabParse"), icon: Search },
+            { id: "history" as const, label: t("gitCommit.tabHistory"), icon: History },
+          ]
         ).map((tab) => (
           <button
             key={tab.id}
@@ -91,7 +93,7 @@ export default function GitCommitGeneratorPage() {
           <div className="space-y-4">
             {/* Type Selector */}
             <Card className="p-6">
-              <h3 className="mb-4 font-semibold">Tipo de Commit</h3>
+              <h3 className="mb-4 font-semibold">{t("gitCommit.commitType")}</h3>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {COMMIT_TYPES.map((ct) => (
                   <button
@@ -120,7 +122,7 @@ export default function GitCommitGeneratorPage() {
                 {/* Scope */}
                 <div>
                   <label htmlFor="commit-scope" className="mb-2 block text-sm font-medium">
-                    Scope <span className="text-muted-foreground">(opcional)</span>
+                    {t("gitCommit.scope")} <span className="text-muted-foreground">{t("gitCommit.optional")}</span>
                   </label>
                   <input
                     id="commit-scope"
@@ -149,7 +151,7 @@ export default function GitCommitGeneratorPage() {
                 {/* Description */}
                 <div>
                   <div className="mb-2 flex items-center justify-between">
-                    <label htmlFor="commit-description" className="text-sm font-medium">Descripción</label>
+                    <label htmlFor="commit-description" className="text-sm font-medium">{t("gitCommit.descriptionLabel")}</label>
                     <span
                       className={`text-xs ${
                         descLength > 72 ? "text-red-500" : descLength > 50 ? "text-yellow-500" : "text-muted-foreground"
@@ -172,13 +174,13 @@ export default function GitCommitGeneratorPage() {
                 {/* Body */}
                 <div>
                   <label htmlFor="commit-body" className="mb-2 block text-sm font-medium">
-                    Body <span className="text-muted-foreground">(opcional)</span>
+                    {t("gitCommit.body")} <span className="text-muted-foreground">{t("gitCommit.optional")}</span>
                   </label>
                   <textarea
                     id="commit-body"
                     value={config.body}
                     onChange={(e) => updateConfig("body", e.target.value)}
-                    placeholder="Explicación detallada del cambio..."
+                    placeholder={t("gitCommit.bodyPlaceholder")}
                     rows={3}
                     className="w-full resize-none rounded-lg border border-border bg-background px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
@@ -198,14 +200,14 @@ export default function GitCommitGeneratorPage() {
                       }}
                       className="size-4 rounded border-border accent-primary"
                     />
-                    <span className="text-sm font-medium">Breaking Change</span>
+                    <span className="text-sm font-medium">{t("gitCommit.breakingChange")}</span>
                   </label>
                   {isBreaking && (
                     <input
                       type="text"
                       value={config.breakingChange}
                       onChange={(e) => updateConfig("breakingChange", e.target.value)}
-                      placeholder="Describe el breaking change..."
+                      placeholder={t("gitCommit.breakingChangePlaceholder")}
                       className="mt-2 w-full rounded-lg border border-border bg-background px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                   )}
@@ -214,7 +216,7 @@ export default function GitCommitGeneratorPage() {
                 {/* Issue Reference */}
                 <div>
                   <label htmlFor="commit-issues" className="mb-2 block text-sm font-medium">
-                    Issues <span className="text-muted-foreground">(opcional)</span>
+                    {t("gitCommit.issues")} <span className="text-muted-foreground">{t("gitCommit.optional")}</span>
                   </label>
                   <input
                     id="commit-issues"
@@ -235,7 +237,7 @@ export default function GitCommitGeneratorPage() {
                   className="flex-1"
                 >
                   <Sparkles className="mr-2 size-4" />
-                  Generar
+                  {t("gitCommit.generate")}
                 </Button>
                 <Button variant="outline" onPress={reset}>
                   <Trash2 className="size-4" />
@@ -247,9 +249,9 @@ export default function GitCommitGeneratorPage() {
           {/* Preview Panel */}
           <Card className="flex flex-col p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Vista Previa</h2>
+              <h2 className="text-lg font-semibold">{t("gitCommit.preview")}</h2>
               {result && (
-                <CopyButton text={result.message} label="Copiar" />
+                <CopyButton text={result.message} label={t("gitCommit.copy")} />
               )}
             </div>
 
@@ -270,8 +272,8 @@ export default function GitCommitGeneratorPage() {
                       <AlertCircle className="size-4" />
                     )}
                     {previewValidation.isValid
-                      ? "Formato válido"
-                      : previewValidation.errors[0] ?? "Formato inválido"}
+                      ? t("gitCommit.validFormat")
+                      : previewValidation.errors[0] ?? t("gitCommit.invalidFormat")}
                   </div>
                 )}
 
@@ -293,7 +295,7 @@ export default function GitCommitGeneratorPage() {
                     </span>
                   )}
                   <span className="rounded-full bg-gray-100 px-2 py-0.5 font-medium text-gray-900 dark:bg-gray-900/30 dark:text-gray-200">
-                    {result.message.length} chars
+                    {t("gitCommit.chars", { count: result.message.length })}
                   </span>
                 </div>
               </div>
@@ -301,7 +303,7 @@ export default function GitCommitGeneratorPage() {
               <div className="flex flex-1 flex-col items-center justify-center py-16 text-center">
                 <GitCommitHorizontal className="mb-4 size-12 text-muted-foreground/30" />
                 <p className="text-muted-foreground">
-                  Selecciona tipo y escribe la descripción
+                  {t("gitCommit.emptyState")}
                 </p>
               </div>
             )}
@@ -313,11 +315,11 @@ export default function GitCommitGeneratorPage() {
       {activeTab === "parse" && (
         <Card className="p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Analizar Commit</h2>
+            <h2 className="text-lg font-semibold">{t("gitCommit.parseTitle")}</h2>
             <div className="flex gap-2">
-              {(["feat", "fix", "refactor"] as const).map((t) => (
-                <Button key={t} variant="ghost" size="sm" onPress={() => loadExample(t)}>
-                  {t}
+              {(["feat", "fix", "refactor"] as const).map((ex) => (
+                <Button key={ex} variant="ghost" size="sm" onPress={() => loadExample(ex)}>
+                  {ex}
                 </Button>
               ))}
             </div>
@@ -328,7 +330,7 @@ export default function GitCommitGeneratorPage() {
             aria-label="Commit message to parse"
             value={parseInput}
             onChange={(e) => setParseInput(e.target.value)}
-            placeholder="Pega un mensaje de commit para analizar..."
+            placeholder={t("gitCommit.parsePlaceholder")}
             rows={4}
             className="w-full resize-none rounded-lg border border-border bg-background px-4 py-3 font-mono text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
@@ -336,33 +338,33 @@ export default function GitCommitGeneratorPage() {
           <div className="mt-3">
             <Button onPress={parse} isDisabled={!parseInput.trim()}>
               <Search className="mr-2 size-4" />
-              Analizar
+              {t("gitCommit.parse")}
             </Button>
           </div>
 
           {parsedCommit && (
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <div className="rounded-lg bg-muted/50 px-4 py-3">
-                <span className="text-xs text-muted-foreground">Tipo</span>
-                <p className="font-mono font-bold">{parsedCommit.type ?? "Desconocido"}</p>
+                <span className="text-xs text-muted-foreground">{t("gitCommit.parseType")}</span>
+                <p className="font-mono font-bold">{parsedCommit.type ?? t("gitCommit.parseUnknown")}</p>
               </div>
               <div className="rounded-lg bg-muted/50 px-4 py-3">
-                <span className="text-xs text-muted-foreground">Scope</span>
+                <span className="text-xs text-muted-foreground">{t("gitCommit.parseScope")}</span>
                 <p className="font-mono font-bold">{parsedCommit.scope || "—"}</p>
               </div>
               <div className="rounded-lg bg-muted/50 px-4 py-3 sm:col-span-2">
-                <span className="text-xs text-muted-foreground">Descripción</span>
+                <span className="text-xs text-muted-foreground">{t("gitCommit.parseDescription")}</span>
                 <p className="font-mono font-bold">{parsedCommit.description}</p>
               </div>
               {parsedCommit.body && (
                 <div className="rounded-lg bg-muted/50 px-4 py-3 sm:col-span-2">
-                  <span className="text-xs text-muted-foreground">Body</span>
+                  <span className="text-xs text-muted-foreground">{t("gitCommit.parseBody")}</span>
                   <p className="whitespace-pre-wrap font-mono text-sm">{parsedCommit.body}</p>
                 </div>
               )}
               {parsedCommit.isBreaking && (
                 <div className="rounded-lg bg-red-100 px-4 py-3 dark:bg-red-900/30 sm:col-span-2">
-                  <span className="text-xs text-red-700 dark:text-red-300">Breaking Change</span>
+                  <span className="text-xs text-red-700 dark:text-red-300">{t("gitCommit.breakingChange")}</span>
                   <p className="font-mono font-bold text-red-800 dark:text-red-200">
                     {parsedCommit.breakingChange || "Yes"}
                   </p>
@@ -370,7 +372,7 @@ export default function GitCommitGeneratorPage() {
               )}
               {parsedCommit.issueRefs.length > 0 && (
                 <div className="rounded-lg bg-muted/50 px-4 py-3 sm:col-span-2">
-                  <span className="text-xs text-muted-foreground">Issues</span>
+                  <span className="text-xs text-muted-foreground">{t("gitCommit.issues")}</span>
                   <div className="mt-1 flex gap-2">
                     {parsedCommit.issueRefs.map((ref) => (
                       <StatusBadge key={ref} variant="info">{ref}</StatusBadge>
@@ -387,11 +389,11 @@ export default function GitCommitGeneratorPage() {
       {activeTab === "history" && (
         <Card className="p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Historial</h2>
+            <h2 className="text-lg font-semibold">{t("gitCommit.historyTitle")}</h2>
             {history.length > 0 && (
               <Button variant="ghost" size="sm" onPress={clearHistory}>
                 <Trash2 className="mr-1 size-4" />
-                Limpiar
+                {t("gitCommit.clear")}
               </Button>
             )}
           </div>
@@ -418,7 +420,7 @@ export default function GitCommitGeneratorPage() {
           ) : (
             <div className="py-12 text-center">
               <History className="mx-auto mb-4 size-12 text-muted-foreground/30" />
-              <p className="text-muted-foreground">No hay historial todavía</p>
+              <p className="text-muted-foreground">{t("gitCommit.noHistory")}</p>
             </div>
           )}
         </Card>

@@ -14,6 +14,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useCronBuilder } from "@/hooks/use-cron-builder";
+import { useTranslation } from "@/hooks/use-translation";
 import { CopyButton } from "@/components/shared/copy-button";
 import { ToolHeader } from "@/components/shared/tool-header";
 import type { CronField } from "@/types/cron-builder";
@@ -39,6 +40,7 @@ export default function CronBuilderPage() {
     reset,
   } = useCronBuilder();
 
+  const { t } = useTranslation();
   const [showHistory, setShowHistory] = useState(false);
 
   const handleSave = () => {
@@ -51,15 +53,15 @@ export default function CronBuilderPage() {
       <ToolHeader
         icon={Clock}
         gradient="from-violet-500 to-purple-600"
-        title="Cron Builder"
-        description="Construye expresiones cron visualmente, sin memorizar sintaxis"
+        title={t("cron.title")}
+        description={t("cron.description")}
       />
 
       {/* Presets */}
       <Card className="p-4">
         <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
           <Zap className="size-4" />
-          Presets comunes
+          {t("cron.commonPresets")}
         </h3>
         <div className="flex flex-wrap gap-2">
           {presets.map((preset) => (
@@ -81,7 +83,7 @@ export default function CronBuilderPage() {
         <div className="space-y-4">
           {/* Visual Builder */}
           <Card className="p-6">
-            <h2 className="mb-4 text-lg font-semibold">Constructor Visual</h2>
+            <h2 className="mb-4 text-lg font-semibold">{t("cron.visualBuilder")}</h2>
 
             <div className="space-y-4">
               {FIELD_ORDER.map((field) => (
@@ -107,12 +109,12 @@ export default function CronBuilderPage() {
 
             {/* Quick reference */}
             <div className="mt-4 rounded-lg bg-muted/50 p-3">
-              <p className="mb-2 text-xs font-medium text-muted-foreground">Sintaxis:</p>
+              <p className="mb-2 text-xs font-medium text-muted-foreground">{t("cron.syntax")}</p>
               <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                <span><code className="rounded bg-muted px-1">*</code> cada valor</span>
-                <span><code className="rounded bg-muted px-1">*/n</code> cada n</span>
-                <span><code className="rounded bg-muted px-1">n-m</code> rango</span>
-                <span><code className="rounded bg-muted px-1">a,b,c</code> lista</span>
+                <span><code className="rounded bg-muted px-1">*</code> {t("cron.syntaxEveryValue")}</span>
+                <span><code className="rounded bg-muted px-1">*/n</code> {t("cron.syntaxEveryN")}</span>
+                <span><code className="rounded bg-muted px-1">n-m</code> {t("cron.syntaxRange")}</span>
+                <span><code className="rounded bg-muted px-1">a,b,c</code> {t("cron.syntaxList")}</span>
               </div>
             </div>
           </Card>
@@ -120,13 +122,13 @@ export default function CronBuilderPage() {
           {/* Raw Expression */}
           <Card className="p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-semibold">Expresión Cron</h3>
+              <h3 className="font-semibold">{t("cron.cronExpression")}</h3>
               <div className="flex gap-2">
                 <Button variant="ghost" size="sm" onPress={handleSave}>
                   <Save className="mr-1 size-4" />
-                  Guardar
+                  {t("cron.save")}
                 </Button>
-                <CopyButton text={rawExpression} label="Copiar" />
+                <CopyButton text={rawExpression} label={t("cron.copy")} />
               </div>
             </div>
 
@@ -155,7 +157,7 @@ export default function CronBuilderPage() {
             <div className="mt-4 flex gap-2">
               <Button variant="outline" size="sm" onPress={reset}>
                 <RotateCcw className="mr-1 size-4" />
-                Reset
+                {t("cron.reset")}
               </Button>
               <Button
                 variant="outline"
@@ -163,7 +165,7 @@ export default function CronBuilderPage() {
                 onPress={() => setShowHistory(!showHistory)}
               >
                 <History className="mr-1 size-4" />
-                Historial ({history.length})
+                {t("cron.history", { count: history.length })}
               </Button>
             </div>
           </Card>
@@ -172,7 +174,7 @@ export default function CronBuilderPage() {
           {showHistory && history.length > 0 && (
             <Card className="p-4">
               <div className="mb-3 flex items-center justify-between">
-                <h4 className="text-sm font-semibold">Historial</h4>
+                <h4 className="text-sm font-semibold">{t("cron.historyTitle")}</h4>
                 <Button variant="ghost" size="sm" onPress={clearHistory}>
                   <Trash2 className="size-4" />
                 </Button>
@@ -201,7 +203,7 @@ export default function CronBuilderPage() {
         <div className="space-y-4">
           {/* Explanation */}
           <Card className="p-6">
-            <h2 className="mb-4 text-lg font-semibold">Explicación</h2>
+            <h2 className="mb-4 text-lg font-semibold">{t("cron.explanation")}</h2>
 
             {explanation ? (
               <div className="space-y-4">
@@ -239,8 +241,8 @@ export default function CronBuilderPage() {
                 <AlertCircle className="mb-2 size-8 text-muted-foreground/30" />
                 <p className="text-muted-foreground">
                   {validation.isValid
-                    ? "Introduce una expresión cron"
-                    : "Corrige los errores para ver la explicación"}
+                    ? t("cron.enterExpression")
+                    : t("cron.fixErrors")}
                 </p>
               </div>
             )}
@@ -250,7 +252,7 @@ export default function CronBuilderPage() {
           <Card className="p-6">
             <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
               <Calendar className="size-5" />
-              Próximas ejecuciones
+              {t("cron.nextExecutions")}
             </h2>
 
             {nextExecutions.length > 0 ? (
@@ -279,8 +281,8 @@ export default function CronBuilderPage() {
                 <Clock className="mb-2 size-8 text-muted-foreground/30" />
                 <p className="text-muted-foreground">
                   {validation.isValid
-                    ? "No hay ejecuciones próximas"
-                    : "Corrige los errores para ver las ejecuciones"}
+                    ? t("cron.noNextExecutions")
+                    : t("cron.fixErrorsExecutions")}
                 </p>
               </div>
             )}
@@ -288,31 +290,31 @@ export default function CronBuilderPage() {
 
           {/* Cheat Sheet */}
           <Card className="p-6">
-            <h3 className="mb-4 text-sm font-semibold">Referencia Rápida</h3>
+            <h3 className="mb-4 text-sm font-semibold">{t("cron.quickReference")}</h3>
             <div className="grid grid-cols-5 gap-2 text-center text-xs">
               <div className="rounded bg-muted p-2">
-                <p className="font-mono font-bold">MIN</p>
+                <p className="font-mono font-bold">{t("cron.cheatMin")}</p>
                 <p className="text-muted-foreground">0-59</p>
               </div>
               <div className="rounded bg-muted p-2">
-                <p className="font-mono font-bold">HORA</p>
+                <p className="font-mono font-bold">{t("cron.cheatHour")}</p>
                 <p className="text-muted-foreground">0-23</p>
               </div>
               <div className="rounded bg-muted p-2">
-                <p className="font-mono font-bold">DÍA</p>
+                <p className="font-mono font-bold">{t("cron.cheatDay")}</p>
                 <p className="text-muted-foreground">1-31</p>
               </div>
               <div className="rounded bg-muted p-2">
-                <p className="font-mono font-bold">MES</p>
+                <p className="font-mono font-bold">{t("cron.cheatMonth")}</p>
                 <p className="text-muted-foreground">1-12</p>
               </div>
               <div className="rounded bg-muted p-2">
-                <p className="font-mono font-bold">SEM</p>
+                <p className="font-mono font-bold">{t("cron.cheatWeek")}</p>
                 <p className="text-muted-foreground">0-6</p>
               </div>
             </div>
             <p className="mt-3 text-center text-xs text-muted-foreground">
-              0 = Domingo, 1 = Lunes, ..., 6 = Sábado
+              {t("cron.weekdayNote")}
             </p>
           </Card>
         </div>
