@@ -12,6 +12,7 @@ import {
   Wand2,
 } from "lucide-react";
 import { ToolHeader } from "@/components/shared/tool-header";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { useDtoMatic } from "@/hooks/use-dto-matic";
 import { CopyButton } from "@/components/shared/copy-button";
 import type { GenerationMode, NamingConvention } from "@/types/dto-matic";
@@ -280,23 +281,15 @@ export default function DtoMaticPage() {
             <div className="flex flex-1 flex-col">
               {/* Stats */}
               <div className="mb-4 flex flex-wrap gap-2">
-                <span className="rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-950 dark:text-green-300">
-                  {result.stats.totalTypes} tipos
-                </span>
+                <StatusBadge variant="success">{result.stats.totalTypes} tipos</StatusBadge>
                 {result.stats.nestedObjects > 0 && (
-                  <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-900 dark:bg-blue-900/30 dark:text-blue-200">
-                    {result.stats.nestedObjects} nested
-                  </span>
+                  <StatusBadge variant="info">{result.stats.nestedObjects} nested</StatusBadge>
                 )}
                 {result.stats.arrays > 0 && (
-                  <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-900 dark:bg-purple-900/30 dark:text-purple-200">
-                    {result.stats.arrays} arrays
-                  </span>
+                  <StatusBadge variant="purple">{result.stats.arrays} arrays</StatusBadge>
                 )}
                 {result.stats.dateFields > 0 && (
-                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900 dark:bg-amber-900/30 dark:text-amber-200">
-                    {result.stats.dateFields} dates
-                  </span>
+                  <StatusBadge variant="warning">{result.stats.dateFields} dates</StatusBadge>
                 )}
               </div>
 

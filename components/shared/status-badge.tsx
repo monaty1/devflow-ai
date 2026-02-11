@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
-type StatusBadgeVariant = "success" | "info" | "warning" | "error" | "neutral";
+type StatusBadgeVariant = "success" | "info" | "warning" | "error" | "neutral" | "purple";
 type StatusBadgeSize = "sm" | "md";
 
 interface StatusBadgeProps {
@@ -19,6 +19,7 @@ const VARIANT_CLASSES: Record<StatusBadgeVariant, string> = {
   warning: "bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
   error: "bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-300",
   neutral: "bg-muted text-muted-foreground",
+  purple: "bg-purple-50 text-purple-800 dark:bg-purple-950 dark:text-purple-300",
 };
 
 const SIZE_CLASSES: Record<StatusBadgeSize, string> = {

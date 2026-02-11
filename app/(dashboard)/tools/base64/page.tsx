@@ -13,6 +13,7 @@ import {
   Link2,
 } from "lucide-react";
 import { useBase64 } from "@/hooks/use-base64";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { CopyButton } from "@/components/shared/copy-button";
 import { ToolHeader } from "@/components/shared/tool-header";
 import type { Base64Mode, Base64Variant } from "@/types/base64";
@@ -226,15 +227,9 @@ export default function Base64Page() {
             <div className="flex flex-1 flex-col">
               {/* Stats */}
               <div className="mb-3 flex flex-wrap gap-2">
-                <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-900 dark:bg-blue-900/30 dark:text-blue-200">
-                  {result.stats.outputLength} chars
-                </span>
-                <span className="rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-950 dark:text-green-300">
-                  {result.stats.outputBytes} bytes
-                </span>
-                <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-900 dark:bg-purple-900/30 dark:text-purple-200">
-                  {(result.stats.compressionRatio * 100).toFixed(0)}% size ratio
-                </span>
+                <StatusBadge variant="info">{result.stats.outputLength} chars</StatusBadge>
+                <StatusBadge variant="success">{result.stats.outputBytes} bytes</StatusBadge>
+                <StatusBadge variant="purple">{(result.stats.compressionRatio * 100).toFixed(0)}% size ratio</StatusBadge>
               </div>
 
               {/* Output */}

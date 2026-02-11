@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Card, Button } from "@heroui/react";
+import { StatusBadge } from "@/components/shared/status-badge";
 import {
   Braces,
   AlertCircle,
@@ -238,19 +239,11 @@ export default function JsonFormatterPage() {
                     {/* Stats */}
                     {result.isValid && (
                       <div className="mb-3 flex flex-wrap gap-2">
-                        <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-900 dark:bg-blue-950 dark:text-blue-200">
-                          {result.stats.keys} keys
-                        </span>
-                        <span className="rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-900 dark:bg-green-950 dark:text-green-200">
-                          depth {result.stats.depth}
-                        </span>
-                        <span className="rounded-full bg-purple-50 px-2 py-0.5 text-xs font-medium text-purple-900 dark:bg-purple-950 dark:text-purple-200">
-                          {result.stats.sizeBytes} bytes
-                        </span>
+                        <StatusBadge variant="info">{result.stats.keys} keys</StatusBadge>
+                        <StatusBadge variant="success">depth {result.stats.depth}</StatusBadge>
+                        <StatusBadge variant="purple">{result.stats.sizeBytes} bytes</StatusBadge>
                         {result.stats.arrays > 0 && (
-                          <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-900 dark:bg-amber-950 dark:text-amber-200">
-                            {result.stats.arrays} arrays
-                          </span>
+                          <StatusBadge variant="warning">{result.stats.arrays} arrays</StatusBadge>
                         )}
                       </div>
                     )}

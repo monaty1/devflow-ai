@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useGitCommitGenerator } from "@/hooks/use-git-commit-generator";
 import { CopyButton } from "@/components/shared/copy-button";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { COMMIT_TYPES, validateCommitMessage } from "@/lib/application/git-commit-generator";
 
@@ -372,12 +373,7 @@ export default function GitCommitGeneratorPage() {
                   <span className="text-xs text-muted-foreground">Issues</span>
                   <div className="mt-1 flex gap-2">
                     {parsedCommit.issueRefs.map((ref) => (
-                      <span
-                        key={ref}
-                        className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-900 dark:bg-blue-900/30 dark:text-blue-200"
-                      >
-                        {ref}
-                      </span>
+                      <StatusBadge key={ref} variant="info">{ref}</StatusBadge>
                     ))}
                   </div>
                 </div>
@@ -409,9 +405,7 @@ export default function GitCommitGeneratorPage() {
                   onClick={() => loadFromHistory(item)}
                   className="flex w-full items-start gap-3 rounded-lg bg-muted/50 px-4 py-3 text-left transition-colors hover:bg-muted"
                 >
-                  <span className="mt-0.5 shrink-0 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-900 dark:bg-blue-900/30 dark:text-blue-200">
-                    {item.type}
-                  </span>
+                  <StatusBadge variant="info" className="mt-0.5 shrink-0">{item.type}</StatusBadge>
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-mono text-sm">{item.message}</p>
                     <p className="text-xs text-muted-foreground">

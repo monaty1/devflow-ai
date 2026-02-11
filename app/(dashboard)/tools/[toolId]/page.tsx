@@ -12,6 +12,7 @@ import {
   Check,
 } from "lucide-react";
 import { useFavorites } from "@/lib/context";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { useTranslation } from "@/hooks/use-translation";
 import { getToolBySlug } from "@/config/tools-data";
 import { TOOL_ICON_MAP } from "@/config/tool-icon-map";
@@ -78,9 +79,7 @@ export default function ToolDetailPage({ params }: ToolDetailPageProps) {
                     {tool.usersCount.toLocaleString()} users
                   </span>
                   {tool.isFree && (
-                    <span className="rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-950 dark:text-green-300">
-                      {t("tools.free")}
-                    </span>
+                    <StatusBadge variant="success">{t("tools.free")}</StatusBadge>
                   )}
                 </div>
               </div>
