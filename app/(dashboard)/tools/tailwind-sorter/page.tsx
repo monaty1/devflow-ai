@@ -14,17 +14,19 @@ import {
   FileText,
 } from "lucide-react";
 import { useTailwindSorter } from "@/hooks/use-tailwind-sorter";
+import { useTranslation } from "@/hooks/use-translation";
 import { CopyButton } from "@/components/shared/copy-button";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { CATEGORY_LABELS, type OutputFormat } from "@/types/tailwind-sorter";
 
-const OUTPUT_FORMATS: { id: OutputFormat; label: string; description: string }[] = [
-  { id: "single-line", label: "Single line", description: "All classes on one line" },
-  { id: "multi-line", label: "Multi-line", description: "One class per line" },
-  { id: "grouped", label: "Grouped", description: "Classes grouped with comments" },
-];
-
 export default function TailwindSorterPage() {
+  const { t } = useTranslation();
+
+  const OUTPUT_FORMATS: { id: OutputFormat; label: string; description: string }[] = [
+    { id: "single-line", label: t("tailwind.singleLine"), description: t("tailwind.singleLineDesc") },
+    { id: "multi-line", label: t("tailwind.multiLine"), description: t("tailwind.multiLineDesc") },
+    { id: "grouped", label: t("tailwind.grouped"), description: t("tailwind.groupedDesc") },
+  ];
   const {
     input,
     config,
@@ -50,8 +52,8 @@ export default function TailwindSorterPage() {
       <ToolHeader
         icon={Palette}
         gradient="from-sky-500 to-cyan-600"
-        title="Tailwind Sorter"
-        description="Sort and organize your Tailwind CSS classes automatically"
+        title={t("tailwind.title")}
+        description={t("tailwind.description")}
       />
 
       {/* Quick Actions */}
@@ -60,16 +62,16 @@ export default function TailwindSorterPage() {
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onPress={() => loadExample("clean")}>
               <FileText className="mr-1 size-4" />
-              Clean example
+              {t("tailwind.cleanExample")}
             </Button>
             <Button variant="outline" size="sm" onPress={() => loadExample("messy")}>
               <FileText className="mr-1 size-4" />
-              Messy example
+              {t("tailwind.messyExample")}
             </Button>
           </div>
           <div className="h-6 w-px bg-border" />
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Format:</span>
+            <span className="text-sm text-muted-foreground">{t("tailwind.format")}</span>
             {OUTPUT_FORMATS.map((format) => (
               <button
                 key={format.id}
@@ -94,12 +96,12 @@ export default function TailwindSorterPage() {
         <div className="space-y-4">
           <Card className="p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Input classes</h2>
+              <h2 className="text-lg font-semibold">{t("tailwind.inputClasses")}</h2>
               <div className="flex gap-2">
-                <CopyButton text={input} label="Copy" isDisabled={!input} />
+                <CopyButton text={input} label={t("common.copy")} isDisabled={!input} />
                 <Button variant="ghost" size="sm" onPress={reset} isDisabled={!input}>
                   <RotateCcw className="mr-1 size-4" />
-                  Clear
+                  {t("common.clear")}
                 </Button>
               </div>
             </div>
@@ -117,14 +119,14 @@ export default function TailwindSorterPage() {
                 <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-1.5">
                   <Layers className="size-4 text-muted-foreground" />
                   <span className="text-sm">
-                    <strong>{inputStats.classCount}</strong> classes
+                    {t("tailwind.classes", { count: inputStats.classCount })}
                   </span>
                 </div>
                 {inputStats.duplicates.length > 0 && (
                   <div className="flex items-center gap-2 rounded-lg bg-amber-500/10 px-3 py-1.5 text-amber-600">
                     <AlertCircle className="size-4" />
                     <span className="text-sm">
-                      <strong>{inputStats.duplicates.length}</strong> duplicates
+                      {t("tailwind.duplicates", { count: inputStats.duplicates.length })}
                     </span>
                   </div>
                 )}
@@ -133,7 +135,7 @@ export default function TailwindSorterPage() {
 
             {/* Config Options */}
             <div className="mt-4 space-y-3 rounded-lg border border-border p-4">
-              <h4 className="text-sm font-medium">Options</h4>
+              <h4 className="text-sm font-medium">{t("common.options")}</h4>
               <div className="space-y-2">
                 <label className="flex items-center gap-2">
                   <input
@@ -142,7 +144,7 @@ export default function TailwindSorterPage() {
                     onChange={(e) => updateConfig("removeDuplicates", e.target.checked)}
                     className="size-4 rounded border-border"
                   />
-                  <span className="text-sm">Remove duplicates</span>
+                  <span className="text-sm">{t("tailwind.removeDuplicates")}</span>
                 </label>
                 <label className="flex items-center gap-2">
                   <input
@@ -151,7 +153,7 @@ export default function TailwindSorterPage() {
                     onChange={(e) => updateConfig("groupByCategory", e.target.checked)}
                     className="size-4 rounded border-border"
                   />
-                  <span className="text-sm">Group by category</span>
+                  <span className="text-sm">{t("tailwind.groupByCategory")}</span>
                 </label>
                 <label className="flex items-center gap-2">
                   <input
@@ -160,7 +162,7 @@ export default function TailwindSorterPage() {
                     onChange={(e) => updateConfig("preserveVariants", e.target.checked)}
                     className="size-4 rounded border-border"
                   />
-                  <span className="text-sm">Sort variants (sm → xl)</span>
+                  <span className="text-sm">{t("tailwind.sortVariants")}</span>
                 </label>
               </div>
             </div>
@@ -175,7 +177,7 @@ export default function TailwindSorterPage() {
                 isDisabled={!inputStats.isValid}
               >
                 <ArrowRight className="mr-2 size-5" />
-                Sort classes
+                {t("tailwind.sortClasses")}
               </Button>
             </div>
 
@@ -187,7 +189,7 @@ export default function TailwindSorterPage() {
                 onPress={() => setShowHistory(!showHistory)}
               >
                 <History className="mr-1 size-4" />
-                History ({history.length})
+                {t("common.history", { count: history.length })}
               </Button>
             </div>
           </Card>
@@ -196,7 +198,7 @@ export default function TailwindSorterPage() {
           {showHistory && history.length > 0 && (
             <Card className="p-4">
               <div className="mb-3 flex items-center justify-between">
-                <h4 className="text-sm font-semibold">Recent history</h4>
+                <h4 className="text-sm font-semibold">{t("common.recentHistory")}</h4>
                 <Button variant="ghost" size="sm" onPress={clearHistory}>
                   <Trash2 className="size-4" />
                 </Button>
@@ -212,7 +214,7 @@ export default function TailwindSorterPage() {
                     <div className="min-w-0 flex-1">
                       <code className="block truncate text-sm font-medium">{item.input}</code>
                       <p className="text-xs text-muted-foreground">
-                        {item.classCount} classes
+                        {t("tailwind.classes", { count: item.classCount })}
                       </p>
                     </div>
                     <ChevronRight className="ml-2 size-4 shrink-0 text-muted-foreground" />
@@ -227,9 +229,9 @@ export default function TailwindSorterPage() {
         <div className="space-y-4">
           <Card className="p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Sorted result</h2>
+              <h2 className="text-lg font-semibold">{t("tailwind.sortedResult")}</h2>
               <div className="flex gap-2">
-                <CopyButton getText={() => result?.output ?? ""} label="Copy" isDisabled={!result} />
+                <CopyButton getText={() => result?.output ?? ""} label={t("common.copy")} isDisabled={!result} />
                 <Button
                   variant="ghost"
                   size="sm"
@@ -237,7 +239,7 @@ export default function TailwindSorterPage() {
                   isDisabled={!result}
                 >
                   <ArrowRight className="mr-1 size-4" />
-                  Apply
+                  {t("common.apply")}
                 </Button>
               </div>
             </div>
@@ -254,19 +256,19 @@ export default function TailwindSorterPage() {
                     <p className="text-2xl font-bold text-primary">
                       {result.stats.totalClasses}
                     </p>
-                    <p className="text-xs text-muted-foreground">Total</p>
+                    <p className="text-xs text-muted-foreground">{t("tailwind.total")}</p>
                   </div>
                   <div className="rounded-lg bg-green-500/10 p-3 text-center">
                     <p className="text-2xl font-bold text-green-600">
                       {result.stats.uniqueClasses}
                     </p>
-                    <p className="text-xs text-muted-foreground">Unique</p>
+                    <p className="text-xs text-muted-foreground">{t("tailwind.unique")}</p>
                   </div>
                   <div className="rounded-lg bg-amber-500/10 p-3 text-center">
                     <p className="text-2xl font-bold text-amber-600">
                       {result.stats.duplicatesRemoved}
                     </p>
-                    <p className="text-xs text-muted-foreground">Removed</p>
+                    <p className="text-xs text-muted-foreground">{t("tailwind.removed")}</p>
                   </div>
                 </div>
               </>
@@ -274,10 +276,10 @@ export default function TailwindSorterPage() {
               <div className="flex min-h-[200px] flex-col items-center justify-center rounded-lg border border-dashed border-border text-center">
                 <Palette className="mb-2 size-12 text-muted-foreground/30" />
                 <p className="text-muted-foreground">
-                  Result will appear here
+                  {t("tailwind.emptyState")}
                 </p>
                 <p className="text-sm text-muted-foreground/70">
-                  Enter classes and press &quot;Sort&quot;
+                  {t("tailwind.emptyStateHint")}
                 </p>
               </div>
             )}
@@ -286,7 +288,7 @@ export default function TailwindSorterPage() {
           {/* Groups Breakdown */}
           {result && result.groups.length > 0 && (
             <Card className="p-6">
-              <h3 className="mb-4 text-sm font-semibold">Breakdown by category</h3>
+              <h3 className="mb-4 text-sm font-semibold">{t("tailwind.breakdown")}</h3>
               <div className="space-y-3">
                 {result.groups.map((group) => (
                   <div
@@ -319,7 +321,7 @@ export default function TailwindSorterPage() {
 
           {/* Category Reference */}
           <Card className="p-6">
-            <h3 className="mb-4 text-sm font-semibold">Category order</h3>
+            <h3 className="mb-4 text-sm font-semibold">{t("tailwind.categoryOrder")}</h3>
             <div className="grid grid-cols-2 gap-2 text-sm">
               {Object.entries(CATEGORY_LABELS).slice(0, 12).map(([id, label], index) => (
                 <div key={id} className="flex items-center gap-2">

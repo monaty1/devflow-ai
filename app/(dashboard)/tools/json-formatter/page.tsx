@@ -16,17 +16,19 @@ import {
   Wand2,
 } from "lucide-react";
 import { useJsonFormatter } from "@/hooks/use-json-formatter";
+import { useTranslation } from "@/hooks/use-translation";
 import { CopyButton } from "@/components/shared/copy-button";
 import { ToolHeader } from "@/components/shared/tool-header";
 import type { JsonFormatMode } from "@/types/json-formatter";
 
-const MODE_OPTIONS: { id: JsonFormatMode; label: string; icon: React.ElementType }[] = [
-  { id: "format", label: "Format", icon: Braces },
-  { id: "minify", label: "Minify", icon: Minimize2 },
-  { id: "validate", label: "Validate", icon: CheckCircle },
-];
-
 export default function JsonFormatterPage() {
+  const { t } = useTranslation();
+
+  const MODE_OPTIONS: { id: JsonFormatMode; label: string; icon: React.ElementType }[] = [
+    { id: "format", label: t("jsonFmt.modeFormat"), icon: Braces },
+    { id: "minify", label: t("jsonFmt.modeMinify"), icon: Minimize2 },
+    { id: "validate", label: t("jsonFmt.modeValidate"), icon: CheckCircle },
+  ];
   const {
     input,
     mode,
@@ -60,8 +62,8 @@ export default function JsonFormatterPage() {
       <ToolHeader
         icon={Braces}
         gradient="from-yellow-500 to-amber-600"
-        title="JSON Formatter"
-        description="Format, minify, validate, and transform JSON instantly"
+        title={t("jsonFmt.title")}
+        description={t("jsonFmt.description")}
       />
 
       {/* Mode Selector */}
@@ -89,15 +91,15 @@ export default function JsonFormatterPage() {
         <div className="space-y-4">
           <Card className="p-6">
             <div className="mb-4 flex items-center justify-between">
-              <label htmlFor="json-input" className="text-lg font-semibold">Input JSON</label>
+              <label htmlFor="json-input" className="text-lg font-semibold">{t("jsonFmt.inputJson")}</label>
               <div className="flex gap-2">
                 <Button variant="ghost" size="sm" onPress={() => loadExample("simple")}>
                   <Wand2 className="mr-1 size-4" />
-                  Simple
+                  {t("jsonFmt.simple")}
                 </Button>
                 <Button variant="ghost" size="sm" onPress={() => loadExample("complex")}>
                   <Wand2 className="mr-1 size-4" />
-                  Complex
+                  {t("jsonFmt.complex")}
                 </Button>
               </div>
             </div>
@@ -127,21 +129,21 @@ export default function JsonFormatterPage() {
 
             {/* Input Stats */}
             <div className="mt-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
-              <span>{inputStats.characters} characters</span>
-              <span>{inputStats.lines} lines</span>
-              {inputStats.isValid && <span className="text-green-600">Valid JSON</span>}
+              <span>{t("common.characters", { count: inputStats.characters })}</span>
+              <span>{t("common.lines", { count: inputStats.lines })}</span>
+              {inputStats.isValid && <span className="text-green-600">{t("jsonFmt.validJson")}</span>}
             </div>
           </Card>
 
           {/* Configuration */}
           <Card className="p-6">
-            <h3 className="mb-4 font-semibold">Configuration</h3>
+            <h3 className="mb-4 font-semibold">{t("common.configuration")}</h3>
 
             <div className="space-y-4">
               {/* Indent Size */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-muted-foreground">
-                  Indent size
+                  {t("jsonFmt.indentSize")}
                 </label>
                 <div className="flex gap-2">
                   {[2, 4].map((size) => (
@@ -155,7 +157,7 @@ export default function JsonFormatterPage() {
                           : "bg-muted text-muted-foreground hover:bg-muted/80"
                       }`}
                     >
-                      {size} spaces
+                      {t("jsonFmt.spaces", { size })}
                     </button>
                   ))}
                 </div>
@@ -169,7 +171,7 @@ export default function JsonFormatterPage() {
                   onChange={(e) => updateConfig("sortKeys", e.target.checked)}
                   className="size-4 rounded border-border accent-primary"
                 />
-                <span className="text-sm">Sort keys alphabetically</span>
+                <span className="text-sm">{t("jsonFmt.sortKeys")}</span>
               </label>
             </div>
 
@@ -181,7 +183,7 @@ export default function JsonFormatterPage() {
                 className="flex-1"
               >
                 <Sparkles className="mr-2 size-4" />
-                {mode === "format" ? "Format" : mode === "minify" ? "Minify" : "Validate"}
+                {mode === "format" ? t("jsonFmt.modeFormat") : mode === "minify" ? t("jsonFmt.modeMinify") : t("jsonFmt.modeValidate")}
               </Button>
               <Button variant="outline" onPress={reset}>
                 <Trash2 className="size-4" />
@@ -193,7 +195,7 @@ export default function JsonFormatterPage() {
         {/* Output Panel */}
         <Card className="flex flex-col p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Output</h2>
+            <h2 className="text-lg font-semibold">{t("jsonFmt.output")}</h2>
             {result?.output && (
               <Button
                 variant="ghost"
@@ -201,7 +203,7 @@ export default function JsonFormatterPage() {
                 onPress={applyOutput}
               >
                 <ArrowRightLeft className="mr-1 size-4" />
-                Apply to Input
+                {t("jsonFmt.applyToInput")}
               </Button>
             )}
           </div>
@@ -209,10 +211,10 @@ export default function JsonFormatterPage() {
           {/* Output Tabs */}
           <div className="mb-3 flex flex-wrap gap-2 border-b border-border pb-3">
             {[
-              { id: "output", label: "Result", icon: Braces },
-              { id: "paths", label: "Paths", icon: List },
-              { id: "typescript", label: "TypeScript", icon: FileCode },
-              { id: "compare", label: "Compare", icon: ArrowRightLeft },
+              { id: "output", label: t("jsonFmt.tabResult"), icon: Braces },
+              { id: "paths", label: t("jsonFmt.tabPaths"), icon: List },
+              { id: "typescript", label: t("jsonFmt.tabTypeScript"), icon: FileCode },
+              { id: "compare", label: t("jsonFmt.tabCompare"), icon: ArrowRightLeft },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -239,25 +241,25 @@ export default function JsonFormatterPage() {
                     {/* Stats */}
                     {result.isValid && (
                       <div className="mb-3 flex flex-wrap gap-2">
-                        <StatusBadge variant="info">{result.stats.keys} keys</StatusBadge>
-                        <StatusBadge variant="success">depth {result.stats.depth}</StatusBadge>
-                        <StatusBadge variant="purple">{result.stats.sizeBytes} bytes</StatusBadge>
+                        <StatusBadge variant="info">{t("jsonFmt.keys", { count: result.stats.keys })}</StatusBadge>
+                        <StatusBadge variant="success">{t("jsonFmt.depth", { count: result.stats.depth })}</StatusBadge>
+                        <StatusBadge variant="purple">{t("jsonFmt.bytes", { count: result.stats.sizeBytes })}</StatusBadge>
                         {result.stats.arrays > 0 && (
-                          <StatusBadge variant="warning">{result.stats.arrays} arrays</StatusBadge>
+                          <StatusBadge variant="warning">{t("jsonFmt.arrays", { count: result.stats.arrays })}</StatusBadge>
                         )}
                       </div>
                     )}
 
                     <CopyButton text={result.output} className="absolute right-2 top-2 z-10" />
                     <pre className="max-h-[400px] overflow-auto rounded-lg bg-muted/50 p-4 font-mono text-sm">
-                      <code>{result.output || "Valid JSON"}</code>
+                      <code>{result.output || t("jsonFmt.validJson")}</code>
                     </pre>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-16 text-center">
                     <Braces className="mb-4 size-12 text-muted-foreground/30" />
                     <p className="text-muted-foreground">
-                      Paste JSON and click Format, Minify, or Validate
+                      {t("jsonFmt.emptyState")}
                     </p>
                   </div>
                 )}
@@ -283,7 +285,7 @@ export default function JsonFormatterPage() {
                   <div className="flex flex-col items-center justify-center py-16 text-center">
                     <List className="mb-4 size-12 text-muted-foreground/30" />
                     <p className="text-muted-foreground">
-                      Enter valid JSON to extract paths
+                      {t("jsonFmt.pathsEmpty")}
                     </p>
                   </div>
                 )}
@@ -303,7 +305,7 @@ export default function JsonFormatterPage() {
                   <div className="flex flex-col items-center justify-center py-16 text-center">
                     <FileCode className="mb-4 size-12 text-muted-foreground/30" />
                     <p className="text-muted-foreground">
-                      Enter valid JSON to generate TypeScript interface
+                      {t("jsonFmt.tsEmpty")}
                     </p>
                   </div>
                 )}
@@ -313,13 +315,13 @@ export default function JsonFormatterPage() {
             {activeTab === "compare" && (
               <div className="space-y-4">
                 <label htmlFor="json-compare" className="block text-sm font-medium text-muted-foreground">
-                  Second JSON to compare
+                  {t("jsonFmt.compareLabel")}
                 </label>
                 <textarea
                   id="json-compare"
                   value={compareInput}
                   onChange={(e) => setCompareInput(e.target.value)}
-                  placeholder="Paste second JSON to compare..."
+                  placeholder={t("jsonFmt.comparePlaceholder")}
                   rows={8}
                   className="w-full resize-none rounded-lg border border-border bg-background px-4 py-3 font-mono text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
@@ -332,12 +334,12 @@ export default function JsonFormatterPage() {
                     {isEqual ? (
                       <>
                         <CheckCircle className="size-5" />
-                        <span className="font-medium">JSON documents are equal</span>
+                        <span className="font-medium">{t("jsonFmt.jsonEqual")}</span>
                       </>
                     ) : (
                       <>
                         <AlertCircle className="size-5" />
-                        <span className="font-medium">JSON documents are different</span>
+                        <span className="font-medium">{t("jsonFmt.jsonDifferent")}</span>
                       </>
                     )}
                   </div>

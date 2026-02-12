@@ -19,21 +19,13 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { useCostCalculator } from "@/hooks/use-cost-calculator";
+import { useTranslation } from "@/hooks/use-translation";
 import { formatCost } from "@/lib/application/cost-calculator";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { AI_MODELS, PROVIDER_LABELS } from "@/config/ai-models";
 import type { CostCalculation } from "@/types/cost-calculator";
 
-const columns = [
-  { uid: "model", name: "Model", sortable: true },
-  { uid: "provider", name: "Provider", sortable: true },
-  { uid: "inputCost", name: "Input Cost", sortable: true },
-  { uid: "outputCost", name: "Output Cost", sortable: true },
-  { uid: "totalCost", name: "Total", sortable: true },
-  { uid: "contextWindow", name: "Context", sortable: true },
-] as const;
-
-type ColumnUid = (typeof columns)[number]["uid"];
+type ColumnUid = "model" | "provider" | "inputCost" | "outputCost" | "totalCost" | "contextWindow";
 
 const providerOptions = [
   { uid: "openai", name: "OpenAI" },
@@ -51,6 +43,17 @@ const INITIAL_VISIBLE_COLUMNS: ColumnUid[] = [
 ];
 
 export default function CostCalculatorPage() {
+  const { t } = useTranslation();
+
+  const columns = useMemo(() => [
+    { uid: "model" as const, name: t("costCalc.colModel"), sortable: true },
+    { uid: "provider" as const, name: t("costCalc.colProvider"), sortable: true },
+    { uid: "inputCost" as const, name: t("costCalc.colInputCost"), sortable: true },
+    { uid: "outputCost" as const, name: t("costCalc.colOutputCost"), sortable: true },
+    { uid: "totalCost" as const, name: t("costCalc.colTotal"), sortable: true },
+    { uid: "contextWindow" as const, name: t("costCalc.colContext"), sortable: true },
+  ], [t]);
+
   const {
     inputTokens,
     setInputTokens,
@@ -87,7 +90,8 @@ export default function CostCalculatorPage() {
   const headerColumns = useMemo(() => {
     if (visibleColumns === "all") return [...columns];
     return columns.filter((col) => visibleColumns.has(col.uid));
-  }, [visibleColumns]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- columns depends on t which is stable
+  }, [visibleColumns, t]);
 
   const filteredItems = useMemo(() => {
     if (!comparison) return [];
@@ -170,13 +174,13 @@ export default function CostCalculatorPage() {
             <div className="flex items-center gap-2">
               {isCheapest && (
                 <Chip size="sm" color="success" variant="soft">
-                  Best
+                  {t("costCalc.best")}
                 </Chip>
               )}
               <span className="font-medium">{result.model.displayName}</span>
               {result.model.isPopular && (
                 <Chip size="sm" color="warning" variant="soft">
-                  Popular
+                  {t("costCalc.popular")}
                 </Chip>
               )}
             </div>
@@ -213,7 +217,7 @@ export default function CostCalculatorPage() {
           return null;
       }
     },
-    [cheapestId]
+    [cheapestId, t]
   );
 
   const onSearchChange = useCallback((value?: string) => {
@@ -247,7 +251,7 @@ export default function CostCalculatorPage() {
             <input
               type="text"
               className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-              placeholder="Search by model or provider..."
+              placeholder={t("costCalc.search")}
               value={filterValue}
               onChange={(e) => onSearchChange(e.target.value)}
             />
@@ -293,7 +297,7 @@ export default function CostCalculatorPage() {
             <div className="relative hidden sm:block">
               <details className="group">
                 <summary className="flex cursor-pointer items-center gap-1 rounded-lg border border-default-200 bg-default-100 px-3 py-2 text-sm">
-                  Columns
+                  {t("costCalc.columns")}
                   <ChevronDown className="size-4" />
                 </summary>
                 <div className="absolute right-0 z-10 mt-1 min-w-[160px] rounded-lg border border-default-200 bg-background p-2 shadow-lg">
@@ -331,10 +335,10 @@ export default function CostCalculatorPage() {
         </div>
         <div className="flex items-center justify-between">
           <span className="text-small text-default-400">
-            {filteredItems.length} of {comparison?.results.length ?? 0} models
+            {t("costCalc.modelsCount", { filtered: filteredItems.length, total: comparison?.results.length ?? 0 })}
           </span>
           <label className="flex items-center gap-1 text-small text-default-400">
-            Rows per page:
+            {t("costCalc.rowsPerPage")}
             <select
               className="rounded bg-transparent text-small text-default-400 outline-none"
               onChange={onRowsPerPageChange}
@@ -358,6 +362,8 @@ export default function CostCalculatorPage() {
       onRowsPerPageChange,
       rowsPerPage,
       providerFilter,
+      t,
+      columns,
     ]
   );
 
@@ -366,8 +372,8 @@ export default function CostCalculatorPage() {
       <div className="flex items-center justify-between px-2 py-2">
         <span className="w-[30%] text-small text-default-400">
           {selectedKeys === "all"
-            ? "All items selected"
-            : `${selectedKeys.size} of ${filteredItems.length} selected`}
+            ? t("costCalc.allSelected")
+            : t("costCalc.selectedCount", { count: selectedKeys.size, total: filteredItems.length })}
         </span>
         <Pagination
           isCompact
@@ -385,7 +391,7 @@ export default function CostCalculatorPage() {
             variant="ghost"
             onPress={() => page > 1 && setPage(page - 1)}
           >
-            Previous
+            {t("costCalc.previous")}
           </Button>
           <Button
             isDisabled={pages === 1}
@@ -393,24 +399,24 @@ export default function CostCalculatorPage() {
             variant="ghost"
             onPress={() => page < pages && setPage(page + 1)}
           >
-            Next
+            {t("costCalc.next")}
           </Button>
         </div>
       </div>
     ),
-    [selectedKeys, filteredItems.length, page, pages]
+    [selectedKeys, filteredItems.length, page, pages, t]
   );
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       {/* Header */}
       <ToolHeader
-        title="API Cost Calculator"
-        description="Compare costs across AI providers"
+        title={t("costCalc.title")}
+        description={t("costCalc.description")}
         actions={
           <Button variant="outline" size="sm" onPress={reset} className="gap-2">
             <RotateCcw className="size-4" />
-            Reset
+            {t("common.reset")}
           </Button>
         }
       />
@@ -422,14 +428,14 @@ export default function CostCalculatorPage() {
           variant={view === "comparison" ? "secondary" : "outline"}
           onPress={() => setView("comparison")}
         >
-          Per Request
+          {t("costCalc.perRequest")}
         </Button>
         <Button
           size="sm"
           variant={view === "monthly" ? "secondary" : "outline"}
           onPress={() => setView("monthly")}
         >
-          Monthly Estimate
+          {t("costCalc.monthlyEstimate")}
         </Button>
       </div>
 
@@ -438,7 +444,7 @@ export default function CostCalculatorPage() {
         <div className="space-y-4">
           <Card className="p-6">
             <Card.Header className="mb-4 p-0">
-              <Card.Title>Configuration</Card.Title>
+              <Card.Title>{t("common.configuration")}</Card.Title>
             </Card.Header>
             <Card.Content className="space-y-4 p-0">
               {/* Input Tokens */}
@@ -447,7 +453,7 @@ export default function CostCalculatorPage() {
                   htmlFor="input-tokens"
                   className="text-sm font-medium text-muted-foreground"
                 >
-                  Input Tokens
+                  {t("costCalc.inputTokens")}
                 </label>
                 <input
                   id="input-tokens"
@@ -467,7 +473,7 @@ export default function CostCalculatorPage() {
                   htmlFor="output-tokens"
                   className="text-sm font-medium text-muted-foreground"
                 >
-                  Output Tokens
+                  {t("costCalc.outputTokens")}
                 </label>
                 <input
                   id="output-tokens"
@@ -489,7 +495,7 @@ export default function CostCalculatorPage() {
                       htmlFor="daily-requests"
                       className="text-sm font-medium text-muted-foreground"
                     >
-                      Daily Requests
+                      {t("costCalc.dailyRequests")}
                     </label>
                     <input
                       id="daily-requests"
@@ -508,7 +514,7 @@ export default function CostCalculatorPage() {
                       htmlFor="model-select"
                       className="text-sm font-medium text-muted-foreground"
                     >
-                      Model
+                      {t("costCalc.model")}
                     </label>
                     <select
                       id="model-select"
@@ -530,7 +536,7 @@ export default function CostCalculatorPage() {
               {/* Quick Presets */}
               <div>
                 <label className="text-sm font-medium text-muted-foreground">
-                  Presets
+                  {t("costCalc.presets")}
                 </label>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {[
@@ -561,13 +567,13 @@ export default function CostCalculatorPage() {
             <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 dark:from-blue-950/30 dark:to-indigo-950/30">
               <Card.Content className="p-0 text-center">
                 <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                  Estimated Monthly Cost
+                  {t("costCalc.estimatedMonthlyCost")}
                 </p>
                 <p className="mt-1 text-4xl font-bold text-blue-700 dark:text-blue-300">
                   {formatCost(monthlyCost)}
                 </p>
                 <p className="mt-2 text-xs text-blue-500 dark:text-blue-400">
-                  {dailyRequests} req/day x 30 days
+                  {t("costCalc.reqPerDay", { count: dailyRequests })}
                 </p>
               </Card.Content>
             </Card>
@@ -579,13 +585,13 @@ export default function CostCalculatorPage() {
           <Card className="p-6">
             <Card.Header className="mb-4 flex items-center justify-between p-0">
               <Card.Title>
-                {view === "comparison" ? "Price Comparison" : "All Models"}
+                {view === "comparison" ? t("costCalc.priceComparison") : t("costCalc.allModels")}
               </Card.Title>
               {comparison && (
                 <div className="flex items-center gap-2 text-sm text-emerald-600">
                   <TrendingDown className="size-4" />
                   <span>
-                    Cheapest: {comparison.results[0]?.model.displayName}
+                    {t("costCalc.cheapest", { model: comparison.results[0]?.model.displayName ?? "" })}
                   </span>
                 </div>
               )}
@@ -619,7 +625,7 @@ export default function CostCalculatorPage() {
                     )}
                   </TableHeader>
                   <TableBody
-                    emptyContent="No models match your search"
+                    emptyContent={t("costCalc.noModels")}
                     items={sortedItems}
                   >
                     {(item) => (
@@ -633,7 +639,7 @@ export default function CostCalculatorPage() {
                 </Table>
               ) : (
                 <p className="py-8 text-center text-muted-foreground">
-                  Enter token counts to see comparison
+                  {t("costCalc.emptyState")}
                 </p>
               )}
             </Card.Content>
@@ -643,7 +649,7 @@ export default function CostCalculatorPage() {
           <Card className="mt-4 p-6">
             <Card.Header className="mb-4 p-0">
               <Card.Title className="text-sm text-muted-foreground">
-                Context Windows
+                {t("costCalc.contextWindows")}
               </Card.Title>
             </Card.Header>
             <Card.Content className="space-y-3 p-0">

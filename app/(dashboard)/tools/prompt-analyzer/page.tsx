@@ -13,20 +13,12 @@ import {
 } from "lucide-react";
 import { usePromptAnalyzer } from "@/hooks/use-prompt-analyzer";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/hooks/use-translation";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { ScoreBadge } from "@/components/tools/score-badge";
 import { SecurityFlagsList } from "@/components/tools/security-flag";
 import { PromptAnalyzerSkeleton } from "@/components/shared/skeletons";
 import type { PromptIssue } from "@/types/prompt-analyzer";
-
-const ISSUE_LABELS: Record<PromptIssue["type"], string> = {
-  vague_instruction: "Vague Instruction",
-  missing_context: "Missing Context",
-  no_output_format: "No Output Format",
-  too_long: "Too Long",
-  redundant: "Redundant Content",
-  missing_role: "Missing Role",
-};
 
 const SEVERITY_COLORS = {
   high: "text-red-900 bg-red-100 dark:bg-red-900/30 dark:text-red-200",
@@ -35,7 +27,17 @@ const SEVERITY_COLORS = {
 };
 
 export default function PromptAnalyzerPage() {
+  const { t } = useTranslation();
   const [prompt, setPrompt] = useState("");
+
+  const ISSUE_LABELS: Record<PromptIssue["type"], string> = {
+    vague_instruction: t("promptAnalyzer.issueVague"),
+    missing_context: t("promptAnalyzer.issueMissingContext"),
+    no_output_format: t("promptAnalyzer.issueNoOutput"),
+    too_long: t("promptAnalyzer.issueTooLong"),
+    redundant: t("promptAnalyzer.issueRedundant"),
+    missing_role: t("promptAnalyzer.issueMissingRole"),
+  };
   const [showHistory, setShowHistory] = useState(false);
   const { result, history, isAnalyzing, analyze, clearHistory, removeFromHistory } =
     usePromptAnalyzer();
@@ -43,7 +45,7 @@ export default function PromptAnalyzerPage() {
 
   const handleAnalyze = async () => {
     if (!prompt.trim()) {
-      addToast("Please enter a prompt to analyze", "warning");
+      addToast(t("promptAnalyzer.toastEnterPrompt"), "warning");
       return;
     }
 
@@ -51,29 +53,29 @@ export default function PromptAnalyzerPage() {
       const analysis = await analyze(prompt);
       if (analysis.securityFlags.length > 0) {
         addToast(
-          `Security issues detected: ${analysis.securityFlags.length}`,
+          t("promptAnalyzer.toastSecurity", { count: analysis.securityFlags.length }),
           "warning"
         );
       } else if (analysis.score >= 8) {
-        addToast("Excellent prompt quality!", "success");
+        addToast(t("promptAnalyzer.toastExcellent"), "success");
       }
     } catch {
-      addToast("Analysis failed. Please try again.", "error");
+      addToast(t("promptAnalyzer.toastFailed"), "error");
     }
   };
 
   const handleLoadFromHistory = (historyPrompt: string) => {
     setPrompt(historyPrompt);
     setShowHistory(false);
-    addToast("Prompt loaded from history", "info");
+    addToast(t("promptAnalyzer.toastLoaded"), "info");
   };
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       {/* Header */}
       <ToolHeader
-        title="Prompt Analyzer"
-        description="Analyze your prompts for quality, clarity, and security issues"
+        title={t("promptAnalyzer.title")}
+        description={t("promptAnalyzer.description")}
       />
 
       {/* Input Section */}
@@ -84,7 +86,7 @@ export default function PromptAnalyzerPage() {
               htmlFor="prompt-input"
               className="text-sm font-medium text-foreground"
             >
-              Enter your prompt
+              {t("promptAnalyzer.enterPrompt")}
             </label>
             <button
               type="button"
@@ -92,7 +94,7 @@ export default function PromptAnalyzerPage() {
               className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               <History className="size-4" />
-              History ({history.length})
+              {t("common.history", { count: history.length })}
             </button>
           </div>
 
@@ -100,13 +102,13 @@ export default function PromptAnalyzerPage() {
             id="prompt-input"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Paste your prompt here to analyze its quality and check for potential issues..."
+            placeholder={t("promptAnalyzer.placeholder")}
             className="min-h-[160px] w-full resize-y rounded-lg border border-border bg-background p-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
 
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">
-              {prompt.length} characters • ~{Math.ceil(prompt.length / 4)} tokens
+              {t("promptAnalyzer.stats", { chars: prompt.length, tokens: Math.ceil(prompt.length / 4) })}
             </span>
             <Button
               onPress={handleAnalyze}
@@ -115,7 +117,7 @@ export default function PromptAnalyzerPage() {
               className="gap-2"
             >
               <Sparkles className="size-4" />
-              Analyze Prompt
+              {t("promptAnalyzer.analyzePrompt")}
             </Button>
           </div>
         </div>
@@ -125,7 +127,7 @@ export default function PromptAnalyzerPage() {
       {showHistory && (
         <Card className="p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-semibold text-foreground">Analysis History</h2>
+            <h2 className="font-semibold text-foreground">{t("promptAnalyzer.analysisHistory")}</h2>
             {history.length > 0 && (
               <Button
                 size="sm"
@@ -134,14 +136,14 @@ export default function PromptAnalyzerPage() {
                 className="gap-1.5"
               >
                 <Trash2 className="size-4" />
-                Clear All
+                {t("common.clearAll")}
               </Button>
             )}
           </div>
 
           {history.length === 0 ? (
             <p className="py-8 text-center text-muted-foreground">
-              No analysis history yet
+              {t("promptAnalyzer.noAnalysisHistory")}
             </p>
           ) : (
             <div className="space-y-2">
@@ -181,7 +183,7 @@ export default function PromptAnalyzerPage() {
                       variant="ghost"
                       onPress={() => handleLoadFromHistory(item.prompt)}
                     >
-                      Load
+                      {t("promptAnalyzer.load")}
                     </Button>
                     <Button
                       size="sm"
@@ -216,23 +218,23 @@ export default function PromptAnalyzerPage() {
               />
               <div className="flex-1 text-center sm:text-left">
                 <h2 className="text-xl font-semibold text-foreground">
-                  Analysis Complete
+                  {t("promptAnalyzer.analysisComplete")}
                 </h2>
                 <p className="mt-1 text-muted-foreground">
-                  Your prompt scored {result.score}/10 ({result.category})
+                  {t("promptAnalyzer.scoreResult", { score: result.score, category: result.category })}
                 </p>
                 <div className="mt-4 flex flex-wrap justify-center gap-4 sm:justify-start">
                   <div className="flex items-center gap-2 text-sm">
                     <FileText className="size-4 text-muted-foreground" />
-                    <span>{result.tokenCount} tokens</span>
+                    <span>{t("common.tokens", { count: result.tokenCount })}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <AlertTriangle className="size-4 text-muted-foreground" />
-                    <span>{result.issues.length} issues</span>
+                    <span>{t("promptAnalyzer.issues", { count: result.issues.length })}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Sparkles className="size-4 text-muted-foreground" />
-                    <span>{result.securityFlags.length} security flags</span>
+                    <span>{t("promptAnalyzer.securityFlags", { count: result.securityFlags.length })}</span>
                   </div>
                 </div>
               </div>
@@ -243,7 +245,7 @@ export default function PromptAnalyzerPage() {
           <Card className="p-6">
             <h3 className="mb-4 flex items-center gap-2 font-semibold text-foreground">
               <AlertTriangle className="size-5" />
-              Security Analysis
+              {t("promptAnalyzer.securityAnalysis")}
             </h3>
             <SecurityFlagsList flags={result.securityFlags} />
           </Card>
@@ -252,7 +254,7 @@ export default function PromptAnalyzerPage() {
           {result.issues.length > 0 && (
             <Card className="p-6">
               <h3 className="mb-4 font-semibold text-foreground">
-                Quality Issues
+                {t("promptAnalyzer.qualityIssues")}
               </h3>
               <div className="space-y-3">
                 {result.issues.map((issue, index) => (
@@ -283,7 +285,7 @@ export default function PromptAnalyzerPage() {
           <Card className="p-6">
             <h3 className="mb-4 flex items-center gap-2 font-semibold text-foreground">
               <Lightbulb className="size-5 text-yellow-500" />
-              Suggestions
+              {t("promptAnalyzer.suggestions")}
             </h3>
             <ul className="space-y-2">
               {result.suggestions.map((suggestion, index) => (
@@ -303,10 +305,10 @@ export default function PromptAnalyzerPage() {
           <div className="text-center">
             <Sparkles className="mx-auto size-12 text-muted-foreground/50" />
             <h3 className="mt-4 text-lg font-medium text-foreground">
-              Ready to analyze
+              {t("promptAnalyzer.readyToAnalyze")}
             </h3>
             <p className="mt-2 text-muted-foreground">
-              Enter a prompt above and click Analyze to get started
+              {t("promptAnalyzer.emptyStateHint")}
             </p>
           </div>
         </Card>

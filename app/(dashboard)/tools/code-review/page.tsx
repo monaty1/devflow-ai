@@ -5,6 +5,7 @@ import { Card, Button } from "@heroui/react";
 import { RotateCcw, AlertTriangle, CheckCircle, Info } from "lucide-react";
 import { useCodeReview } from "@/hooks/use-code-review";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/hooks/use-translation";
 import { ToolHeader } from "@/components/shared/tool-header";
 import type { SupportedLanguage, CodeIssue } from "@/types/code-review";
 
@@ -34,6 +35,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export default function CodeReviewPage() {
+  const { t } = useTranslation();
   const [code, setCode] = useState("");
   const [language, setLanguage] = useState<SupportedLanguage>("typescript");
   const { result, isReviewing, review, reset } = useCodeReview();
@@ -41,7 +43,7 @@ export default function CodeReviewPage() {
 
   const handleReview = async () => {
     if (!code.trim()) {
-      addToast("Please enter code to review", "warning");
+      addToast(t("codeReview.toastEnterCode"), "warning");
       return;
     }
 
@@ -52,12 +54,12 @@ export default function CodeReviewPage() {
       ).length;
 
       if (criticalCount > 0) {
-        addToast(`Found ${criticalCount} critical issue(s)!`, "error");
+        addToast(t("codeReview.toastCritical", { count: criticalCount }), "error");
       } else if (reviewResult.overallScore >= 80) {
-        addToast("Code looks great!", "success");
+        addToast(t("codeReview.toastGreat"), "success");
       }
     } catch {
-      addToast("Review failed. Please try again.", "error");
+      addToast(t("codeReview.toastFailed"), "error");
     }
   };
 
@@ -70,12 +72,12 @@ export default function CodeReviewPage() {
     <div className="mx-auto max-w-5xl space-y-6">
       {/* Header */}
       <ToolHeader
-        title="Code Review Assistant"
-        description="Automated code quality and security analysis"
+        title={t("codeReview.title")}
+        description={t("codeReview.description")}
         actions={
           <Button variant="outline" size="sm" onPress={handleReset} className="gap-2">
             <RotateCcw className="size-4" />
-            Reset
+            {t("common.reset")}
           </Button>
         }
       />
@@ -84,13 +86,13 @@ export default function CodeReviewPage() {
         {/* Input Panel */}
         <Card className="p-6">
           <Card.Header className="mb-4 p-0">
-            <Card.Title>Code Input</Card.Title>
+            <Card.Title>{t("codeReview.codeInput")}</Card.Title>
           </Card.Header>
           <Card.Content className="space-y-4 p-0">
             {/* Language Selector */}
             <div>
               <label htmlFor="code-review-language" className="text-sm font-medium text-muted-foreground">
-                Language
+                {t("codeReview.language")}
               </label>
               <select
                 id="code-review-language"
@@ -109,13 +111,13 @@ export default function CodeReviewPage() {
             {/* Code Editor */}
             <div>
               <label htmlFor="code-review-input" className="text-sm font-medium text-muted-foreground">
-                Paste your code
+                {t("codeReview.pasteCode")}
               </label>
               <textarea
                 id="code-review-input"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                placeholder="// Paste your code here..."
+                placeholder={t("codeReview.placeholder")}
                 className="mt-1 h-80 w-full resize-none rounded-lg border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                 spellCheck={false}
               />
@@ -123,14 +125,14 @@ export default function CodeReviewPage() {
 
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
-                {code.split("\n").length} lines
+                {t("common.lines", { count: code.split("\n").length })}
               </span>
               <Button
                 onPress={handleReview}
                 isPending={isReviewing}
                 isDisabled={!code.trim()}
               >
-                Review Code
+                {t("codeReview.reviewCode")}
               </Button>
             </div>
           </Card.Content>
@@ -146,7 +148,7 @@ export default function CodeReviewPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">
-                        Overall Score
+                        {t("codeReview.overallScore")}
                       </p>
                       <p
                         className={`text-4xl font-bold ${
@@ -172,30 +174,30 @@ export default function CodeReviewPage() {
               {/* Metrics */}
               <Card className="p-6">
                 <Card.Header className="mb-4 p-0">
-                  <Card.Title className="text-sm">Metrics</Card.Title>
+                  <Card.Title className="text-sm">{t("codeReview.metrics")}</Card.Title>
                 </Card.Header>
                 <Card.Content className="p-0">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-xs text-muted-foreground">Total Lines</p>
+                      <p className="text-xs text-muted-foreground">{t("codeReview.totalLines")}</p>
                       <p className="font-semibold">{result.metrics.totalLines}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Code Lines</p>
+                      <p className="text-xs text-muted-foreground">{t("codeReview.codeLines")}</p>
                       <p className="font-semibold">{result.metrics.codeLines}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Comments</p>
+                      <p className="text-xs text-muted-foreground">{t("codeReview.comments")}</p>
                       <p className="font-semibold">{result.metrics.commentLines}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Complexity</p>
+                      <p className="text-xs text-muted-foreground">{t("codeReview.complexity")}</p>
                       <p className="font-semibold">{result.metrics.complexity}</p>
                     </div>
                   </div>
                   <div className="mt-4">
                     <div className="mb-1 flex justify-between text-sm">
-                      <span className="text-muted-foreground">Maintainability</span>
+                      <span className="text-muted-foreground">{t("codeReview.maintainability")}</span>
                       <span>{result.metrics.maintainabilityIndex}%</span>
                     </div>
                     <div className="h-2 w-full rounded-full bg-muted">
@@ -221,7 +223,7 @@ export default function CodeReviewPage() {
                 <Card className="p-6">
                   <Card.Header className="mb-4 p-0">
                     <Card.Title className="text-sm">
-                      Issues ({result.issues.length})
+                      {t("codeReview.issues", { count: result.issues.length })}
                     </Card.Title>
                   </Card.Header>
                   <Card.Content className="max-h-64 space-y-2 overflow-y-auto p-0">
@@ -237,7 +239,7 @@ export default function CodeReviewPage() {
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
                               <span className="text-xs text-muted-foreground">
-                                Line {issue.line}
+                                {t("codeReview.line", { line: issue.line })}
                               </span>
                               <span
                                 className={`rounded-full px-2 py-0.5 text-xs ${CATEGORY_COLORS[issue.category]}`}
@@ -264,7 +266,7 @@ export default function CodeReviewPage() {
               {/* Suggestions */}
               <Card className="p-6">
                 <Card.Header className="mb-4 p-0">
-                  <Card.Title className="text-sm">Suggestions</Card.Title>
+                  <Card.Title className="text-sm">{t("codeReview.suggestions")}</Card.Title>
                 </Card.Header>
                 <Card.Content className="space-y-2 p-0">
                   {result.suggestions.map((s, i) => (
@@ -283,9 +285,9 @@ export default function CodeReviewPage() {
             <Card className="p-16">
               <Card.Content className="p-0 text-center">
                 <p className="mb-4 text-5xl">🔍</p>
-                <p className="text-foreground">Ready to review</p>
+                <p className="text-foreground">{t("codeReview.emptyState")}</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Paste code and click Review to analyze
+                  {t("codeReview.emptyStateHint")}
                 </p>
               </Card.Content>
             </Card>

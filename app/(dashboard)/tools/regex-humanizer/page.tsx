@@ -9,15 +9,10 @@ import {
   Trash2,
 } from "lucide-react";
 import { useRegexHumanizer } from "@/hooks/use-regex-humanizer";
+import { useTranslation } from "@/hooks/use-translation";
 import { CopyButton } from "@/components/shared/copy-button";
 import { ToolHeader } from "@/components/shared/tool-header";
 import type { RegexMode } from "@/types/regex-humanizer";
-
-const TABS: { id: RegexMode; label: string; icon: typeof Regex }[] = [
-  { id: "explain", label: "Explain", icon: Regex },
-  { id: "generate", label: "Generate", icon: Sparkles },
-  { id: "test", label: "Test", icon: FlaskConical },
-];
 
 // Token type to color mapping
 const TOKEN_COLORS: Record<string, string> = {
@@ -32,6 +27,14 @@ const TOKEN_COLORS: Record<string, string> = {
 };
 
 export default function RegexHumanizerPage() {
+  const { t } = useTranslation();
+
+  const TABS: { id: RegexMode; label: string; icon: typeof Regex }[] = [
+    { id: "explain", label: t("regex.tabExplain"), icon: Regex },
+    { id: "generate", label: t("regex.tabGenerate"), icon: Sparkles },
+    { id: "test", label: t("regex.tabTest"), icon: FlaskConical },
+  ];
+
   const {
     mode,
     pattern,
@@ -67,8 +70,8 @@ export default function RegexHumanizerPage() {
       <ToolHeader
         icon={Regex}
         gradient="from-cyan-500 to-blue-600"
-        title="Regex Humanizer"
-        description="Explain regex in plain English, generate patterns from descriptions"
+        title={t("regex.title")}
+        description={t("regex.description")}
       />
 
       {/* Tabs */}
@@ -95,9 +98,9 @@ export default function RegexHumanizerPage() {
         {/* Input Panel */}
         <Card className="p-6">
           <h2 className="mb-4 text-lg font-semibold">
-            {mode === "explain" && "Regular Expression"}
-            {mode === "generate" && "Description"}
-            {mode === "test" && "Pattern & Text"}
+            {mode === "explain" && t("regex.regularExpression")}
+            {mode === "generate" && t("regex.descriptionLabel")}
+            {mode === "test" && t("regex.patternAndText")}
           </h2>
 
           {/* Explain Mode */}
@@ -105,7 +108,7 @@ export default function RegexHumanizerPage() {
             <div className="space-y-4">
               <div>
                 <label htmlFor="regex-explain-input" className="mb-2 block text-sm font-medium text-muted-foreground">
-                  Enter your regex
+                  {t("regex.enterRegex")}
                 </label>
                 <div className="relative">
                   <input
@@ -119,7 +122,7 @@ export default function RegexHumanizerPage() {
                   {pattern && !isValidRegex(pattern) && (
                     <div className="mt-2 flex items-center gap-2 text-sm text-red-500">
                       <AlertCircle className="size-4" />
-                      Invalid regex
+                      {t("regex.invalidRegex")}
                     </div>
                   )}
                 </div>
@@ -128,7 +131,7 @@ export default function RegexHumanizerPage() {
               {/* Presets */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-muted-foreground">
-                  Common patterns
+                  {t("regex.commonPatterns")}
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {commonPatterns.map((preset) => (
@@ -151,7 +154,7 @@ export default function RegexHumanizerPage() {
             <div className="space-y-4">
               <div>
                 <label htmlFor="regex-description-input" className="mb-2 block text-sm font-medium text-muted-foreground">
-                  Describe what you need
+                  {t("regex.describeNeed")}
                 </label>
                 <textarea
                   id="regex-description-input"
@@ -164,7 +167,7 @@ export default function RegexHumanizerPage() {
               </div>
 
               <div className="rounded-lg bg-muted/50 p-4">
-                <h4 className="mb-2 text-sm font-medium">Example descriptions:</h4>
+                <h4 className="mb-2 text-sm font-medium">{t("regex.exampleDescs")}</h4>
                 <ul className="space-y-1 text-xs text-muted-foreground">
                   <li>• &quot;valid email&quot;</li>
                   <li>• &quot;US phone number&quot;</li>
@@ -181,7 +184,7 @@ export default function RegexHumanizerPage() {
             <div className="space-y-4">
               <div>
                 <label htmlFor="regex-test-pattern" className="mb-2 block text-sm font-medium text-muted-foreground">
-                  Regular expression
+                  {t("regex.testRegex")}
                 </label>
                 <input
                   id="regex-test-pattern"
@@ -195,7 +198,7 @@ export default function RegexHumanizerPage() {
 
               <div>
                 <label htmlFor="regex-test-text" className="mb-2 block text-sm font-medium text-muted-foreground">
-                  Test text
+                  {t("regex.testText")}
                 </label>
                 <textarea
                   id="regex-test-text"
@@ -241,9 +244,9 @@ export default function RegexHumanizerPage() {
               isPending={isLoading}
               className="flex-1"
             >
-              {mode === "explain" && "Explain"}
-              {mode === "generate" && "Generate"}
-              {mode === "test" && "Test"}
+              {mode === "explain" && t("regex.explain")}
+              {mode === "generate" && t("regex.tabGenerate")}
+              {mode === "test" && t("regex.test")}
             </Button>
             <Button variant="outline" onPress={reset}>
               <Trash2 className="size-4" />
@@ -254,7 +257,7 @@ export default function RegexHumanizerPage() {
         {/* Output Panel */}
         <Card className="p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Result</h2>
+            <h2 className="text-lg font-semibold">{t("common.result")}</h2>
             {(analysis || generatedPattern || testResult) && (
               <CopyButton
                 getText={() =>
@@ -272,7 +275,7 @@ export default function RegexHumanizerPage() {
             <div className="space-y-4">
               {/* Syntax Highlighted Pattern */}
               <div className="rounded-lg bg-muted/50 p-4">
-                <h4 className="mb-2 text-sm font-medium">Pattern:</h4>
+                <h4 className="mb-2 text-sm font-medium">{t("regex.pattern")}</h4>
                 <div className="flex flex-wrap gap-1 font-mono text-sm">
                   {analysis.tokens.map((token, i) => (
                     <span
@@ -289,19 +292,19 @@ export default function RegexHumanizerPage() {
               {/* Color Legend */}
               <div className="flex flex-wrap gap-2 text-xs">
                 <span className={`rounded px-2 py-0.5 ${TOKEN_COLORS["anchor"]}`}>
-                  Anchors
+                  {t("regex.anchors")}
                 </span>
                 <span className={`rounded px-2 py-0.5 ${TOKEN_COLORS["group"]}`}>
-                  Groups
+                  {t("regex.groups")}
                 </span>
                 <span className={`rounded px-2 py-0.5 ${TOKEN_COLORS["quantifier"]}`}>
-                  Quantifiers
+                  {t("regex.quantifiers")}
                 </span>
                 <span className={`rounded px-2 py-0.5 ${TOKEN_COLORS["charClass"]}`}>
-                  Classes
+                  {t("regex.classes")}
                 </span>
                 <span className={`rounded px-2 py-0.5 ${TOKEN_COLORS["escape"]}`}>
-                  Escapes
+                  {t("regex.escapes")}
                 </span>
               </div>
 
@@ -316,7 +319,7 @@ export default function RegexHumanizerPage() {
               {analysis.groups.length > 0 && (
                 <div className="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
                   <h4 className="mb-2 font-medium text-blue-700 dark:text-blue-300">
-                    Capture groups ({analysis.groups.length})
+                    {t("regex.captureGroups", { count: analysis.groups.length })}
                   </h4>
                   <ul className="space-y-2 text-sm">
                     {analysis.groups.map((group) => (
@@ -340,7 +343,7 @@ export default function RegexHumanizerPage() {
             <div className="space-y-4">
               <div className="rounded-lg bg-green-50 p-4 dark:bg-green-900/20">
                 <h4 className="mb-2 font-medium text-green-700 dark:text-green-300">
-                  Generated pattern:
+                  {t("regex.generatedPattern")}
                 </h4>
                 <code className="block rounded bg-green-100 p-3 font-mono text-sm dark:bg-green-900/30">
                   {generatedPattern}
@@ -348,8 +351,7 @@ export default function RegexHumanizerPage() {
               </div>
 
               <p className="text-sm text-muted-foreground">
-                You can copy this pattern and test it in the
-                &quot;Test&quot; tab.
+                {t("regex.testPatternHint")}
               </p>
 
               <Button
@@ -359,7 +361,7 @@ export default function RegexHumanizerPage() {
                   setPattern(generatedPattern);
                 }}
               >
-                Test this pattern
+                {t("regex.testThisPattern")}
               </Button>
             </div>
           )}
@@ -387,8 +389,8 @@ export default function RegexHumanizerPage() {
                     }`}
                   >
                     {testResult.matches
-                      ? `${testResult.allMatches.length} match(es) found`
-                      : "No matches"}
+                      ? t("regex.matchesFound", { count: testResult.allMatches.length })
+                      : t("regex.noMatches")}
                   </p>
                   {!testResult.isValid && (
                     <p className="text-sm text-red-600">{testResult.error}</p>
@@ -399,7 +401,7 @@ export default function RegexHumanizerPage() {
               {/* Matches List */}
               {testResult.allMatches.length > 0 && (
                 <div className="space-y-2">
-                  <h4 className="font-medium">Matches:</h4>
+                  <h4 className="font-medium">{t("regex.matches")}</h4>
                   {testResult.allMatches.map((match, i) => (
                     <div
                       key={i}
@@ -434,7 +436,7 @@ export default function RegexHumanizerPage() {
               {/* Highlighted Text Preview */}
               {testResult.matches && testInput && (
                 <div className="rounded-lg bg-muted/50 p-4">
-                  <h4 className="mb-2 text-sm font-medium">Preview:</h4>
+                  <h4 className="mb-2 text-sm font-medium">{t("regex.preview")}</h4>
                   <HighlightedText
                     text={testInput}
                     matches={testResult.allMatches}
@@ -449,11 +451,9 @@ export default function RegexHumanizerPage() {
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <Regex className="mb-4 size-12 text-muted-foreground/30" />
               <p className="text-muted-foreground">
-                {mode === "explain" &&
-                  "Enter a regex to see its explanation"}
-                {mode === "generate" &&
-                  "Describe the pattern you need"}
-                {mode === "test" && "Enter a pattern and text to test"}
+                {mode === "explain" && t("regex.emptyExplain")}
+                {mode === "generate" && t("regex.emptyGenerate")}
+                {mode === "test" && t("regex.emptyTest")}
               </p>
             </div>
           )}
