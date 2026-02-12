@@ -3,19 +3,21 @@
 import { Card, Button } from "@heroui/react";
 import { RotateCcw } from "lucide-react";
 import { useTokenVisualizer } from "@/hooks/use-token-visualizer";
+import { useTranslation } from "@/hooks/use-translation";
 import { CopyButton } from "@/components/shared/copy-button";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { formatCost } from "@/lib/application/cost-calculator";
 
 export default function TokenVisualizerPage() {
+  const { t } = useTranslation();
   const { input, setInput, visualization, reset } = useTokenVisualizer();
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       {/* Header */}
       <ToolHeader
-        title="Token Visualizer"
-        description="See how AI models tokenize your text in real-time"
+        title={t("tokenViz.title")}
+        description={t("tokenViz.description")}
         actions={
           <div className="flex gap-2">
             {visualization && (
@@ -23,13 +25,13 @@ export default function TokenVisualizerPage() {
                 getText={() =>
                   `Tokens: ${visualization.totalTokens}\nInput: ${visualization.input}\nGPT-4 Cost: ${formatCost(visualization.estimatedCost.gpt4)}\nClaude Cost: ${formatCost(visualization.estimatedCost.claude)}`
                 }
-                label="Copy"
+                label={t("common.copy")}
                 variant="outline"
               />
             )}
             <Button variant="outline" size="sm" onPress={reset} className="gap-2">
               <RotateCcw className="size-4" />
-              Reset
+              {t("common.reset")}
             </Button>
           </div>
         }
@@ -38,13 +40,13 @@ export default function TokenVisualizerPage() {
       {/* Input */}
       <Card className="p-6">
         <Card.Header className="mb-4 p-0">
-          <Card.Title>Input Text</Card.Title>
+          <Card.Title>{t("tokenViz.inputText")}</Card.Title>
         </Card.Header>
         <Card.Content className="p-0">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Type or paste text here to see how it gets tokenized..."
+            placeholder={t("tokenViz.placeholder")}
             className="h-40 w-full resize-none rounded-lg border border-border bg-background p-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </Card.Content>
@@ -55,7 +57,7 @@ export default function TokenVisualizerPage() {
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <Card className="p-4">
             <Card.Content className="p-0 text-center">
-              <p className="text-xs text-muted-foreground">Total Tokens</p>
+              <p className="text-xs text-muted-foreground">{t("tokenViz.totalTokens")}</p>
               <p className="text-2xl font-bold text-blue-600">
                 {visualization.totalTokens}
               </p>
@@ -63,7 +65,7 @@ export default function TokenVisualizerPage() {
           </Card>
           <Card className="p-4">
             <Card.Content className="p-0 text-center">
-              <p className="text-xs text-muted-foreground">Characters</p>
+              <p className="text-xs text-muted-foreground">{t("tokenViz.characters")}</p>
               <p className="text-2xl font-bold text-purple-600">
                 {visualization.input.length}
               </p>
@@ -71,7 +73,7 @@ export default function TokenVisualizerPage() {
           </Card>
           <Card className="p-4">
             <Card.Content className="p-0 text-center">
-              <p className="text-xs text-muted-foreground">GPT-4o Cost</p>
+              <p className="text-xs text-muted-foreground">{t("tokenViz.gpt4Cost")}</p>
               <p className="text-2xl font-bold text-amber-600">
                 {formatCost(visualization.estimatedCost.gpt4)}
               </p>
@@ -79,7 +81,7 @@ export default function TokenVisualizerPage() {
           </Card>
           <Card className="p-4">
             <Card.Content className="p-0 text-center">
-              <p className="text-xs text-muted-foreground">Claude Cost</p>
+              <p className="text-xs text-muted-foreground">{t("tokenViz.claudeCost")}</p>
               <p className="text-2xl font-bold text-emerald-600">
                 {formatCost(visualization.estimatedCost.claude)}
               </p>
@@ -92,9 +94,9 @@ export default function TokenVisualizerPage() {
       {visualization && (
         <Card className="p-6">
           <Card.Header className="mb-4 p-0">
-            <Card.Title>Token Breakdown</Card.Title>
+            <Card.Title>{t("tokenViz.tokenBreakdown")}</Card.Title>
             <Card.Description>
-              Each colored block = 1 token (approximate)
+              {t("tokenViz.tokenDescription")}
             </Card.Description>
           </Card.Header>
           <Card.Content className="p-0">
@@ -116,9 +118,7 @@ export default function TokenVisualizerPage() {
             {/* Legend */}
             <div className="mt-6 border-t border-border pt-4">
               <p className="text-xs text-muted-foreground">
-                Tokens are approximate. Real tokenization varies by model (BPE
-                algorithm). Common words = 1 token. Rare/long words may split
-                into multiple tokens.
+                {t("tokenViz.legend")}
               </p>
             </div>
           </Card.Content>
@@ -131,7 +131,7 @@ export default function TokenVisualizerPage() {
           <Card.Content className="p-0 text-center">
             <p className="mb-4 text-5xl">✨</p>
             <p className="text-muted-foreground">
-              Start typing to see tokenization in real-time
+              {t("tokenViz.emptyState")}
             </p>
           </Card.Content>
         </Card>
