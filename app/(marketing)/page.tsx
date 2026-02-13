@@ -1,26 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import {
-  useStaggerIn,
-  useScrollReveal,
-  useCounter,
-} from "@/hooks/use-gsap";
+import dynamic from "next/dynamic";
+import { Zap } from "lucide-react";
 import { useTranslation } from "@/hooks/use-translation";
-import { Zap, Monitor, LockOpen, Star, Shield, TrendingUp } from "lucide-react";
-import { FeatureCard } from "@/components/ui/feature-card";
-import { TOOLS_DATA } from "@/config/tools-data";
-import { TOOL_ICON_MAP } from "@/config/tool-icon-map";
+
+// Heavy below-the-fold sections loaded lazily to reduce main thread work
+const StatsSection = dynamic(() => import("./sections/stats-section"), {
+  ssr: false,
+});
+const FeaturesSection = dynamic(() => import("./sections/features-section"), {
+  ssr: false,
+});
+const WhySection = dynamic(() => import("./sections/why-section"), {
+  ssr: false,
+});
+const CtaSection = dynamic(() => import("./sections/cta-section"), {
+  ssr: false,
+});
 
 export default function HomePage() {
-  const featuresRef = useStaggerIn("> *", 0.3);
-  const statsRef = useScrollReveal();
-  const ctaRef = useScrollReveal();
   const { t } = useTranslation();
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
+      {/* Hero Section — always critical, rendered immediately */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
 
@@ -64,129 +68,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section ref={statsRef} className="container mx-auto px-4 py-16">
-        <h2 className="sr-only">Project Stats</h2>
-        <div className="mx-auto grid max-w-4xl grid-cols-2 gap-6 md:grid-cols-4">
-          {[
-            { label: t("home.freeTools"), value: 15, icon: <Zap className="size-6" /> },
-            { label: t("home.openSource"), value: 100, icon: <Monitor className="size-6" /> },
-            { label: t("home.noApiKey"), value: 0, icon: <LockOpen className="size-6" /> },
-            { label: t("home.githubStars"), value: 500, icon: <Star className="size-6" /> },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-xl bg-muted/50 p-6 text-center"
-            >
-              <div className="mb-2 flex justify-center text-muted-foreground">{stat.icon}</div>
-              <CounterDisplay target={stat.value} />
-              <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Below-the-fold sections — lazy loaded */}
+      <StatsSection />
+      <FeaturesSection />
+      <WhySection />
+      <CtaSection />
 
-      {/* Features Section */}
-      <section className="border-t border-border bg-muted/30 py-20">
-        <div className="container mx-auto px-4">
-          <div className="mb-12 text-center">
-            <h2 className="mb-3 text-4xl font-bold">{t("home.powerfulTools")}</h2>
-            <p className="text-muted-foreground">
-              {t("home.powerfulToolsDesc")}
-            </p>
-          </div>
-
-          <div
-            ref={featuresRef}
-            className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3"
-          >
-            {TOOLS_DATA.map((tool) => {
-              const Icon = TOOL_ICON_MAP[tool.icon];
-              if (!Icon) return null;
-              return (
-                <FeatureCard
-                  key={tool.id}
-                  icon={Icon}
-                  title={tool.name}
-                  description={tool.description}
-                />
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Why DevFlow Section */}
-      <section className="py-20">
-        <div className="container mx-auto max-w-5xl px-4">
-          <div className="mb-12 text-center">
-            <h2 className="mb-3 text-4xl font-bold">{t("home.whyTitle")}</h2>
-            <p className="text-muted-foreground">
-              {t("home.whySubtitle")}
-            </p>
-          </div>
-
-          <div className="grid gap-8 md:grid-cols-3">
-            {[
-              {
-                icon: Shield,
-                title: t("home.securityTitle"),
-                description: t("home.securityDesc"),
-              },
-              {
-                icon: TrendingUp,
-                title: t("home.costTitle"),
-                description: t("home.costDesc"),
-              },
-              {
-                icon: Zap,
-                title: t("home.dxTitle"),
-                description: t("home.dxDesc"),
-              },
-            ].map((item) => (
-              <div key={item.title} className="p-6 text-center">
-                <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/30">
-                  <item.icon className="size-6 text-blue-600 dark:text-blue-400" />
-                </div>
-                <h3 className="mb-2 text-lg font-semibold">{item.title}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {item.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section ref={ctaRef} className="container mx-auto px-4 py-24">
-        <div className="mx-auto max-w-3xl rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 p-12 text-center">
-          <h2 className="mb-4 text-3xl font-bold text-white">
-            {t("home.ctaTitle")}
-          </h2>
-          <p className="mb-8 text-white/90">
-            {t("home.ctaSubtitle")}
-          </p>
-          <div className="flex flex-col justify-center gap-4 sm:flex-row">
-            <Link
-              href="/tools"
-              className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg bg-white px-8 font-semibold text-blue-900 transition-colors hover:bg-blue-50"
-            >
-              {t("home.startUsing")}
-            </Link>
-            <Link
-              href="https://github.com/albertoguinda/devflow-ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg border-2 border-white px-8 font-semibold text-white transition-colors hover:bg-white/10"
-            >
-              {t("home.starGithub")}
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
+      {/* Footer — lightweight, no lazy load needed */}
       <footer className="border-t py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           © 2026 DevFlow AI ·{" "}
@@ -210,14 +98,5 @@ export default function HomePage() {
         </div>
       </footer>
     </div>
-  );
-}
-
-function CounterDisplay({ target }: { target: number }) {
-  const counterRef = useCounter(target);
-  return (
-    <span ref={counterRef} className="block text-3xl font-bold text-foreground">
-      0
-    </span>
   );
 }

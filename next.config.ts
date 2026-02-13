@@ -52,7 +52,15 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === "production",
   },
   experimental: {
-    optimizePackageImports: ["lucide-react"],
+    optimizePackageImports: [
+      "lucide-react",
+      "framer-motion",
+      "@heroui/react",
+      "@heroui/styles",
+      "gsap",
+      "zod",
+      "react-hook-form",
+    ],
   },
   async headers() {
     return [
