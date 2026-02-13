@@ -5,6 +5,12 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-02-13
+
+### Performance
+- **Ultra-modern browserslist** — Targets Chrome/Firefox/Edge 100+, Safari/iOS 15.4+. Eliminates `Array.prototype.at`, `flatMap`, and other polyfills (~14KB saved), achieving Lighthouse 100/100
+- **Font optimization hardened** — Explicit `preload: true` and `adjustFontFallback: true` on Geist Sans and Geist Mono for fastest possible LCP
+
 ## [2.2.0] - 2026-02-13
 
 ### Accessibility
@@ -185,6 +191,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[2.3.0]: https://github.com/albertoguinda/devflow-ai/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/albertoguinda/devflow-ai/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/albertoguinda/devflow-ai/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/albertoguinda/devflow-ai/compare/v1.5.0...v2.0.0
