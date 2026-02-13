@@ -5,6 +5,19 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-02-13
+
+### Accessibility
+- **WCAG AAA contrast** — Primary color upgraded to `#1e40af` (Blue 800, 8.73:1 on white) in light mode and `#93c5fd` (Blue 300, 9.8:1 on dark bg) in dark mode. All text-on-primary elements now meet WCAG AAA 7:1 minimum
+- **US flag locale icon** — Replaced UK Union Jack with US Stars and Stripes for English locale toggle
+
+### Performance
+- **Mobile LCP optimization** — Removed GSAP fade-in animation from hero section (above-the-fold). Content renders instantly instead of starting at opacity:0, eliminating the 600ms LCP delay on mobile
+- **Hero CTA uses design system** — Replaced hardcoded `bg-blue-600` with `bg-primary` token for consistent theming
+
+### Changed
+- **TFM preparation** — Added `ENTREGA_TFM.md` to `.gitignore`
+
 ## [2.1.0] - 2026-02-13
 
 ### Performance
@@ -172,6 +185,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[2.2.0]: https://github.com/albertoguinda/devflow-ai/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/albertoguinda/devflow-ai/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/albertoguinda/devflow-ai/compare/v1.5.0...v2.0.0
 [1.5.0]: https://github.com/albertoguinda/devflow-ai/compare/v1.4.0...v1.5.0

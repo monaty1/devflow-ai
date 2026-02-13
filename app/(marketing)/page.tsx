@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import {
-  useFadeIn,
   useStaggerIn,
   useScrollReveal,
   useCounter,
@@ -14,7 +13,6 @@ import { TOOLS_DATA } from "@/config/tools-data";
 import { TOOL_ICON_MAP } from "@/config/tool-icon-map";
 
 export default function HomePage() {
-  const heroRef = useFadeIn(0);
   const featuresRef = useStaggerIn("> *", 0.3);
   const statsRef = useScrollReveal();
   const ctaRef = useScrollReveal();
@@ -27,10 +25,7 @@ export default function HomePage() {
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
 
         <div className="container mx-auto px-4 py-24 md:py-32">
-          <div
-            ref={heroRef}
-            className="mx-auto max-w-4xl space-y-6 text-center"
-          >
+          <div className="mx-auto max-w-4xl space-y-6 text-center">
             {/* Badge */}
             <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-900 dark:bg-blue-900/30 dark:text-blue-200">
               <Zap className="size-4" />
@@ -54,7 +49,7 @@ export default function HomePage() {
             <div className="flex flex-col justify-center gap-4 pt-4 sm:flex-row">
               <Link
                 href="/tools"
-                className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg bg-blue-600 px-8 text-base font-semibold text-white transition-colors hover:bg-blue-700"
+                className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg bg-primary px-8 text-base font-semibold text-white transition-colors hover:opacity-90"
               >
                 {t("home.getStarted")}
               </Link>
@@ -175,7 +170,7 @@ export default function HomePage() {
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
             <Link
               href="/tools"
-              className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg bg-white px-8 font-semibold text-blue-600 transition-colors hover:bg-blue-50"
+              className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg bg-white px-8 font-semibold text-primary transition-colors hover:bg-blue-50"
             >
               {t("home.startUsing")}
             </Link>
