@@ -170,7 +170,7 @@ export default function HomePage() {
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
             <Link
               href="/tools"
-              className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg bg-white px-8 font-semibold text-primary transition-colors hover:bg-blue-50"
+              className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg bg-white px-8 font-semibold text-blue-900 transition-colors hover:bg-blue-50"
             >
               {t("home.startUsing")}
             </Link>
