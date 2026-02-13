@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Card, Button } from "@heroui/react";
-import { Plus, Trash2, Download, FolderPlus } from "lucide-react";
+import { Plus, Trash2, Download, FolderPlus, FileText, BookOpen } from "lucide-react";
 import { useContextManager } from "@/hooks/use-context-manager";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
@@ -104,6 +104,7 @@ export default function ContextManagerPage() {
       <ToolHeader
         title={t("ctxMgr.title")}
         description={t("ctxMgr.description")}
+        breadcrumb
         actions={
           <Button onPress={() => setShowCreateWindow(true)} aria-expanded={showCreateWindow} className="gap-2">
             <FolderPlus className="size-4" />
@@ -182,7 +183,7 @@ export default function ContextManagerPage() {
                           addToast(t("ctxMgr.toastWindowDeleted"), "info");
                         }}
                         className="text-muted-foreground transition-colors hover:text-red-500"
-                        aria-label={`Delete window ${window.name}`}
+                        aria-label={t("ctxMgr.deleteWindowLabel", { name: window.name })}
                       >
                         <Trash2 className="size-3.5" />
                       </button>
@@ -224,21 +225,21 @@ export default function ContextManagerPage() {
                     className="gap-2"
                   >
                     <Download className="size-4" />
-                    XML
+                    {t("ctxMgr.formatXml")}
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onPress={() => handleExport("json")}
                   >
-                    JSON
+                    {t("ctxMgr.formatJson")}
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onPress={() => handleExport("markdown")}
                   >
-                    MD
+                    {t("ctxMgr.formatMd")}
                   </Button>
                 </div>
               </div>
@@ -432,7 +433,7 @@ export default function ContextManagerPage() {
                               addToast(t("ctxMgr.toastDocRemoved"), "info");
                             }}
                             className="text-muted-foreground transition-colors hover:text-red-500"
-                            aria-label={`Remove document ${doc.title}`}
+                            aria-label={t("ctxMgr.removeDocLabel", { name: doc.title })}
                           >
                             <Trash2 className="size-4" />
                           </button>
@@ -444,7 +445,7 @@ export default function ContextManagerPage() {
               ) : (
                 <Card className="p-12">
                   <Card.Content className="p-0 text-center">
-                    <p className="mb-3 text-4xl">📄</p>
+                    <FileText className="mx-auto mb-3 size-10 text-muted-foreground" />
                     <p className="text-foreground">{t("ctxMgr.noDocuments")}</p>
                     <p className="text-sm text-muted-foreground">
                       {t("ctxMgr.noDocumentsHint")}
@@ -456,7 +457,7 @@ export default function ContextManagerPage() {
           ) : (
             <Card className="p-16">
               <Card.Content className="p-0 text-center">
-                <p className="mb-4 text-5xl">📚</p>
+                <BookOpen className="mx-auto mb-4 size-12 text-muted-foreground" />
                 <p className="text-lg text-foreground">{t("ctxMgr.noWindowsEmpty")}</p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {t("ctxMgr.noWindowsHint")}

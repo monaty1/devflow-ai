@@ -296,4 +296,143 @@ var c = 3;`;
       }
     });
   });
+
+  describe("calculateMetrics comment and blank line handling", () => {
+    it("should count multiline /* */ comments spanning multiple lines", () => {
+      const code = `const a = 1;
+/*
+  This is a multiline
+  comment spanning
+  several lines
+*/
+const b = 2;`;
+
+      const result = reviewCode(code, "javascript");
+
+      // Lines: "const a = 1;" (code), "/*" (comment), "  This is..." (comment),
+      // "  comment spanning" (comment), "  several lines" (comment), "*/" (comment),
+      // "const b = 2;" (code)
+      expect(result.metrics.commentLines).toBe(5);
+      expect(result.metrics.codeLines).toBe(2);
+      expect(result.metrics.blankLines).toBe(0);
+    });
+
+    it("should count single-line # comments (Python-style)", () => {
+      const code = `# This is a Python comment
+x = 1
+# Another comment
+y = 2`;
+
+      const result = reviewCode(code, "python");
+
+      expect(result.metrics.commentLines).toBe(2);
+      expect(result.metrics.codeLines).toBe(2);
+    });
+
+    it("should count blank lines correctly", () => {
+      const code = `const a = 1;
+
+const b = 2;
+
+const c = 3;`;
+
+      const result = reviewCode(code, "javascript");
+
+      expect(result.metrics.blankLines).toBe(2);
+      expect(result.metrics.codeLines).toBe(3);
+      expect(result.metrics.totalLines).toBe(5);
+    });
+
+    it("should handle transition from inside multiline comment back out with */", () => {
+      const code = `const before = 1;
+/* start of comment
+   still in comment
+   end of comment */
+const after = 2;`;
+
+      const result = reviewCode(code, "javascript");
+
+      // "const before = 1;" -> code
+      // "/* start of comment" -> comment, starts multiline
+      // "   still in comment" -> comment (inside multiline)
+      // "   end of comment */" -> comment (inside multiline, contains */, exits)
+      // "const after = 2;" -> code
+      expect(result.metrics.commentLines).toBe(3);
+      expect(result.metrics.codeLines).toBe(2);
+    });
+
+    it("should handle a single-line /* */ comment without entering multiline mode", () => {
+      const code = `/* single line comment */
+const x = 1;`;
+
+      const result = reviewCode(code, "javascript");
+
+      // "/* single line comment */" starts with /* and contains */ -> comment, no multiline
+      // "const x = 1;" -> code
+      expect(result.metrics.commentLines).toBe(1);
+      expect(result.metrics.codeLines).toBe(1);
+    });
+
+    it("should handle mixed comment types", () => {
+      const code = `// JS comment
+# Python comment
+/* block start
+   block middle
+*/
+const x = 1;
+
+const y = 2;`;
+
+      const result = reviewCode(code, "python");
+
+      // "// JS comment" -> comment (starts with //)
+      // "# Python comment" -> comment (starts with #)
+      // "/* block start" -> comment, enters multiline
+      // "   block middle" -> comment (inside multiline)
+      // "*/" -> comment (inside multiline, exits)
+      // "const x = 1;" -> code
+      // "" -> blank
+      // "const y = 2;" -> code
+      expect(result.metrics.commentLines).toBe(5);
+      expect(result.metrics.codeLines).toBe(2);
+      expect(result.metrics.blankLines).toBe(1);
+      expect(result.metrics.totalLines).toBe(8);
+    });
+
+    it("should count lines with only whitespace as blank lines", () => {
+      const code = `const a = 1;
+
+const b = 2;
+
+const c = 3;`;
+
+      const result = reviewCode(code, "javascript");
+
+      // Lines 2 and 4 are whitespace-only, should be blank
+      expect(result.metrics.blankLines).toBe(2);
+      expect(result.metrics.codeLines).toBe(3);
+    });
+
+    it("should handle multiple consecutive multiline comments", () => {
+      const code = `/*
+  First block
+*/
+/*
+  Second block
+*/
+const x = 1;`;
+
+      const result = reviewCode(code, "javascript");
+
+      // "/*" -> comment, enters multiline
+      // "  First block" -> comment (multiline)
+      // "*/" -> comment (multiline, exits)
+      // "/*" -> comment, enters multiline
+      // "  Second block" -> comment (multiline)
+      // "*/" -> comment (multiline, exits)
+      // "const x = 1;" -> code
+      expect(result.metrics.commentLines).toBe(6);
+      expect(result.metrics.codeLines).toBe(1);
+    });
+  });
 });

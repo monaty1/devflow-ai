@@ -6,6 +6,7 @@ import { useTheme } from "next-themes";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
 import { useLocaleStore } from "@/lib/stores/locale-store";
+import { Sun, Moon, Monitor } from "lucide-react";
 
 interface Settings {
   notifications: boolean;
@@ -90,7 +91,7 @@ export default function SettingsPage() {
                       : "border-border text-muted-foreground hover:border-muted-foreground/50"
                   }`}
                 >
-                  {themeOption === "light" ? "☀️" : themeOption === "dark" ? "🌙" : "💻"}{" "}
+                  {themeOption === "light" ? <Sun className="mr-1 inline size-4" /> : themeOption === "dark" ? <Moon className="mr-1 inline size-4" /> : <Monitor className="mr-1 inline size-4" />}{" "}
                   {t(`settings.${themeOption}`)}
                 </button>
               ))}

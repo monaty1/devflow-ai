@@ -76,6 +76,7 @@ export default function PromptAnalyzerPage() {
       <ToolHeader
         title={t("promptAnalyzer.title")}
         description={t("promptAnalyzer.description")}
+        breadcrumb
       />
 
       {/* Input Section */}

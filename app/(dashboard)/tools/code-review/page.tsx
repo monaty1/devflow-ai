@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Card, Button } from "@heroui/react";
-import { RotateCcw, AlertTriangle, CheckCircle, Info } from "lucide-react";
+import { RotateCcw, AlertTriangle, CheckCircle, Info, Search } from "lucide-react";
 import { useCodeReview } from "@/hooks/use-code-review";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
@@ -74,6 +74,7 @@ export default function CodeReviewPage() {
       <ToolHeader
         title={t("codeReview.title")}
         description={t("codeReview.description")}
+        breadcrumb
         actions={
           <Button variant="outline" size="sm" onPress={handleReset} className="gap-2">
             <RotateCcw className="size-4" />
@@ -284,7 +285,7 @@ export default function CodeReviewPage() {
           ) : (
             <Card className="p-16">
               <Card.Content className="p-0 text-center">
-                <p className="mb-4 text-5xl">🔍</p>
+                <Search className="mx-auto mb-4 size-12 text-muted-foreground" />
                 <p className="text-foreground">{t("codeReview.emptyState")}</p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {t("codeReview.emptyStateHint")}

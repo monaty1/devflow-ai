@@ -261,6 +261,141 @@ describe("Regex Humanizer", () => {
     });
   });
 
+  describe("generateRegex - generateFromDescription branches", () => {
+    it("should return Spanish phone pattern for description with teléfono AND español", () => {
+      const regex = generateRegex("teléfono español");
+      const phoneEs = COMMON_PATTERNS.find((p) => p.id === "phone-es")!.pattern;
+      expect(regex).toBe(phoneEs);
+      expect(isValidRegex(regex)).toBe(true);
+    });
+
+    it("should return generic phone pattern for description with teléfono without español", () => {
+      // Use a description that contains "teléfono" but NOT "español", "espanol", or "es"
+      const regex = generateRegex("validar teléfono global");
+      expect(regex).toBe("^\\+?[\\d\\s\\-\\(\\)]+$");
+      expect(isValidRegex(regex)).toBe(true);
+    });
+
+    it("should return ISO date pattern for 'fecha iso'", () => {
+      const regex = generateRegex("fecha iso");
+      const dateIso = COMMON_PATTERNS.find((p) => p.id === "date-iso")!.pattern;
+      expect(regex).toBe(dateIso);
+      expect(isValidRegex(regex)).toBe(true);
+    });
+
+    it("should return dd/mm/yyyy pattern for 'fecha dd/mm'", () => {
+      const regex = generateRegex("fecha dd/mm");
+      expect(regex).toBe("^\\d{2}/\\d{2}/\\d{4}$");
+      expect(isValidRegex(regex)).toBe(true);
+    });
+
+    it("should default to ISO date pattern for 'fecha' alone", () => {
+      const regex = generateRegex("fecha");
+      const dateIso = COMMON_PATTERNS.find((p) => p.id === "date-iso")!.pattern;
+      expect(regex).toBe(dateIso);
+      expect(isValidRegex(regex)).toBe(true);
+    });
+
+    it("should return IPv4 pattern for 'ip' description", () => {
+      const regex = generateRegex("ip");
+      const ipv4 = COMMON_PATTERNS.find((p) => p.id === "ipv4")!.pattern;
+      expect(regex).toBe(ipv4);
+      expect(isValidRegex(regex)).toBe(true);
+    });
+
+    it("should return IPv4 pattern for 'ipv4' description", () => {
+      const regex = generateRegex("dirección ipv4");
+      const ipv4 = COMMON_PATTERNS.find((p) => p.id === "ipv4")!.pattern;
+      expect(regex).toBe(ipv4);
+      expect(isValidRegex(regex)).toBe(true);
+    });
+
+    it("should return password pattern for 'contraseña' description", () => {
+      const regex = generateRegex("contraseña");
+      const password = COMMON_PATTERNS.find((p) => p.id === "password")!.pattern;
+      expect(regex).toBe(password);
+      expect(isValidRegex(regex)).toBe(true);
+    });
+
+    it("should return password pattern for 'password' description", () => {
+      const regex = generateRegex("validar password");
+      const password = COMMON_PATTERNS.find((p) => p.id === "password")!.pattern;
+      expect(regex).toBe(password);
+      expect(isValidRegex(regex)).toBe(true);
+    });
+
+    it("should return DNI pattern for 'dni' description", () => {
+      const regex = generateRegex("dni");
+      const dni = COMMON_PATTERNS.find((p) => p.id === "dni-es")!.pattern;
+      expect(regex).toBe(dni);
+      expect(isValidRegex(regex)).toBe(true);
+    });
+
+    it("should return DNI pattern for 'nif' description", () => {
+      const regex = generateRegex("validar nif");
+      const dni = COMMON_PATTERNS.find((p) => p.id === "dni-es")!.pattern;
+      expect(regex).toBe(dni);
+      expect(isValidRegex(regex)).toBe(true);
+    });
+
+    it("should return hex color pattern for 'color' description", () => {
+      const regex = generateRegex("color");
+      const hexColor = COMMON_PATTERNS.find((p) => p.id === "hex-color")!.pattern;
+      expect(regex).toBe(hexColor);
+      expect(isValidRegex(regex)).toBe(true);
+    });
+
+    it("should return hex color pattern for 'hex' description", () => {
+      const regex = generateRegex("validar hex");
+      const hexColor = COMMON_PATTERNS.find((p) => p.id === "hex-color")!.pattern;
+      expect(regex).toBe(hexColor);
+      expect(isValidRegex(regex)).toBe(true);
+    });
+
+    it("should generate digit pattern with starting digit like '10 dígitos empezando por 6'", () => {
+      const regex = generateRegex("10 dígitos empezando por 6");
+      expect(regex).toBe("^[6]\\d{9}$");
+      expect(isValidRegex(regex)).toBe(true);
+      const result = testRegex(regex, "6123456789");
+      expect(result.matches).toBe(true);
+    });
+
+    it("should return URL pattern for 'enlace' description", () => {
+      const regex = generateRegex("enlace web");
+      const url = COMMON_PATTERNS.find((p) => p.id === "url")!.pattern;
+      expect(regex).toBe(url);
+      expect(isValidRegex(regex)).toBe(true);
+    });
+
+    it("should return email pattern for 'correo' description", () => {
+      const regex = generateRegex("correo electrónico");
+      const email = COMMON_PATTERNS.find((p) => p.id === "email")!.pattern;
+      expect(regex).toBe(email);
+      expect(isValidRegex(regex)).toBe(true);
+    });
+
+    it("should return dd/mm pattern for 'fecha día/mes'", () => {
+      const regex = generateRegex("fecha día/mes");
+      expect(regex).toBe("^\\d{2}/\\d{2}/\\d{4}$");
+      expect(isValidRegex(regex)).toBe(true);
+    });
+
+    it("should generate alphanumeric for 'alfanumerico' (no accent)", () => {
+      const regex = generateRegex("alfanumerico");
+      expect(regex).toBe("^[a-zA-Z0-9]+$");
+    });
+
+    it("should generate lowercase for 'minuscula' (no accent)", () => {
+      const regex = generateRegex("letras minuscula");
+      expect(regex).toBe("^[a-z]+$");
+    });
+
+    it("should generate uppercase for 'mayuscula' (no accent)", () => {
+      const regex = generateRegex("letras mayuscula");
+      expect(regex).toBe("^[A-Z]+$");
+    });
+  });
+
   describe("testRegex - advanced matching", () => {
     it("should handle /pattern/flags format", () => {
       const result = testRegex("/hello/i", "Hello World");

@@ -12,6 +12,7 @@ import {
   Sparkles,
   Menu,
   X,
+  BookOpen,
 } from "lucide-react";
 import { useTranslation } from "@/hooks/use-translation";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
@@ -58,6 +59,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const NAV_ITEMS = [
     { href: "/tools", label: t("sidebar.tools"), icon: Wrench },
+    { href: "/docs", label: t("sidebar.docs"), icon: BookOpen },
     { href: "/favorites", label: t("sidebar.favorites"), icon: Heart },
     { href: "/history", label: t("sidebar.history"), icon: Clock },
     { href: "/settings", label: t("sidebar.settings"), icon: Settings },

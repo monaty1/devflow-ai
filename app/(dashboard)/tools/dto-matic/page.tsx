@@ -62,6 +62,7 @@ export default function DtoMaticPage() {
         gradient="from-green-500 to-emerald-600"
         title={t("dtoMatic.title")}
         description={t("dtoMatic.description")}
+        breadcrumb
       />
 
       {/* Mode Selector */}
@@ -103,10 +104,10 @@ export default function DtoMaticPage() {
 
             <textarea
               id="dto-json-input"
-              aria-label="JSON input for DTO generation"
+              aria-label={t("dtoMatic.jsonInputLabel")}
               value={jsonInput}
               onChange={(e) => setJsonInput(e.target.value)}
-              placeholder='{"id": 1, "name": "John Doe", "email": "john@example.com"}'
+              placeholder={t("dtoMatic.jsonPlaceholder")}
               rows={12}
               className={`w-full resize-none rounded-lg border bg-background px-4 py-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 ${
                 !isJsonValid

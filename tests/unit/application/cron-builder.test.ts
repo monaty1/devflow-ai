@@ -395,6 +395,81 @@ describe("Cron Builder", () => {
     });
   });
 
+  describe("explainExpression – uncovered branches", () => {
+    it("should explain cron with step value */5 mentioning 'Cada 5 minutos'", () => {
+      const result = explainExpression("*/5 * * * *");
+
+      expect(result.humanReadable).toContain("Cada 5 minutos");
+      // The minute field explanation should mention "Cada 5 minutos"
+      const minuteDetail = result.details.find((d) => d.field === "minute");
+      expect(minuteDetail).toBeDefined();
+      expect(minuteDetail!.explanation).toContain("Cada 5 minutos");
+    });
+
+    it("should explain cron with step on non-star base 10/5 mentioning 'empezando en 10'", () => {
+      const result = explainExpression("10/5 * * * *");
+
+      const minuteDetail = result.details.find((d) => d.field === "minute");
+      expect(minuteDetail).toBeDefined();
+      expect(minuteDetail!.explanation).toContain("Cada 5");
+      expect(minuteDetail!.explanation).toContain("empezando en 10");
+    });
+
+    it("should explain range value 1-5 in minute field with 'Del 1 al 5'", () => {
+      const result = explainExpression("1-5 * * * *");
+
+      const minuteDetail = result.details.find((d) => d.field === "minute");
+      expect(minuteDetail).toBeDefined();
+      expect(minuteDetail!.explanation).toContain("Del 1 al 5");
+    });
+
+    it("should explain comma-separated with range '1,3-5' formatting both items", () => {
+      const result = explainExpression("1,3-5 * * * *");
+
+      const minuteDetail = result.details.find((d) => d.field === "minute");
+      expect(minuteDetail).toBeDefined();
+      // Should contain both the single value "1" and the range "3-5"
+      expect(minuteDetail!.explanation).toContain("1");
+      expect(minuteDetail!.explanation).toContain("3");
+      expect(minuteDetail!.explanation).toContain("5");
+    });
+
+    it("should explain specific minute + wildcard hour '30 * * * *' as 'En el minuto 30 de cada hora'", () => {
+      const result = explainExpression("30 * * * *");
+
+      expect(result.humanReadable).toContain("En el minuto 30 de cada hora");
+    });
+
+    it("should explain specific minute + hour range '0 9-17 * * *' mentioning the range", () => {
+      const result = explainExpression("0 9-17 * * *");
+
+      expect(result.humanReadable).toContain("minuto 00");
+      expect(result.humanReadable).toContain("9:00");
+      expect(result.humanReadable).toContain("17:00");
+    });
+
+    it("should explain day of month as number '0 0 15 * *' with 'el día 15'", () => {
+      const result = explainExpression("0 0 15 * *");
+
+      expect(result.humanReadable).toContain("el día 15");
+    });
+
+    it("should explain day of month as pattern '0 0 1,15 * *' with 'días 1,15'", () => {
+      const result = explainExpression("0 0 1,15 * *");
+
+      expect(result.humanReadable).toContain("días 1,15");
+    });
+
+    it("should handle else branch for non-star minute and hour like '1-5 2-4 * * *'", () => {
+      const result = explainExpression("1-5 2-4 * * *");
+
+      // This hits the else branch in buildHumanReadable: minute != "*" and hour != "*"
+      // but neither matches the step, single-digit-minute-wildcard-hour, or specific-minute-hour-range patterns
+      expect(result.humanReadable).toContain("minuto 1-5");
+      expect(result.humanReadable).toContain("hora 2-4");
+    });
+  });
+
   describe("formatRelative branches (via calculateNextExecutions)", () => {
     it("should produce relative strings for next executions", () => {
       const executions = calculateNextExecutions("* * * * *", 1);

@@ -64,6 +64,7 @@ export default function JsonFormatterPage() {
         gradient="from-yellow-500 to-amber-600"
         title={t("jsonFmt.title")}
         description={t("jsonFmt.description")}
+        breadcrumb
       />
 
       {/* Mode Selector */}
@@ -110,7 +111,7 @@ export default function JsonFormatterPage() {
               aria-describedby={input && !inputValidation.isValid ? "json-input-error" : undefined}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder='{"name": "John", "age": 30, "email": "john@example.com"}'
+              placeholder={t("jsonFmt.jsonPlaceholder")}
               rows={14}
               className={`w-full resize-none rounded-lg border bg-background px-4 py-3 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 ${
                 input && !inputValidation.isValid
@@ -122,7 +123,7 @@ export default function JsonFormatterPage() {
             {input && !inputValidation.isValid && inputValidation.error && (
               <div id="json-input-error" role="alert" className="mt-2 flex items-center gap-2 text-sm text-red-500">
                 <AlertCircle className="size-4" />
-                Line {inputValidation.error.line}, Col {inputValidation.error.column}:{" "}
+                {t("jsonFmt.syntaxError", { line: inputValidation.error.line, col: inputValidation.error.column })}{" "}
                 {inputValidation.error.message}
               </div>
             )}

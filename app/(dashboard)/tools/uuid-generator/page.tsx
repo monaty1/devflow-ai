@@ -62,6 +62,7 @@ export default function UuidGeneratorPage() {
         gradient="from-teal-500 to-emerald-600"
         title={t("uuid.title")}
         description={t("uuid.description")}
+        breadcrumb
       />
 
       {/* Tab Selector */}
@@ -277,7 +278,7 @@ export default function UuidGeneratorPage() {
 
           <input
             id="uuid-parse"
-            aria-label="UUID to parse"
+            aria-label={t("uuid.parseInputLabel")}
             type="text"
             value={parseInput}
             onChange={(e) => setParseInput(e.target.value)}

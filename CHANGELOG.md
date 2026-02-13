@@ -5,6 +5,75 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-02-12
+
+### Added
+- **100/80/0 Strategic Coverage Architecture** — Tiered coverage enforcement via Vitest:
+  - **CORE (100%):** `lib/application/*.ts` — per-file enforcement (80% stmts/lines/funcs, 70% branches minimum floor)
+  - **IMPORTANT (80%):** `components/shared/*.tsx`, `hooks/use-toast.ts` — included in coverage scope
+  - **INFRASTRUCTURE (0%):** `types/`, `config/`, `lib/stores/`, barrel `index.ts` — excluded, TypeScript enforces correctness
+- **Coverage gap tests** — New unit tests targeting uncovered branches in prompt-analyzer, regex-humanizer, dto-matic, code-review, cron-builder, variable-name-wizard, base64
+- **Security audit job** in CI pipeline — `npm audit --audit-level=high` runs in parallel with quality checks
+- **Coverage artifact upload** — CI publishes HTML coverage report as GitHub Actions artifact (14-day retention)
+- **`npm run audit:security`** script in package.json
+
+### Security
+- **CSP hardened** — Added `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`, `object-src 'none'`, `upgrade-insecure-requests` directives
+- **Input validation audit** — Confirmed: no API routes (100% client-side), no raw input handling, JSON-LD uses static `JSON.stringify`, Zod available for form validation
+
+### Changed
+- **CI pipeline restructured** — 3 jobs: quality (lint + typecheck + coverage), security (audit), build. Coverage enforcement gates the build — if thresholds fail, build is blocked
+- **Vitest config** — Added `perFile: true` enforcement, `json-summary` reporter, expanded coverage `include` to IMPORTANT tier, explicit INFRASTRUCTURE `exclude`
+
+## [1.5.0] - 2026-02-11
+
+### Added
+- **/docs page** — Comprehensive documentation page listing all 15 tools with longDescription, features list, tags, and category badges. Includes full-text search (name, description, tags) and category filters. Each tool card has gradient header with icon, direct link to launch the tool, and two-column features grid.
+- **Sidebar "Docs" entry** — New `BookOpen` icon navigation item in dashboard sidebar between Tools and Favorites
+- **Dynamic OG image** — Generated at edge runtime via Next.js `ImageResponse` (1200x630). Dark gradient background with DevFlow AI logo, title "The developer toolkit for AI development", "Free & Open Source" + "15 Tools" badges, and "Para vosotros, developers" tagline. Twitter image reuses the same component.
+
+### Improved
+- **Metadata cleanup** — Removed hardcoded `/og-image.png` references from `openGraph.images` and `twitter.images`; Next.js file convention handles image generation automatically
+
+### Internationalized
+- **8 new locale keys** for docs page (`docs.title`, `docs.subtitle`, `docs.search`, `docs.showing`, `docs.openTool`, `docs.noResults`, `docs.noResultsHint`) + `sidebar.docs` in both EN and ES
+
+## [1.4.0] - 2026-02-11
+
+### Added
+- **Breadcrumb navigation** on all 15 tool pages — `ToolHeader` component extended with `breadcrumb` prop rendering `Tools > Current Page` with link back to tool listing
+- **35 component tests** with `@testing-library/react` and `userEvent` — StatusBadge (11 tests), CopyButton (8 tests), ToolHeader (8 tests), Toast system (8 tests). Total tests: 578
+
+### Replaced
+- **All UI emojis replaced with lucide-react icons** across 8 pages — context-manager (FileText, BookOpen), code-review (Search), token-visualizer (Sparkles), regex-humanizer (CheckCircle2, XCircle), history (Inbox), settings (Sun, Moon, Monitor), landing page (Zap, Monitor, LockOpen, Star)
+
+### Internationalized
+- **~20 remaining hardcoded strings** — placeholders, aria-labels, filter labels, error messages, and format buttons now use `t()` calls
+- New locale keys added to both `en.json` and `es.json` (history, gitCommit, dtoMatic, jsonFmt, uuid, ctxMgr)
+
+### Security
+- **CSP hardened** — Removed `unsafe-eval` from `script-src`, added `connect-src 'self'` and `frame-src https://giscus.app`
+
+### Improved
+- **Clipboard API fallback** — `CopyButton` falls back to `document.execCommand("copy")` when `navigator.clipboard` is unavailable
+- **Toast stacking limit** — Maximum 5 simultaneous toasts, oldest are discarded automatically
+
+## [1.3.0] - 2026-02-11
+
+### Added
+- **Full i18n coverage for all 15 tool pages** — Every hardcoded user-facing string replaced with `useTranslation()` hook calls
+- **~290 locale keys** added to both `en.json` and `es.json` covering all tool pages
+- **Common i18n namespace** — Shared keys (`common.reset`, `common.copy`, `common.history`, etc.) reused across tools to avoid duplication
+
+### Changed
+- Translatable arrays (`MODE_OPTIONS`, `TABS`, `OUTPUT_FORMATS`, `columns`) moved inside component bodies to access `t()` function
+- Cost calculator `columns` wrapped in `useMemo` for render performance
+- `useCallback`/`useMemo` dependency arrays updated to include `t` where needed
+
+### Pages internationalized
+- token-visualizer, code-review, prompt-analyzer, json-formatter, tailwind-sorter, context-manager, variable-name-wizard, regex-humanizer, cost-calculator
+- (Previously completed: base64, dto-matic, http-status-finder, cron-builder, git-commit-generator, uuid-generator)
+
 ## [1.2.0] - 2026-02-11
 
 ### Refactored
@@ -84,6 +153,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[2.0.0]: https://github.com/albertoguinda/devflow-ai/compare/v1.5.0...v2.0.0
+[1.5.0]: https://github.com/albertoguinda/devflow-ai/compare/v1.4.0...v1.5.0
+[1.4.0]: https://github.com/albertoguinda/devflow-ai/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/albertoguinda/devflow-ai/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/albertoguinda/devflow-ai/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/albertoguinda/devflow-ai/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/albertoguinda/devflow-ai/releases/tag/v1.0.0

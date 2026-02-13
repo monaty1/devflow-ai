@@ -9,6 +9,7 @@
   "sidebar.favorites": "Favoritos",
   "sidebar.history": "Historial",
   "sidebar.settings": "Ajustes",
+  "sidebar.docs": "Docs",
   "sidebar.freeOpenSource": "Gratis y Open Source",
 
   "dashboard.welcome": "Bienvenido a DevFlow AI",
@@ -89,6 +90,7 @@
   "home.footer": "© 2026 DevFlow AI · Gratis y Open Source · Hecho con Next.js 16 ·",
   "home.viewOnGithub": "Ver en GitHub",
 
+  "common.tools": "Herramientas",
   "common.backToTools": "Volver a Herramientas",
   "common.features": "Caracteristicas",
   "common.launch": "Abrir {name}",
@@ -554,5 +556,36 @@
   "costCalc.colInputCost": "Costo Entrada",
   "costCalc.colOutputCost": "Costo Salida",
   "costCalc.colTotal": "Total",
-  "costCalc.colContext": "Contexto"
+  "costCalc.colContext": "Contexto",
+
+  "history.searchLabel": "Buscar historial",
+  "history.filterAll": "Todas",
+
+  "gitCommit.scopePlaceholder": "auth, api, ui, db...",
+  "gitCommit.descriptionPlaceholder": "agregar flujo de autenticación",
+  "gitCommit.issuesPlaceholder": "#123, #456",
+  "gitCommit.parseInputLabel": "Mensaje de commit a analizar",
+  "gitCommit.breakingYes": "Sí",
+
+  "dtoMatic.jsonInputLabel": "Entrada JSON para generación de DTO",
+  "dtoMatic.jsonPlaceholder": "{\"id\": 1, \"name\": \"John Doe\", \"email\": \"john@example.com\"}",
+
+  "jsonFmt.jsonPlaceholder": "{\"name\": \"John\", \"age\": 30, \"email\": \"john@example.com\"}",
+  "jsonFmt.syntaxError": "Línea {line}, Col {col}:",
+
+  "uuid.parseInputLabel": "UUID a analizar",
+
+  "ctxMgr.deleteWindowLabel": "Eliminar ventana {name}",
+  "ctxMgr.removeDocLabel": "Eliminar documento {name}",
+  "ctxMgr.formatXml": "XML",
+  "ctxMgr.formatJson": "JSON",
+  "ctxMgr.formatMd": "MD",
+
+  "docs.title": "Documentacion",
+  "docs.subtitle": "Guia completa de las 15 herramientas de desarrollo",
+  "docs.search": "Buscar en documentacion...",
+  "docs.showing": "{count} de {total} herramientas",
+  "docs.openTool": "Abrir herramienta",
+  "docs.noResults": "No se encontraron herramientas",
+  "docs.noResultsHint": "Intenta ajustar tu busqueda o filtros"
 }

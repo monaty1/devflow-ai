@@ -8,12 +8,8 @@ import {
   useCounter,
 } from "@/hooks/use-gsap";
 import { useTranslation } from "@/hooks/use-translation";
+import { Zap, Monitor, LockOpen, Star, Shield, TrendingUp } from "lucide-react";
 import { FeatureCard } from "@/components/ui/feature-card";
-import {
-  Zap,
-  Shield,
-  TrendingUp,
-} from "lucide-react";
 import { TOOLS_DATA } from "@/config/tools-data";
 import { TOOL_ICON_MAP } from "@/config/tool-icon-map";
 
@@ -78,16 +74,16 @@ export default function HomePage() {
         <h2 className="sr-only">Project Stats</h2>
         <div className="mx-auto grid max-w-4xl grid-cols-2 gap-6 md:grid-cols-4">
           {[
-            { label: t("home.freeTools"), value: 15, emoji: "⚡" },
-            { label: t("home.openSource"), value: 100, emoji: "💻" },
-            { label: t("home.noApiKey"), value: 0, emoji: "🔓" },
-            { label: t("home.githubStars"), value: 500, emoji: "⭐" },
+            { label: t("home.freeTools"), value: 15, icon: <Zap className="size-6" /> },
+            { label: t("home.openSource"), value: 100, icon: <Monitor className="size-6" /> },
+            { label: t("home.noApiKey"), value: 0, icon: <LockOpen className="size-6" /> },
+            { label: t("home.githubStars"), value: 500, icon: <Star className="size-6" /> },
           ].map((stat) => (
             <div
               key={stat.label}
               className="rounded-xl bg-muted/50 p-6 text-center"
             >
-              <p className="mb-2 text-2xl">{stat.emoji}</p>
+              <div className="mb-2 flex justify-center text-muted-foreground">{stat.icon}</div>
               <CounterDisplay target={stat.value} />
               <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
             </div>

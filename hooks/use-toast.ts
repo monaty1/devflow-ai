@@ -35,7 +35,7 @@ export function useToastState() {
       const id = crypto.randomUUID();
       const newToast: Toast = { id, message, type, duration };
 
-      setToasts((prev) => [...prev, newToast]);
+      setToasts((prev) => [...prev.slice(-4), newToast]);
 
       if (duration > 0) {
         setTimeout(() => {

@@ -3,6 +3,8 @@
 import { Card, Button } from "@heroui/react";
 import {
   Regex,
+  CheckCircle2,
+  XCircle,
   Sparkles,
   FlaskConical,
   AlertCircle,
@@ -72,20 +74,21 @@ export default function RegexHumanizerPage() {
         gradient="from-cyan-500 to-blue-600"
         title={t("regex.title")}
         description={t("regex.description")}
+        breadcrumb
       />
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-border pb-4">
+      <div className="flex flex-wrap gap-2">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => setMode(tab.id)}
             aria-current={mode === tab.id ? "true" : undefined}
-            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+            className={`flex items-center gap-2 rounded-lg border-2 px-4 py-2.5 transition-all ${
               mode === tab.id
-                ? "bg-primary text-white"
-                : "text-muted-foreground hover:bg-muted"
+                ? "border-primary bg-primary/10"
+                : "border-border hover:border-primary/50"
             }`}
           >
             <tab.icon className="size-4" />
@@ -378,7 +381,7 @@ export default function RegexHumanizerPage() {
                 }`}
               >
                 <span className="text-2xl">
-                  {testResult.matches ? "✅" : "❌"}
+                  {testResult.matches ? <CheckCircle2 className="size-7 text-green-600 dark:text-green-400" /> : <XCircle className="size-7 text-red-600 dark:text-red-400" />}
                 </span>
                 <div>
                   <p

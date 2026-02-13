@@ -255,6 +255,71 @@ describe("Base64 Encoder/Decoder", () => {
     });
   });
 
+  describe("validateBase64 - uncovered branches", () => {
+    it("should validate url-safe base64 that needs padding restoration", () => {
+      // "Hello, World!" encodes to "SGVsbG8sIFdvcmxkIQ==" in standard
+      // In url-safe without padding: "SGVsbG8sIFdvcmxkIQ"
+      // This needs padding restoration (length % 4 !== 0)
+      const result = validateBase64("SGVsbG8sIFdvcmxkIQ", "url-safe");
+      expect(result.isValid).toBe(true);
+    });
+
+    it("should return isValid false with error for invalid standard base64 characters", () => {
+      const result = validateBase64("Invalid!@#$Base64", "standard");
+      expect(result.isValid).toBe(false);
+      expect(result.error).toBeDefined();
+      expect(result.error).toContain("Invalid");
+    });
+
+    it("should return isValid false with error for invalid url-safe base64 characters", () => {
+      const result = validateBase64("Invalid+Base/64==", "url-safe");
+      expect(result.isValid).toBe(false);
+      expect(result.error).toBeDefined();
+      expect(result.error).toContain("Invalid");
+      expect(result.error).toContain("URL-safe");
+    });
+
+    it("should return isValid false for standard base64 with wrong length", () => {
+      // Standard base64 must be multiple of 4
+      const result = validateBase64("SGVsb"); // length 5, not multiple of 4
+      expect(result.isValid).toBe(false);
+      expect(result.error).toContain("length");
+    });
+  });
+
+  describe("calculateBase64Stats - uncovered branches", () => {
+    it("should calculate decode mode stats with inputBytes / outputBytes ratio", () => {
+      const input = "SGVsbG8sIFdvcmxkIQ=="; // base64 encoded "Hello, World!"
+      const output = "Hello, World!";
+      const stats = calculateBase64Stats(input, output, "decode");
+
+      expect(stats.inputLength).toBe(input.length);
+      expect(stats.outputLength).toBe(output.length);
+      // In decode mode, compressionRatio = inputBytes / max(outputBytes, 1)
+      expect(stats.compressionRatio).toBeGreaterThan(1);
+      expect(stats.inputBytes).toBeGreaterThan(stats.outputBytes);
+    });
+
+    it("should handle empty string input without dividing by zero", () => {
+      const stats = calculateBase64Stats("", "", "encode");
+
+      expect(stats.inputLength).toBe(0);
+      expect(stats.outputLength).toBe(0);
+      expect(stats.inputBytes).toBe(0);
+      expect(stats.outputBytes).toBe(0);
+      // Should use Math.max(inputBytes, 1) to avoid division by zero
+      expect(stats.compressionRatio).toBe(0);
+    });
+
+    it("should handle empty string input in decode mode", () => {
+      const stats = calculateBase64Stats("", "", "decode");
+
+      expect(stats.inputLength).toBe(0);
+      expect(stats.outputLength).toBe(0);
+      expect(stats.compressionRatio).toBe(0);
+    });
+  });
+
   describe("roundtrip encoding/decoding", () => {
     it("should roundtrip ASCII text", () => {
       const original = "Hello, World!";

@@ -413,6 +413,7 @@ export default function CostCalculatorPage() {
       <ToolHeader
         title={t("costCalc.title")}
         description={t("costCalc.description")}
+        breadcrumb
         actions={
           <Button variant="outline" size="sm" onPress={reset} className="gap-2">
             <RotateCcw className="size-4" />

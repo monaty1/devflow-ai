@@ -65,21 +65,12 @@ export const metadata: Metadata = {
     title: "DevFlowAI - Free & Open Source Developer Utilities",
     description:
       "Free, open-source developer toolkit for AI development. Analyze prompts, review code, calculate API costs, and more.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "DevFlowAI - Developer Toolkit for AI Development",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "DevFlowAI - Free & Open Source Developer Utilities",
     description:
       "Free, open-source developer toolkit for AI development. Built by developers, for developers.",
-    images: ["/og-image.png"],
     creator: "@devflowai",
   },
   alternates: {

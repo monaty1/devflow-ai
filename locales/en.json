@@ -9,6 +9,7 @@
   "sidebar.favorites": "Favorites",
   "sidebar.history": "History",
   "sidebar.settings": "Settings",
+  "sidebar.docs": "Docs",
   "sidebar.freeOpenSource": "Free & Open Source",
 
   "dashboard.welcome": "Welcome to DevFlow AI",
@@ -89,6 +90,7 @@
   "home.footer": "© 2026 DevFlow AI · Free & Open Source · Built with Next.js 16 ·",
   "home.viewOnGithub": "View on GitHub",
 
+  "common.tools": "Tools",
   "common.backToTools": "Back to Tools",
   "common.features": "Features",
   "common.launch": "Launch {name}",
@@ -554,5 +556,36 @@
   "costCalc.colInputCost": "Input Cost",
   "costCalc.colOutputCost": "Output Cost",
   "costCalc.colTotal": "Total",
-  "costCalc.colContext": "Context"
+  "costCalc.colContext": "Context",
+
+  "history.searchLabel": "Search history",
+  "history.filterAll": "All",
+
+  "gitCommit.scopePlaceholder": "auth, api, ui, db...",
+  "gitCommit.descriptionPlaceholder": "add user authentication flow",
+  "gitCommit.issuesPlaceholder": "#123, #456",
+  "gitCommit.parseInputLabel": "Commit message to parse",
+  "gitCommit.breakingYes": "Yes",
+
+  "dtoMatic.jsonInputLabel": "JSON input for DTO generation",
+  "dtoMatic.jsonPlaceholder": "{\"id\": 1, \"name\": \"John Doe\", \"email\": \"john@example.com\"}",
+
+  "jsonFmt.jsonPlaceholder": "{\"name\": \"John\", \"age\": 30, \"email\": \"john@example.com\"}",
+  "jsonFmt.syntaxError": "Line {line}, Col {col}:",
+
+  "uuid.parseInputLabel": "UUID to parse",
+
+  "ctxMgr.deleteWindowLabel": "Delete window {name}",
+  "ctxMgr.removeDocLabel": "Remove document {name}",
+  "ctxMgr.formatXml": "XML",
+  "ctxMgr.formatJson": "JSON",
+  "ctxMgr.formatMd": "MD",
+
+  "docs.title": "Documentation",
+  "docs.subtitle": "Comprehensive guide to all 15 developer tools",
+  "docs.search": "Search documentation...",
+  "docs.showing": "{count} of {total} tools",
+  "docs.openTool": "Open tool",
+  "docs.noResults": "No tools found",
+  "docs.noResultsHint": "Try adjusting your search or filters"
 }

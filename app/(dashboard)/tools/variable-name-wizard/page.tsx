@@ -92,6 +92,7 @@ export default function VariableNameWizardPage() {
         gradient="from-fuchsia-500 to-pink-600"
         title={t("varName.title")}
         description={t("varName.description")}
+        breadcrumb
       />
 
       {/* Mode Toggle */}

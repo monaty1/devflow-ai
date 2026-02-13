@@ -88,6 +88,7 @@ export default function HttpStatusFinderPage() {
         gradient="from-cyan-500 to-blue-600"
         title={t("httpStatus.title")}
         description={t("httpStatus.description")}
+        breadcrumb
       />
 
       {/* Search */}

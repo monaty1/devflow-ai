@@ -55,6 +55,7 @@ export default function CronBuilderPage() {
         gradient="from-violet-500 to-purple-600"
         title={t("cron.title")}
         description={t("cron.description")}
+        breadcrumb
       />
 
       {/* Presets */}

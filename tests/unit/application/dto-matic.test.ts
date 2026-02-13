@@ -339,6 +339,100 @@ describe("DTO-Matic", () => {
     });
   });
 
+  describe("parseJson - uncovered branches", () => {
+    it("should produce null type for a null field value", () => {
+      const result = parseJson('{"deletedAt": null}');
+
+      expect(result.fields[0]!.type).toBe("null");
+      expect(result.fields[0]!.isOptional).toBe(true);
+    });
+
+    it("should produce Record<string, unknown> for an empty nested object", () => {
+      const json = '{"metadata": {}}';
+      const result = generateCode(json, {
+        ...DEFAULT_CONFIG,
+        rootName: "Item",
+      });
+
+      const dtoFile = result.files.find((f) => f.type === "interface");
+      expect(dtoFile).toBeDefined();
+      expect(dtoFile!.content).toContain("Record<string, unknown>");
+    });
+
+    it("should produce Type[] for an array of objects", () => {
+      const json = '{"users": [{"name": "Alice"}, {"name": "Bob"}]}';
+      const result = generateCode(json, {
+        ...DEFAULT_CONFIG,
+        rootName: "Response",
+      });
+
+      const dtoFile = result.files.find((f) => f.type === "interface");
+      expect(dtoFile).toBeDefined();
+      // The array of objects should produce a nested interface name with []
+      expect(dtoFile!.content).toContain("ResponseDtoUsers[]");
+    });
+
+    it("should use Date type in Entity when detectDates is true in clean-arch mode", () => {
+      const json = '{"createdAt": "2024-01-15T10:30:00Z", "updatedAt": "2024-06-01"}';
+      const result = generateCode(json, {
+        ...DEFAULT_CONFIG,
+        mode: "clean-arch",
+        rootName: "Event",
+        detectDates: true,
+      });
+
+      const entityFile = result.files.find((f) => f.type === "entity");
+      expect(entityFile).toBeDefined();
+      expect(entityFile!.content).toContain("Date");
+
+      // DTO should keep string type (not Date)
+      const dtoFile = result.files.find((f) => f.type === "interface");
+      expect(dtoFile).toBeDefined();
+      expect(dtoFile!.content).toContain("string");
+    });
+
+    it("should use string type in both DTO and Entity when detectDates is false", () => {
+      const json = '{"createdAt": "2024-01-15T10:30:00Z"}';
+      const result = generateCode(json, {
+        ...DEFAULT_CONFIG,
+        mode: "clean-arch",
+        rootName: "Event",
+        detectDates: false,
+      });
+
+      const entityFile = result.files.find((f) => f.type === "entity");
+      expect(entityFile).toBeDefined();
+      // With detectDates false, entity should NOT use Date
+      expect(entityFile!.content).not.toContain("Date");
+      expect(entityFile!.content).toContain("string");
+
+      const dtoFile = result.files.find((f) => f.type === "interface");
+      expect(dtoFile).toBeDefined();
+      expect(dtoFile!.content).toContain("string");
+    });
+
+    it("should handle an empty array at root", () => {
+      const result = parseJson("[]");
+
+      expect(result.rootType).toBe("array");
+      expect(result.fields.length).toBe(0);
+    });
+
+    it("should handle an array of primitives at root", () => {
+      const result = parseJson("[1, 2, 3]");
+
+      expect(result.rootType).toBe("array");
+      expect(result.fields.length).toBe(0);
+    });
+
+    it("should handle empty arrays within objects", () => {
+      const result = parseJson('{"tags": []}');
+
+      expect(result.fields[0]!.isArray).toBe(true);
+      expect(result.fields[0]!.type).toBe("unknown");
+    });
+  });
+
   describe("toSnakeCase conversion", () => {
     it("should convert camelCase to snake_case in fields", () => {
       const json = '{"camelCaseField": "value", "anotherField": 123}';

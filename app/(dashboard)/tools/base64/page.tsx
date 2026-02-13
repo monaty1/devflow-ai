@@ -59,6 +59,7 @@ export default function Base64Page() {
         gradient="from-indigo-500 to-blue-600"
         title={t("base64.title")}
         description={t("base64.description")}
+        breadcrumb
       />
 
       {/* Mode Selector */}

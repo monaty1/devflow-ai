@@ -7,7 +7,8 @@
 ### 15 herramientas para developers &middot; 0 deps externas &middot; 100% local &middot; Open Source
 
 [![Build](https://img.shields.io/github/actions/workflow/status/albertoguinda/devflow-ai/ci.yml?branch=main&style=flat-square&logo=github&label=CI)](https://github.com/albertoguinda/devflow-ai/actions)
-[![Tests](https://img.shields.io/badge/tests-543%20passed-brightgreen?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
+[![Tests](https://img.shields.io/badge/tests-passing-brightgreen?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
+[![Coverage](https://img.shields.io/badge/coverage-strategic_(100%2F80%2F0)-blue?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
@@ -58,7 +59,7 @@
 - **Local history** &mdash; localStorage persistence
 - **Copy to clipboard** &mdash; 1-click from any tool
 - **Dark / Light mode** &mdash; auto-detection + manual toggle
-- **543 unit tests** &mdash; 80%+ coverage with Vitest
+- **Strategic test coverage** &mdash; 100/80/0 architecture with per-file enforcement
 - **TypeScript strict** &mdash; all strict flags enabled, zero `any`
 - **Clean Architecture** &mdash; Domain, Application, Presentation layers
 - **WCAG AAA accessibility** &mdash; keyboard nav, ARIA labels, skip links
@@ -124,19 +125,30 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ## Scripts
 
-| Command                 | Description                 |
-| ----------------------- | --------------------------- |
-| `npm run dev`           | Dev server (Turbopack)      |
-| `npm run build`         | Production build            |
-| `npm run lint`          | ESLint                      |
-| `npm run type-check`    | TypeScript `tsc --noEmit`   |
-| `npm run test`          | Vitest watch mode           |
-| `npm run test:run`      | Single test run             |
-| `npm run test:coverage` | Coverage with 80% threshold |
+| Command                 | Description                            |
+| ----------------------- | -------------------------------------- |
+| `npm run dev`           | Dev server (Turbopack)                 |
+| `npm run build`         | Production build                       |
+| `npm run lint`          | ESLint                                 |
+| `npm run type-check`    | TypeScript `tsc --noEmit`              |
+| `npm run test`          | Vitest watch mode                      |
+| `npm run test:run`      | Single test run                        |
+| `npm run test:coverage` | Coverage with per-file thresholds      |
+| `npm run audit:security`| npm audit (high + critical)            |
 
 ---
 
-## Testing
+## Testing Strategy: 100/80/0
+
+We follow a **Strategic Coverage** architecture. Not all code needs the same level of testing:
+
+| Tier               | Path                         | Target  | Rationale                                              |
+| ------------------ | ---------------------------- | ------- | ------------------------------------------------------ |
+| **CORE (100%)**    | `lib/application/*.ts`       | 80-100% | Pure business logic, data transformation, security     |
+| **IMPORTANT (80%)**| `components/shared/*.tsx`     | 80%     | User-facing UI components with interactive behavior    |
+| **INFRA (0%)**     | `types/`, `config/`, stores  | 0%      | TypeScript compiler enforces correctness               |
+
+**Per-file enforcement** is enabled: each CORE file must individually meet thresholds. The CI pipeline fails if any file drops below its floor.
 
 ```bash
 npm run test:run                                             # All tests
@@ -145,22 +157,44 @@ npx vitest run -t "should format"                            # By pattern
 npm run test:coverage                                        # Coverage report
 ```
 
-```
- Test Files   16 passed (16)
-      Tests   543 passed (543)
-   Duration   7.24s
-```
+---
+
+## Security
+
+### HTTP Headers
+
+All responses include strict security headers via `next.config.ts`:
+
+| Header                       | Value                                    |
+| ---------------------------- | ---------------------------------------- |
+| `Content-Security-Policy`    | Strict CSP with `frame-ancestors 'none'`, `object-src 'none'`, `upgrade-insecure-requests` |
+| `Strict-Transport-Security`  | `max-age=63072000; includeSubDomains; preload` |
+| `X-Content-Type-Options`     | `nosniff`                                |
+| `X-Frame-Options`            | `DENY`                                   |
+| `Permissions-Policy`         | camera, mic, geolocation disabled        |
+| `Referrer-Policy`            | `strict-origin-when-cross-origin`        |
+
+### Design Principles
+
+- **No backend** &mdash; zero server-side attack surface
+- **No API routes** &mdash; all processing happens in the browser
+- **No user data** &mdash; localStorage only, no external transmission
+- **CSP enforced** &mdash; blocks XSS, clickjacking, and data injection
+- **Dependency audit** &mdash; `npm audit` runs in CI on every push
 
 ---
 
-## Security Headers
+## CI/CD Pipeline
 
-- `Content-Security-Policy` &mdash; default-src 'self'
-- `Strict-Transport-Security` &mdash; HSTS with preload
-- `X-Content-Type-Options` &mdash; nosniff
-- `X-Frame-Options` &mdash; DENY
-- `Permissions-Policy` &mdash; camera, mic, geolocation disabled
-- `Referrer-Policy` &mdash; strict-origin-when-cross-origin
+GitHub Actions runs on every push to `main` and all pull requests:
+
+```
+quality:   ESLint → TypeScript → Tests + Coverage (thresholds enforced)
+security:  npm audit --audit-level=high (parallel)
+build:     next build (gates on quality passing)
+```
+
+Coverage reports are uploaded as artifacts on every run.
 
 ---
 
@@ -207,10 +241,20 @@ npm run test:coverage                                        # Coverage report
 - **Historial local** &mdash; persistencia con localStorage
 - **Copy to clipboard** &mdash; en 1 click desde cualquier herramienta
 - **Dark / Light mode** &mdash; deteccion automatica + toggle manual
-- **543 tests unitarios** &mdash; cobertura > 80% con Vitest
+- **Cobertura estrategica** &mdash; arquitectura 100/80/0 con enforcement per-file
 - **TypeScript strict** &mdash; todos los flags estrictos activados, cero `any`
 - **Clean Architecture** &mdash; separacion en capas Domain, Application, Presentation
 - **Accesibilidad WCAG AAA** &mdash; navegacion por teclado, ARIA labels, skip links
+
+---
+
+## Estrategia de Testing: 100/80/0
+
+| Tier               | Ruta                          | Objetivo | Justificacion                                            |
+| ------------------ | ----------------------------- | -------- | -------------------------------------------------------- |
+| **CORE (100%)**    | `lib/application/*.ts`        | 80-100%  | Logica de negocio pura, transformacion de datos          |
+| **IMPORTANT (80%)**| `components/shared/*.tsx`      | 80%      | Componentes UI interactivos                              |
+| **INFRA (0%)**     | `types/`, `config/`, stores   | 0%       | TypeScript garantiza correctitud                         |
 
 ---
 

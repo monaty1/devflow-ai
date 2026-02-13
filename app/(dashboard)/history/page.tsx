@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Card, Button } from "@heroui/react";
-import { Trash2, Search, Clock } from "lucide-react";
+import { Trash2, Search, Clock, Inbox } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
 
@@ -149,7 +149,7 @@ export default function HistoryPage() {
       {/* Search & Filter */}
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
-          <label htmlFor="history-search" className="sr-only">Search history</label>
+          <label htmlFor="history-search" className="sr-only">{t("history.searchLabel")}</label>
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <input
             id="history-search"
@@ -171,7 +171,7 @@ export default function HistoryPage() {
                   : "border-border hover:border-primary/50"
               }`}
             >
-              All
+              {t("history.filterAll")}
             </button>
             {toolLabels.map((label) => (
               <button
@@ -215,7 +215,7 @@ export default function HistoryPage() {
         </div>
       ) : (
         <Card className="p-16 text-center">
-          <p className="mb-4 text-5xl">📭</p>
+          <Inbox className="mx-auto mb-4 size-12 text-muted-foreground" />
           <p className="text-foreground">
             {search || toolFilter ? t("history.noResults") : t("history.noHistory")}
           </p>

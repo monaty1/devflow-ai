@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, Button } from "@heroui/react";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Sparkles } from "lucide-react";
 import { useTokenVisualizer } from "@/hooks/use-token-visualizer";
 import { useTranslation } from "@/hooks/use-translation";
 import { CopyButton } from "@/components/shared/copy-button";
@@ -18,6 +18,7 @@ export default function TokenVisualizerPage() {
       <ToolHeader
         title={t("tokenViz.title")}
         description={t("tokenViz.description")}
+        breadcrumb
         actions={
           <div className="flex gap-2">
             {visualization && (
@@ -129,7 +130,7 @@ export default function TokenVisualizerPage() {
       {!visualization && (
         <Card className="p-16">
           <Card.Content className="p-0 text-center">
-            <p className="mb-4 text-5xl">✨</p>
+            <Sparkles className="mx-auto mb-4 size-12 text-muted-foreground" />
             <p className="text-muted-foreground">
               {t("tokenViz.emptyState")}
             </p>

@@ -195,6 +195,119 @@ describe("Variable Name Wizard", () => {
     });
   });
 
+  describe("generateSuggestions – uncovered branches", () => {
+    it("should generate suggestions for a short 1-word description", () => {
+      const result = generateSuggestions("user", "variable", DEFAULT_WIZARD_CONFIG);
+
+      expect(result.suggestions.length).toBeGreaterThan(0);
+      // Single-word input should still produce suggestions with suffix/prefix variations
+      expect(result.context).toBe("user");
+      expect(result.type).toBe("variable");
+    });
+
+    it("should generate hook suggestions with 'use' prefix and score them higher", () => {
+      const result = generateSuggestions("auth state", "hook", DEFAULT_WIZARD_CONFIG);
+
+      // Should have suggestions that start with "use"
+      const usePrefixed = result.suggestions.filter((s) => s.name.toLowerCase().startsWith("use"));
+      expect(usePrefixed.length).toBeGreaterThan(0);
+
+      // The "use"-prefixed suggestion should have a higher score than non-use ones
+      const nonUsePrefixed = result.suggestions.filter((s) => !s.name.toLowerCase().startsWith("use"));
+      if (nonUsePrefixed.length > 0) {
+        const maxUseScore = Math.max(...usePrefixed.map((s) => s.score));
+        const maxNonUseScore = Math.max(...nonUsePrefixed.map((s) => s.score));
+        expect(maxUseScore).toBeGreaterThanOrEqual(maxNonUseScore);
+      }
+
+      // Reasoning for hook with "use" prefix should mention React hooks pattern
+      const useHookSuggestion = usePrefixed.find((s) => s.reasoning.includes("hooks de React"));
+      expect(useHookSuggestion).toBeDefined();
+    });
+
+    it("should score PascalCase higher for component type", () => {
+      const result = generateSuggestions("user profile card", "component", DEFAULT_WIZARD_CONFIG);
+
+      const pascalSuggestions = result.suggestions.filter((s) => s.convention === "PascalCase");
+      expect(pascalSuggestions.length).toBeGreaterThan(0);
+
+      // PascalCase should be among the top-scored suggestions for components
+      const topSuggestion = result.suggestions[0];
+      expect(topSuggestion).toBeDefined();
+      expect(topSuggestion!.convention).toBe("PascalCase");
+    });
+
+    it("should score SCREAMING_SNAKE_CASE higher for constant type", () => {
+      const result = generateSuggestions("max retry count", "constant", DEFAULT_WIZARD_CONFIG);
+
+      const screamingSuggestions = result.suggestions.filter(
+        (s) => s.convention === "SCREAMING_SNAKE_CASE"
+      );
+      expect(screamingSuggestions.length).toBeGreaterThan(0);
+
+      // SCREAMING_SNAKE_CASE should score highest for constants
+      // Check it appears as top suggestion or at least scores well
+      const screamingScore = screamingSuggestions[0]!.score;
+      expect(screamingScore).toBeGreaterThanOrEqual(70);
+
+      // Should include reasoning about standard convention for constants
+      const withReasoning = screamingSuggestions.find((s) =>
+        s.reasoning.includes("Convención estándar para constantes")
+      );
+      expect(withReasoning).toBeDefined();
+    });
+
+    it("should score getter prefixes higher for function type", () => {
+      const result = generateSuggestions("user data", "function", DEFAULT_WIZARD_CONFIG);
+
+      // Functions with getter prefixes (get, fetch) should score higher
+      const getterSuggestions = result.suggestions.filter((s) => {
+        const name = s.name.toLowerCase();
+        return name.startsWith("get") || name.startsWith("fetch");
+      });
+      expect(getterSuggestions.length).toBeGreaterThan(0);
+
+      // The getter-prefixed version should have a higher score than the plain version
+      const plainSuggestions = result.suggestions.filter((s) => {
+        const name = s.name.toLowerCase();
+        return !name.startsWith("get") && !name.startsWith("fetch") &&
+          !name.startsWith("load") && !name.startsWith("retrieve") &&
+          !name.startsWith("find") && !name.startsWith("query") &&
+          !name.startsWith("handle") && !name.startsWith("on") &&
+          !name.startsWith("process") && !name.startsWith("validate") &&
+          !name.startsWith("check") && !name.startsWith("verify") &&
+          !name.startsWith("ensure") && !name.startsWith("assert");
+      });
+
+      if (plainSuggestions.length > 0) {
+        const maxGetterScore = Math.max(...getterSuggestions.map((s) => s.score));
+        const maxPlainScore = Math.max(...plainSuggestions.map((s) => s.score));
+        expect(maxGetterScore).toBeGreaterThan(maxPlainScore);
+      }
+
+      // Should include reasoning about descriptive prefix
+      const withReasoning = getterSuggestions.find((s) =>
+        s.reasoning.includes("Prefijo de acción descriptivo")
+      );
+      expect(withReasoning).toBeDefined();
+    });
+
+    it("should generate suggestions for a very long description (>5 words)", () => {
+      const longDescription = "calculate total price with tax and discount applied";
+      const result = generateSuggestions(longDescription, "variable", DEFAULT_WIZARD_CONFIG);
+
+      expect(result.suggestions.length).toBeGreaterThan(0);
+      expect(result.context).toBe(longDescription);
+
+      // Suggestions with >5 words should get a score penalty (-15) from the length check
+      // The base words version (7 words) should have lower score than shorter variations
+      for (const suggestion of result.suggestions) {
+        expect(suggestion.score).toBeGreaterThanOrEqual(0);
+        expect(suggestion.score).toBeLessThanOrEqual(100);
+      }
+    });
+  });
+
   describe("isValidForConvention", () => {
     it("should validate camelCase", () => {
       expect(isValidForConvention("userName", "camelCase")).toBe(true);

@@ -60,6 +60,7 @@ export default function GitCommitGeneratorPage() {
         gradient="from-orange-500 to-red-600"
         title={t("gitCommit.title")}
         description={t("gitCommit.description")}
+        breadcrumb
       />
 
       {/* Tab Selector */}
@@ -129,7 +130,7 @@ export default function GitCommitGeneratorPage() {
                     type="text"
                     value={config.scope}
                     onChange={(e) => updateConfig("scope", e.target.value)}
-                    placeholder="auth, api, ui, db..."
+                    placeholder={t("gitCommit.scopePlaceholder")}
                     className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                   {scopeSuggestions.length > 0 && (
@@ -165,7 +166,7 @@ export default function GitCommitGeneratorPage() {
                     type="text"
                     value={config.description}
                     onChange={(e) => updateConfig("description", e.target.value)}
-                    placeholder="add user authentication flow"
+                    placeholder={t("gitCommit.descriptionPlaceholder")}
                     maxLength={100}
                     className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
@@ -223,7 +224,7 @@ export default function GitCommitGeneratorPage() {
                     type="text"
                     value={config.issueRef}
                     onChange={(e) => updateConfig("issueRef", e.target.value)}
-                    placeholder="#123, #456"
+                    placeholder={t("gitCommit.issuesPlaceholder")}
                     className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
@@ -327,7 +328,7 @@ export default function GitCommitGeneratorPage() {
 
           <textarea
             id="commit-parse-input"
-            aria-label="Commit message to parse"
+            aria-label={t("gitCommit.parseInputLabel")}
             value={parseInput}
             onChange={(e) => setParseInput(e.target.value)}
             placeholder={t("gitCommit.parsePlaceholder")}
@@ -366,7 +367,7 @@ export default function GitCommitGeneratorPage() {
                 <div className="rounded-lg bg-red-100 px-4 py-3 dark:bg-red-900/30 sm:col-span-2">
                   <span className="text-xs text-red-700 dark:text-red-300">{t("gitCommit.breakingChange")}</span>
                   <p className="font-mono font-bold text-red-800 dark:text-red-200">
-                    {parsedCommit.breakingChange || "Yes"}
+                    {parsedCommit.breakingChange || t("gitCommit.breakingYes")}
                   </p>
                 </div>
               )}

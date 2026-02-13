@@ -54,6 +54,7 @@ export default function TailwindSorterPage() {
         gradient="from-sky-500 to-cyan-600"
         title={t("tailwind.title")}
         description={t("tailwind.description")}
+        breadcrumb
       />
 
       {/* Quick Actions */}
