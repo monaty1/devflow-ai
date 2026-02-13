@@ -65,6 +65,7 @@ system_prompts_leaks-main/
 # Claude
 .claude
 .CLAUDE.md
+CLAUDE.md
 
 # Internal planning
 TODO.md

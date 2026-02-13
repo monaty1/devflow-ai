@@ -141,8 +141,8 @@ select:focus-visible,
   top: -40px;
   left: 0;
   padding: 8px 16px;
-  background: var(--color-primary);
-  color: white;
+  background: #1e293b;
+  color: #f8fafc;
   z-index: 100;
   transition: top 0.2s;
 }

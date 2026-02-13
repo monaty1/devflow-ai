@@ -37,8 +37,9 @@ describe("Code Review", () => {
     });
 
     it("should detect hardcoded credentials", () => {
+      // pragma: allowlist secret — intentionally fake for testing detection
       const result = reviewCode(
-        'const apiKey = "sk-1234567890abcdef";',
+        'const apiKey = "MOCK_SECRET_KEY_1234";',
         "typescript"
       );
 
@@ -239,8 +240,9 @@ function complex(a, b, c, d, e, f) {
     });
 
     it("should detect security issues and suggest fixing them", () => {
-      const code = `const secret = "mysecret123";
-const password = "admin123";
+      // pragma: allowlist secret — intentionally fake for testing detection
+      const code = `const secret = "MOCK_SECRET_VALUE";
+const password = "MOCK_PASS_VALUE";
 document.innerHTML = userInput;
 eval(code);`;
       const result = reviewCode(code, "javascript");

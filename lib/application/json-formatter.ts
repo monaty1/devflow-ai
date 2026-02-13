@@ -67,8 +67,11 @@ export function minifyJson(input: string): string {
   return JSON.stringify(parsed);
 }
 
+const DANGEROUS_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
 /**
- * Recursively sorts object keys alphabetically
+ * Recursively sorts object keys alphabetically.
+ * Filters out dangerous keys to prevent prototype pollution.
  */
 export function sortObjectKeys(obj: unknown): unknown {
   if (obj === null || typeof obj !== "object") {
@@ -80,7 +83,9 @@ export function sortObjectKeys(obj: unknown): unknown {
   }
 
   const sorted: Record<string, unknown> = {};
-  const keys = Object.keys(obj as Record<string, unknown>).sort();
+  const keys = Object.keys(obj as Record<string, unknown>)
+    .filter((k) => !DANGEROUS_KEYS.has(k))
+    .sort();
 
   for (const key of keys) {
     sorted[key] = sortObjectKeys((obj as Record<string, unknown>)[key]);

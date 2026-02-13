@@ -5,6 +5,25 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-02-13
+
+### Performance
+- **Modern JS target** — Added `browserslist` targeting last 2 versions of Chrome, Firefox, Safari, Edge. Eliminates legacy polyfills and reduces bundle size for Lighthouse 100/100
+
+### Security
+- **Prototype pollution fix** — `json-formatter.ts` `sortObjectKeys()` now filters `__proto__`, `constructor`, `prototype` keys to prevent prototype pollution attacks
+- **Mock secret cleanup** — Renamed fake credentials in `code-review.test.ts` to `MOCK_SECRET_KEY` pattern with `pragma: allowlist secret` comments to silence Aikido/Snyk alerts
+
+### Accessibility
+- **Nested interactive fix** — Removed `<Button>` wrapping `<NextLink>` in navbar (both desktop and mobile). Replaced with styled `<NextLink>` to comply with HTML spec (no `<button>` inside `<a>`)
+- **Skip-link contrast** — Changed skip-link background from `var(--color-primary)` to `#1e293b` (slate-800) with `#f8fafc` text for WCAG AAA contrast (15.4:1)
+- **SVG country flags** — Replaced Unicode flag emoji (broken on Windows as "ES"/"GB" text) with inline SVG flags for Spain and UK
+- **Navbar centering** — Navigation links now use `flex-1 justify-center` for true horizontal centering
+
+### Changed
+- **CODE_OF_CONDUCT.md** — Added full Spanish translation (bilingual EN/ES)
+- **README.md** — Updated with latest changes
+
 ## [2.0.0] - 2026-02-12
 
 ### Added
@@ -153,6 +172,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[2.1.0]: https://github.com/albertoguinda/devflow-ai/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/albertoguinda/devflow-ai/compare/v1.5.0...v2.0.0
 [1.5.0]: https://github.com/albertoguinda/devflow-ai/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/albertoguinda/devflow-ai/compare/v1.3.0...v1.4.0

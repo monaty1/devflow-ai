@@ -7,8 +7,9 @@
 ### 15 herramientas para developers &middot; 0 deps externas &middot; 100% local &middot; Open Source
 
 [![Build](https://img.shields.io/github/actions/workflow/status/albertoguinda/devflow-ai/ci.yml?branch=main&style=flat-square&logo=github&label=CI)](https://github.com/albertoguinda/devflow-ai/actions)
-[![Tests](https://img.shields.io/badge/tests-passing-brightgreen?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
+[![Tests](https://img.shields.io/badge/tests-644_passing-brightgreen?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
 [![Coverage](https://img.shields.io/badge/coverage-strategic_(100%2F80%2F0)-blue?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
+[![Lighthouse](https://img.shields.io/badge/Lighthouse-100%2F100%2F100%2F100-brightgreen?style=flat-square&logo=lighthouse&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
@@ -86,8 +87,8 @@
 
 ```
 ├── app/                    # Pages & layouts (App Router)
-│   ├── (marketing)/        # Landing, about, docs
-│   └── (dashboard)/        # Dashboard + 15 tool pages
+│   ├── (marketing)/        # Landing, about
+│   └── (dashboard)/        # Dashboard + 15 tool pages + docs
 ├── components/             # UI components
 ├── hooks/                  # Custom React hooks ("use client")
 ├── lib/
@@ -180,6 +181,7 @@ All responses include strict security headers via `next.config.ts`:
 - **No API routes** &mdash; all processing happens in the browser
 - **No user data** &mdash; localStorage only, no external transmission
 - **CSP enforced** &mdash; blocks XSS, clickjacking, and data injection
+- **Prototype pollution protection** &mdash; dangerous keys (`__proto__`, `constructor`, `prototype`) filtered
 - **Dependency audit** &mdash; `npm audit` runs in CI on every push
 
 ---
@@ -248,6 +250,50 @@ Coverage reports are uploaded as artifacts on every run.
 
 ---
 
+## Stack Tecnologico
+
+| Capa       | Tecnologia                                                      |
+| ---------- | --------------------------------------------------------------- |
+| Framework  | [Next.js 16](https://nextjs.org) (App Router + Turbopack)       |
+| UI         | [React 19](https://react.dev)                                   |
+| Lenguaje   | [TypeScript 5](https://www.typescriptlang.org) (maximo estricto)|
+| Estilos    | [Tailwind CSS 4](https://tailwindcss.com) (config CSS-first)    |
+| Componentes| [HeroUI v3 beta](https://heroui.com) (patron compuesto)         |
+| Iconos     | [Lucide React](https://lucide.dev)                              |
+| Animaciones| [GSAP](https://gsap.com) + [Framer Motion](https://motion.dev)  |
+| Testing    | [Vitest](https://vitest.dev) + Testing Library                  |
+| Linting    | ESLint 9 (flat config)                                          |
+
+---
+
+## Arquitectura
+
+```
+├── app/                    # Paginas y layouts (App Router)
+│   ├── (marketing)/        # Landing, about
+│   └── (dashboard)/        # Dashboard + 15 tool pages + docs
+├── components/             # Componentes UI
+├── hooks/                  # Custom React hooks ("use client")
+├── lib/
+│   └── application/        # Logica de negocio pura (sin React)
+├── types/                  # Interfaces TypeScript
+└── config/                 # Registro de tools y configuracion
+```
+
+**Flujo de dependencias:** `Presentacion -> Aplicacion -> Dominio`
+
+Cada tool sigue un patron de 5 archivos:
+
+```
+types/<tool>.ts             → Interfaces y tipos
+lib/application/<tool>.ts   → Logica pura (sin React)
+hooks/use-<tool>.ts         → Hook con estado y localStorage
+app/.../tools/<slug>/page   → Pagina UI
+tests/.../<tool>.test.ts    → Tests unitarios
+```
+
+---
+
 ## Estrategia de Testing: 100/80/0
 
 | Tier               | Ruta                          | Objetivo | Justificacion                                            |
@@ -255,6 +301,46 @@ Coverage reports are uploaded as artifacts on every run.
 | **CORE (100%)**    | `lib/application/*.ts`        | 80-100%  | Logica de negocio pura, transformacion de datos          |
 | **IMPORTANT (80%)**| `components/shared/*.tsx`      | 80%      | Componentes UI interactivos                              |
 | **INFRA (0%)**     | `types/`, `config/`, stores   | 0%       | TypeScript garantiza correctitud                         |
+
+---
+
+## Seguridad
+
+### Cabeceras HTTP
+
+Todas las respuestas incluyen cabeceras de seguridad estrictas via `next.config.ts`:
+
+| Cabecera                     | Valor                                    |
+| ---------------------------- | ---------------------------------------- |
+| `Content-Security-Policy`    | CSP estricto con `frame-ancestors 'none'`, `object-src 'none'`, `upgrade-insecure-requests` |
+| `Strict-Transport-Security`  | `max-age=63072000; includeSubDomains; preload` |
+| `X-Content-Type-Options`     | `nosniff`                                |
+| `X-Frame-Options`            | `DENY`                                   |
+| `Permissions-Policy`         | camara, micro, geolocalizacion deshabilitados |
+| `Referrer-Policy`            | `strict-origin-when-cross-origin`        |
+
+### Principios de Diseno
+
+- **Sin backend** &mdash; cero superficie de ataque del lado servidor
+- **Sin API routes** &mdash; todo el procesamiento en el navegador
+- **Sin datos de usuario** &mdash; solo localStorage, sin transmision externa
+- **CSP reforzado** &mdash; bloquea XSS, clickjacking e inyeccion de datos
+- **Proteccion contra prototype pollution** &mdash; claves peligrosas (`__proto__`, `constructor`, `prototype`) filtradas
+- **Auditoria de dependencias** &mdash; `npm audit` se ejecuta en CI en cada push
+
+---
+
+## Pipeline CI/CD
+
+GitHub Actions se ejecuta en cada push a `main` y todas las pull requests:
+
+```
+quality:   ESLint → TypeScript → Tests + Coverage (umbrales obligatorios)
+security:  npm audit --audit-level=high (en paralelo)
+build:     next build (requiere que quality pase)
+```
+
+Los reportes de cobertura se suben como artifacts en cada ejecucion.
 
 ---
 
