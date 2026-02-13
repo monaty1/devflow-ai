@@ -49,7 +49,7 @@ export default function HomePage() {
             <div className="flex flex-col justify-center gap-4 pt-4 sm:flex-row">
               <Link
                 href="/tools"
-                className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg bg-primary px-8 text-base font-semibold text-white transition-colors hover:opacity-90"
+                className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg bg-primary px-8 text-base font-semibold text-primary-foreground transition-colors hover:opacity-90"
               >
                 {t("home.getStarted")}
               </Link>

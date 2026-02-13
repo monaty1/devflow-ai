@@ -62,7 +62,7 @@ export default function ToolsPage() {
               onClick={() => setCategory(cat.value)}
               className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                 category === cat.value
-                  ? "bg-primary text-white"
+                  ? "bg-primary text-primary-foreground"
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
               }`}
             >

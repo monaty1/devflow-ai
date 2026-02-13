@@ -14,6 +14,7 @@
 :root {
   /* Brand Colors — #1e40af (Blue 800) = 8.73:1 on white — WCAG AAA */
   --color-primary: #1e40af;
+  --color-primary-foreground: #ffffff;
   --color-primary-hover: #1e3a8a;
   --color-primary-light: #eff6ff;
 
@@ -68,6 +69,7 @@
   --color-card-foreground: #f8fafc;
 
   --color-primary: #93c5fd; /* Blue 300: 9.8:1 on #0f172a — WCAG AAA */
+  --color-primary-foreground: #0f172a; /* Slate 900: 9.8:1 on #93c5fd — WCAG AAA */
   --color-primary-hover: #bfdbfe;
   --color-primary-light: #1e3a5f;
   --color-focus: #93c5fd;
@@ -79,6 +81,7 @@
   --color-background: var(--color-background);
   --color-foreground: var(--color-foreground);
   --color-primary: var(--color-primary);
+  --color-primary-foreground: var(--color-primary-foreground);
   --color-secondary: var(--color-secondary);
   --color-accent: var(--color-accent);
   --color-muted: var(--color-muted);

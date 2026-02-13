@@ -14,7 +14,7 @@ export default function NotFound() {
       </p>
       <Link
         href="/tools"
-        className="inline-flex h-11 cursor-pointer items-center justify-center rounded-lg bg-primary px-6 text-sm font-medium text-white transition-colors hover:bg-primary/90"
+        className="inline-flex h-11 cursor-pointer items-center justify-center rounded-lg bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
       >
         Volver a las herramientas
       </Link>

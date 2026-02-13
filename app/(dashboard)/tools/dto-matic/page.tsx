@@ -164,7 +164,7 @@ export default function DtoMaticPage() {
                       onClick={() => updateConfig("naming", opt.id)}
                       className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                         config.naming === opt.id
-                          ? "bg-primary text-white"
+                          ? "bg-primary text-primary-foreground"
                           : "bg-muted text-muted-foreground hover:bg-muted/80"
                       }`}
                     >
@@ -294,7 +294,7 @@ export default function DtoMaticPage() {
                     onClick={() => setSelectedFileId(file.id)}
                     className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                       selectedFileId === file.id
-                        ? "bg-primary text-white"
+                        ? "bg-primary text-primary-foreground"
                         : "bg-muted text-muted-foreground hover:bg-muted/80"
                     }`}
                   >

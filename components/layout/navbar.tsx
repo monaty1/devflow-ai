@@ -101,7 +101,7 @@ export function Navbar() {
           </NextLink>
           <NextLink
             href="/tools"
-            className="ml-2 inline-flex h-8 w-[140px] cursor-pointer items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-white transition-colors hover:opacity-90"
+            className="ml-2 inline-flex h-8 w-[140px] cursor-pointer items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
           >
             {t("nav.openDashboard")}
           </NextLink>
@@ -151,7 +151,7 @@ export function Navbar() {
               <NextLink
                 href="/tools"
                 onClick={() => setIsMenuOpen(false)}
-                className="flex h-10 w-full cursor-pointer items-center justify-center rounded-md bg-primary text-sm font-medium text-white transition-colors hover:opacity-90"
+                className="flex h-10 w-full cursor-pointer items-center justify-center rounded-md bg-primary text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
               >
                 {t("nav.openDashboard")}
               </NextLink>

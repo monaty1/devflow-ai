@@ -23,7 +23,7 @@ export function FeatureCard({
       )}
     >
       <Card.Header className="flex-row items-start gap-4">
-        <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
+        <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
           <Icon className="size-6" />
         </div>
         <div className="flex flex-col gap-1">

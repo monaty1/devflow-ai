@@ -154,7 +154,7 @@ export default function JsonFormatterPage() {
                       onClick={() => updateConfig("indentSize", size as 2 | 4)}
                       className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
                         config.indentSize === size
-                          ? "bg-primary text-white"
+                          ? "bg-primary text-primary-foreground"
                           : "bg-muted text-muted-foreground hover:bg-muted/80"
                       }`}
                     >
@@ -223,7 +223,7 @@ export default function JsonFormatterPage() {
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
                 className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                   activeTab === tab.id
-                    ? "bg-primary text-white"
+                    ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground hover:bg-muted/80"
                 }`}
               >
