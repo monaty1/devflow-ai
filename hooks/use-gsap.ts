@@ -16,16 +16,15 @@ export function useFadeIn(delay = 0) {
     if (!ref.current) return;
 
     if (prefersReducedMotion()) {
-      gsap.set(ref.current, { opacity: 1, y: 0 });
+      gsap.set(ref.current, { opacity: 1 });
       return;
     }
 
     gsap.fromTo(
       ref.current,
-      { opacity: 0, y: 20 },
+      { opacity: 0 },
       {
         opacity: 1,
-        y: 0,
         duration: 0.6,
         delay,
         ease: "power2.out",
@@ -52,17 +51,15 @@ export function useStaggerIn(childSelector = ":scope > *", delay = 0) {
     if (elements.length === 0) return;
 
     if (prefersReducedMotion()) {
-      gsap.set(elements, { opacity: 1, y: 0, scale: 1 });
+      gsap.set(elements, { opacity: 1 });
       return;
     }
 
     gsap.fromTo(
       elements,
-      { opacity: 0, y: 30, scale: 0.95 },
+      { opacity: 0 },
       {
         opacity: 1,
-        y: 0,
-        scale: 1,
         duration: 0.5,
         stagger: 0.1,
         delay,
@@ -82,7 +79,7 @@ export function useScrollReveal() {
     if (!ref.current) return;
 
     if (prefersReducedMotion()) {
-      gsap.set(ref.current, { opacity: 1, y: 0 });
+      gsap.set(ref.current, { opacity: 1 });
       return;
     }
 
@@ -92,8 +89,8 @@ export function useScrollReveal() {
           if (entry.isIntersecting) {
             gsap.fromTo(
               entry.target,
-              { opacity: 0, y: 40 },
-              { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }
+              { opacity: 0 },
+              { opacity: 1, duration: 0.7, ease: "power2.out" }
             );
             observer.unobserve(entry.target);
           }

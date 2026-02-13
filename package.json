@@ -24,6 +24,7 @@
     "@heroui/styles": "^3.0.0-beta.5",
     "@heroui/table": "^2.2.30",
     "@hookform/resolvers": "^5.2.2",
+    "@sentry/nextjs": "^10.38.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.30.0",
     "gsap": "^3.14.2",

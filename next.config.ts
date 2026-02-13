@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const securityHeaders = [
   {
@@ -33,7 +34,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self'",
-      "connect-src 'self'",
+      "connect-src 'self' https://api.github.com https://*.ingest.sentry.io",
       "frame-src https://giscus.app",
       "frame-ancestors 'none'",
       "base-uri 'self'",
@@ -72,4 +73,18 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  // Suppress source map upload logs in CI
+  silent: true,
+
+  // Upload source maps for better stack traces
+  widenClientFileUpload: true,
+
+  // Hide source maps from the client
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
+  },
+
+  // Opt out of Sentry telemetry
+  telemetry: false,
+});
