@@ -12,10 +12,10 @@
 
 /* Base CSS Variables */
 :root {
-  /* Brand Colors (OKLCH for better color manipulation) */
-  --color-primary: oklch(0.55 0.22 250);
-  --color-primary-hover: oklch(0.48 0.24 250);
-  --color-primary-light: oklch(0.95 0.03 250);
+  /* Brand Colors — #2563eb (Blue 600) = 4.6:1 on white — WCAG AA */
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-light: #eff6ff;
 
   --color-secondary: oklch(0.6 0.14 280);
   --color-secondary-hover: oklch(0.53 0.16 280);
@@ -39,7 +39,7 @@
   --color-card-foreground: #0f172a;
 
   /* Focus ring color */
-  --color-focus: oklch(0.55 0.22 250);
+  --color-focus: #2563eb;
 
   /* Typography */
   --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
@@ -67,10 +67,10 @@
   --color-card: #1e293b;
   --color-card-foreground: #f8fafc;
 
-  --color-primary: oklch(0.72 0.16 250);
-  --color-primary-hover: oklch(0.78 0.14 250);
-  --color-primary-light: oklch(0.22 0.06 250);
-  --color-focus: oklch(0.72 0.16 250);
+  --color-primary: #60a5fa; /* Blue 400: 4.7:1 on #0f172a — WCAG AA */
+  --color-primary-hover: #93bbfd;
+  --color-primary-light: #1e3a5f;
+  --color-focus: #60a5fa;
 }
 
 /* Tailwind Theme Extension */
