@@ -12,6 +12,7 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
+  Tooltip,
 } from "@heroui/react";
 import {
   Globe,
@@ -30,6 +31,10 @@ import {
   X,
   ChevronRight,
   HelpCircle,
+  Activity,
+  AlertTriangle,
+  Info,
+  Server,
 } from "lucide-react";
 import { useHttpStatusFinder } from "@/hooks/use-http-status-finder";
 import { useTranslation } from "@/hooks/use-translation";
@@ -64,7 +69,7 @@ export default function HttpStatusFinderPage() {
   } = useHttpStatusFinder();
 
   const [activeView, setActiveView] = useState<"grid" | "table">("grid");
-  const [testResponse, setTestResult] = useState<{ headers: Record<string, string>; time: number } | null>(null);
+  const [testResponse, setTestResult] = useState<{ headers: Record<string, string>; time: number; ok: boolean } | null>(null);
   const [isTesting, setIsTesting] = useState(false);
 
   const statusColumns: ColumnConfig[] = [
@@ -97,12 +102,13 @@ export default function HttpStatusFinderPage() {
     setIsTesting(true);
     const start = Date.now();
     try {
+      // Using a proxy or direct fetch if CORS allows, httpstat.us usually allows it
       const res = await fetch(`https://httpstat.us/${code}`);
       const headers: Record<string, string> = {};
       res.headers.forEach((v, k) => { headers[k] = v; });
-      setTestResult({ headers, time: Date.now() - start });
-    } catch {
-      setTestResult(null);
+      setTestResult({ headers, time: Date.now() - start, ok: res.ok });
+    } catch (err) {
+      setTestResult({ headers: { error: "CORS or Network Error. Check console." }, time: Date.now() - start, ok: false });
     } finally {
       setIsTesting(false);
     }
@@ -113,7 +119,7 @@ export default function HttpStatusFinderPage() {
   , [query, categoryFilter, results.codes, commonCodes]);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <div className="mx-auto max-w-7xl space-y-6">
       <ToolHeader
         icon={Globe}
         gradient="from-cyan-500 to-blue-600"
@@ -126,7 +132,7 @@ export default function HttpStatusFinderPage() {
               <Button isIconOnly size="sm" variant={activeView === "grid" ? "solid" : "light"} color={activeView === "grid" ? "primary" : "default"} onPress={() => setActiveView("grid")}><History className="size-3.5" /></Button>
               <Button isIconOnly size="sm" variant={activeView === "table" ? "solid" : "light"} color={activeView === "table" ? "primary" : "default"} onPress={() => setActiveView("table")}><Database className="size-3.5" /></Button>
             </div>
-            <Button variant="outline" size="sm" onPress={clearSearch} className="gap-2">
+            <Button variant="outline" size="sm" onPress={clearSearch} className="gap-2 font-bold">
               <RotateCcw className="size-4" /> Reset
             </Button>
           </div>
@@ -136,10 +142,10 @@ export default function HttpStatusFinderPage() {
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Search & Selector Column */}
         <div className="lg:col-span-4 space-y-6">
-          <Card className="p-6">
-            <h3 className="font-bold flex items-center gap-2 mb-4">
+          <Card className="p-6 border-divider shadow-sm">
+            <h3 className="font-bold flex items-center gap-2 mb-6 text-foreground/80 uppercase text-[10px] tracking-widest">
               <Search className="size-4 text-primary" />
-              Smart Search
+              Smart Navigator
             </h3>
             <Input
               isClearable
@@ -148,17 +154,17 @@ export default function HttpStatusFinderPage() {
               onValueChange={setQuery}
               onClear={clearSearch}
               variant="bordered"
-              classNames={{ input: "font-medium" }}
+              classNames={{ input: "font-bold text-sm" }}
             />
-            <div className="grid grid-cols-3 gap-2 mt-4">
+            <div className="grid grid-cols-3 gap-2 mt-6">
               {["1xx", "2xx", "3xx", "4xx", "5xx"].map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setCategoryFilter(categoryFilter === cat ? null : cat as HttpStatusCategory)}
                   className={cn(
-                    "px-2 py-1.5 rounded-lg border text-[10px] font-black uppercase transition-all",
+                    "px-2 py-2 rounded-xl border-2 text-[10px] font-black uppercase transition-all",
                     categoryFilter === cat 
-                      ? "bg-primary border-primary text-white shadow-md" 
+                      ? "bg-primary border-primary text-white shadow-lg" 
                       : "bg-muted/30 border-transparent hover:bg-muted text-muted-foreground"
                   )}
                 >
@@ -169,21 +175,22 @@ export default function HttpStatusFinderPage() {
           </Card>
 
           {/* Decision Wizard Card */}
-          <Card className="p-6 bg-gradient-to-br from-cyan-600 to-blue-700 text-white shadow-xl shadow-blue-500/20">
-            <h3 className="text-xs font-black uppercase opacity-80 mb-4 flex items-center gap-2 tracking-widest">
-              <HelpCircle className="size-3" /> Quick Decision Flow
+          <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-2xl">
+            <h3 className="text-xs font-black uppercase opacity-60 mb-6 flex items-center gap-2 tracking-widest">
+              <HelpCircle className="size-3 text-cyan-400" /> Decision Pipeline
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {[
+                { q: "Resource modified?", a: "304 Not Modified" },
                 { q: "Auth required?", a: "401 Unauthorized" },
                 { q: "Permission denied?", a: "403 Forbidden" },
-                { q: "Resource missing?", a: "404 Not Found" },
-                { q: "Success & no body?", a: "204 No Content" },
+                { q: "Body too large?", a: "413 Payload Too Large" },
+                { q: "External API down?", a: "502 Bad Gateway" },
               ].map((item, i) => (
-                <div key={i} className="flex justify-between items-center bg-white/10 p-2 rounded-lg backdrop-blur-sm border border-white/5">
-                  <span className="text-[10px] font-bold">{item.q}</span>
-                  <ChevronRight className="size-3 opacity-40" />
-                  <span className="text-[10px] font-black uppercase text-cyan-200">{item.a.split(" ")[0]}</span>
+                <div key={i} className="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5 group hover:bg-white/10 transition-colors cursor-default">
+                  <span className="text-[10px] font-bold opacity-80">{item.q}</span>
+                  <ChevronRight className="size-3 opacity-20 group-hover:translate-x-1 transition-transform" />
+                  <span className="text-[10px] font-black uppercase text-cyan-400">{item.a.split(" ")[0]}</span>
                 </div>
               ))}
             </div>
@@ -193,119 +200,157 @@ export default function HttpStatusFinderPage() {
         {/* Results Column */}
         <div className="lg:col-span-8 space-y-6">
           {selectedCode ? (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
               {/* Header Card */}
-              <Card className="p-8 border-divider shadow-xl">
-                <div className="flex flex-col sm:flex-row justify-between gap-6">
-                  <div className="flex items-center gap-6">
-                    <div className={cn("size-24 rounded-3xl flex items-center justify-center text-4xl font-black shadow-inner", CATEGORY_COLORS[selectedCode.category])}>
+              <Card className="p-10 border-divider shadow-2xl relative overflow-hidden">
+                <div className={cn("absolute top-0 right-0 w-32 h-32 opacity-5 -mr-10 -mt-10 rounded-full", CATEGORY_COLORS[selectedCode.category].split(" ")[0])} />
+                <div className="flex flex-col sm:flex-row justify-between gap-8 relative z-10">
+                  <div className="flex items-center gap-8">
+                    <div className={cn("size-32 rounded-[2.5rem] flex items-center justify-center text-5xl font-black shadow-2xl transform hover:rotate-3 transition-transform", CATEGORY_COLORS[selectedCode.category])}>
                       {selectedCode.code}
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <h2 className="text-3xl font-black">{selectedCode.name}</h2>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <h2 className="text-4xl font-black tracking-tight">{selectedCode.name}</h2>
                         <CopyButton text={selectedCode.code.toString()} variant="ghost" size="sm" />
                       </div>
-                      <StatusBadge variant="info">{getCategoryInfo(selectedCode.category).label.toUpperCase()}</StatusBadge>
+                      <div className="flex gap-2 items-center">
+                        <StatusBadge variant="info">{getCategoryInfo(selectedCode.category).label.toUpperCase()}</StatusBadge>
+                        <span className="text-[10px] font-black opacity-30 uppercase tracking-widest">RFC Compliant</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex gap-2 self-start">
-                    <Button isIconOnly variant="flat" color="danger" onPress={() => setSelectedCode(null)}><X className="size-4" /></Button>
-                  </div>
+                  <Button isIconOnly variant="flat" color="danger" radius="full" onPress={() => setSelectedCode(null)} className="shadow-lg"><X className="size-5" /></Button>
                 </div>
 
-                <div className="mt-8 grid gap-6 sm:grid-cols-2">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Description</label>
-                    <p className="text-sm font-medium leading-relaxed">{selectedCode.description}</p>
+                <div className="mt-12 grid gap-10 sm:grid-cols-2 border-t border-divider pt-10">
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2">
+                      <Info className="size-3" /> Description
+                    </label>
+                    <p className="text-sm font-medium leading-relaxed opacity-80">{selectedCode.description}</p>
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">When to use</label>
-                    <p className="text-sm font-medium leading-relaxed">{selectedCode.whenToUse}</p>
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2">
+                      <Activity className="size-3" /> Usage Context
+                    </label>
+                    <p className="text-sm font-medium leading-relaxed opacity-80">{selectedCode.whenToUse}</p>
                   </div>
                 </div>
               </Card>
 
-              {/* Implementation & Testing Grid */}
+              {/* Related Headers & Links Row */}
               <div className="grid gap-6 sm:grid-cols-2">
-                <Card className="p-6">
-                  <h3 className="font-bold flex items-center gap-2 mb-4 text-primary">
-                    <Terminal className="size-4" />
-                    Implementation
+                <Card className="p-6 border-divider">
+                  <h3 className="text-xs font-black uppercase text-muted-foreground mb-4 tracking-widest flex items-center gap-2">
+                    <Layers className="size-4 text-primary" /> Associated Headers
                   </h3>
-                  <div className="space-y-4">
-                    {selectedCode.snippets ? (
-                      Object.entries(selectedCode.snippets).map(([lang, code]) => (
-                        <div key={lang} className="space-y-1.5">
-                          <div className="flex justify-between items-center px-1">
-                            <span className="text-[10px] font-black uppercase text-muted-foreground">{lang}</span>
-                            <CopyButton text={code} size="xs" variant="ghost" />
-                          </div>
-                          <pre className="p-3 bg-muted/30 rounded-xl font-mono text-[11px] border border-divider overflow-x-auto">
-                            <code>{code}</code>
-                          </pre>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-xs text-muted-foreground italic">Standard headers are usually enough for this code.</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedCode.relatedHeaders?.length ? selectedCode.relatedHeaders.map(h => (
+                      <Chip key={h} variant="flat" color="primary" className="font-mono text-[10px] font-bold">{h}</Chip>
+                    )) : <p className="text-xs italic opacity-40">No specific required headers.</p>}
+                  </div>
+                  <div className="mt-8 pt-6 border-t border-divider flex gap-3">
+                    {selectedCode.rfcLink && (
+                      <Button size="sm" variant="bordered" className="font-bold flex-1" onPress={() => window.open(selectedCode.rfcLink, "_blank")}>
+                        <ExternalLink className="size-3.5 mr-2" /> RFC Docs
+                      </Button>
                     )}
+                    <Button size="sm" variant="bordered" className="font-bold flex-1" onPress={() => window.open(`https://http.cat/${selectedCode.code}`, "_blank")}>
+                      🐱 HTTP Cat
+                    </Button>
                   </div>
                 </Card>
 
-                <Card className="p-6 overflow-hidden">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold flex items-center gap-2 text-emerald-600">
-                      <Play className="size-4" />
-                      Live Mock Test
+                <Card className="p-6 bg-slate-900 text-white shadow-xl overflow-hidden relative">
+                  <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none"><Server className="size-20" /></div>
+                  <div className="flex items-center justify-between mb-6 relative z-10">
+                    <h3 className="text-xs font-black uppercase opacity-60 tracking-widest flex items-center gap-2">
+                      <Play className="size-4 text-emerald-400" />
+                      Live Error Simulation
                     </h3>
-                    <Button size="sm" color="success" variant="flat" className="font-bold h-8" onPress={() => runMockTest(selectedCode.code)} isLoading={isTesting}>
-                      Run Fetch
+                    <Button size="sm" color="success" className="font-black h-8 shadow-lg shadow-emerald-500/20" onPress={() => runMockTest(selectedCode.code)} isLoading={isTesting}>
+                      Trigger Response
                     </Button>
                   </div>
                   {testResponse ? (
-                    <div className="space-y-3">
-                      <div className="flex justify-between text-[10px] font-black uppercase opacity-60">
-                        <span>Response Headers</span>
-                        <span>{testResponse.time}ms</span>
+                    <div className="space-y-4 animate-in fade-in duration-500 relative z-10">
+                      <div className="flex justify-between items-center px-1">
+                        <span className={cn("text-[10px] font-black uppercase px-2 py-0.5 rounded", testResponse.ok ? "bg-emerald-500/20 text-emerald-400" : "bg-rose-500/20 text-rose-400")}>
+                          {testResponse.ok ? "HTTP 2xx OK" : `ERROR SIGNAL`}
+                        </span>
+                        <span className="text-[10px] font-mono opacity-40">{testResponse.time}ms</span>
                       </div>
-                      <div className="p-3 bg-slate-900 text-emerald-400 rounded-xl font-mono text-[10px] h-48 overflow-auto border border-white/10">
+                      <div className="p-4 bg-black/40 rounded-2xl font-mono text-[10px] h-40 overflow-auto border border-white/5 scrollbar-hide">
                         {Object.entries(testResponse.headers).map(([k, v]) => (
-                          <div key={k} className="mb-1">
-                            <span className="opacity-50">{k}:</span> {v}
+                          <div key={k} className="mb-1.5 flex gap-2">
+                            <span className="text-white/30 shrink-0 capitalize">{k}:</span>
+                            <span className="text-emerald-400/80 break-all">{v}</span>
                           </div>
                         ))}
                       </div>
                     </div>
                   ) : (
-                    <div className="h-48 flex flex-row items-center justify-center border-2 border-dashed border-divider rounded-xl text-center p-4">
-                      <p className="text-xs text-muted-foreground">Click "Run Fetch" to simulate a real HTTP call to this status code using httpstat.us</p>
+                    <div className="h-40 flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-2xl text-center p-6 relative z-10">
+                      <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest">Awaiting execution...</p>
                     </div>
                   )}
                 </Card>
               </div>
+
+              {/* Implementation Snippets */}
+              <Card className="p-8 border-divider">
+                <h3 className="font-black text-lg mb-6 flex items-center gap-2">
+                  <Terminal className="size-5 text-primary" />
+                  Code Implementation
+                </h3>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {selectedCode.snippets ? Object.entries(selectedCode.snippets).map(([lang, code]) => (
+                    <div key={lang} className="space-y-2 group">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-black uppercase text-muted-foreground tracking-tighter group-hover:text-primary transition-colors">{lang}</span>
+                        <CopyButton text={code} size="xs" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <pre className="p-4 bg-muted/30 rounded-2xl font-mono text-[10px] border border-divider overflow-x-auto h-32 scrollbar-hide">
+                        <code>{code}</code>
+                      </pre>
+                    </div>
+                  )) : (
+                    <div className="col-span-full p-10 bg-muted/10 border-2 border-dashed border-divider rounded-3xl text-center">
+                      <p className="text-sm italic opacity-40">Generic response standard applies to this status code.</p>
+                    </div>
+                  )}
+                </div>
+              </Card>
             </div>
           ) : (
             <div className="space-y-6">
+              <div className="flex justify-between items-center px-2">
+                <h2 className="text-sm font-black uppercase tracking-widest text-muted-foreground">
+                  {query.trim() || categoryFilter ? "Search Results" : "Most Common Codes"}
+                </h2>
+                {displayCodes.length > 0 && <StatusBadge variant="info">{displayCodes.length} CODES FOUND</StatusBadge>}
+              </div>
+
               {activeView === "grid" ? (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   {displayCodes.map((status) => (
-                    <button key={status.code} onClick={() => setSelectedCode(status)} className="group text-left">
-                      <Card className="p-4 border-2 border-transparent hover:border-primary/30 transition-all cursor-pointer shadow-sm group-hover:shadow-md">
-                        <div className="flex items-center gap-3">
-                          <div className={cn("size-12 rounded-xl flex items-center justify-center font-black", CATEGORY_COLORS[status.category])}>
-                            {status.code}
-                          </div>
-                          <div className="min-w-0">
-                            <h4 className="font-bold text-sm truncate">{status.name}</h4>
-                            <p className="text-[10px] text-muted-foreground truncate uppercase font-black">{getCategoryInfo(status.category).label}</p>
-                          </div>
+                    <button key={status.code} onClick={() => setSelectedCode(status)} className="group text-left h-full">
+                      <Card className="p-5 border-2 border-transparent hover:border-primary/30 transition-all cursor-pointer shadow-sm group-hover:shadow-xl group-hover:-translate-y-1 h-full flex flex-row items-center gap-4 bg-content1 overflow-hidden relative">
+                        <div className={cn("size-14 shrink-0 rounded-2xl flex items-center justify-center font-black text-lg shadow-inner", CATEGORY_COLORS[status.category])}>
+                          {status.code}
                         </div>
+                        <div className="min-w-0">
+                          <h4 className="font-black text-sm truncate uppercase tracking-tight">{status.name}</h4>
+                          <p className="text-[9px] text-muted-foreground truncate font-bold opacity-60 uppercase">{getCategoryInfo(status.category).label}</p>
+                        </div>
+                        <div className="absolute -bottom-2 -right-2 opacity-5 group-hover:opacity-10 transition-opacity"><Globe className="size-16" /></div>
                       </Card>
                     </button>
                   ))}
                 </div>
               ) : (
-                <Card className="p-0 overflow-hidden border-divider">
+                <Card className="p-0 overflow-hidden border-divider shadow-xl">
                   <DataTable
                     columns={statusColumns}
                     data={displayCodes.map(c => ({ ...c, id: c.code }))}
@@ -313,6 +358,14 @@ export default function HttpStatusFinderPage() {
                     renderCell={renderStatusCell}
                     initialVisibleColumns={["code", "name", "category", "description"]}
                   />
+                </Card>
+              )}
+
+              {displayCodes.length === 0 && (
+                <Card className="p-20 border-dashed border-2 bg-muted/20 text-center">
+                  <Globe className="size-16 mx-auto mb-4 opacity-20" />
+                  <h3 className="text-xl font-bold opacity-40">No matching status codes</h3>
+                  <p className="text-sm opacity-30 mt-1">Try searching by numeric code (e.g. 404) or name (e.g. "auth").</p>
                 </Card>
               )}
             </div>
