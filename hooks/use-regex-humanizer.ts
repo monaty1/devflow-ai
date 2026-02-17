@@ -1,174 +1,118 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import type {
-  RegexAnalysis,
-  TestResult,
-  RegexMode,
-} from "@/types/regex-humanizer";
-import {
-  explainRegex,
-  generateRegex,
-  testRegex,
-  isValidRegex,
-  COMMON_PATTERNS,
-} from "@/lib/application/regex-humanizer";
-import { useToolHistory } from "@/hooks/use-tool-history";
-import type { RegexFlavor } from "@/types/regex-humanizer";
+import { useState, useCallback, useEffect, useRef } from "react";
+import type { RegexAnalysis, TestResult } from "@/types/regex-humanizer";
+import { REGEX_HUMANIZER_WORKER_SOURCE } from "@/lib/application/regex-humanizer/worker-source";
 
-interface RegexHistoryItem {
-  id: string;
+interface UseRegexHumanizerReturn {
   pattern: string;
-  mode: RegexMode;
-  timestamp: string;
+  explanation: RegexAnalysis | null;
+  testResult: TestResult | null;
+  isExplaining: boolean;
+  isGenerating: boolean;
+  setPattern: (pattern: string) => void;
+  explain: (pattern: string) => Promise<void>;
+  generate: (description: string) => Promise<void>;
+  test: (pattern: string, text: string) => Promise<void>;
+  reset: () => void;
 }
 
-export function useRegexHumanizer() {
-  const [mode, setMode] = useState<RegexMode>("explain");
-  const [flavor, setFlavor] = useState<RegexFlavor>("javascript");
+export function useRegexHumanizer(): UseRegexHumanizerReturn {
   const [pattern, setPattern] = useState("");
-  const [description, setDescription] = useState("");
-  const [testInput, setTestInput] = useState("");
-  const [analysis, setAnalysis] = useState<RegexAnalysis | null>(null);
-  const [generatedPattern, setGeneratedPattern] = useState<string | null>(null);
+  const [explanation, setExplanation] = useState<RegexAnalysis | null>(null);
   const [testResult, setTestResult] = useState<TestResult | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { history, addToHistory: addItemToHistory, clearHistory } =
-    useToolHistory<RegexHistoryItem>("devflow-regex-history", 20);
+  const [isExplaining, setIsExplaining] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const workerRef = useRef<Worker | null>(null);
 
-  const addToHistory = useCallback(
-    (patternValue: string, modeValue: RegexMode) => {
-      const newItem: RegexHistoryItem = {
-        id: crypto.randomUUID(),
-        pattern: patternValue,
-        mode: modeValue,
-        timestamp: new Date().toISOString(),
-      };
-      addItemToHistory(newItem);
-    },
-    [addItemToHistory],
-  );
+  useEffect(() => {
+    const blob = new Blob([REGEX_HUMANIZER_WORKER_SOURCE], { type: "application/javascript" });
+    const worker = new Worker(URL.createObjectURL(blob));
+    workerRef.current = worker;
 
-  const explain = useCallback(() => {
-    if (!pattern.trim()) {
-      setError("Por favor, introduce una expresión regular");
-      return;
-    }
+    return () => {
+      worker.terminate();
+    };
+  }, []);
 
-    if (!isValidRegex(pattern)) {
-      setError("La expresión regular no es válida");
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const result = explainRegex(pattern, flavor);
-      setAnalysis(result);
-      addToHistory(pattern, "explain");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Error al analizar la regex");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [pattern, flavor, addToHistory]);
-
-  const generate = useCallback(() => {
-    if (!description.trim()) {
-      setError("Por favor, describe el patrón que necesitas");
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const result = generateRegex(description);
-      setGeneratedPattern(result);
-      setPattern(result);
-      addToHistory(result, "generate");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Error al generar la regex");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [description, addToHistory]);
-
-  const test = useCallback(() => {
-    if (!pattern.trim()) {
-      setError("Por favor, introduce una expresión regular");
-      return;
-    }
-
-    setError(null);
-
-    try {
-      const result = testRegex(pattern, testInput);
-      setTestResult(result);
-
-      if (!result.isValid) {
-        setError(result.error || "Regex inválida");
+  const runWorker = useCallback((action: string, payload: any): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      if (!workerRef.current) {
+        reject(new Error("Worker not initialized"));
+        return;
       }
+
+      const worker = workerRef.current;
+
+      const handleMessage = (e: MessageEvent) => {
+        if (e.data.type === "success") {
+          worker.removeEventListener("message", handleMessage);
+          resolve(e.data.result);
+        } else {
+          worker.removeEventListener("message", handleMessage);
+          reject(new Error(e.data.error || "Worker error"));
+        }
+      };
+
+      worker.addEventListener("message", handleMessage);
+      worker.postMessage({ action, payload });
+    });
+  }, []);
+
+  const explain = useCallback(async (patternInput: string) => {
+    if (!patternInput.trim()) return;
+    setIsExplaining(true);
+    try {
+      const result = await runWorker("explain", { patternInput });
+      setExplanation(result);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error al probar la regex");
+      console.error(e);
+    } finally {
+      setIsExplaining(false);
     }
-  }, [pattern, testInput]);
+  }, [runWorker]);
+
+  const generate = useCallback(async (description: string) => {
+    if (!description.trim()) return;
+    setIsGenerating(true);
+    try {
+      const regex = await runWorker("generate", { description });
+      setPattern(regex);
+      // Auto-explain generated regex
+      const explanationResult = await runWorker("explain", { patternInput: regex });
+      setExplanation(explanationResult);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [runWorker]);
+
+  const test = useCallback(async (regexPattern: string, text: string) => {
+    try {
+      const result = await runWorker("test", { pattern: regexPattern, text });
+      setTestResult(result);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [runWorker]);
 
   const reset = useCallback(() => {
     setPattern("");
-    setDescription("");
-    setTestInput("");
-    setAnalysis(null);
-    setGeneratedPattern(null);
+    setExplanation(null);
     setTestResult(null);
-    setError(null);
-    setFlavor("javascript");
-  }, []);
-
-  const loadPreset = useCallback((presetId: string) => {
-    const preset = COMMON_PATTERNS.find((p) => p.id === presetId);
-    if (preset) {
-      setPattern(preset.pattern);
-      setTestInput(preset.examples[0] || "");
-      setAnalysis(null);
-      setTestResult(null);
-      setError(null);
-    }
   }, []);
 
   return {
-    // State
-    mode,
-    flavor,
     pattern,
-    description,
-    testInput,
-    analysis,
-    generatedPattern,
+    explanation,
     testResult,
-    isLoading,
-    error,
-    history,
-    commonPatterns: COMMON_PATTERNS,
-
-    // Setters
-    setMode,
-    setFlavor,
+    isExplaining,
+    isGenerating,
     setPattern,
-    setDescription,
-    setTestInput,
-
-    // Actions
     explain,
     generate,
     test,
     reset,
-    loadPreset,
-    clearHistory,
-
-    // Utilities
-    isValidRegex,
   };
 }
