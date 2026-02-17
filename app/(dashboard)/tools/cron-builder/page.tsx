@@ -25,6 +25,9 @@ import {
   Github,
   Code2,
   Box,
+  Globe,
+  CheckCircle2,
+  AlertTriangle,
 } from "lucide-react";
 import { useCronBuilder } from "@/hooks/use-cron-builder";
 import { useTranslation } from "@/hooks/use-translation";
@@ -51,11 +54,13 @@ export default function CronBuilderPage() {
     reset,
   } = useCronBuilder();
 
-  const [activeTab, setActiveTab] = useState<"builder" | "history">("builder");
+  const [activeTab, setActiveTab] = useState<"builder" | "infra">("builder");
   const [configFormat, setConfigFormat] = useState<ConfigFormat>("kubernetes");
+  const [timezone, setTimezone] = useState("UTC");
 
   const executionColumns: ColumnConfig[] = [
-    { name: "DATE", uid: "formatted", sortable: true },
+    { name: "LOCAL TIME", uid: "formatted", sortable: true },
+    { name: "UTC TIME", uid: "utc" },
     { name: "RELATIVE", uid: "relative", sortable: true },
   ];
 
@@ -68,6 +73,12 @@ export default function CronBuilderPage() {
             <span className="font-mono text-sm font-bold">{exec.formatted}</span>
           </div>
         );
+      case "utc":
+        return (
+          <span className="font-mono text-xs text-muted-foreground">
+            {exec.date.toISOString().replace("T", " ").slice(0, 16)} UTC
+          </span>
+        );
       case "relative":
         return (
           <Chip size="sm" variant="flat" color="secondary" className="font-black text-[10px] uppercase">
@@ -78,6 +89,13 @@ export default function CronBuilderPage() {
         return (exec as any)[columnKey];
     }
   };
+
+  const INFRA_FORMATS: { id: ConfigFormat; label: string; icon: any }[] = [
+    { id: "kubernetes", label: "Kubernetes CronJob", icon: Cloud },
+    { id: "github-actions", label: "GitHub Actions", icon: Github },
+    { id: "aws-eventbridge", label: "AWS EventBridge", icon: Box },
+    { id: "linux-crontab", label: "Linux Crontab", icon: Terminal },
+  ];
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -96,94 +114,135 @@ export default function CronBuilderPage() {
       />
 
       <div className="grid gap-6 lg:grid-cols-12">
-        {/* Visual Builder Column */}
+        {/* Builder Column */}
         <div className="lg:col-span-5 space-y-6">
           <Card className="p-6">
-            <div className="mb-6 flex items-center justify-between">
-              <h3 className="text-lg font-bold flex items-center gap-2">
-                <Terminal className="size-5 text-primary" />
-                Expression Builder
-              </h3>
-              <CopyButton text={expression} />
-            </div>
+            <Tabs 
+              selectedKey={activeTab} 
+              onSelectionChange={(k) => setActiveTab(k as any)}
+              variant="underlined"
+              classNames={{ tabList: "gap-6 mb-6", cursor: "bg-primary" }}
+            >
+              <Tab key="builder" title="Expression Builder" />
+              <Tab key="infra" title="Infrastructure" />
+            </Tabs>
 
-            <div className="bg-muted/50 p-6 rounded-2xl border border-divider mb-8 text-center shadow-inner">
-              <p className="text-3xl font-black tracking-widest text-primary font-mono">
-                {expression}
-              </p>
-              <p className="text-[10px] uppercase font-black text-muted-foreground mt-2 tracking-tighter">
-                min · hour · day · month · week
-              </p>
-            </div>
-
-            <div className="space-y-6">
-              {[
-                { field: "minute", label: "Minute", range: "0-59" },
-                { field: "hour", label: "Hour", range: "0-23" },
-                { field: "dayOfMonth", label: "Day", range: "1-31" },
-                { field: "month", label: "Month", range: "1-12" },
-                { field: "dayOfWeek", label: "Weekday", range: "0-6" },
-              ].map((f) => (
-                <div key={f.field} className="space-y-1.5">
-                  <div className="flex justify-between items-center">
-                    <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{f.label}</label>
-                    <span className="text-[10px] opacity-50 font-mono">{f.range}</span>
+            {activeTab === "builder" && (
+              <div className="space-y-6">
+                <div className="bg-muted/50 p-6 rounded-2xl border border-divider text-center shadow-inner relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                  <p className="text-4xl font-black tracking-widest text-primary font-mono select-all">
+                    {expression}
+                  </p>
+                  <div className="flex justify-center gap-4 mt-2 text-[10px] uppercase font-black text-muted-foreground tracking-tighter">
+                    <span>min</span><span>hour</span><span>day</span><span>month</span><span>week</span>
                   </div>
-                  <Input
-                    size="sm"
-                    variant="bordered"
-                    value={(cron as any)[f.field]}
-                    onValueChange={(val) => setField(f.field as any, val)}
-                    classNames={{ input: "font-mono font-bold" }}
-                  />
+                  <div className="absolute top-2 right-2">
+                    <CopyButton text={expression} variant="ghost" size="sm" />
+                  </div>
                 </div>
-              ))}
-            </div>
-          </Card>
 
-          {/* Quick Presets */}
-          <Card className="p-6">
-            <h3 className="font-bold mb-4 flex items-center gap-2">
-              <Zap className="size-4 text-warning" />
-              Standard Presets
-            </h3>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { name: "Every Minute", exp: "* * * * *" },
-                { name: "Every 5m", exp: "*/5 * * * *" },
-                { name: "Hourly", exp: "0 * * * *" },
-                { name: "Daily 00:00", exp: "0 0 * * *" },
-                { name: "Weekly (Mon)", exp: "0 0 * * 1" },
-                { name: "Monthly (1st)", exp: "0 0 1 * *" },
-              ].map((p) => (
-                <Button
-                  key={p.name}
-                  size="sm"
-                  variant="flat"
-                  onPress={() => setExpression(p.exp)}
-                  className="font-bold text-[10px] h-8"
-                >
-                  {p.name}
-                </Button>
-              ))}
-            </div>
+                <div className="space-y-4">
+                  {[
+                    { field: "minute", label: "Minute", range: "0-59" },
+                    { field: "hour", label: "Hour", range: "0-23" },
+                    { field: "dayOfMonth", label: "Day", range: "1-31" },
+                    { field: "month", label: "Month", range: "1-12" },
+                    { field: "dayOfWeek", label: "Weekday", range: "0-6" },
+                  ].map((f) => (
+                    <div key={f.field} className="flex items-center gap-4">
+                      <label className="w-16 text-xs font-bold uppercase tracking-widest text-muted-foreground text-right">{f.label}</label>
+                      <Input
+                        size="sm"
+                        variant="bordered"
+                        value={(cron as any)[f.field]}
+                        onValueChange={(val) => setField(f.field as any, val)}
+                        classNames={{ input: "font-mono font-bold" }}
+                        placeholder="*"
+                        className="flex-1"
+                      />
+                      <span className="text-[10px] opacity-30 font-mono w-10">{f.range}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="pt-4 border-t border-divider">
+                  <p className="text-[10px] font-black uppercase text-muted-foreground mb-3 tracking-widest">Common Presets</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { name: "Every 1m", exp: "* * * * *" },
+                      { name: "Hourly", exp: "0 * * * *" },
+                      { name: "Daily", exp: "0 0 * * *" },
+                      { name: "Weekly", exp: "0 0 * * 1" },
+                      { name: "Monthly", exp: "0 0 1 * *" },
+                      { name: "Weekdays", exp: "0 9 * * 1-5" },
+                    ].map((p) => (
+                      <Button
+                        key={p.name}
+                        size="sm"
+                        variant="flat"
+                        onPress={() => setExpression(p.exp)}
+                        className="font-bold text-[10px] h-8"
+                      >
+                        {p.name}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "infra" && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-2">
+                  {INFRA_FORMATS.map((f) => (
+                    <button
+                      key={f.id}
+                      onClick={() => {
+                        setConfigFormat(f.id);
+                        loadConfig(f.id);
+                      }}
+                      className={cn(
+                        "flex flex-col items-center justify-center p-3 rounded-xl border transition-all gap-2",
+                        configFormat === f.id 
+                          ? "bg-primary/10 border-primary/30 text-primary shadow-sm" 
+                          : "bg-muted/30 border-transparent hover:bg-muted/50"
+                      )}
+                    >
+                      <f.icon className="size-5" />
+                      <span className="text-[10px] font-bold uppercase text-center">{f.label.split(" ")[0]}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <Card className="p-0 border-divider shadow-sm overflow-hidden">
+                  <div className="p-3 bg-muted/30 border-b border-divider flex justify-between items-center">
+                    <span className="text-xs font-bold text-muted-foreground">{config.label}</span>
+                    <CopyButton text={config.code} size="sm" />
+                  </div>
+                  <pre className="p-4 font-mono text-xs leading-relaxed overflow-auto max-h-[300px] bg-background">
+                    <code>{config.code}</code>
+                  </pre>
+                </Card>
+              </div>
+            )}
           </Card>
         </div>
 
         {/* Intelligence Column */}
         <div className="lg:col-span-7 space-y-6">
           {/* Natural Explanation */}
-          <Card className="p-6 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-            <h3 className="text-xs font-black uppercase text-primary mb-3 tracking-widest">
-              Human-Readable Explanation
+          <Card className="p-8 bg-gradient-to-br from-orange-500/10 to-amber-500/10 border-orange-500/20 shadow-lg">
+            <h3 className="text-xs font-black uppercase text-orange-600 mb-4 flex items-center gap-2 tracking-widest">
+              <Sparkles className="size-4" /> Human Readable
             </h3>
-            <p className="text-xl font-bold leading-relaxed">
+            <p className="text-2xl font-black leading-tight text-foreground">
               “{explanation.summary}”
             </p>
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-6 flex flex-wrap gap-2">
               {explanation.details.map((d, i) => (
                 <Tooltip key={i} content={d.explanation}>
-                  <Chip size="sm" variant="dot" color="primary" className="cursor-default font-medium">
+                  <Chip size="sm" variant="dot" color="warning" className="cursor-help font-bold border border-warning/20">
                     {d.field}: {d.value}
                   </Chip>
                 </Tooltip>
@@ -191,66 +250,34 @@ export default function CronBuilderPage() {
             </div>
           </Card>
 
-          {/* Infrastructure Snippets */}
-          <Card className="p-0 overflow-hidden shadow-xl border-indigo-500/20">
-            <div className="p-4 border-b border-divider flex items-center justify-between bg-muted/20">
-              <h3 className="font-bold flex items-center gap-2 text-indigo-600">
-                <Box className="size-4" />
-                Infrastructure Deployment
-              </h3>
-              <div className="flex bg-muted p-1 rounded-xl">
-                {[
-                  { id: "kubernetes", icon: Cloud },
-                  { id: "github-actions", icon: Github },
-                  { id: "linux-crontab", icon: Terminal },
-                ].map((f) => {
-                  const Icon = f.icon;
-                  return (
-                    <Button
-                      key={f.id}
-                      isIconOnly
-                      size="sm"
-                      variant={configFormat === f.id ? "solid" : "light"}
-                      color={configFormat === f.id ? "primary" : "default"}
-                      onPress={() => {
-                        setConfigFormat(f.id as ConfigFormat);
-                        loadConfig(f.id as ConfigFormat);
-                      }}
-                      className="rounded-lg h-8 w-8"
-                    >
-                      <Icon className="size-3.5" />
-                    </Button>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="p-0 flex flex-col">
-              <div className="p-4 bg-blue-50/50 dark:bg-blue-950/10 flex justify-between items-center">
-                <span className="text-[10px] font-black uppercase text-indigo-500 tracking-widest">
-                  {configFormat === "kubernetes" ? "k8s-cronjob.yaml" : configFormat === "github-actions" ? "workflow.yaml" : "crontab"}
-                </span>
-                <CopyButton text={config.code} />
-              </div>
-              <pre className="p-6 font-mono text-xs leading-relaxed overflow-auto max-h-[300px] bg-background">
-                <code>{config.code}</code>
-              </pre>
-            </div>
-          </Card>
-
           {/* Execution Timeline */}
-          <Card className="p-6">
-            <h3 className="font-bold mb-6 flex items-center gap-2">
-              <Play className="size-4 text-emerald-500" />
-              Upcoming Executions (Next 10)
-            </h3>
-            <DataTable
-              columns={executionColumns}
-              data={nextExecutions.map((e, id) => ({ ...e, id }))}
-              filterField="formatted"
-              renderCell={renderExecutionCell}
-              initialVisibleColumns={["formatted", "relative"]}
-              emptyContent="No upcoming executions found within the next year."
-            />
+          <Card className="p-6 border-divider">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-bold flex items-center gap-2 text-emerald-600">
+                <Play className="size-4" />
+                Schedule Forecast
+              </h3>
+              <div className="flex items-center gap-2">
+                <Globe className="size-3 text-muted-foreground" />
+                <span className="text-xs font-mono text-muted-foreground">UTC vs Local</span>
+              </div>
+            </div>
+            
+            {explanation.humanReadable.includes("inválida") ? (
+              <div className="p-12 text-center border-2 border-dashed border-divider rounded-xl">
+                <AlertTriangle className="size-8 text-amber-500 mx-auto mb-3" />
+                <p className="text-sm font-medium text-muted-foreground">Invalid cron expression</p>
+              </div>
+            ) : (
+              <DataTable
+                columns={executionColumns}
+                data={nextExecutions.map((e, id) => ({ ...e, id }))}
+                filterField="formatted"
+                renderCell={renderExecutionCell}
+                initialVisibleColumns={["formatted", "utc", "relative"]}
+                emptyContent="No upcoming executions found."
+              />
+            )}
           </Card>
         </div>
       </div>
