@@ -21,6 +21,7 @@ export interface CommitConfig {
   breakingChange: string;
   issueRef: string;
   useEmojis: boolean;
+  requireIssue: boolean;
 }
 
 export const DEFAULT_COMMIT_CONFIG: CommitConfig = {
@@ -31,6 +32,7 @@ export const DEFAULT_COMMIT_CONFIG: CommitConfig = {
   breakingChange: "",
   issueRef: "",
   useEmojis: true,
+  requireIssue: false,
 };
 
 export interface DiffAnalysis {

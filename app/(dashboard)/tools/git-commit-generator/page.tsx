@@ -13,6 +13,7 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
+  Textarea,
 } from "@heroui/react";
 import {
   GitCommit,
@@ -30,6 +31,13 @@ import {
   Wand2,
   ChevronRight,
   History,
+  FileText,
+  ShieldCheck,
+  Zap,
+  LayoutList,
+  MessageSquare,
+  ListPlus,
+  Hash,
 } from "lucide-react";
 import { useGitCommitGenerator } from "@/hooks/use-git-commit-generator";
 import { useTranslation } from "@/hooks/use-translation";
@@ -39,7 +47,7 @@ import { CopyButton } from "@/components/shared/copy-button";
 import { DataTable, type ColumnConfig } from "@/components/ui";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { cn } from "@/lib/utils";
-import type { CommitType, CommitResult } from "@/types/git-commit-generator";
+import type { CommitType } from "@/types/git-commit-generator";
 import { COMMIT_TYPES, getCommitTypeInfo } from "@/lib/application/git-commit-generator";
 
 export default function GitCommitGeneratorPage() {
@@ -47,21 +55,19 @@ export default function GitCommitGeneratorPage() {
   const { addToast } = useToast();
   const {
     config,
-    message,
-    validation,
+    result,
     history,
     parsedCommit,
-    isAnalyzing,
-    setField,
-    setConfig,
+    updateConfig,
     generate,
-    analyzeDiff,
+    analyze,
     parse,
     reset,
     clearHistory,
+    getChangelog,
   } = useGitCommitGenerator();
 
-  const [activeTab, setActiveTab] = useState<"generate" | "parse" | "history">("generate");
+  const [activeTab, setActiveTab] = useState<"composer" | "parse" | "changelog">("composer");
   const [diffInput, setDiffInput] = useState("");
 
   const historyColumns: ColumnConfig[] = [
@@ -71,27 +77,20 @@ export default function GitCommitGeneratorPage() {
     { name: "ACTIONS", uid: "actions" },
   ];
 
-  const renderHistoryCell = useCallback((item: CommitResult, columnKey: React.Key) => {
+  const renderHistoryCell = useCallback((item: any, columnKey: React.Key) => {
     switch (columnKey) {
       case "message":
         return (
-          <span className="font-mono text-xs truncate max-w-[300px] block" title={item.message}>
-            {item.message.split("\n")[0]}
-          </span>
+          <div className="flex flex-col gap-0.5 max-w-[300px]">
+            <span className="font-mono text-xs font-black truncate text-primary">{item.message.split("\n")[0]}</span>
+            <span className="text-[9px] opacity-40 font-mono italic truncate">{item.timestamp}</span>
+          </div>
         );
       case "type":
         const info = getCommitTypeInfo(item.type);
-        return (
-          <Chip size="sm" variant="flat" className="capitalize">
-            {info.emoji} {item.type}
-          </Chip>
-        );
+        return <Chip size="sm" variant="flat" className="font-black text-[10px] uppercase">{info.emoji} {item.type}</Chip>;
       case "scope":
-        return item.scope ? (
-          <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">{item.scope}</span>
-        ) : (
-          <span className="text-muted-foreground opacity-50">-</span>
-        );
+        return item.scope ? <Chip size="sm" variant="dot" color="primary" className="font-bold text-[9px] uppercase">{item.scope}</Chip> : <span className="opacity-20">-</span>;
       case "actions":
         return <CopyButton text={item.message} size="sm" variant="ghost" />;
       default:
@@ -100,21 +99,18 @@ export default function GitCommitGeneratorPage() {
   }, []);
 
   const handleDiffAnalysis = () => {
-    if (!diffInput.trim()) {
-      addToast("Please paste a git diff first", "warning");
-      return;
-    }
-    analyzeDiff(diffInput);
-    setActiveTab("generate");
-    setDiffInput("");
-    addToast("Diff analyzed! Type and scope suggestions applied.", "success");
+    if (!diffInput.trim()) return;
+    analyze();
+    addToast("Diff analyzed! Suggestions applied to composer.", "success");
   };
 
+  const changelog = useMemo(() => getChangelog(), [getChangelog]);
+
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <div className="mx-auto max-w-7xl space-y-6">
       <ToolHeader
         icon={GitCommit}
-        gradient="from-slate-700 to-zinc-800"
+        gradient="from-slate-700 to-zinc-900"
         title={t("gitCommit.title")}
         description={t("gitCommit.description")}
         breadcrumb
@@ -127,253 +123,271 @@ export default function GitCommitGeneratorPage() {
       />
 
       <div className="grid gap-6 lg:grid-cols-12">
-        {/* Main Interface */}
-        <div className="lg:col-span-7 space-y-6">
+        {/* Input Column */}
+        <div className="lg:col-span-5 space-y-6">
           <Card className="p-6">
-            <Tabs 
-              selectedKey={activeTab} 
-              onSelectionChange={(k) => setActiveTab(k as any)}
-              variant="underlined"
-              classNames={{ tabList: "gap-6 mb-6", cursor: "bg-primary" }}
-            >
-              <Tab key="generate" title="Composer" />
-              <Tab key="parse" title="Parse / Analyze" />
-              <Tab key="history" title="History" />
-            </Tabs>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-bold flex items-center gap-2">
+                <Terminal className="size-4 text-primary" />
+                Commit Architect
+              </h3>
+              <div className="flex gap-1">
+                <StatusBadge variant={config.description.length > 50 ? "warning" : "success"}>
+                  {config.description.length}/72
+                </StatusBadge>
+              </div>
+            </div>
 
-            {activeTab === "generate" && (
-              <div className="space-y-5">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Type</label>
-                    <Dropdown>
-                      <DropdownTrigger>
-                        <Button variant="bordered" className="w-full justify-between capitalize text-left">
-                          {config.type ? (
-                            <span className="flex items-center gap-2">
-                              {getCommitTypeInfo(config.type).emoji} {config.type}
-                            </span>
-                          ) : "Select Type"}
-                          <ChevronRight className="size-4 rotate-90" />
-                        </Button>
-                      </DropdownTrigger>
-                      <DropdownMenu 
-                        selectionMode="single"
-                        selectedKeys={new Set([config.type])}
-                        onSelectionChange={(k) => setField("type", Array.from(k)[0] as CommitType)}
-                        className="max-h-[300px] overflow-y-auto"
-                      >
-                        {COMMIT_TYPES.map((t) => (
-                          <DropdownItem key={t.type} startContent={<span className="text-lg">{t.emoji}</span>} description={t.description}>
-                            {t.label}
-                          </DropdownItem>
-                        ))}
-                      </DropdownMenu>
-                    </Dropdown>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Scope</label>
-                    <Input 
-                      placeholder="e.g. auth, api, ui" 
-                      value={config.scope}
-                      onValueChange={(v) => setField("scope", v)}
-                      variant="bordered"
-                    />
-                  </div>
+            <div className="space-y-5">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Type</label>
+                  <Dropdown>
+                    <DropdownTrigger>
+                      <Button variant="bordered" className="w-full justify-between h-10 font-bold uppercase text-[10px]">
+                        {config.type ? (
+                          <span className="flex items-center gap-2">
+                            {getCommitTypeInfo(config.type).emoji} {config.type}
+                          </span>
+                        ) : "Select"}
+                        <ChevronRight className="size-3 rotate-90 opacity-40" />
+                      </Button>
+                    </DropdownTrigger>
+                    <DropdownMenu 
+                      selectionMode="single"
+                      selectedKeys={new Set([config.type])}
+                      onSelectionChange={(k) => updateConfig("type", Array.from(k)[0] as CommitType)}
+                      className="max-h-64 overflow-auto"
+                    >
+                      {COMMIT_TYPES.map(t => (
+                        <DropdownItem key={t.type} startContent={<span>{t.emoji}</span>} description={t.description}>{t.label}</DropdownItem>
+                      ))}
+                    </DropdownMenu>
+                  </Dropdown>
                 </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Short Description</label>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Scope</label>
                   <Input 
-                    placeholder="imperative, lowercase, no period (e.g. add google login)" 
-                    value={config.description}
-                    onValueChange={(v) => setField("description", v)}
-                    variant="bordered"
-                    className={cn(
-                      config.description.length > 50 ? "text-warning" : "",
-                      config.description.length > 72 ? "text-danger" : ""
-                    )}
-                    endContent={
-                      <span className={cn("text-xs", config.description.length > 72 ? "text-danger font-bold" : "text-muted-foreground")}>
-                        {config.description.length}/72
-                      </span>
-                    }
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Long Body (Optional)</label>
-                  <textarea
-                    placeholder="Motivation for the change and contrasts with previous behavior"
-                    value={config.body}
-                    onChange={(e) => setField("body", e.target.value)}
-                    className="h-32 w-full resize-none rounded-xl border border-divider bg-background p-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Breaking Change</label>
-                    <Input 
-                      placeholder="Description of breaking change" 
-                      value={config.breakingChange}
-                      onValueChange={(v) => setField("breakingChange", v)}
-                      variant="bordered"
-                      color={config.breakingChange ? "danger" : "default"}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Issue References</label>
-                    <Input 
-                      placeholder="#123, JIRA-456" 
-                      value={config.issueRef}
-                      onValueChange={(v) => setField("issueRef", v)}
-                      variant="bordered"
-                      startContent={<Github className="size-4 text-muted-foreground" />}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4 pt-4">
-                  <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-muted transition-colors border border-transparent hover:border-divider">
-                    <input 
-                      type="checkbox" 
-                      checked={config.useEmojis} 
-                      onChange={(e) => setField("useEmojis", e.target.checked)}
-                      className="size-4 rounded accent-primary"
-                    />
-                    <span className="text-sm font-medium">Use Gitmoji</span>
-                  </label>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "parse" && (
-              <div className="space-y-6">
-                <div className="p-4 bg-muted/30 rounded-xl border border-dashed border-divider">
-                  <h3 className="font-bold flex items-center gap-2 mb-2">
-                    <FileDiff className="size-4 text-primary" />
-                    Smart Diff Analysis
-                  </h3>
-                  <p className="text-xs text-muted-foreground mb-4">
-                    Paste output from <code>git diff --cached</code> to auto-detect type and scope.
-                  </p>
-                  <textarea
-                    value={diffInput}
-                    onChange={(e) => setDiffInput(e.target.value)}
-                    placeholder="diff --git a/src/main.ts b/src/main.ts..."
-                    className="h-32 w-full resize-none rounded-lg border border-divider bg-background p-3 font-mono text-xs mb-3 focus:ring-2 focus:ring-primary/20"
-                  />
-                  <Button 
                     size="sm" 
-                    color="secondary" 
-                    onPress={handleDiffAnalysis} 
-                    className="font-bold w-full"
-                    isLoading={isAnalyzing}
-                  >
-                    <Wand2 className="size-3 mr-2" /> Analyze & Fill Form
-                  </Button>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Parse Existing Message</label>
-                  <textarea
-                    placeholder="Paste a commit message to validate..."
-                    className="h-24 w-full resize-none rounded-xl border border-divider bg-background p-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    onChange={(e) => parse(e.target.value)}
+                    placeholder="e.g. auth, ui" 
+                    value={config.scope} 
+                    onValueChange={(v) => updateConfig("scope", v)} 
+                    variant="bordered"
+                    classNames={{ input: "font-bold text-xs" }}
                   />
                 </div>
-
-                {parsedCommit && (
-                  <Card className="p-4 bg-muted/20">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div><span className="font-bold opacity-60">Type:</span> {parsedCommit.type}</div>
-                      <div><span className="font-bold opacity-60">Scope:</span> {parsedCommit.scope || "-"}</div>
-                      <div className="col-span-2"><span className="font-bold opacity-60">Desc:</span> {parsedCommit.description}</div>
-                    </div>
-                  </Card>
-                )}
               </div>
-            )}
 
-            {activeTab === "history" && (
-              <div className="p-0">
-                <div className="flex justify-end mb-4">
-                  <Button size="sm" color="danger" variant="flat" onPress={clearHistory}>Clear History</Button>
-                </div>
-                <DataTable
-                  columns={historyColumns}
-                  data={history}
-                  filterField="message"
-                  renderCell={renderHistoryCell}
-                  initialVisibleColumns={["message", "type", "actions"]}
-                  emptyContent="No generated commits yet."
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Summary</label>
+                <Input 
+                  placeholder="What changed?" 
+                  value={config.description} 
+                  onValueChange={(v) => updateConfig("description", v)}
+                  variant="bordered"
+                  classNames={{ input: "font-medium" }}
                 />
               </div>
-            )}
+
+              <div className="space-y-1">
+                <div className="flex justify-between items-center px-1">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Description Body</label>
+                  <button 
+                    onClick={() => updateConfig("body", config.body + "\\n- ")}
+                    className="text-[9px] font-black text-primary uppercase flex items-center gap-1 hover:underline"
+                  >
+                    <ListPlus className="size-2.5" /> Add Point
+                  </button>
+                </div>
+                <Textarea
+                  placeholder="Detailed explanation..."
+                  value={config.body}
+                  onValueChange={(v) => updateConfig("body", v)}
+                  className="font-mono text-xs"
+                  minRows={4}
+                />
+              </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Refs</label>
+                    <Input 
+                      size="sm" 
+                      placeholder="#123" 
+                      value={config.issueRef} 
+                      onValueChange={(v) => updateConfig("issueRef", v)} 
+                      variant="bordered"
+                      startContent={<Hash className="size-3 opacity-40" />}
+                      color={config.requireIssue && !config.issueRef ? "danger" : "default"}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2 justify-end pb-1.5">
+                    <label className="flex items-center gap-2 cursor-pointer group">
+                      <input 
+                        type="checkbox" 
+                        checked={config.useEmojis} 
+                        onChange={(e) => updateConfig("useEmojis", e.target.checked)}
+                        className="size-4 rounded accent-primary"
+                      />
+                      <span className="text-[10px] font-black uppercase text-muted-foreground group-hover:text-primary transition-colors">Use Gitmoji</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer group">
+                      <input 
+                        type="checkbox" 
+                        checked={config.requireIssue} 
+                        onChange={(e) => updateConfig("requireIssue", e.target.checked)}
+                        className="size-4 rounded accent-danger"
+                      />
+                      <span className="text-[10px] font-black uppercase text-muted-foreground group-hover:text-danger transition-colors">Mandatory Issue</span>
+                    </label>
+                  </div>
+                </div>
+
+                {validation.errors.length > 0 && (
+                  <div className="space-y-2 p-3 bg-danger/5 border border-danger/20 rounded-xl">
+                    {validation.errors.map((err, i) => (
+                      <p key={i} className="text-[10px] text-danger font-bold flex items-center gap-2">
+                        <AlertTriangle className="size-3" /> {err}
+                      </p>
+                    ))}
+                  </div>
+                )}
+
+                <Button onPress={generate} color="primary" className="w-full h-12 font-black shadow-xl shadow-primary/20 text-md" isDisabled={!validation.isValid}>
+                  <Sparkles className="size-4 mr-2" /> Forge Message
+                </Button>
+            </div>
+          </Card>
+
+          {/* Quick Diff Analysis */}
+          <Card className="p-6 border-indigo-500/20 bg-indigo-500/5">
+            <h3 className="text-xs font-black uppercase text-indigo-600 mb-4 flex items-center gap-2 tracking-widest">
+              <FileDiff className="size-4" /> AI Diff Auditor
+            </h3>
+            <textarea
+              placeholder="Paste git diff output here..."
+              className="h-32 w-full resize-none rounded-xl border border-divider bg-background p-3 font-mono text-[10px] mb-3 focus:ring-2 focus:ring-indigo-500/20 shadow-inner"
+              onChange={(e) => setDiffInput(e.target.value)}
+              value={diffInput}
+            />
+            <Button size="sm" color="secondary" className="w-full font-black" onPress={handleDiffAnalysis} isDisabled={!diffInput.trim()}>
+              Analyze & Prefill
+            </Button>
           </Card>
         </div>
 
-        {/* Live Preview Column */}
-        <div className="lg:col-span-5 space-y-6">
-          <Card className="p-6 bg-content1 border-divider shadow-lg">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-bold flex items-center gap-2">
-                <Github className="size-5" />
-                GitHub Preview
-              </h3>
-              <StatusBadge variant={validation.isValid ? "success" : "danger"}>
-                {validation.isValid ? "Valid" : "Issues Found"}
-              </StatusBadge>
-            </div>
-
-            <div className="border border-divider rounded-md overflow-hidden bg-background">
-              <div className="bg-muted/50 p-2 border-b border-divider flex items-center gap-2 text-xs text-muted-foreground">
-                <GitBranch className="size-3" />
-                <span className="font-mono">main</span>
-                <span className="mx-1">·</span>
-                <span className="font-mono text-[10px]">a1b2c3d</span>
+        {/* Results Column */}
+        <div className="lg:col-span-7 space-y-6">
+          <Tabs 
+            selectedKey={activeTab} 
+            onSelectionChange={(k) => setActiveTab(k as any)}
+            variant="solid"
+            color="primary"
+            classNames={{ tabList: "bg-muted/50 rounded-xl p-1" }}
+          >
+            <Tab key="composer" title={
+              <div className="flex items-center gap-2">
+                <MessageSquare className="size-4" /> <span>Result</span>
               </div>
-              <div className="p-4 font-mono text-sm">
-                <div className="font-bold text-foreground">
-                  {message.split("\n")[0] || <span className="opacity-30 italic">Commit header...</span>}
+            } />
+            <Tab key="changelog" title={
+              <div className="flex items-center gap-2">
+                <LayoutList className="size-4" /> <span>Session Changelog</span>
+              </div>
+            } />
+            <Tab key="history" title={
+              <div className="flex items-center gap-2">
+                <History className="size-4" /> <span>Registry</span>
+              </div>
+            } />
+          </Tabs>
+
+          {activeTab === "composer" && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+              <Card className="p-0 border-divider shadow-xl overflow-hidden bg-background">
+                <div className="p-4 border-b border-divider bg-muted/20 flex justify-between items-center">
+                  <div className="flex items-center gap-3">
+                    <div className="size-8 bg-zinc-900 rounded-full flex items-center justify-center border border-white/10 shadow-lg">
+                      <Github className="size-4 text-white" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold">git-preview</span>
+                      <span className="text-[9px] opacity-40 font-mono">main · a1b2c3d</span>
+                    </div>
+                  </div>
+                  <CopyButton text={message || ""} />
                 </div>
-                {message.split("\n").slice(1).map((line, i) => (
-                  <div key={i} className="text-muted-foreground mt-1 whitespace-pre-wrap">
-                    {line}
-                  </div>
-                ))}
-              </div>
-            </div>
+                <div className="p-8 font-mono text-sm leading-relaxed whitespace-pre-wrap min-h-[200px]">
+                  {message ? (
+                    <div className="space-y-2">
+                      <p className="font-black text-primary underline decoration-primary/20 underline-offset-4">{message.split("\n")[0]}</p>
+                      <p className="text-muted-foreground">{message.split("\n").slice(1).join("\n")}</p>
+                    </div>
+                  ) : (
+                    <span className="opacity-20 italic">Forging your commit message...</span>
+                  )}
+                </div>
+                <div className="p-4 border-t border-divider bg-muted/5 flex gap-2">
+                   <CopyButton text={`git commit -m "${message || ""}"`} label="Copy CLI Command" className="flex-1 h-10 font-bold" />
+                </div>
+              </Card>
 
-            {!validation.isValid && validation.errors.length > 0 && (
-              <div className="mt-4 space-y-2">
-                {validation.errors.map((err, i) => (
-                  <div key={i} className="flex items-start gap-2 text-xs text-danger bg-danger/10 p-2 rounded-lg">
-                    <AlertTriangle className="size-3 mt-0.5 shrink-0" />
-                    <span>{err}</span>
+              {/* Validation Audit */}
+              <Card className="p-6">
+                <h3 className="text-[10px] font-black uppercase text-muted-foreground mb-4 tracking-widest flex items-center gap-2">
+                  <ShieldCheck className="size-3 text-emerald-500" /> Commit Standard Compliance
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center text-xs">
+                    <span>Conventional Commits 1.0.0</span>
+                    <StatusBadge variant="success">PASSED</StatusBadge>
                   </div>
-                ))}
-              </div>
-            )}
-
-            <div className="mt-6 pt-6 border-t border-divider flex flex-col gap-3">
-              <div className="flex gap-2">
-                <Button 
-                  color="primary" 
-                  className="flex-1 font-bold h-12 shadow-lg shadow-primary/20"
-                  onPress={generate}
-                  isDisabled={!validation.isValid}
-                >
-                  <Copy className="size-4 mr-2" /> Copy Message
-                </Button>
-                <CopyButton text={`git commit -m "${message}"`} label="Cmd" className="h-12 px-6" />
-              </div>
-              <p className="text-[10px] text-center text-muted-foreground">
-                Based on <a href="https://www.conventionalcommits.org/" target="_blank" rel="noreferrer" className="underline hover:text-primary">Conventional Commits 1.0.0</a>
-              </p>
+                  <div className="flex justify-between items-center text-xs">
+                    <span>Header length (&lt; 72 chars)</span>
+                    <StatusBadge variant={config.description.length <= 72 ? "success" : "danger"}>
+                      {config.description.length} chars
+                    </StatusBadge>
+                  </div>
+                  <div className="flex justify-between items-center text-xs">
+                    <span>Body Separation (Empty line)</span>
+                    <StatusBadge variant={config.body ? "success" : "info"}>{config.body ? "YES" : "N/A"}</StatusBadge>
+                  </div>
+                </div>
+              </Card>
             </div>
-          </Card>
+          )}
+
+          {activeTab === "changelog" && (
+            <Card className="p-0 border-divider shadow-xl overflow-hidden h-[600px] flex flex-col animate-in fade-in slide-in-from-right-4 duration-500">
+              <div className="p-4 border-b border-divider flex justify-between items-center bg-muted/20">
+                <div className="flex items-center gap-2">
+                  <FileText className="size-4 text-primary" />
+                  <span className="text-xs font-black uppercase tracking-widest">Automatic Session Changelog</span>
+                </div>
+                <CopyButton text={changelog} />
+              </div>
+              <pre className="p-8 font-mono text-xs leading-relaxed overflow-auto flex-1 bg-background text-foreground/80">
+                <code>{changelog || "No commits in current session to generate a changelog."}</code>
+              </pre>
+            </Card>
+          )}
+
+          {activeTab === "history" && (
+            <Card className="p-0 overflow-hidden shadow-xl border-divider h-[600px] animate-in fade-in slide-in-from-right-4 duration-500">
+              <div className="p-4 border-b border-divider bg-muted/20 flex items-center justify-between">
+                <span className="text-xs font-black uppercase tracking-widest">Commit Registry</span>
+                <Button size="xs" color="danger" variant="flat" onPress={clearHistory} className="font-black text-[9px]">WIPE CACHE</Button>
+              </div>
+              <DataTable
+                columns={historyColumns}
+                data={history}
+                filterField="message"
+                renderCell={renderHistoryCell}
+                initialVisibleColumns={["message", "type", "actions"]}
+                emptyContent="Registry empty."
+              />
+            </Card>
+          )}
         </div>
       </div>
     </div>

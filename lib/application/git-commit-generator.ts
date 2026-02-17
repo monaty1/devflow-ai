@@ -178,7 +178,7 @@ export function generateCommitMessage(config: CommitConfig): CommitResult {
 /**
  * Validates a conventional commit message string
  */
-export function validateCommitMessage(message: string): CommitValidation {
+export function validateCommitMessage(message: string, config?: CommitConfig): CommitValidation {
   const errors: string[] = [];
 
   if (!message.trim()) {
@@ -192,6 +192,11 @@ export function validateCommitMessage(message: string): CommitValidation {
   const headerRegex = /^(feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert)(\(.+\))?!?:\s.+$/;
   if (!headerRegex.test(header)) {
     errors.push("El encabezado no sigue el formato: type(scope): description");
+  }
+
+  // Check mandatory issue if config allows
+  if (config?.requireIssue && !config.issueRef.trim()) {
+    errors.push("Team Rule: Issue Reference (#123) is mandatory.");
   }
 
   // Check header length
@@ -354,4 +359,53 @@ export function suggestScope(description: string): string[] {
     .sort((a, b) => b.count - a.count)
     .slice(0, 5)
     .map((m) => m.scope);
+}
+
+/**
+ * Generates a CHANGELOG from a list of commit results
+ */
+export function generateChangelog(commits: CommitResult[]): string {
+  if (commits.length === 0) return "";
+
+  const sections: Record<string, string[]> = {
+    feat: [],
+    fix: [],
+    perf: [],
+    refactor: [],
+    docs: [],
+    chore: [],
+  };
+
+  commits.forEach((c) => {
+    const type = c.type;
+    const info = getCommitTypeInfo(type);
+    const line = `- ${info.emoji} **${c.scope || "general"}**: ${c.description} ${c.issueRef ? `(${c.issueRef})` : ""}`;
+    
+    if (sections[type]) {
+      sections[type].push(line);
+    } else {
+      if (!sections.other) sections.other = [];
+      sections.other.push(line);
+    }
+  });
+
+  let changelog = `# CHANGELOG - ${new Date().toLocaleDateString()}\\n\\n`;
+
+  const labels: Record<string, string> = {
+    feat: "✨ Features",
+    fix: "🐛 Bug Fixes",
+    perf: "⚡ Performance",
+    refactor: "♻️ Refactors",
+    docs: "📝 Documentation",
+    chore: "🔧 Maintenance",
+    other: "📦 Other Changes",
+  };
+
+  Object.entries(sections).forEach(([type, items]) => {
+    if (items.length > 0) {
+      changelog += `## ${labels[type] || type}\\n${items.join("\\n")}\\n\\n`;
+    }
+  });
+
+  return changelog.trim();
 }

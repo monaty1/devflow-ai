@@ -14,15 +14,13 @@ import {
   suggestScope,
   analyzeDiff,
   EXAMPLE_COMMITS,
+  generateChangelog,
+  validateCommitMessage,
 } from "@/lib/application/git-commit-generator";
 import { useToolHistory } from "@/hooks/use-tool-history";
+import { useMemo } from "react";
 
-interface HistoryItem {
-  id: string;
-  message: string;
-  type: CommitType;
-  timestamp: string;
-}
+export interface HistoryItem extends CommitResult {}
 
 export function useGitCommitGenerator() {
   const [config, setConfig] = useState<CommitConfig>(DEFAULT_COMMIT_CONFIG);
@@ -31,17 +29,19 @@ export function useGitCommitGenerator() {
   const [diffInput, setDiffInput] = useState("");
   const [parsedCommit, setParsedCommit] = useState<ParsedCommit | null>(null);
   const { history, addToHistory: addItemToHistory, clearHistory } =
-    useToolHistory<HistoryItem>("devflow-git-commit-generator-history", 10);
+    useToolHistory<HistoryItem>("devflow-git-commit-generator-history", 20);
 
   const addToHistory = useCallback((commitResult: CommitResult) => {
-    const newItem: HistoryItem = {
-      id: commitResult.id,
-      message: commitResult.message,
-      type: commitResult.type,
-      timestamp: commitResult.timestamp,
-    };
-    addItemToHistory(newItem);
+    addItemToHistory(commitResult);
   }, [addItemToHistory]);
+
+  const message = useMemo(() => {
+    return generateCommitMessage(config).message;
+  }, [config]);
+
+  const validation = useMemo(() => {
+    return validateCommitMessage(message, config);
+  }, [message, config]);
 
   const generate = useCallback(() => {
     if (!config.description.trim()) return;
@@ -50,6 +50,10 @@ export function useGitCommitGenerator() {
     setResult(commitResult);
     addToHistory(commitResult);
   }, [config, addToHistory]);
+
+  const getChangelog = useCallback(() => {
+    return generateChangelog(history);
+  }, [history]);
 
   const parse = useCallback(() => {
     if (!parseInput.trim()) {
@@ -108,6 +112,8 @@ export function useGitCommitGenerator() {
     // State
     config,
     result,
+    message,
+    validation,
     parseInput,
     diffInput,
     parsedCommit,
