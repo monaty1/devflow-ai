@@ -13,6 +13,17 @@ import {
   MoreVertical,
   ExternalLink,
 } from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+} from "recharts";
 import { useCostCalculator } from "@/hooks/use-cost-calculator";
 import { useTranslation } from "@/hooks/use-translation";
 import { formatCost } from "@/lib/application/cost-calculator";
@@ -123,6 +134,32 @@ export default function CostCalculatorPage() {
         return (result as any)[columnKey];
     }
   }, [cheapestId, bestValueId]);
+
+  const chartData = useMemo(() => {
+    if (!comparison || comparison.results.length === 0) return [];
+    
+    // Top 5 models for the chart
+    const topModels = comparison.results.slice(0, 5);
+    
+    return Array.from({ length: 30 }, (_, i) => {
+      const day = i + 1;
+      const dataPoint: any = { day: `Day ${day}` };
+      
+      topModels.forEach(result => {
+        // Daily cost * number of days
+        dataPoint[result.model.displayName] = Number((result.totalCost * dailyRequests * day).toFixed(2));
+      });
+      
+      return dataPoint;
+    });
+  }, [comparison, dailyRequests]);
+
+  const topModelNames = useMemo(() => {
+    if (!comparison) return [];
+    return comparison.results.slice(0, 5).map(r => r.model.displayName);
+  }, [comparison]);
+
+  const COLORS = ["#3b82f6", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981"];
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -289,6 +326,60 @@ export default function CostCalculatorPage() {
                 <p className="text-muted-foreground">{t("costCalc.emptyState")}</p>
               </div>
             )}
+          </Card>
+
+          {/* Projection Chart */}
+          <Card className="p-6 mt-6">
+            <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
+              <Sparkles className="size-5 text-warning" />
+              30-Day Cumulative Cost Projection (Top 5 Models)
+            </h3>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData}>
+                  <defs>
+                    {topModelNames.map((name, i) => (
+                      <linearGradient key={name} id={`color${i}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={COLORS[i % COLORS.length]} stopOpacity={0.1}/>
+                        <stop offset="95%" stopColor={COLORS[i % COLORS.length]} stopOpacity={0}/>
+                      </linearGradient>
+                    ))}
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                  <XAxis 
+                    dataKey="day" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{fontSize: 10, fill: 'gray'}}
+                    interval={6}
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{fontSize: 10, fill: 'gray'}}
+                    tickFormatter={(val) => `$${val}`}
+                  />
+                  <RechartsTooltip 
+                    contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', fontSize: '12px', color: 'white' }}
+                    itemStyle={{ padding: '2px 0' }}
+                  />
+                  {topModelNames.map((name, i) => (
+                    <Area
+                      key={name}
+                      type="monotone"
+                      dataKey={name}
+                      stroke={COLORS[i % COLORS.length]}
+                      fillOpacity={1}
+                      fill={`url(#color${i})`}
+                      strokeWidth={2}
+                    />
+                  ))}
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-4 italic text-center">
+              * Projection assumes constant daily requests and token counts. Prices may vary by provider.
+            </p>
           </Card>
         </div>
       </div>

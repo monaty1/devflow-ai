@@ -1,6 +1,7 @@
 import type { AIModel, AIProvider } from "@/types/cost-calculator";
 
 const LITELLM_URL = "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json";
+export const PRICING_CACHE_KEY = "latest-ai-prices";
 
 export interface LiteLLMModel {
   input_cost_per_token?: number;

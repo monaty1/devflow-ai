@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useMemo, useCallback, useEffect } from "react";
+import useSWR from "swr";
 import {
   compareAllModels,
   calculateMonthlyCost,
 } from "@/lib/application/cost-calculator";
 import type { CostComparison, AIModel } from "@/types/cost-calculator";
 import { AI_MODELS } from "@/config/ai-models";
-import { fetchLatestPrices } from "@/infrastructure/services/pricing-service";
+import { fetchLatestPrices, PRICING_CACHE_KEY } from "@/infrastructure/services/pricing-service";
 import { useSmartNavigation } from "@/hooks/use-smart-navigation";
 
 export function useCostCalculator() {
@@ -15,38 +16,29 @@ export function useCostCalculator() {
   const [outputTokens, setOutputTokens] = useState(500);
   const [dailyRequests, setDailyRequests] = useState(100);
   const [selectedModelId, setSelectedModelId] = useState("gpt-4o");
-  const [models, setModels] = useState<AIModel[]>(AI_MODELS);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [lastSync, setLastSync] = useState<string | null>(null);
   
+  const { data: latestModels, error, isValidating, mutate } = useSWR(
+    PRICING_CACHE_KEY,
+    fetchLatestPrices,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      dedupingInterval: 3600000, // 1 hour
+    }
+  );
+
+  const models = useMemo(() => {
+    return latestModels && latestModels.length > 0 ? latestModels : AI_MODELS;
+  }, [latestModels]);
+
   const { getSharedData } = useSmartNavigation();
 
   useEffect(() => {
     const shared = getSharedData();
     if (shared) {
-      // Estimate tokens from shared text (approx 4 chars per token)
       setInputTokens(Math.ceil(shared.length / 4));
     }
   }, [getSharedData]);
-
-  const syncPrices = useCallback(async () => {
-    setIsSyncing(true);
-    try {
-      const latest = await fetchLatestPrices();
-      if (latest.length > 0) {
-        setModels(latest);
-        setLastSync(new Date().toLocaleTimeString());
-      }
-    } catch (error) {
-      console.error("Failed to sync prices, using fallbacks", error);
-    } finally {
-      setIsSyncing(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    syncPrices();
-  }, [syncPrices]);
 
   const comparison: CostComparison | null = useMemo(() => {
     if (inputTokens <= 0 && outputTokens <= 0) return null;
@@ -87,9 +79,9 @@ export function useCostCalculator() {
     comparison,
     monthlyCost,
     reset,
-    isSyncing,
-    lastSync,
-    syncPrices,
+    isSyncing: isValidating,
+    lastSync: latestModels ? new Date().toISOString() : null,
+    syncPrices: () => mutate(),
     models
   };
 }
