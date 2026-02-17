@@ -1,188 +1,140 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import type {
-  WizardConfig,
   ConversionResult,
   GenerationResult,
-  NamingConvention,
+  WizardConfig,
   VariableType,
 } from "@/types/variable-name-wizard";
-import { DEFAULT_WIZARD_CONFIG } from "@/types/variable-name-wizard";
-import {
-  convertToAll,
-  generateSuggestions,
-  detectConvention,
-  isValidInput,
-  splitIntoWords,
-  expandAbbreviations,
-  abbreviateName,
-  convertTo,
-  EXAMPLE_INPUTS,
-} from "@/lib/application/variable-name-wizard";
-import { useToolHistory } from "@/hooks/use-tool-history";
+import { VARIABLE_NAME_WIZARD_WORKER_SOURCE } from "@/lib/application/variable-name-wizard/worker-source";
 
-interface HistoryItem {
-  id: string;
+interface UseVariableNameWizardReturn {
   input: string;
   mode: "convert" | "generate";
-  timestamp: string;
+  config: WizardConfig;
+  conversionResult: ConversionResult | null;
+  generationResult: GenerationResult | null;
+  isProcessing: boolean;
+  setInput: (input: string) => void;
+  setMode: (mode: "convert" | "generate") => void;
+  updateConfig: <K extends keyof WizardConfig>(key: K, value: WizardConfig[K]) => void;
+  convert: () => Promise<void>;
+  generate: () => Promise<void>;
+  reset: () => void;
+  loadExample: () => void;
 }
 
-export function useVariableNameWizard() {
+export function useVariableNameWizard(): UseVariableNameWizardReturn {
   const [input, setInput] = useState("");
-  const [mode, setMode] = useState<"convert" | "generate">("convert");
-  const [variableType, setVariableType] = useState<VariableType>("variable");
-  const [config, setConfig] = useState<WizardConfig>(DEFAULT_WIZARD_CONFIG);
+  const [mode, setMode] = useState<"convert" | "generate">("generate");
+  const [config, setConfig] = useState<WizardConfig>({
+    type: "variable",
+    maxSuggestions: 10,
+    language: "typescript" as any,
+  });
   const [conversionResult, setConversionResult] = useState<ConversionResult | null>(null);
   const [generationResult, setGenerationResult] = useState<GenerationResult | null>(null);
-  const { history, addToHistory: addItemToHistory, clearHistory } =
-    useToolHistory<HistoryItem>("devflow-variable-wizard-history", 10);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const workerRef = useRef<Worker | null>(null);
 
-  // Computed values
-  const inputStats = useMemo(() => {
-    if (!input.trim()) {
-      return {
-        wordCount: 0,
-        detectedConvention: "unknown" as const,
-        isValid: false,
-      };
-    }
-    return {
-      wordCount: splitIntoWords(input).length,
-      detectedConvention: detectConvention(input),
-      isValid: isValidInput(input),
+  useEffect(() => {
+    const blob = new Blob([VARIABLE_NAME_WIZARD_WORKER_SOURCE], { type: "application/javascript" });
+    const worker = new Worker(URL.createObjectURL(blob));
+    workerRef.current = worker;
+
+    return () => {
+      worker.terminate();
     };
-  }, [input]);
-
-  const addToHistory = useCallback((inputValue: string, inputMode: "convert" | "generate") => {
-    const newItem: HistoryItem = {
-      id: crypto.randomUUID(),
-      input: inputValue.slice(0, 50) + (inputValue.length > 50 ? "..." : ""),
-      mode: inputMode,
-      timestamp: new Date().toISOString(),
-    };
-    addItemToHistory(newItem);
-  }, [addItemToHistory]);
-
-  const convert = useCallback(() => {
-    if (!isValidInput(input)) return;
-
-    const result = convertToAll(input);
-    setConversionResult(result);
-    setGenerationResult(null);
-    addToHistory(input, "convert");
-  }, [input, addToHistory]);
-
-  const generate = useCallback(() => {
-    if (!isValidInput(input)) return;
-
-    const result = generateSuggestions(input, variableType, config);
-    setGenerationResult(result);
-    setConversionResult(null);
-    addToHistory(input, "generate");
-  }, [input, variableType, config, addToHistory]);
-
-  const convertSingle = useCallback(
-    (convention: NamingConvention): string => {
-      if (!isValidInput(input)) return "";
-      return convertTo(input, convention);
-    },
-    [input]
-  );
-
-  const updateConfig = useCallback(
-    <K extends keyof WizardConfig>(key: K, value: WizardConfig[K]) => {
-      setConfig((prev) => ({ ...prev, [key]: value }));
-    },
-    []
-  );
-
-  const loadExample = useCallback((index: number = 0) => {
-    const example = EXAMPLE_INPUTS[index % EXAMPLE_INPUTS.length];
-    if (example) {
-      setInput(example);
-      setConversionResult(null);
-      setGenerationResult(null);
-    }
   }, []);
 
-  const reset = useCallback(() => {
+  const runWorker = useCallback((action: string, payload: any): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      if (!workerRef.current) {
+        reject(new Error("Worker not initialized"));
+        return;
+      }
+
+      const worker = workerRef.current;
+
+      const handleMessage = (e: MessageEvent) => {
+        if (e.data.type === "success") {
+          worker.removeEventListener("message", handleMessage);
+          resolve(e.data.result);
+        } else {
+          worker.removeEventListener("message", handleMessage);
+          reject(new Error(e.data.error || "Worker error"));
+        }
+      };
+
+      worker.addEventListener("message", handleMessage);
+      worker.postMessage({ action, payload });
+    });
+  }, []);
+
+  const convert = useCallback(async () => {
+    if (!input.trim()) return;
+    setIsProcessing(true);
+    try {
+      const result = await runWorker("convert", { name: input });
+      setConversionResult({
+        id: crypto.randomUUID(),
+        original: input,
+        originalConvention: "unknown",
+        conversions: result.conversions,
+        timestamp: new Date().toISOString()
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [input, runWorker]);
+
+  const generate = useCallback(async () => {
+    if (!input.trim()) return;
+    setIsProcessing(true);
+    try {
+      const result = await runWorker("generate", { 
+        context: input, 
+        type: config.type, 
+        language: config.language 
+      });
+      setGenerationResult(result);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [input, config, runWorker]);
+
+  const updateConfig = <K extends keyof WizardConfig>(key: K, value: WizardConfig[K]) => {
+    setConfig((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const reset = () => {
     setInput("");
     setConversionResult(null);
     setGenerationResult(null);
-  }, []);
+  };
 
-  const loadFromHistory = useCallback((item: HistoryItem) => {
-    setInput(item.input.replace("...", ""));
-    setMode(item.mode);
-    setConversionResult(null);
-    setGenerationResult(null);
-  }, []);
-
-  const expand = useCallback(() => {
-    if (!input.trim()) return;
-    const expanded = expandAbbreviations(input);
-    setInput(expanded);
-    setConversionResult(null);
-    setGenerationResult(null);
-  }, [input]);
-
-  const abbreviate = useCallback(() => {
-    if (!input.trim()) return;
-    const abbreviated = abbreviateName(input);
-    setInput(abbreviated);
-    setConversionResult(null);
-    setGenerationResult(null);
-  }, [input]);
-
-  const applyConversion = useCallback(
-    (convention: NamingConvention) => {
-      if (conversionResult) {
-        const newValue = conversionResult.conversions[convention];
-        setInput(newValue);
-        setConversionResult(null);
-      }
-    },
-    [conversionResult]
-  );
-
-  const applySuggestion = useCallback(
-    (suggestionName: string) => {
-      setInput(suggestionName);
-      setGenerationResult(null);
-    },
-    []
-  );
+  const loadExample = () => {
+    setInput("get current user info");
+  };
 
   return {
-    // State
     input,
     mode,
-    variableType,
     config,
     conversionResult,
     generationResult,
-    history,
-    inputStats,
-
-    // Setters
+    isProcessing,
     setInput,
     setMode,
-    setVariableType,
     updateConfig,
-
-    // Actions
     convert,
     generate,
-    convertSingle,
-    loadExample,
     reset,
-    clearHistory,
-    loadFromHistory,
-    expand,
-    abbreviate,
-    applyConversion,
-    applySuggestion,
+    loadExample,
   };
 }
