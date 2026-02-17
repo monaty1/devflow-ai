@@ -8,6 +8,7 @@ export interface UuidConfig {
   format: UuidFormat;
   quantity: number;
   exportFormat: "text" | "json" | "csv" | "sql";
+  prefix: string;
 }
 
 export const DEFAULT_UUID_CONFIG: UuidConfig = {
@@ -15,6 +16,7 @@ export const DEFAULT_UUID_CONFIG: UuidConfig = {
   format: "standard",
   quantity: 1,
   exportFormat: "text",
+  prefix: "",
 };
 
 export interface UuidResult {
@@ -23,6 +25,13 @@ export interface UuidResult {
   version: UuidVersion;
   format: UuidFormat;
   timestamp: string;
+  collisionStats?: CollisionStats;
+}
+
+export interface CollisionStats {
+  attempts: number;
+  collisions: number;
+  probability: string;
 }
 
 export interface UuidValidation {
@@ -30,6 +39,12 @@ export interface UuidValidation {
   version?: UuidVersion | "unknown";
   variant?: string;
   error?: string;
+}
+
+export interface BinaryPart {
+  label: string;
+  bits: string;
+  color: string;
 }
 
 export interface UuidInfo {
@@ -42,4 +57,5 @@ export interface UuidInfo {
   node?: string;
   isExposed: boolean;
   entropyScore: number;
+  binaryView?: BinaryPart[];
 }

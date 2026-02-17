@@ -14,6 +14,7 @@ import {
   validateUuid,
   parseUuid,
   EXAMPLE_UUIDS,
+  formatBulkExport,
 } from "@/lib/application/uuid-generator";
 import { useToolHistory } from "@/hooks/use-tool-history";
 
@@ -28,9 +29,7 @@ interface HistoryItem {
 export function useUuidGenerator() {
   const [config, setConfig] = useState<UuidConfig>(DEFAULT_UUID_CONFIG);
   const [result, setResult] = useState<UuidResult | null>(null);
-  const [validateInput, setValidateInput] = useState("");
-  const [parseInput, setParseInput] = useState("");
-  const [parsedInfo, setParsedInfo] = useState<UuidInfo | null>(null);
+  const [analysis, setAnalysis] = useState<UuidInfo | null>(null);
   const { history, addToHistory: addItemToHistory, clearHistory } =
     useToolHistory<HistoryItem>("devflow-uuid-generator-history", 50);
 
@@ -51,18 +50,18 @@ export function useUuidGenerator() {
     addToHistory(config);
   }, [config, addToHistory]);
 
-  const validate = useCallback(() => {
-    return validateUuid(validateInput);
-  }, [validateInput]);
-
-  const parse = useCallback(() => {
-    if (!parseInput.trim()) {
-      setParsedInfo(null);
+  const analyze = useCallback((input: string) => {
+    if (!input.trim()) {
+      setAnalysis(null);
       return;
     }
-    const info = parseUuid(parseInput);
-    setParsedInfo(info);
-  }, [parseInput]);
+    const info = parseUuid(input);
+    setAnalysis(info);
+  }, []);
+
+  const validate = useCallback((input: string) => {
+    return validateUuid(input);
+  }, []);
 
   const updateConfig = useCallback(
     <K extends keyof UuidConfig>(key: K, value: UuidConfig[K]) => {
@@ -71,40 +70,27 @@ export function useUuidGenerator() {
     []
   );
 
-  const loadExample = useCallback((version: UuidVersion) => {
-    setParseInput(EXAMPLE_UUIDS[version]);
-    const info = parseUuid(EXAMPLE_UUIDS[version]);
-    setParsedInfo(info);
+  const exportBulk = useCallback((uuids: string[], format: "text" | "json" | "csv" | "sql") => {
+    return formatBulkExport(uuids, format);
   }, []);
 
   const reset = useCallback(() => {
     setConfig(DEFAULT_UUID_CONFIG);
     setResult(null);
-    setValidateInput("");
-    setParseInput("");
-    setParsedInfo(null);
+    setAnalysis(null);
   }, []);
 
   return {
-    // State
     config,
     result,
-    validateInput,
-    parseInput,
-    parsedInfo,
+    analysis,
     history,
-
-    // Setters
-    setValidateInput,
-    setParseInput,
     updateConfig,
-
-    // Actions
     generate,
+    analyze,
     validate,
-    parse,
-    loadExample,
     reset,
     clearHistory,
+    exportBulk,
   };
 }
