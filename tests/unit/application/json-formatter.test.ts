@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   validateJson,
+  fixJson,
   formatJson,
   minifyJson,
   sortObjectKeys,
@@ -9,6 +10,9 @@ import {
   getValueAtPath,
   compareJson,
   jsonToTypeScript,
+  jsonToYaml,
+  jsonToXml,
+  jsonToCsv,
   processJson,
   EXAMPLE_JSON,
 } from "@/lib/application/json-formatter";
@@ -358,6 +362,303 @@ describe("JSON Formatter", () => {
       expect(result.isValid).toBe(true);
       expect(result.stats).toBeDefined();
       expect(result.stats!.keys).toBeGreaterThan(0);
+    });
+
+    it("should process with to-yaml mode", () => {
+      const result = processJson('{"name": "John", "age": 30}', "to-yaml");
+      expect(result.isValid).toBe(true);
+      expect(result.mode).toBe("to-yaml");
+      expect(result.output).toContain("name:");
+      expect(result.output).toContain("age:");
+    });
+
+    it("should process with to-xml mode", () => {
+      const result = processJson('{"name": "John"}', "to-xml");
+      expect(result.isValid).toBe(true);
+      expect(result.mode).toBe("to-xml");
+      expect(result.output).toContain("<?xml");
+      expect(result.output).toContain("<root>");
+      expect(result.output).toContain("<name>John</name>");
+    });
+
+    it("should process with to-csv mode", () => {
+      const result = processJson('[{"name": "John", "age": 30}]', "to-csv");
+      expect(result.isValid).toBe(true);
+      expect(result.mode).toBe("to-csv");
+      expect(result.output).toContain("name,age");
+      expect(result.output).toContain('"John"');
+    });
+  });
+
+  describe("fixJson", () => {
+    it("should replace single quotes with double quotes", () => {
+      const result = fixJson("{'name': 'John'}");
+      expect(result).toContain('"name"');
+      expect(result).toContain('"John"');
+    });
+
+    it("should remove trailing commas", () => {
+      const result = fixJson('{"name": "John", "age": 30, }');
+      expect(result).not.toMatch(/,\s*}/);
+    });
+
+    it("should add quotes to unquoted keys", () => {
+      const result = fixJson("{name: \"John\"}");
+      expect(result).toContain('"name"');
+    });
+
+    it("should fix missing closing braces", () => {
+      const result = fixJson('{"name": "John"');
+      expect(result).toContain("}");
+    });
+
+    it("should fix missing closing brackets", () => {
+      const result = fixJson("[1, 2, 3");
+      expect(result).toContain("]");
+    });
+
+    it("should handle already valid JSON", () => {
+      const input = '{"name": "John"}';
+      const result = fixJson(input);
+      expect(JSON.parse(result)).toEqual({ name: "John" });
+    });
+
+    it("should trim whitespace", () => {
+      const result = fixJson('  {"a": 1}  ');
+      expect(result).toBe('{"a": 1}');
+    });
+  });
+
+  describe("jsonToYaml", () => {
+    it("should convert null to 'null'", () => {
+      expect(jsonToYaml(null)).toBe("null");
+    });
+
+    it("should convert primitive values to string", () => {
+      expect(jsonToYaml(42)).toBe("42");
+      expect(jsonToYaml("hello")).toBe("hello");
+      expect(jsonToYaml(true)).toBe("true");
+    });
+
+    it("should convert simple object to YAML", () => {
+      const result = jsonToYaml({ name: "John", age: 30 });
+      expect(result).toContain("name: John");
+      expect(result).toContain("age: 30");
+    });
+
+    it("should convert array to YAML with dashes", () => {
+      const result = jsonToYaml([1, 2, 3]);
+      expect(result).toContain("- 1");
+      expect(result).toContain("- 2");
+      expect(result).toContain("- 3");
+    });
+
+    it("should convert nested objects to YAML", () => {
+      const result = jsonToYaml({ user: { name: "John" } });
+      expect(result).toContain("user:");
+      expect(result).toContain("name: John");
+    });
+
+    it("should handle objects with null values", () => {
+      const result = jsonToYaml({ data: null });
+      expect(result).toContain("data:");
+    });
+
+    it("should handle arrays of objects", () => {
+      const result = jsonToYaml([{ id: 1 }, { id: 2 }]);
+      expect(result).toContain("id: 1");
+      expect(result).toContain("id: 2");
+    });
+  });
+
+  describe("jsonToXml", () => {
+    it("should generate XML header", () => {
+      const result = jsonToXml({});
+      expect(result).toContain('<?xml version="1.0" encoding="UTF-8"?>');
+    });
+
+    it("should wrap in root element", () => {
+      const result = jsonToXml({ name: "John" });
+      expect(result).toContain("<root>");
+      expect(result).toContain("</root>");
+    });
+
+    it("should convert simple values", () => {
+      const result = jsonToXml({ name: "John", age: 30 });
+      expect(result).toContain("<name>John</name>");
+      expect(result).toContain("<age>30</age>");
+    });
+
+    it("should convert arrays with item elements", () => {
+      const result = jsonToXml({ items: [1, 2, 3] });
+      expect(result).toContain("<item>1</item>");
+      expect(result).toContain("<item>2</item>");
+    });
+
+    it("should handle null values as self-closing tags", () => {
+      const result = jsonToXml(null, "data");
+      expect(result).toContain("<data/>");
+    });
+
+    it("should handle nested objects", () => {
+      const result = jsonToXml({ user: { name: "John" } });
+      expect(result).toContain("<user><name>John</name></user>");
+    });
+
+    it("should accept custom root name", () => {
+      const result = jsonToXml({ a: 1 }, "custom");
+      expect(result).toContain("<custom>");
+      expect(result).toContain("</custom>");
+    });
+  });
+
+  describe("jsonToCsv", () => {
+    it("should convert array of objects to CSV", () => {
+      const result = jsonToCsv([
+        { name: "John", age: 30 },
+        { name: "Jane", age: 25 },
+      ]);
+      expect(result).toContain("name,age");
+      expect(result).toContain('"John",30');
+      expect(result).toContain('"Jane",25');
+    });
+
+    it("should convert single object to CSV", () => {
+      const result = jsonToCsv({ name: "John", age: 30 });
+      expect(result).toContain("name,age");
+      expect(result).toContain('"John",30');
+    });
+
+    it("should return empty string for empty array", () => {
+      const result = jsonToCsv([]);
+      expect(result).toBe("");
+    });
+
+    it("should escape double quotes in strings", () => {
+      const result = jsonToCsv([{ text: 'He said "hello"' }]);
+      expect(result).toContain('""hello""');
+    });
+
+    it("should handle numeric and boolean values without quotes", () => {
+      const result = jsonToCsv([{ num: 42, flag: true }]);
+      const lines = result.split("\n");
+      expect(lines[1]).toBe("42,true");
+    });
+  });
+
+  describe("validateJson - error detail branches", () => {
+    it("should set fixable flag for token-related errors", () => {
+      const result = validateJson('{"name": undefined}');
+      expect(result.isValid).toBe(false);
+      expect(result.error).toBeDefined();
+    });
+
+    it("should calculate line and column for multi-line errors", () => {
+      const result = validateJson('{\n  "name": \n}');
+      expect(result.isValid).toBe(false);
+      expect(result.error).toBeDefined();
+      expect(result.error!.line).toBeGreaterThanOrEqual(1);
+      expect(result.error!.column).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe("sortObjectKeys - dangerous keys", () => {
+    it("should filter out __proto__ key", () => {
+      const obj = JSON.parse('{"__proto__": "bad", "safe": 1}');
+      const sorted = sortObjectKeys(obj) as Record<string, unknown>;
+      expect(Object.keys(sorted)).toEqual(["safe"]);
+    });
+
+    it("should filter out constructor key", () => {
+      const obj = { constructor: "bad", safe: 1 };
+      const sorted = sortObjectKeys(obj) as Record<string, unknown>;
+      expect(Object.keys(sorted)).toEqual(["safe"]);
+    });
+  });
+
+  describe("extractJsonPaths - special key names", () => {
+    it("should bracket-quote keys with special characters", () => {
+      const input = '{"some-key": 1, "another.key": 2}';
+      const paths = extractJsonPaths(input);
+      const pathStrings = paths.map((p) => p.path);
+      expect(pathStrings).toContain('$["some-key"]');
+      expect(pathStrings).toContain('$["another.key"]');
+    });
+
+    it("should set correct types for path entries", () => {
+      const input = '{"arr": [1], "obj": {}, "str": "hello", "num": 42, "nil": null}';
+      const paths = extractJsonPaths(input);
+      const typeMap = new Map(paths.map((p) => [p.path, p.type]));
+      expect(typeMap.get("$.arr")).toBe("array");
+      expect(typeMap.get("$.obj")).toBe("object");
+      expect(typeMap.get("$.str")).toBe("string");
+      expect(typeMap.get("$.num")).toBe("number");
+      expect(typeMap.get("$.nil")).toBe("null");
+    });
+  });
+
+  describe("getValueAtPath - edge cases", () => {
+    it("should return undefined when traversing through null", () => {
+      const input = '{"a": null}';
+      const value = getValueAtPath(input, "$.a.b");
+      expect(value).toBeUndefined();
+    });
+
+    it("should return undefined when using array index on non-array", () => {
+      const input = '{"a": "string"}';
+      const value = getValueAtPath(input, "$.a[0]");
+      expect(value).toBeUndefined();
+    });
+
+    it("should return undefined when using object key on non-object", () => {
+      const input = '{"a": 42}';
+      const value = getValueAtPath(input, "$.a.b");
+      expect(value).toBeUndefined();
+    });
+
+    it("should handle path without leading $.", () => {
+      const input = '{"name": "John"}';
+      const value = getValueAtPath(input, "name");
+      expect(value).toBe("John");
+    });
+  });
+
+  describe("jsonToTypeScript - additional branches", () => {
+    it("should handle null value in object", () => {
+      const result = jsonToTypeScript('{"data": null}', "Response");
+      expect(result).toContain("data: null");
+    });
+
+    it("should handle empty array in object", () => {
+      const result = jsonToTypeScript('{"items": []}', "Response");
+      expect(result).toContain("items: unknown[]");
+    });
+
+    it("should handle array of objects in object", () => {
+      const result = jsonToTypeScript('{"users": [{"name": "John"}]}', "Data");
+      expect(result).toContain("interface UsersItem");
+      expect(result).toContain("users: UsersItem[]");
+    });
+
+    it("should handle keys needing quoting", () => {
+      const result = jsonToTypeScript('{"some-key": "value"}', "Data");
+      expect(result).toContain('"some-key"');
+    });
+  });
+
+  describe("calculateJsonStats - size properties", () => {
+    it("should calculate sizeBytes and minifiedSize", () => {
+      const input = '{\n  "name": "John"\n}';
+      const stats = calculateJsonStats(input);
+      expect(stats.sizeBytes).toBeGreaterThan(0);
+      expect(stats.minifiedSize).toBeGreaterThan(0);
+      expect(stats.minifiedSize).toBeLessThanOrEqual(stats.sizeBytes);
+    });
+
+    it("should handle values count correctly", () => {
+      const input = '{"a": "text", "b": 42}';
+      const stats = calculateJsonStats(input);
+      expect(stats.values).toBe(2);
     });
   });
 });

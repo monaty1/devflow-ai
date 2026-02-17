@@ -31,6 +31,8 @@ export default defineConfig({
         "**/*.d.ts",
         "**/index.ts",
         "**/*.test.{ts,tsx}",
+        // Worker source strings — not executable code, just string constants
+        "**/worker-source.ts",
         // INFRASTRUCTURE — TypeScript enforces correctness
         "types/**",
         "config/**",

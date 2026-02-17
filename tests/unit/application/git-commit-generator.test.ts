@@ -7,9 +7,11 @@ import {
   parseCommitMessage,
   getCommitTypeInfo,
   suggestScope,
+  analyzeDiff,
+  generateChangelog,
 } from "@/lib/application/git-commit-generator";
 import { DEFAULT_COMMIT_CONFIG } from "@/types/git-commit-generator";
-import type { CommitType } from "@/types/git-commit-generator";
+import type { CommitType, CommitResult } from "@/types/git-commit-generator";
 
 describe("Git Commit Message Generator", () => {
   describe("COMMIT_TYPES", () => {
@@ -372,6 +374,297 @@ describe("Git Commit Message Generator", () => {
     it("should sort by relevance (more keyword matches first)", () => {
       const suggestions = suggestScope("login token session password");
       expect(suggestions[0]).toBe("auth");
+    });
+  });
+
+  describe("analyzeDiff", () => {
+    it("should extract file names from diff", () => {
+      const diff = "diff --git a/src/app.ts b/src/app.ts\n+some code\n-old code";
+      const result = analyzeDiff(diff);
+      expect(result.filesChanged).toContain("src/app.ts");
+    });
+
+    it("should detect breaking changes", () => {
+      const diff = "diff --git a/src/api.ts b/src/api.ts\n+BREAKING CHANGE: new API";
+      const result = analyzeDiff(diff);
+      expect(result.isBreaking).toBe(true);
+    });
+
+    it("should detect DEPRECATED as breaking", () => {
+      const diff = "diff --git a/src/api.ts b/src/api.ts\n+DEPRECATED: old method";
+      const result = analyzeDiff(diff);
+      expect(result.isBreaking).toBe(true);
+    });
+
+    it("should suggest test type when only test files changed", () => {
+      const diff = "diff --git a/tests/unit/app.test.ts b/tests/unit/app.test.ts\n+new test";
+      const result = analyzeDiff(diff);
+      expect(result.suggestedType).toBe("test");
+    });
+
+    it("should suggest docs type when only markdown files changed", () => {
+      const diff = "diff --git a/README.md b/README.md\n+updated docs";
+      const result = analyzeDiff(diff);
+      expect(result.suggestedType).toBe("docs");
+    });
+
+    it("should suggest chore type when package.json changed", () => {
+      const diff = "diff --git a/package.json b/package.json\n+new dep";
+      const result = analyzeDiff(diff);
+      expect(result.suggestedType).toBe("chore");
+    });
+
+    it("should suggest fix type when fix-related files changed", () => {
+      const diff = "diff --git a/src/bugfix/resolver.ts b/src/bugfix/resolver.ts\n+fix code";
+      const result = analyzeDiff(diff);
+      expect(result.suggestedType).toBe("fix");
+    });
+
+    it("should suggest scope from first file directory", () => {
+      const diff = "diff --git a/components/button.tsx b/components/button.tsx\n+change";
+      const result = analyzeDiff(diff);
+      expect(result.suggestedScope).toBe("components");
+    });
+
+    it("should default to feat for generic source files", () => {
+      const diff = "diff --git a/src/feature/new.ts b/src/feature/new.ts\n+new feature";
+      const result = analyzeDiff(diff);
+      expect(result.suggestedType).toBe("feat");
+    });
+
+    it("should return empty scope when file has no directory", () => {
+      const diff = "some random diff without file headers";
+      const result = analyzeDiff(diff);
+      expect(result.suggestedScope).toBe("");
+      expect(result.filesChanged).toHaveLength(0);
+    });
+
+    it("should handle multiple files in diff", () => {
+      const diff = [
+        "diff --git a/src/a.ts b/src/a.ts",
+        "+code",
+        "diff --git a/src/b.ts b/src/b.ts",
+        "+code",
+      ].join("\n");
+      const result = analyzeDiff(diff);
+      expect(result.filesChanged).toHaveLength(2);
+    });
+
+    it("should detect test files with .spec. extension", () => {
+      const diff = "diff --git a/test/app.spec.ts b/test/app.spec.ts\n+test";
+      const result = analyzeDiff(diff);
+      expect(result.suggestedType).toBe("test");
+    });
+
+    it("should detect docs in docs/ directory", () => {
+      const diff = "diff --git a/docs/guide.md b/docs/guide.md\n+content";
+      const result = analyzeDiff(diff);
+      expect(result.suggestedType).toBe("docs");
+    });
+  });
+
+  describe("generateChangelog", () => {
+    it("should return empty string for no commits", () => {
+      expect(generateChangelog([])).toBe("");
+    });
+
+    it("should generate changelog with feat section", () => {
+      const commits: CommitResult[] = [{
+        id: "1",
+        message: "feat(ui): add button",
+        type: "feat",
+        scope: "ui",
+        description: "add button",
+        body: "",
+        breakingChange: "",
+        issueRef: "",
+        timestamp: new Date().toISOString(),
+      }];
+      const result = generateChangelog(commits);
+      expect(result).toContain("Features");
+      expect(result).toContain("ui");
+      expect(result).toContain("add button");
+    });
+
+    it("should generate changelog with fix section", () => {
+      const commits: CommitResult[] = [{
+        id: "2",
+        message: "fix(api): resolve crash",
+        type: "fix",
+        scope: "api",
+        description: "resolve crash",
+        body: "",
+        breakingChange: "",
+        issueRef: "#42",
+        timestamp: new Date().toISOString(),
+      }];
+      const result = generateChangelog(commits);
+      expect(result).toContain("Bug Fixes");
+      expect(result).toContain("#42");
+    });
+
+    it("should use 'general' scope when scope is empty", () => {
+      const commits: CommitResult[] = [{
+        id: "3",
+        message: "feat: add feature",
+        type: "feat",
+        scope: "",
+        description: "add feature",
+        body: "",
+        breakingChange: "",
+        issueRef: "",
+        timestamp: new Date().toISOString(),
+      }];
+      const result = generateChangelog(commits);
+      expect(result).toContain("general");
+    });
+
+    it("should place unknown types in other section", () => {
+      const commits: CommitResult[] = [{
+        id: "4",
+        message: "ci: update pipeline",
+        type: "ci",
+        scope: "github",
+        description: "update pipeline",
+        body: "",
+        breakingChange: "",
+        issueRef: "",
+        timestamp: new Date().toISOString(),
+      }];
+      const result = generateChangelog(commits);
+      expect(result).toContain("Other Changes");
+    });
+
+    it("should handle multiple commits in multiple sections", () => {
+      const commits: CommitResult[] = [
+        {
+          id: "5", message: "feat: a", type: "feat", scope: "x",
+          description: "a", body: "", breakingChange: "", issueRef: "",
+          timestamp: new Date().toISOString(),
+        },
+        {
+          id: "6", message: "fix: b", type: "fix", scope: "y",
+          description: "b", body: "", breakingChange: "", issueRef: "",
+          timestamp: new Date().toISOString(),
+        },
+        {
+          id: "7", message: "perf: c", type: "perf", scope: "z",
+          description: "c", body: "", breakingChange: "", issueRef: "",
+          timestamp: new Date().toISOString(),
+        },
+      ];
+      const result = generateChangelog(commits);
+      expect(result).toContain("Features");
+      expect(result).toContain("Bug Fixes");
+      expect(result).toContain("Performance");
+    });
+  });
+
+  describe("generateCommitMessage - emoji mode", () => {
+    it("should include emoji when useEmojis is true", () => {
+      const config = {
+        ...DEFAULT_COMMIT_CONFIG,
+        type: "feat" as const,
+        description: "add feature",
+        useEmojis: true,
+      };
+      const result = generateCommitMessage(config);
+      expect(result.message).toContain("\u2728"); // sparkles emoji
+    });
+
+    it("should not include emoji when useEmojis is false", () => {
+      const config = {
+        ...DEFAULT_COMMIT_CONFIG,
+        type: "feat" as const,
+        description: "add feature",
+        useEmojis: false,
+      };
+      const result = generateCommitMessage(config);
+      expect(result.message.startsWith("feat:")).toBe(true);
+    });
+  });
+
+  describe("validateCommitMessage - requireIssue", () => {
+    it("should fail when requireIssue is true and no issue is provided", () => {
+      const config = {
+        ...DEFAULT_COMMIT_CONFIG,
+        type: "feat" as const,
+        description: "add feature",
+        requireIssue: true,
+        issueRef: "",
+      };
+      const result = validateCommitMessage("feat: add feature", config);
+      expect(result.isValid).toBe(false);
+      expect(result.errors.some(e => e.includes("Issue Reference"))).toBe(true);
+    });
+
+    it("should pass when requireIssue is true and issue is provided", () => {
+      const config = {
+        ...DEFAULT_COMMIT_CONFIG,
+        type: "feat" as const,
+        description: "add feature",
+        requireIssue: true,
+        issueRef: "#123",
+      };
+      const result = validateCommitMessage("feat: add feature", config);
+      expect(result.isValid).toBe(true);
+    });
+
+    it("should detect empty description after colon", () => {
+      const result = validateCommitMessage("feat: ");
+      expect(result.isValid).toBe(false);
+      expect(result.errors.some(e => e.includes("descripción"))).toBe(true);
+    });
+  });
+
+  describe("parseCommitMessage - additional branches", () => {
+    it("should parse breaking change from footer without ! mark", () => {
+      const msg = "feat: change api\n\nBREAKING CHANGE: removed old endpoints";
+      const parsed = parseCommitMessage(msg);
+      expect(parsed?.isBreaking).toBe(true);
+      expect(parsed?.breakingChange).toBe("removed old endpoints");
+    });
+
+    it("should set breakingChange to 'Yes' when ! mark but no footer detail", () => {
+      const parsed = parseCommitMessage("feat!: new api");
+      expect(parsed?.isBreaking).toBe(true);
+      expect(parsed?.breakingChange).toBe("Yes");
+    });
+
+    it("should parse footer with generic key-value format", () => {
+      const msg = "feat: add feature\n\nSigned-off-by: Author";
+      const parsed = parseCommitMessage(msg);
+      // Signed-off-by matches /^[\w-]+:\s/ so it goes to footer
+      expect(parsed?.body).toBe("");
+    });
+
+    it("should handle body lines before footer", () => {
+      const msg = "feat: feature\n\nThis is the body.\nMore body.\n\nRefs: #99";
+      const parsed = parseCommitMessage(msg);
+      expect(parsed?.body).toContain("This is the body.");
+      expect(parsed?.body).toContain("More body.");
+      expect(parsed?.issueRefs).toContain("#99");
+    });
+
+    it("should parse Refs line with multiple refs", () => {
+      const msg = "fix: bug\n\nRefs: #1, #2, #3";
+      const parsed = parseCommitMessage(msg);
+      expect(parsed?.issueRefs).toContain("#1");
+      expect(parsed?.issueRefs).toContain("#2");
+      expect(parsed?.issueRefs).toContain("#3");
+    });
+
+    it("should not duplicate inline refs that are also in Refs footer", () => {
+      const msg = "fix: resolve #42\n\nRefs: #42";
+      const parsed = parseCommitMessage(msg);
+      const count42 = parsed?.issueRefs.filter(r => r === "#42").length;
+      expect(count42).toBe(1);
+    });
+
+    it("should parse body without blank separator line", () => {
+      const msg = "feat: feature\nbody line here";
+      const parsed = parseCommitMessage(msg);
+      expect(parsed?.body).toContain("body line here");
     });
   });
 });

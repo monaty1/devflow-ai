@@ -6,6 +6,9 @@ import {
   removeDocumentFromWindow,
   reorderDocuments,
   exportContext,
+  stripComments,
+  generateTree,
+  exportForAI,
 } from "@/lib/application/context-manager";
 import type { ContextWindow } from "@/types/context-manager";
 
@@ -231,6 +234,195 @@ describe("Context Manager", () => {
         // Check for max tokens value - locale formatting may vary
         expect(exported.content).toMatch(/128[,.]?000/);
       });
+    });
+  });
+
+  describe("createDocument - optional params", () => {
+    it("should create document with filePath", () => {
+      const doc = createDocument("File Doc", "content", "code", "high", ["ts"], "src/index.ts");
+      expect(doc.filePath).toBe("src/index.ts");
+    });
+
+    it("should create document with instructions", () => {
+      const doc = createDocument("Inst Doc", "content", "code", "medium", [], undefined, "Follow these rules");
+      expect(doc.instructions).toBe("Follow these rules");
+    });
+
+    it("should create document with both filePath and instructions", () => {
+      const doc = createDocument("Full Doc", "content", "api", "low", ["api"], "api/route.ts", "Use REST");
+      expect(doc.filePath).toBe("api/route.ts");
+      expect(doc.instructions).toBe("Use REST");
+    });
+  });
+
+  describe("stripComments", () => {
+    it("should strip single-line comments from code", () => {
+      const code = "const x = 1; // this is a comment\nconst y = 2;";
+      const result = stripComments(code, "code");
+      expect(result).not.toContain("// this is a comment");
+      expect(result).toContain("const x = 1;");
+      expect(result).toContain("const y = 2;");
+    });
+
+    it("should strip multi-line comments from code", () => {
+      const code = "/* multi\nline\ncomment */\nconst x = 1;";
+      const result = stripComments(code, "code");
+      expect(result).not.toContain("multi");
+      expect(result).toContain("const x = 1;");
+    });
+
+    it("should return content unchanged for non-code types", () => {
+      const notes = "// this is not code\nsome notes";
+      expect(stripComments(notes, "documentation")).toBe(notes);
+      expect(stripComments(notes, "notes")).toBe(notes);
+      expect(stripComments(notes, "api")).toBe(notes);
+      expect(stripComments(notes, "other")).toBe(notes);
+    });
+
+    it("should remove empty lines after stripping comments", () => {
+      const code = "const a = 1;\n// comment\n\nconst b = 2;";
+      const result = stripComments(code, "code");
+      expect(result).not.toMatch(/^\s*$/m);
+    });
+  });
+
+  describe("generateTree", () => {
+    it("should generate tree from file paths", () => {
+      const docs = [
+        createDocument("A", "c", "code", "high", [], "src/index.ts"),
+        createDocument("B", "c", "code", "high", [], "src/utils/helper.ts"),
+      ];
+      const tree = generateTree(docs);
+      expect(tree).toContain("src");
+      expect(tree).toContain("index.ts");
+      expect(tree).toContain("utils");
+      expect(tree).toContain("helper.ts");
+    });
+
+    it("should use title when filePath is missing", () => {
+      const docs = [
+        createDocument("My Document", "c", "notes", "low", []),
+      ];
+      const tree = generateTree(docs);
+      expect(tree).toContain("My Document");
+    });
+
+    it("should handle empty array", () => {
+      const tree = generateTree([]);
+      expect(tree).toBe("");
+    });
+  });
+
+  describe("exportForAI", () => {
+    it("should generate AI export with project hierarchy", () => {
+      let win = createContextWindow("AI Test");
+      const doc = createDocument("App", "const x = 1;", "code", "high", [], "src/app.ts");
+      win = addDocumentToWindow(win, doc);
+
+      const result = exportForAI(win);
+      expect(result).toContain("Senior Software Engineer");
+      expect(result).toContain("<project_hierarchy>");
+      expect(result).toContain("<context_documents>");
+      expect(result).toContain("src/app.ts");
+      expect(result).toContain("const x = 1;");
+    });
+
+    it("should strip comments when option is set", () => {
+      let win = createContextWindow("AI Test");
+      const doc = createDocument("App", "const x = 1; // comment\nconst y = 2;", "code", "high", [], "src/app.ts");
+      win = addDocumentToWindow(win, doc);
+
+      const result = exportForAI(win, { stripComments: true });
+      expect(result).not.toContain("// comment");
+      expect(result).toContain("const x = 1;");
+    });
+
+    it("should include instructions when document has them", () => {
+      let win = createContextWindow("AI Test");
+      const doc = createDocument("App", "code here", "code", "high", [], "src/app.ts", "Follow DRY principle");
+      win = addDocumentToWindow(win, doc);
+
+      const result = exportForAI(win);
+      expect(result).toContain("<instructions>Follow DRY principle</instructions>");
+    });
+
+    it("should omit instructions tag when document has no instructions", () => {
+      let win = createContextWindow("AI Test");
+      const doc = createDocument("App", "code here", "code", "high", [], "src/app.ts");
+      win = addDocumentToWindow(win, doc);
+
+      const result = exportForAI(win);
+      expect(result).not.toContain("<instructions>");
+    });
+  });
+
+  describe("exportContext - additional branches", () => {
+    it("should include tags in markdown when present", () => {
+      let win = createContextWindow("Tag Test");
+      const doc = createDocument("Tagged", "content", "code", "high", ["react", "ts"]);
+      win = addDocumentToWindow(win, doc);
+
+      const exported = exportContext(win, "markdown");
+      expect(exported.content).toContain("**Tags:** react, ts");
+    });
+
+    it("should handle document with no tags in markdown", () => {
+      let win = createContextWindow("No Tag Test");
+      const doc = createDocument("No Tags", "content", "code", "low", []);
+      win = addDocumentToWindow(win, doc);
+
+      const exported = exportContext(win, "markdown");
+      expect(exported.content).not.toContain("**Tags:**");
+    });
+
+    it("should include tags in XML export", () => {
+      let win = createContextWindow("XML Tags");
+      const doc = createDocument("Tagged XML", "content", "code", "medium", ["js"]);
+      win = addDocumentToWindow(win, doc);
+
+      const exported = exportContext(win, "xml");
+      expect(exported.content).toContain("<tag>js</tag>");
+    });
+
+    it("should escape quotes and apostrophes in XML", () => {
+      let win = createContextWindow("XML Escape");
+      const doc = createDocument("Title with \"quotes\" and 'apostrophes'", "content", "notes", "low", []);
+      win = addDocumentToWindow(win, doc);
+
+      const exported = exportContext(win, "xml");
+      expect(exported.content).toContain("&quot;");
+      expect(exported.content).toContain("&apos;");
+    });
+  });
+
+  describe("reorderDocuments - additional branches", () => {
+    it("should sort multiple documents by priority order", () => {
+      let win = createContextWindow("Sort Test");
+      const doc1 = createDocument("Low", "c", "code", "low", []);
+      const doc2 = createDocument("Med", "c", "code", "medium", []);
+      const doc3 = createDocument("High", "c", "code", "high", []);
+
+      win = addDocumentToWindow(win, doc1);
+      win = addDocumentToWindow(win, doc2);
+      win = addDocumentToWindow(win, doc3);
+
+      // Reorder doc1 to medium priority - triggers sort
+      win = reorderDocuments(win, doc1.id, "medium");
+
+      expect(win.documents[0]?.priority).toBe("high");
+    });
+
+    it("should not change non-target documents", () => {
+      let win = createContextWindow("Test");
+      const doc1 = createDocument("A", "c", "code", "low", []);
+      const doc2 = createDocument("B", "c", "code", "high", []);
+
+      win = addDocumentToWindow(win, doc1);
+      win = addDocumentToWindow(win, doc2);
+      win = reorderDocuments(win, doc1.id, "medium");
+
+      const doc2Updated = win.documents.find(d => d.id === doc2.id);
+      expect(doc2Updated?.priority).toBe("high");
     });
   });
 });

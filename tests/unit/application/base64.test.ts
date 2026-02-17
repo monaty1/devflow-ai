@@ -4,6 +4,10 @@ import {
   decodeBase64,
   validateBase64,
   processBase64,
+  getByteView,
+  bytesToHex,
+  hexToBytes,
+  detectContent,
 } from "@/lib/application/base64";
 import { DEFAULT_BASE64_CONFIG } from "@/types/base64";
 
@@ -190,6 +194,126 @@ describe("Base64 Encoder/Decoder", () => {
       const result = validateBase64("SGVsb"); // length 5, not multiple of 4
       expect(result.isValid).toBe(false);
       expect(result.error).toContain("length");
+    });
+  });
+
+  describe("getByteView", () => {
+    it("should return hex, binary, and decimal for plain text", () => {
+      const result = getByteView("Hi", false);
+      expect(result.hex).toBe("48 69");
+      expect(result.binary).toBe("01001000 01101001");
+      expect(result.decimal).toEqual([72, 105]);
+    });
+
+    it("should decode base64 input and return byte view", () => {
+      // "Hi" in base64 is "SGk="
+      const result = getByteView("SGk=", true);
+      expect(result.hex).toBe("48 69");
+      expect(result.decimal).toEqual([72, 105]);
+    });
+
+    it("should return empty byte view for invalid base64", () => {
+      const result = getByteView("!!!invalid!!!", true);
+      expect(result.hex).toBe("");
+      expect(result.binary).toBe("");
+      expect(result.decimal).toEqual([]);
+    });
+
+    it("should handle empty string", () => {
+      const result = getByteView("", false);
+      expect(result.hex).toBe("");
+      expect(result.decimal).toEqual([]);
+    });
+  });
+
+  describe("bytesToHex", () => {
+    it("should convert bytes to hex string", () => {
+      const bytes = new Uint8Array([0x48, 0x65, 0x6c, 0x6c, 0x6f]);
+      expect(bytesToHex(bytes)).toBe("48656c6c6f");
+    });
+
+    it("should handle empty array", () => {
+      expect(bytesToHex(new Uint8Array())).toBe("");
+    });
+
+    it("should pad single digit hex values", () => {
+      const bytes = new Uint8Array([0x01, 0x0a]);
+      expect(bytesToHex(bytes)).toBe("010a");
+    });
+  });
+
+  describe("hexToBytes", () => {
+    it("should convert hex string to bytes", () => {
+      const bytes = hexToBytes("48656c6c6f");
+      expect(Array.from(bytes)).toEqual([0x48, 0x65, 0x6c, 0x6c, 0x6f]);
+    });
+
+    it("should return empty array for odd length hex", () => {
+      const bytes = hexToBytes("abc");
+      expect(bytes.length).toBe(0);
+    });
+
+    it("should handle empty string", () => {
+      const bytes = hexToBytes("");
+      expect(bytes.length).toBe(0);
+    });
+
+    it("should strip spaces from hex string", () => {
+      const bytes = hexToBytes("48 65");
+      expect(Array.from(bytes)).toEqual([0x48, 0x65]);
+    });
+  });
+
+  describe("detectContent", () => {
+    it("should detect JSON object", () => {
+      expect(detectContent('{"key": "value"}')).toBe("json");
+    });
+
+    it("should detect JSON array", () => {
+      expect(detectContent('[1, 2, 3]')).toBe("json");
+    });
+
+    it("should detect JWT token", () => {
+      expect(detectContent("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.abc123def456")).toBe("jwt");
+    });
+
+    it("should detect hex string", () => {
+      expect(detectContent("48656c6c6f20")).toBe("hex");
+    });
+
+    it("should return text for plain text", () => {
+      expect(detectContent("Hello World!")).toBe("text");
+    });
+
+    it("should detect image from data URI in base64 mode", () => {
+      expect(detectContent("data:image/png;base64,abc", true)).toBe("image");
+    });
+
+    it("should return text for invalid base64 in base64 mode", () => {
+      expect(detectContent("!!!not-base64!!!", true)).toBe("text");
+    });
+
+    it("should return text for invalid JSON-like content", () => {
+      expect(detectContent("{not valid json}")).toBe("text");
+    });
+  });
+
+  describe("processBase64 - additional coverage", () => {
+    it("should include byteView and detectedType in encode result", () => {
+      const result = processBase64("Hello", "encode");
+      expect(result.byteView).toBeDefined();
+      expect(result.detectedType).toBeDefined();
+    });
+
+    it("should include stats with compressionRatio for decode", () => {
+      const result = processBase64("SGVsbG8sIFdvcmxkIQ==", "decode");
+      expect(result.stats.compressionRatio).toBeGreaterThan(0);
+    });
+
+    it("should handle whitespace-only input as empty", () => {
+      const result = processBase64("   ", "encode");
+      expect(result.isValid).toBe(false);
+      expect(result.error).toBe("Empty input");
     });
   });
 
