@@ -7,8 +7,8 @@ export interface ContextDocument {
   tags: string[];
   tokenCount: number;
   createdAt: string;
-  filePath?: string;
-  instructions?: string;
+  filePath?: string | undefined;
+  instructions?: string | undefined;
 }
 
 export type DocumentType = "code" | "documentation" | "api" | "notes" | "other";

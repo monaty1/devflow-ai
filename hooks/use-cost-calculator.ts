@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback } from "react";
 import useSWR from "swr";
 import {
   compareAllModels,
@@ -9,10 +9,17 @@ import {
 import type { CostComparison } from "@/types/cost-calculator";
 import { AI_MODELS } from "@/config/ai-models";
 import { fetchLatestPrices, PRICING_CACHE_KEY } from "@/infrastructure/services/pricing-service";
-import { useSmartNavigation } from "@/hooks/use-smart-navigation";
+
+
+function getInitialInputTokens(): number {
+  if (typeof window === "undefined") return 1000;
+  const shared = localStorage.getItem("devflow-shared-data");
+  if (shared) return Math.ceil(shared.length / 4);
+  return 1000;
+}
 
 export function useCostCalculator() {
-  const [inputTokens, setInputTokens] = useState(1000);
+  const [inputTokens, setInputTokens] = useState(getInitialInputTokens);
   const [outputTokens, setOutputTokens] = useState(500);
   const [dailyRequests, setDailyRequests] = useState(100);
   const [selectedModelId, setSelectedModelId] = useState("gpt-4o");
@@ -30,15 +37,6 @@ export function useCostCalculator() {
   const models = useMemo(() => {
     return latestModels && latestModels.length > 0 ? latestModels : AI_MODELS;
   }, [latestModels]);
-
-  const { getSharedData } = useSmartNavigation();
-
-  useEffect(() => {
-    const shared = getSharedData();
-    if (shared) {
-      setInputTokens(Math.ceil(shared.length / 4));
-    }
-  }, [getSharedData]);
 
   const comparison: CostComparison | null = useMemo(() => {
     if (inputTokens <= 0 && outputTokens <= 0) return null;

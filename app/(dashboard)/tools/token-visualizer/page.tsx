@@ -214,7 +214,7 @@ export default function TokenVisualizerPage() {
                 <div className="p-4 border-t border-divider bg-muted/10">
                   <p className="text-[10px] text-muted-foreground italic flex items-center gap-2">
                     <Info className="size-3" />
-                    Each box represents a token. Red highlights indicate "waste" (extra spaces/redundancy).
+                    Each box represents a token. Red highlights indicate &quot;waste&quot; (extra spaces/redundancy).
                   </p>
                 </div>
               </Card>

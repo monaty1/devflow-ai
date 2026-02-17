@@ -31,16 +31,16 @@ export interface Base64Result {
   output: string;
   mode: Base64Mode;
   isValid: boolean;
-  error?: string;
+  error?: string | undefined;
   stats: Base64Stats;
   timestamp: string;
-  byteView?: ByteRepresentation;
+  byteView?: ByteRepresentation | undefined;
   fileInfo?: {
     name: string;
     mimeType: string;
     size: number;
-  };
-  detectedType?: "image" | "pdf" | "json" | "jwt" | "text" | "hex" | "binary";
+  } | undefined;
+  detectedType?: "image" | "pdf" | "json" | "jwt" | "text" | "hex" | "binary" | undefined;
 }
 
 export interface Base64Stats {

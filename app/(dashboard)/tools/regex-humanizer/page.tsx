@@ -61,7 +61,7 @@ export default function RegexHumanizerPage() {
       case "description":
         return <span className="text-sm">{group.description}</span>;
       default:
-        return (group as any)[key];
+        return String(group[key as keyof typeof group] ?? "");
     }
   };
 
@@ -290,7 +290,7 @@ export default function RegexHumanizerPage() {
                                     <span className="font-mono bg-primary/10 text-primary px-1.5 rounded">Match {i + 1}</span>
                                     <span className="text-muted-foreground italic">Index: {m.index}</span>
                                   </div>
-                                  <p className="font-mono break-all font-bold">"{m.match}"</p>
+                                  <p className="font-mono break-all font-bold">&quot;{m.match}&quot;</p>
                                   {Object.keys(m.groups).length > 0 && (
                                     <div className="flex flex-wrap gap-2 mt-1">
                                       {Object.entries(m.groups).map(([key, val]) => (

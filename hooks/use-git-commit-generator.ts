@@ -19,7 +19,7 @@ import {
 import { useToolHistory } from "@/hooks/use-tool-history";
 import { useMemo } from "react";
 
-export interface HistoryItem extends CommitResult {}
+export type HistoryItem = CommitResult;
 
 export function useGitCommitGenerator() {
   const [config, setConfig] = useState<CommitConfig>(DEFAULT_COMMIT_CONFIG);

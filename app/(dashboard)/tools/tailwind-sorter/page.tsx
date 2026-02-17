@@ -61,7 +61,7 @@ export default function TailwindSorterPage() {
           </Chip>
         );
       default:
-        return (item as any)[key];
+        return String(item[key as keyof typeof item] ?? "");
     }
   };
 

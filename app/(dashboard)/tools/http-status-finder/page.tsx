@@ -79,7 +79,7 @@ export default function HttpStatusFinderPage() {
       case "description":
         return <span className="text-xs text-muted-foreground line-clamp-1">{status.description}</span>;
       default:
-        return (status as any)[key];
+        return String(status[key as keyof typeof status] ?? "");
     }
   }, []);
 
@@ -91,7 +91,7 @@ export default function HttpStatusFinderPage() {
       const headers: Record<string, string> = {};
       res.headers.forEach((v, k) => { headers[k] = v; });
       setTestResult({ headers, time: Date.now() - start, ok: res.ok });
-    } catch (err) {
+    } catch {
       setTestResult({ headers: { error: "CORS or Network Error. Check console." }, time: Date.now() - start, ok: false });
     } finally {
       setIsTesting(false);
@@ -347,7 +347,7 @@ export default function HttpStatusFinderPage() {
                 <Card className="p-20 border-dashed border-2 bg-muted/20 text-center">
                   <Globe className="size-16 mx-auto mb-4 opacity-20" />
                   <h3 className="text-xl font-bold opacity-40">No matching status codes</h3>
-                  <p className="text-sm opacity-30 mt-1">Try searching by numeric code (e.g. 404) or name (e.g. "auth").</p>
+                  <p className="text-sm opacity-30 mt-1">Try searching by numeric code (e.g. 404) or name (e.g. &quot;auth&quot;).</p>
                 </Card>
               )}
             </div>

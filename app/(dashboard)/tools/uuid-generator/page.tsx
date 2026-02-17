@@ -238,7 +238,7 @@ export default function UuidGeneratorPage() {
                         </div>
                       </Button>
                     </DropdownTrigger>
-                    <DropdownMenu onAction={(k) => setExportFormat(k as any)}>
+                    <DropdownMenu onAction={(k) => setExportFormat(k as "text" | "json" | "csv" | "sql")}>
                       <DropdownItem key="text">Plain Text</DropdownItem>
                       <DropdownItem key="json">JSON Array</DropdownItem>
                       <DropdownItem key="csv">CSV Table</DropdownItem>

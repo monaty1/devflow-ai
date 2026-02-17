@@ -69,7 +69,7 @@ describe("Git Commit Message Generator", () => {
 
   describe("generateCommitMessage", () => {
     it("should generate a simple commit message", () => {
-      const config = { ...DEFAULT_COMMIT_CONFIG, type: "feat" as const, description: "add user login" };
+      const config = { ...DEFAULT_COMMIT_CONFIG, type: "feat" as const, description: "add user login", useEmojis: false };
       const result = generateCommitMessage(config);
       expect(result.message).toBe("feat: add user login");
       expect(result.type).toBe("feat");
@@ -83,6 +83,7 @@ describe("Git Commit Message Generator", () => {
         type: "fix" as const,
         scope: "auth",
         description: "resolve token expiration",
+        useEmojis: false,
       };
       const result = generateCommitMessage(config);
       expect(result.message).toBe("fix(auth): resolve token expiration");
@@ -142,7 +143,7 @@ describe("Git Commit Message Generator", () => {
       ];
 
       types.forEach((type) => {
-        const config = { ...DEFAULT_COMMIT_CONFIG, type, description: "some change" };
+        const config = { ...DEFAULT_COMMIT_CONFIG, type, description: "some change", useEmojis: false };
         const result = generateCommitMessage(config);
         expect(result.message.startsWith(type)).toBe(true);
       });
@@ -154,6 +155,7 @@ describe("Git Commit Message Generator", () => {
         type: "feat" as const,
         scope: "  auth  ",
         description: "  add login  ",
+        useEmojis: false,
       };
       const result = generateCommitMessage(config);
       expect(result.message).toBe("feat(auth): add login");

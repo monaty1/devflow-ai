@@ -27,7 +27,7 @@ import { ToolHeader } from "@/components/shared/tool-header";
 import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { cn } from "@/lib/utils";
-import type { JsonPathResult } from "@/types/json-formatter";
+import type { JsonPathResult, JsonFormatMode } from "@/types/json-formatter";
 
 export default function JsonFormatterPage() {
   const { t } = useTranslation();
@@ -75,7 +75,7 @@ export default function JsonFormatterPage() {
         const valStr = String(item.value);
         return <span className="text-[11px] text-muted-foreground truncate max-w-[250px] inline-block font-mono">{valStr}</span>;
       default:
-        return (item as any)[key];
+        return String(item[key as keyof typeof item] ?? "");
     }
   }, []);
 
@@ -230,7 +230,7 @@ export default function JsonFormatterPage() {
                         key={m} 
                         size="sm" 
                         variant={mode === m ? "primary" : "ghost"} 
-                        onPress={() => { setMode(m as any); process(); }}
+                        onPress={() => { setMode(m as JsonFormatMode); process(); }}
                         className="h-8 px-3 text-[10px] font-black uppercase tracking-tighter"
                       >
                         {m.includes("-") ? m.split("-")[1] : m}

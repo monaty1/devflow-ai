@@ -142,7 +142,7 @@ export function reviewCode(code: string, language: SupportedLanguage): CodeRevie
   };
 }
 
-function generateRefactoredCode(code: string, language: SupportedLanguage, issues: CodeIssue[]): string {
+function generateRefactoredCode(code: string, language: SupportedLanguage, _issues: CodeIssue[]): string {
   let refactored = code;
 
   // Generic refactors

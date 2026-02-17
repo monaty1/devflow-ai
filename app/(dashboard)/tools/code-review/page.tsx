@@ -107,14 +107,14 @@ export default function CodeReviewPage() {
         const severityMap = {
           critical: { color: "danger" as const, icon: ShieldAlert },
           warning: { color: "warning" as const, icon: AlertTriangle },
-          info: { color: "primary" as const, icon: Info },
+          info: { color: "accent" as const, icon: Info },
         } as const;
         const config = severityMap[issue.severity as keyof typeof severityMap];
         const Icon = config.icon;
         return (
           <Chip
             size="sm"
-            color={config.color as any}
+            color={config.color}
             variant="soft"
             className="capitalize font-bold h-6"
           >
@@ -154,7 +154,7 @@ export default function CodeReviewPage() {
           </Dropdown>
         );
       default:
-        return (issue as any)[key];
+        return String(issue[key as keyof typeof issue] ?? "");
     }
   }, [navigateTo]);
 

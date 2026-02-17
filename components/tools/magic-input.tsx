@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Card, Button } from "@heroui/react";
 import {
@@ -12,78 +12,64 @@ import {
   Regex,
   Search,
 } from "lucide-react";
-import { useTranslation } from "@/hooks/use-translation";
 
-type DetectedType = 
-  | "json" 
-  | "cron" 
-  | "jwt" 
-  | "base64" 
-  | "sql" 
+type DetectedType =
+  | "json"
+  | "cron"
+  | "jwt"
+  | "base64"
+  | "sql"
   | "regex"
   | "code"
   | "uuid"
   | null;
 
+function detectInputType(trimmed: string): DetectedType {
+  if (!trimmed) return null;
+
+  if ((trimmed.startsWith("{") && trimmed.endsWith("}")) || (trimmed.startsWith("[") && trimmed.endsWith("]"))) {
+    try {
+      JSON.parse(trimmed);
+      return "json";
+    } catch {}
+  }
+
+  if (/^(\*|([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])|\*\/([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])) (\*|([0-9]|1[0-9]|2[0-3])|\*\/([0-9]|1[0-9]|2[0-3])) (\*|([1-9]|1[0-9]|2[0-9]|3[0-1])|\*\/([1-9]|1[0-9]|2[0-9]|3[0-1])) (\*|([1-9]|1[0-2])|\*\/([1-9]|1[0-2])) (\*|([0-6])|\*\/([0-6]))$/.test(trimmed)) {
+    return "cron";
+  }
+
+  if (/^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/.test(trimmed)) {
+    return "jwt";
+  }
+
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)) {
+    return "uuid";
+  }
+
+  if (trimmed.length > 20 && /^[A-Za-z0-9+/=]+$/.test(trimmed) && trimmed.length % 4 === 0) {
+    return "base64";
+  }
+
+  if (/^(SELECT|INSERT|UPDATE|DELETE|CREATE|DROP|ALTER)/i.test(trimmed)) {
+    return "sql";
+  }
+
+  if (trimmed.startsWith("/") && trimmed.endsWith("/")) {
+    return "regex";
+  }
+
+  if (trimmed.includes("function") || trimmed.includes("const") || trimmed.includes("import ") || trimmed.includes("class ")) {
+    return "code";
+  }
+
+  return null;
+}
+
 export function MagicInput() {
   const [input, setInput] = useState("");
-  const [detectedType, setDetectedType] = useState<DetectedType>(null);
   const router = useRouter();
-  const { t: _t } = useTranslation();
 
-  useEffect(() => {
-    const trimmed = input.trim();
-    if (!trimmed) {
-      setDetectedType(null);
-      return;
-    }
-
-    // Detection Logic
-    if ((trimmed.startsWith("{") && trimmed.endsWith("}")) || (trimmed.startsWith("[") && trimmed.endsWith("]"))) {
-      try {
-        JSON.parse(trimmed);
-        setDetectedType("json");
-        return;
-      } catch {}
-    }
-
-    if (/^(\*|([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])|\*\/([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])) (\*|([0-9]|1[0-9]|2[0-3])|\*\/([0-9]|1[0-9]|2[0-3])) (\*|([1-9]|1[0-9]|2[0-9]|3[0-1])|\*\/([1-9]|1[0-9]|2[0-9]|3[0-1])) (\*|([1-9]|1[0-2])|\*\/([1-9]|1[0-2])) (\*|([0-6])|\*\/([0-6]))$/.test(trimmed)) {
-      setDetectedType("cron");
-      return;
-    }
-
-    if (/^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/.test(trimmed)) {
-      setDetectedType("jwt");
-      return;
-    }
-
-    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)) {
-      setDetectedType("uuid");
-      return;
-    }
-
-    if (trimmed.length > 20 && /^[A-Za-z0-9+/=]+$/.test(trimmed) && trimmed.length % 4 === 0) {
-      setDetectedType("base64");
-      return;
-    }
-
-    if (/^(SELECT|INSERT|UPDATE|DELETE|CREATE|DROP|ALTER)/i.test(trimmed)) {
-      setDetectedType("sql");
-      return;
-    }
-
-    if (trimmed.startsWith("/") && trimmed.endsWith("/")) {
-      setDetectedType("regex");
-      return;
-    }
-
-    if (trimmed.includes("function") || trimmed.includes("const") || trimmed.includes("import ") || trimmed.includes("class ")) {
-      setDetectedType("code");
-      return;
-    }
-
-    setDetectedType(null);
-  }, [input]);
+  const detectedType = useMemo(() => detectInputType(input.trim()), [input]);
 
   const handleAction = (tool: string, _action: string) => {
     // In a real app, we would pass the 'input' via query param or global state context

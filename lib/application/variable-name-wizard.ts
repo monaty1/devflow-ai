@@ -328,7 +328,7 @@ function generateReasoning(
 
 // --- Auditing ---
 
-function performAudit(name: string, type: VariableType): NameAudit {
+function performAudit(name: string, _type: VariableType): NameAudit {
   const findings: string[] = [];
   const words = splitIntoWords(name);
   const lowerName = name.toLowerCase();

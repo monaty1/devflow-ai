@@ -98,7 +98,7 @@ export default function DtoMaticPage() {
           </div>
         );
       default:
-        return (file as any)[key];
+        return String(file[key as keyof typeof file] ?? "");
     }
   }, [selectedFileId, setSelectedFileId]);
 

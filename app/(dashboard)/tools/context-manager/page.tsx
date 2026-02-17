@@ -106,7 +106,7 @@ export default function ContextManagerPage() {
         return (
           <Dropdown>
             <DropdownTrigger>
-              <Button size="sm" variant="ghost" className="capitalize font-bold h-6 text-[10px]" style={{ color: (priorityMap as any)[doc.priority] }}>
+              <Button size="sm" variant="ghost" className="capitalize font-bold h-6 text-[10px]" style={{ color: priorityMap[doc.priority as keyof typeof priorityMap] }}>
                 {doc.priority}
               </Button>
             </DropdownTrigger>
@@ -124,7 +124,7 @@ export default function ContextManagerPage() {
           </Button>
         );
       default:
-        return (doc as any)[key];
+        return String(doc[key as keyof typeof doc] ?? "");
     }
   }, [activeWindow, changePriority, removeDocument]);
 

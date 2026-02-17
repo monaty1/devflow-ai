@@ -136,7 +136,7 @@ export default function CostCalculatorPage() {
           </div>
         );
       default:
-        return (result as any)[key];
+        return String(result[key as keyof typeof result] ?? "");
     }
   }, [cheapestId, bestValueId]);
 
@@ -148,7 +148,7 @@ export default function CostCalculatorPage() {
     
     return Array.from({ length: 30 }, (_, i) => {
       const day = i + 1;
-      const dataPoint: any = { day: `Day ${day}` };
+      const dataPoint: Record<string, string | number> = { day: `Day ${day}` };
       
       topModels.forEach(result => {
         // Daily cost * number of days

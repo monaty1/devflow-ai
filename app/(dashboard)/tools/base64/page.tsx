@@ -67,14 +67,14 @@ export default function Base64Page() {
     }));
   }, [result]);
 
-  const renderByteCell = useCallback((item: any, columnKey: React.Key) => {
-    const key = columnKey.toString();
+  const renderByteCell = useCallback((item: { id: number; offset: string; hex: string; binary: string | undefined; decimal: number | undefined }, columnKey: React.Key) => {
+    const key = columnKey.toString() as keyof typeof item;
     switch (key) {
       case "offset": return <span className="font-mono text-[10px] text-muted-foreground">0x{item.offset}</span>;
       case "hex": return <span className="font-mono text-xs font-black text-primary">{item.hex}</span>;
       case "binary": return <span className="font-mono text-[10px] opacity-60">{item.binary}</span>;
       case "decimal": return <span className="font-mono text-xs">{item.decimal}</span>;
-      default: return item[key];
+      default: return String(item[key]);
     }
   }, []);
 
@@ -181,7 +181,7 @@ export default function Base64Page() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <Tabs 
               selectedKey={activeView} 
-              onSelectionChange={(k) => setActiveView(k as any)}
+              onSelectionChange={(k) => setActiveView(k as "text" | "preview" | "inspector")}
               variant="primary"
             >
               <Tab key="text">Text View</Tab>
@@ -259,7 +259,7 @@ export default function Base64Page() {
                   </Card>
                 )}
 
-                {!["jwt", "image", "json"].includes(result?.detectedType!) && (
+                {result?.detectedType && !["jwt", "image", "json"].includes(result.detectedType) && (
                   <div className="flex flex-col items-center justify-center h-full text-center p-20 opacity-30">
                     <Search className="size-16 mb-4" />
                     <p className="font-black text-xl">NO SMART PREVIEW</p>

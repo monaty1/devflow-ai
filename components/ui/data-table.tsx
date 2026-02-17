@@ -63,7 +63,7 @@ export function DataTable<T extends { id: string | number }>({
   const [statusFilter, setStatusFilter] = useState<Selection>("all");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
-    column: (columns[0]?.uid as any) || "",
+    column: columns[0]?.uid ?? "",
     direction: "ascending",
   });
   const [page, setPage] = useState(1);
@@ -80,15 +80,15 @@ export function DataTable<T extends { id: string | number }>({
     let filteredData = [...data];
 
     if (hasSearchFilter) {
-      filteredData = filteredData.filter((item: any) => {
-        const val = filterField.split('.').reduce((obj: any, key: string) => obj?.[key], item);
+      filteredData = filteredData.filter((item) => {
+        const val = filterField.split('.').reduce((obj: Record<string, unknown>, key: string) => (obj?.[key] ?? {}) as Record<string, unknown>, item as unknown as Record<string, unknown>);
         return String(val || "").toLowerCase().includes(filterValue.toLowerCase());
       });
     }
     if (statusOptions && statusFilter !== "all" && (statusFilter as Set<string>).size !== statusOptions.length) {
       const filterSet = statusFilter as Set<string>;
-      filteredData = filteredData.filter((item: any) =>
-        filterSet.has(item.status)
+      filteredData = filteredData.filter((item) =>
+        filterSet.has(((item as unknown as Record<string, string>)["status"]) ?? "")
       );
     }
 
@@ -105,9 +105,9 @@ export function DataTable<T extends { id: string | number }>({
   }, [page, filteredItems, rowsPerPage]);
 
   const sortedItems = useMemo(() => {
-    return [...items].sort((a: any, b: any) => {
-      const first = sortDescriptor.column?.toString().split('.').reduce((obj: any, key: string) => obj?.[key], a);
-      const second = sortDescriptor.column?.toString().split('.').reduce((obj: any, key: string) => obj?.[key], b);
+    return [...items].sort((a, b) => {
+      const first = sortDescriptor.column?.toString().split('.').reduce((obj: Record<string, unknown>, key: string) => (obj?.[key] ?? {}) as Record<string, unknown>, a as unknown as Record<string, unknown>) as unknown as string | number;
+      const second = sortDescriptor.column?.toString().split('.').reduce((obj: Record<string, unknown>, key: string) => (obj?.[key] ?? {}) as Record<string, unknown>, b as unknown as Record<string, unknown>) as unknown as string | number;
       const cmp = first < second ? -1 : first > second ? 1 : 0;
 
       return sortDescriptor.direction === "descending" ? -cmp : cmp;
@@ -212,7 +212,7 @@ export function DataTable<T extends { id: string | number }>({
         <span className="w-[30%] text-small text-default-400">
           {selectedKeys === "all"
             ? "All items selected"
-            : `${(selectedKeys as Set<any>).size} of ${filteredItems.length} selected`}
+            : `${(selectedKeys as Set<string>).size} of ${filteredItems.length} selected`}
         </span>
         <Pagination
           color="primary"
@@ -252,20 +252,20 @@ export function DataTable<T extends { id: string | number }>({
       onSortChange={setSortDescriptor}
     >
       <TableHeader columns={headerColumns}>
-        {(column: any) => (
+        {(column: ColumnConfig) => (
           <TableColumn
             key={column.uid}
             align={column.uid === "actions" ? "center" : "start"}
-            allowsSorting={column.sortable}
+            allowsSorting={column.sortable ?? false}
           >
             {column.name}
           </TableColumn>
         )}
       </TableHeader>
       <TableBody emptyContent={emptyContent} items={sortedItems}>
-        {(item: any) => (
+        {(item: T) => (
           <TableRow key={item.id}>
-            {(columnKey: any) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
+            {(columnKey: React.Key) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
           </TableRow>
         )}
       </TableBody>

@@ -73,7 +73,7 @@ export function useWorker<T, R>(options: WorkerOptions<T, R>) {
     };
 
     workerRef.current.postMessage(data);
-  }, [options.fn]); // Dependency on fn string representation
+  }, [options]); // Dependency on options
 
   return { run, status, result, error };
 }

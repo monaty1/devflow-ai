@@ -73,7 +73,7 @@ export function fixJson(input: string): string {
 /**
  * Basic JSON to YAML conversion (without external libs for weight)
  */
-export function jsonToYaml(obj: any, indent = 0): string {
+export function jsonToYaml(obj: unknown, indent = 0): string {
   const spaces = "  ".repeat(indent);
   if (obj === null) return "null";
   if (typeof obj !== "object") return String(obj);
@@ -95,8 +95,8 @@ export function jsonToYaml(obj: any, indent = 0): string {
 /**
  * Basic JSON to XML conversion
  */
-export function jsonToXml(obj: any, rootName = "root"): string {
-  function toXml(val: any, name: string): string {
+export function jsonToXml(obj: unknown, rootName = "root"): string {
+  function toXml(val: unknown, name: string): string {
     if (val === null) return `<${name}/>`;
     if (Array.isArray(val)) {
       return val.map(item => toXml(item, "item")).join("");
@@ -115,7 +115,7 @@ export function jsonToXml(obj: any, rootName = "root"): string {
 /**
  * Basic JSON to CSV conversion
  */
-export function jsonToCsv(obj: any): string {
+export function jsonToCsv(obj: unknown): string {
   const arr = Array.isArray(obj) ? obj : [obj];
   if (arr.length === 0) return "";
   

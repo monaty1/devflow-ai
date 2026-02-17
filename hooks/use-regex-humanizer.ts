@@ -35,7 +35,7 @@ export function useRegexHumanizer(): UseRegexHumanizerReturn {
     };
   }, []);
 
-  const runWorker = useCallback((action: string, payload: any): Promise<any> => {
+  const runWorker = useCallback((action: string, payload: Record<string, unknown>): Promise<unknown> => {
     return new Promise((resolve, reject) => {
       if (!workerRef.current) {
         reject(new Error("Worker not initialized"));
@@ -63,7 +63,7 @@ export function useRegexHumanizer(): UseRegexHumanizerReturn {
     if (!patternInput.trim()) return;
     setIsExplaining(true);
     try {
-      const result = await runWorker("explain", { patternInput });
+      const result = await runWorker("explain", { patternInput }) as RegexAnalysis;
       setExplanation(result);
     } catch (e) {
       console.error(e);
@@ -76,10 +76,10 @@ export function useRegexHumanizer(): UseRegexHumanizerReturn {
     if (!description.trim()) return;
     setIsGenerating(true);
     try {
-      const regex = await runWorker("generate", { description });
+      const regex = await runWorker("generate", { description }) as string;
       setPattern(regex);
       // Auto-explain generated regex
-      const explanationResult = await runWorker("explain", { patternInput: regex });
+      const explanationResult = await runWorker("explain", { patternInput: regex }) as RegexAnalysis;
       setExplanation(explanationResult);
     } catch (e) {
       console.error(e);
@@ -90,7 +90,7 @@ export function useRegexHumanizer(): UseRegexHumanizerReturn {
 
   const test = useCallback(async (regexPattern: string, text: string) => {
     try {
-      const result = await runWorker("test", { pattern: regexPattern, text });
+      const result = await runWorker("test", { pattern: regexPattern, text }) as TestResult;
       setTestResult(result);
     } catch (e) {
       console.error(e);

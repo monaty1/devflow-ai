@@ -71,10 +71,12 @@ describe("Cross-Module Integration Tests", () => {
 
       const result = generateCode(sampleJson, {
         mode: "quick",
+        targetLanguage: "typescript",
         rootName: "User",
         naming: "PascalCase",
         optionalFields: false,
         detectDates: false,
+        detectSemanticTypes: false,
         exportTypes: true,
         readonlyEntities: false,
         generateMappers: false,
@@ -154,12 +156,12 @@ describe("Cross-Module Integration Tests", () => {
       expect(review.overallScore).toBeGreaterThanOrEqual(0);
 
       const suggestionsText = review.suggestions.join(". ");
-      const tokens = tokenizeText(suggestionsText);
+      const tokens = tokenizeText(suggestionsText, "openai");
       expect(tokens.length).toBeGreaterThan(0);
     });
 
     it("should create visualization from code and measure token cost", () => {
-      const viz = createVisualization(tsCode);
+      const viz = createVisualization(tsCode, "openai");
       expect(viz.segments.length).toBeGreaterThan(0);
       expect(viz.totalTokens).toBeGreaterThan(0);
     });
@@ -223,6 +225,8 @@ describe("Cross-Module Integration Tests", () => {
         body: "",
         breakingChange: "",
         issueRef: "",
+        useEmojis: false,
+        requireIssue: false,
       });
 
       expect(commit.message).toContain("feat");
@@ -239,6 +243,8 @@ describe("Cross-Module Integration Tests", () => {
         description: "resolve token expiry race condition",
         body: "",
         breakingChange: "",
+        useEmojis: false,
+        requireIssue: false,
         issueRef: "",
       });
 

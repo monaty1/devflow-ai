@@ -486,5 +486,5 @@
   "tailwind.audit": "Optimization Suggestions",
   "tailwind.breakpoints": "Responsive Distribution",
   "tailwind.noIssues": "No conflicts or redundancies detected.",
-  "tailwind.redundant": "Redundant",
+  "tailwind.redundant": "Redundant"
 }

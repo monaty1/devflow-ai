@@ -32,7 +32,7 @@ import { CopyButton } from "@/components/shared/copy-button";
 import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { cn } from "@/lib/utils";
-import type { NameSuggestion, VariableType } from "@/types/variable-name-wizard";
+import type { NameSuggestion, VariableType, WizardConfig } from "@/types/variable-name-wizard";
 
 export default function VariableNameWizardPage() {
   const { t } = useTranslation();
@@ -102,7 +102,7 @@ export default function VariableNameWizardPage() {
       case "actions":
         return <CopyButton text={suggestion.name} size="sm" variant="ghost" />;
       default:
-        return (suggestion as any)[key];
+        return String(suggestion[key as keyof typeof suggestion] ?? "");
     }
   };
 
@@ -114,7 +114,7 @@ export default function VariableNameWizardPage() {
     { id: "csharp", label: "C# .NET", icon: Layers },
   ];
 
-  const TYPE_OPTIONS: { id: VariableType; label: string; icon: any }[] = [
+  const TYPE_OPTIONS: { id: VariableType; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: "variable", label: "Variable", icon: Code2 },
     { id: "function", label: "Function", icon: Wand2 },
     { id: "constant", label: "Constant", icon: ListIcon },
@@ -168,7 +168,7 @@ export default function VariableNameWizardPage() {
                   {LANGUAGES.map(lang => (
                     <button
                       key={lang.id}
-                      onClick={() => updateConfig("language" as any, lang.id)}
+                      onClick={() => updateConfig("language", lang.id as WizardConfig["language"])}
                       className={cn(
                         "flex items-center gap-2 p-2 rounded-lg border transition-all text-left",
                         config.language === lang.id 
@@ -227,7 +227,7 @@ export default function VariableNameWizardPage() {
                 <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
                   <p className="text-[10px] text-primary-400 font-bold mb-2 uppercase">Pro Tip</p>
                   <p className="text-xs opacity-70 leading-relaxed italic">
-                    "Use intent-revealing names. The name of a variable should tell you why it exists, what it does, and how it is used."
+                    &quot;Use intent-revealing names. The name of a variable should tell you why it exists, what it does, and how it is used.&quot;
                   </p>
                 </div>
               </div>

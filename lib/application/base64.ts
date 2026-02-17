@@ -3,7 +3,6 @@
 import type {
   Base64Config,
   Base64Result,
-  Base64Stats,
   Base64Mode,
   ByteRepresentation,
 } from "@/types/base64";

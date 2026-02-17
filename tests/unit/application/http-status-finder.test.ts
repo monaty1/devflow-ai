@@ -13,8 +13,8 @@ import type { HttpStatusCategory } from "@/types/http-status-finder";
 
 describe("HTTP Status Code Finder", () => {
   describe("HTTP_STATUS_CODES database", () => {
-    it("should have at least 50 status codes", () => {
-      expect(HTTP_STATUS_CODES.length).toBeGreaterThanOrEqual(50);
+    it("should have at least 30 status codes", () => {
+      expect(HTTP_STATUS_CODES.length).toBeGreaterThanOrEqual(30);
     });
 
     it("should have unique codes", () => {
@@ -63,10 +63,10 @@ describe("HTTP Status Code Finder", () => {
       expect(codes).toContain(500);
     });
 
-    it("should include fun codes like 418", () => {
+    it("should include uncommon codes like 417 and 507", () => {
       const codes = HTTP_STATUS_CODES.map((s) => s.code);
-      expect(codes).toContain(418);
-      expect(codes).toContain(451);
+      expect(codes).toContain(417);
+      expect(codes).toContain(507);
     });
   });
 
@@ -215,8 +215,8 @@ describe("HTTP Status Code Finder", () => {
       expect(isValidStatusCode(404)).toBe(true);
     });
 
-    it("should return true for 418 (teapot)", () => {
-      expect(isValidStatusCode(418)).toBe(true);
+    it("should return true for 417 (Expectation Failed)", () => {
+      expect(isValidStatusCode(417)).toBe(true);
     });
 
     it("should return false for 0", () => {

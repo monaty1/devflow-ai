@@ -6,6 +6,8 @@ import type {
   ClassGroup,
   SorterConfig,
   TailwindCategory,
+  TailwindConflict,
+  TailwindAuditItem,
 } from "@/types/tailwind-sorter";
 import { CATEGORY_LABELS, CATEGORY_ORDER } from "@/types/tailwind-sorter";
 

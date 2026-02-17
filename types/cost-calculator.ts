@@ -32,7 +32,7 @@ export interface CostCalculation {
   outputCost: number;
   totalCost: number;
   calculatedAt: string;
-  valueScore?: number;
+  valueScore?: number | undefined;
 }
 
 export interface CostComparison {

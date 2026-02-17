@@ -72,11 +72,11 @@ export default function CronBuilderPage() {
           </Chip>
         );
       default:
-        return (exec as any)[key];
+        return String(exec[key as keyof typeof exec] ?? "");
     }
   };
 
-  const INFRA_FORMATS: { id: ConfigFormat; label: string; icon: any }[] = [
+  const INFRA_FORMATS: { id: ConfigFormat; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: "kubernetes", label: "Kubernetes CronJob", icon: Cloud },
     { id: "github-actions", label: "GitHub Actions", icon: Github },
     { id: "aws-eventbridge", label: "AWS EventBridge", icon: Box },
@@ -139,8 +139,8 @@ export default function CronBuilderPage() {
                       <label className="w-16 text-xs font-bold uppercase tracking-widest text-muted-foreground text-right">{f.label}</label>
                       <Input
                         variant="primary"
-                        value={(expression as any)[f.field]}
-                        onChange={(e) => setField(f.field as any, e.target.value)}
+                        value={expression[f.field as keyof typeof expression]}
+                        onChange={(e) => setField(f.field as keyof typeof expression, e.target.value)}
                         className="flex-1 font-mono font-bold"
                         placeholder="*"
                       />
@@ -164,7 +164,7 @@ export default function CronBuilderPage() {
                         key={p.name}
                         size="sm"
                         variant="ghost"
-                        onPress={() => setExpression(p.exp as any)}
+                        onPress={() => setExpression(p.exp)}
                         className="font-bold text-[10px] h-8"
                       >
                         {p.name}

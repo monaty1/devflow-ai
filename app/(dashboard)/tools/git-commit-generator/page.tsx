@@ -34,7 +34,7 @@ import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
 import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { StatusBadge } from "@/components/shared/status-badge";
-import type { CommitType } from "@/types/git-commit-generator";
+import type { CommitType, CommitResult } from "@/types/git-commit-generator";
 import { COMMIT_TYPES, getCommitTypeInfo } from "@/lib/application/git-commit-generator";
 
 export default function GitCommitGeneratorPage() {
@@ -62,7 +62,7 @@ export default function GitCommitGeneratorPage() {
     { name: "ACTIONS", uid: "actions" },
   ];
 
-  const renderHistoryCell = useCallback((item: any, columnKey: React.Key) => {
+  const renderHistoryCell = useCallback((item: CommitResult, columnKey: React.Key) => {
     const key = columnKey.toString();
     switch (key) {
       case "message":
@@ -80,7 +80,7 @@ export default function GitCommitGeneratorPage() {
       case "actions":
         return <CopyButton text={item.message} size="sm" variant="ghost" />;
       default:
-        return (item as any)[key];
+        return String(item[key as keyof CommitResult] ?? "");
     }
   }, []);
 

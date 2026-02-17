@@ -170,23 +170,25 @@ export function stripComments(code: string, type: DocumentType): string {
 
 export function generateTree(documents: ContextDocument[]): string {
   const paths = documents.map(d => d.filePath || d.title);
-  const tree: any = {};
+  interface TreeNode { [key: string]: TreeNode; }
+  const tree: TreeNode = {};
 
   paths.forEach(path => {
-    let current = tree;
+    let current: TreeNode = tree;
     path.split("/").forEach(part => {
       if (!current[part]) current[part] = {};
-      current = current[part];
+      current = current[part] as TreeNode;
     });
   });
 
-  function render(obj: any, indent: string = ""): string {
+  function render(obj: TreeNode, indent: string = ""): string {
     let result = "";
     const keys = Object.keys(obj);
     keys.forEach((key, index) => {
       const isLast = index === keys.length - 1;
       result += `${indent}${isLast ? "└── " : "├── "}${key}\n`;
-      result += render(obj[key], indent + (isLast ? "    " : "│   "));
+      const child = obj[key];
+      if (child) result += render(child, indent + (isLast ? "    " : "│   "));
     });
     return result;
   }

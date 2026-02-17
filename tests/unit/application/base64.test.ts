@@ -3,11 +3,7 @@ import {
   encodeBase64,
   decodeBase64,
   validateBase64,
-  calculateBase64Stats,
   processBase64,
-  fileToDataUrl,
-  dataUrlToBase64,
-  EXAMPLE_BASE64,
 } from "@/lib/application/base64";
 import { DEFAULT_BASE64_CONFIG } from "@/types/base64";
 
@@ -125,28 +121,6 @@ describe("Base64 Encoder/Decoder", () => {
     });
   });
 
-  describe("calculateBase64Stats", () => {
-    it("should calculate encode stats", () => {
-      const input = "Hello";
-      const output = "SGVsbG8=";
-      const stats = calculateBase64Stats(input, output, "encode");
-
-      expect(stats.inputLength).toBe(5);
-      expect(stats.outputLength).toBe(8);
-      expect(stats.compressionRatio).toBeGreaterThan(1); // Base64 increases size
-    });
-
-    it("should calculate decode stats", () => {
-      const input = "SGVsbG8=";
-      const output = "Hello";
-      const stats = calculateBase64Stats(input, output, "decode");
-
-      expect(stats.inputLength).toBe(8);
-      expect(stats.outputLength).toBe(5);
-      expect(stats.compressionRatio).toBeGreaterThan(1);
-    });
-  });
-
   describe("processBase64", () => {
     it("should process encode mode", () => {
       const result = processBase64("Hello, World!", "encode");
@@ -187,74 +161,6 @@ describe("Base64 Encoder/Decoder", () => {
     });
   });
 
-  describe("fileToDataUrl", () => {
-    it("should create data URL with default mime type", () => {
-      const base64 = "SGVsbG8=";
-      const result = fileToDataUrl(base64);
-      expect(result).toBe("data:application/octet-stream;base64,SGVsbG8=");
-    });
-
-    it("should create data URL with custom mime type", () => {
-      const base64 = "SGVsbG8=";
-      const result = fileToDataUrl(base64, "text/plain");
-      expect(result).toBe("data:text/plain;base64,SGVsbG8=");
-    });
-
-    it("should create image data URL", () => {
-      const base64 = "iVBORw0KGgo=";
-      const result = fileToDataUrl(base64, "image/png");
-      expect(result).toBe("data:image/png;base64,iVBORw0KGgo=");
-    });
-  });
-
-  describe("dataUrlToBase64", () => {
-    it("should extract base64 from data URL", () => {
-      const dataUrl = "data:text/plain;base64,SGVsbG8=";
-      const result = dataUrlToBase64(dataUrl);
-      expect(result).toEqual({
-        mimeType: "text/plain",
-        base64: "SGVsbG8=",
-      });
-    });
-
-    it("should extract from image data URL", () => {
-      const dataUrl = "data:image/png;base64,iVBORw0KGgo=";
-      const result = dataUrlToBase64(dataUrl);
-      expect(result?.mimeType).toBe("image/png");
-      expect(result?.base64).toBe("iVBORw0KGgo=");
-    });
-
-    it("should return null for invalid data URL", () => {
-      const result = dataUrlToBase64("not-a-data-url");
-      expect(result).toBeNull();
-    });
-
-    it("should return null for non-base64 data URL", () => {
-      const result = dataUrlToBase64("data:text/plain,Hello");
-      expect(result).toBeNull();
-    });
-  });
-
-  describe("EXAMPLE_BASE64", () => {
-    it("should have valid text example", () => {
-      expect(EXAMPLE_BASE64.text).toBeTruthy();
-    });
-
-    it("should have valid JSON example", () => {
-      expect(() => JSON.parse(EXAMPLE_BASE64.json)).not.toThrow();
-    });
-
-    it("should have valid encoded example", () => {
-      const validation = validateBase64(EXAMPLE_BASE64.encoded);
-      expect(validation.isValid).toBe(true);
-    });
-
-    it("should have valid URL-safe example", () => {
-      const validation = validateBase64(EXAMPLE_BASE64.urlSafe, "url-safe");
-      expect(validation.isValid).toBe(true);
-    });
-  });
-
   describe("validateBase64 - uncovered branches", () => {
     it("should validate url-safe base64 that needs padding restoration", () => {
       // "Hello, World!" encodes to "SGVsbG8sIFdvcmxkIQ==" in standard
@@ -284,39 +190,6 @@ describe("Base64 Encoder/Decoder", () => {
       const result = validateBase64("SGVsb"); // length 5, not multiple of 4
       expect(result.isValid).toBe(false);
       expect(result.error).toContain("length");
-    });
-  });
-
-  describe("calculateBase64Stats - uncovered branches", () => {
-    it("should calculate decode mode stats with inputBytes / outputBytes ratio", () => {
-      const input = "SGVsbG8sIFdvcmxkIQ=="; // base64 encoded "Hello, World!"
-      const output = "Hello, World!";
-      const stats = calculateBase64Stats(input, output, "decode");
-
-      expect(stats.inputLength).toBe(input.length);
-      expect(stats.outputLength).toBe(output.length);
-      // In decode mode, compressionRatio = inputBytes / max(outputBytes, 1)
-      expect(stats.compressionRatio).toBeGreaterThan(1);
-      expect(stats.inputBytes).toBeGreaterThan(stats.outputBytes);
-    });
-
-    it("should handle empty string input without dividing by zero", () => {
-      const stats = calculateBase64Stats("", "", "encode");
-
-      expect(stats.inputLength).toBe(0);
-      expect(stats.outputLength).toBe(0);
-      expect(stats.inputBytes).toBe(0);
-      expect(stats.outputBytes).toBe(0);
-      // Should use Math.max(inputBytes, 1) to avoid division by zero
-      expect(stats.compressionRatio).toBe(0);
-    });
-
-    it("should handle empty string input in decode mode", () => {
-      const stats = calculateBase64Stats("", "", "decode");
-
-      expect(stats.inputLength).toBe(0);
-      expect(stats.outputLength).toBe(0);
-      expect(stats.compressionRatio).toBe(0);
     });
   });
 

@@ -19,6 +19,8 @@ describe("Cost Calculator", () => {
     contextWindow: 128000,
     maxOutput: 4096,
     isPopular: false,
+    updatedAt: new Date().toISOString(),
+    category: "general",
   };
 
   describe("calculateCost", () => {

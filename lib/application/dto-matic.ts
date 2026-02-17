@@ -339,7 +339,7 @@ ${generateJavaFields(fields, config)}
   return files;
 }
 
-function generateJavaFields(fields: JsonField[], config: DtoMaticConfig): string {
+function generateJavaFields(fields: JsonField[], _config: DtoMaticConfig): string {
   return fields.map(field => {
     const type = getJavaType(field);
     const name = applyNaming(field.name, "camelCase");
@@ -390,7 +390,7 @@ ${generateCSharpFields(fields, config)}
   return files;
 }
 
-function generateCSharpFields(fields: JsonField[], config: DtoMaticConfig): string {
+function generateCSharpFields(fields: JsonField[], _config: DtoMaticConfig): string {
   return fields.map(field => {
     const type = getCSharpType(field);
     const name = applyNaming(field.name, "PascalCase");
@@ -435,7 +435,7 @@ ${generateGoFields(fields, config)}
   return files;
 }
 
-function generateGoFields(fields: JsonField[], config: DtoMaticConfig): string {
+function generateGoFields(fields: JsonField[], _config: DtoMaticConfig): string {
   return fields.map(field => {
     const type = getGoType(field);
     const name = applyNaming(field.name, "PascalCase");
@@ -480,7 +480,7 @@ ${generatePythonFields(fields, config)}
   return files;
 }
 
-function generatePythonFields(fields: JsonField[], config: DtoMaticConfig): string {
+function generatePythonFields(fields: JsonField[], _config: DtoMaticConfig): string {
   return fields.map(field => {
     const type = getPythonType(field);
     const name = applyNaming(field.name, "snake_case");

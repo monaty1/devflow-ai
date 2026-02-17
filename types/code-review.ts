@@ -22,11 +22,11 @@ export type SupportedLanguage =
 
 export interface CodeIssue {
   line: number;
-  column?: number;
+  column?: number | undefined;
   severity: "critical" | "warning" | "info";
   category: IssueCategory;
   message: string;
-  suggestion?: string;
+  suggestion?: string | undefined;
 }
 
 export type IssueCategory =
