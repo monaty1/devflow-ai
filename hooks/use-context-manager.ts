@@ -51,7 +51,7 @@ interface UseContextManagerReturn {
   removeDocument: (documentId: string) => void;
   changePriority: (documentId: string, priority: Priority) => void;
   exportWindow: (format: "xml" | "json" | "markdown") => ExportedContext | null;
-  exportForAI: () => string | null;
+  exportForAI: (options?: { stripComments?: boolean }) => string | null;
 }
 
 export function useContextManager(): UseContextManagerReturn {
@@ -146,9 +146,9 @@ export function useContextManager(): UseContextManagerReturn {
     [activeWindow]
   );
 
-  const exportForAIHandler = useCallback((): string | null => {
+  const exportForAIHandler = useCallback((options?: { stripComments?: boolean }): string | null => {
     if (!activeWindow) return null;
-    return exportForAI(activeWindow);
+    return exportForAI(activeWindow, options);
   }, [activeWindow]);
 
   return {

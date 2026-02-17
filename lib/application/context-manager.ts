@@ -157,26 +157,67 @@ ${docs}
 </context>`;
 }
 
-export function exportForAI(window: ContextWindow): string {
-  const fileTree = window.documents
-    .map(doc => `- ${doc.filePath || doc.title}`)
-    .join("\n");
+export function stripComments(code: string, type: DocumentType): string {
+  if (type !== "code") return code;
+  
+  // Basic regex for multi-line and single-line comments
+  // Handles JS/TS, Java, PHP, C# styles
+  return code
+    .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "$1")
+    .replace(/^\s*\n/gm, "") // remove empty lines
+    .trim();
+}
+
+export function generateTree(documents: ContextDocument[]): string {
+  const paths = documents.map(d => d.filePath || d.title);
+  const tree: any = {};
+
+  paths.forEach(path => {
+    let current = tree;
+    path.split("/").forEach(part => {
+      if (!current[part]) current[part] = {};
+      current = current[part];
+    });
+  });
+
+  function render(obj: any, indent: string = ""): string {
+    let result = "";
+    const keys = Object.keys(obj);
+    keys.forEach((key, index) => {
+      const isLast = index === keys.length - 1;
+      result += `${indent}${isLast ? "└── " : "├── "}${key}\n`;
+      result += render(obj[key], indent + (isLast ? "    " : "│   "));
+    });
+    return result;
+  }
+
+  return render(tree);
+}
+
+export function exportForAI(window: ContextWindow, options: { stripComments?: boolean } = {}): string {
+  const projectTree = generateTree(window.documents);
 
   const docs = window.documents
     .map(
-      (doc) => `<file path="${doc.filePath || doc.title}" type="${doc.type}">
+      (doc) => {
+        let content = doc.content;
+        if (options.stripComments) {
+          content = stripComments(content, doc.type);
+        }
+        return `<file path="${doc.filePath || doc.title}" type="${doc.type}">
 ${doc.instructions ? `<instructions>${doc.instructions}</instructions>\n` : ""}<content>
-${doc.content}
+${content}
 </content>
-</file>`
+</file>`;
+      }
     )
     .join("\n\n");
 
   return `I am providing context for a software development task. Please act as a Senior Software Engineer.
 
-<project_map>
-${fileTree}
-</project_map>
+<project_hierarchy>
+${projectTree}
+</project_hierarchy>
 
 <context_documents>
 ${docs}

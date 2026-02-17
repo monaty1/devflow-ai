@@ -12,6 +12,7 @@ import {
   Progress,
   Chip,
   User,
+  Checkbox,
 } from "@heroui/react";
 import {
   Plus,
@@ -29,6 +30,8 @@ import {
   List as ListIcon,
   ChevronRight,
   Sparkles,
+  Search,
+  FolderTree,
 } from "lucide-react";
 import { useContextManager } from "@/hooks/use-context-manager";
 import { useToast } from "@/hooks/use-toast";
@@ -51,16 +54,17 @@ export default function ContextManagerPage() {
     activeWindow,
     createWindow,
     deleteWindow,
-    setActiveWindow,
+    setActiveWindowId,
     addDocument,
     removeDocument,
     changePriority,
     exportWindow,
+    exportForAI,
   } = useContextManager();
 
   const [showAddDoc, setShowAddDoc] = useState(false);
   const [newWindowName, setNewWindowName] = useState("");
-  const [exportProfile, setExportProfile] = useState<"xml" | "markdown" | "json">("xml");
+  const [stripComments, setStripComments] = useState(true);
 
   const docColumns: ColumnConfig[] = [
     { name: "DOCUMENT", uid: "title", sortable: true },
@@ -81,7 +85,7 @@ export default function ContextManagerPage() {
             <div className="flex flex-col">
               <span className="font-bold text-sm">{doc.title}</span>
               <span className="text-[10px] text-muted-foreground font-mono truncate max-w-[150px]">
-                {doc.id}
+                {doc.filePath || "No path set"}
               </span>
             </div>
           </div>
@@ -95,9 +99,9 @@ export default function ContextManagerPage() {
       case "tokens":
         return (
           <div className="flex flex-col gap-1 min-w-[100px]">
-            <span className="font-mono text-xs font-bold">{doc.tokens.toLocaleString()}</span>
+            <span className="font-mono text-xs font-bold">{doc.tokenCount.toLocaleString()}</span>
             <Progress 
-              value={(doc.tokens / (activeWindow?.maxTokens || 1)) * 100} 
+              value={(doc.tokenCount / (activeWindow?.maxTokens || 1)) * 100} 
               size="sm" 
               color="primary" 
               className="h-1"
@@ -136,7 +140,7 @@ export default function ContextManagerPage() {
   }, [activeWindow, changePriority, removeDocument]);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <div className="mx-auto max-w-7xl space-y-6">
       <ToolHeader
         icon={BookOpen}
         gradient="from-blue-500 to-indigo-600"
@@ -145,9 +149,9 @@ export default function ContextManagerPage() {
         breadcrumb
       />
 
-      <div className="grid gap-6 lg:grid-cols-4">
+      <div className="grid gap-6 lg:grid-cols-12">
         {/* Sidebar: Windows List */}
-        <Card className="p-4 lg:col-span-1 flex flex-col gap-4">
+        <Card className="p-4 lg:col-span-3 flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <Input
               size="sm"
@@ -177,12 +181,12 @@ export default function ContextManagerPage() {
             </Button>
           </div>
 
-          <div className="space-y-2 mt-4">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-2">Your Windows</p>
+          <div className="space-y-2 mt-4 overflow-auto max-h-[600px] pr-2 scrollbar-hide">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-2">Project Contexts</p>
             {windows.map((w) => (
               <div
                 key={w.id}
-                onClick={() => setActiveWindow(w.id)}
+                onClick={() => setActiveWindowId(w.id)}
                 className={cn(
                   "group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all border border-transparent",
                   activeWindowId === w.id 
@@ -212,33 +216,32 @@ export default function ContextManagerPage() {
         </Card>
 
         {/* Main Content */}
-        <div className="lg:col-span-3 space-y-6">
+        <div className="lg:col-span-9 space-y-6">
           {activeWindow ? (
             <>
               {/* Dashboard Row */}
               <div className="grid gap-4 sm:grid-cols-3">
-                <Card className="p-6 bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-lg shadow-blue-500/20">
-                  <p className="text-[10px] font-bold uppercase opacity-80 mb-1">Context Utilization</p>
-                  <p className="text-3xl font-black mb-2">{activeWindow.utilizationPercentage}%</p>
+                <Card className="p-6 bg-gradient-to-br from-indigo-600 to-blue-700 text-white shadow-lg shadow-indigo-500/20">
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-[10px] font-bold uppercase opacity-80">Utilization</p>
+                    <StatusBadge variant="info">{activeWindow.totalTokens.toLocaleString()} t</StatusBadge>
+                  </div>
+                  <p className="text-4xl font-black mb-2">{activeWindow.utilizationPercentage}%</p>
                   <Progress 
                     value={activeWindow.utilizationPercentage} 
                     color="warning" 
                     className="h-2 bg-white/20"
                   />
-                  <div className="mt-3 flex justify-between text-[10px] font-bold opacity-90">
-                    <span>{activeWindow.totalTokens.toLocaleString()} tokens</span>
-                    <span>{activeWindow.maxTokens.toLocaleString()} max</span>
-                  </div>
                 </Card>
 
-                <Card className="p-6 flex flex-col justify-center border-2 border-transparent hover:border-blue-500/20 transition-all">
+                <Card className="p-6 flex flex-col justify-center border-2 border-transparent hover:border-indigo-500/20 transition-all">
                   <div className="flex items-center gap-3">
-                    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-2xl text-blue-600">
+                    <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl text-indigo-600">
                       <Coins className="size-6" />
                     </div>
                     <div>
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Est. Cost (GPT-4o)</p>
-                      <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                      <p className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">
                         {formatCost((activeWindow.totalTokens / 1_000_000) * (AI_MODELS.find(m => m.id === "gpt-4o")?.inputPricePerMToken || 2.5))}
                       </p>
                     </div>
@@ -246,128 +249,170 @@ export default function ContextManagerPage() {
                   <Button 
                     size="sm" 
                     variant="ghost" 
-                    className="mt-4 font-bold border-blue-100 dark:border-blue-900"
+                    className="mt-4 font-bold border-indigo-100 dark:border-indigo-900"
                     onPress={() => {
                       const fullContent = activeWindow.documents.map(d => `--- ${d.title} ---\n${d.content}`).join("\n\n");
                       navigateTo("token-visualizer", fullContent);
                     }}
                   >
-                    Deep Token Analysis
+                    Deep Token Audit
                   </Button>
                 </Card>
 
-                <Card className="p-6 flex flex-col gap-3">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Export Profile</p>
-                  <div className="flex flex-col gap-2">
-                    <div className="flex p-1 bg-muted rounded-xl">
-                      {["xml", "markdown"].map((p) => (
-                        <button
-                          key={p}
-                          onClick={() => setExportProfile(p as any)}
-                          className={cn(
-                            "flex-1 py-1.5 text-[10px] font-black uppercase rounded-lg transition-all",
-                            exportProfile === p ? "bg-background shadow-sm text-primary" : "text-muted-foreground"
-                          )}
-                        >
-                          {p}
-                        </button>
-                      ))}
-                    </div>
-                    <Button 
-                      color="primary" 
-                      className="font-bold shadow-lg shadow-primary/20 h-10"
-                      onPress={() => {
-                        const content = exportWindow(exportProfile);
-                        navigator.clipboard.writeText(content);
-                        addToast(`Context exported as ${exportProfile.toUpperCase()}`, "success");
-                      }}
+                <Card className="p-6 flex flex-col gap-4">
+                  <div className="flex flex-col gap-1">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Packaging Engine</p>
+                    <Checkbox 
+                      isSelected={stripComments} 
+                      onValueChange={setStripComments}
+                      size="sm"
+                      className="mt-1"
                     >
-                      <Share2 className="size-4 mr-2" /> Copy for AI
-                    </Button>
+                      <span className="text-[10px] font-black uppercase text-primary tracking-tighter">Strip Code Comments</span>
+                    </Checkbox>
                   </div>
+                  <Button 
+                    color="primary" 
+                    className="font-bold shadow-lg shadow-primary/20 h-12"
+                    onPress={() => {
+                      const content = exportForAI({ stripComments });
+                      if (content) {
+                        navigator.clipboard.writeText(content);
+                        addToast(`AI-Ready Context (XML) copied to clipboard!`, "success");
+                      }
+                    }}
+                  >
+                    <Share2 className="size-4 mr-2" /> Copy AI-Ready Context
+                  </Button>
                 </Card>
               </div>
 
-              {/* Documents Table */}
-              <Card className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-bold flex items-center gap-2">
-                    <FileText className="size-5 text-primary" />
-                    Context Documents
+              {/* Hierarchy & Documents */}
+              <div className="grid gap-6 lg:grid-cols-5">
+                {/* Visual Tree */}
+                <Card className="p-6 lg:col-span-2 bg-muted/10 border-divider">
+                  <h3 className="text-xs font-black uppercase text-muted-foreground mb-4 flex items-center gap-2 tracking-widest">
+                    <FolderTree className="size-3 text-primary" /> Project Hierarchy
                   </h3>
-                  <Button 
-                    color="primary" 
-                    variant="flat" 
-                    size="sm" 
-                    onPress={() => setShowAddDoc(true)}
-                    className="font-bold"
-                  >
-                    <Plus className="size-4 mr-1" /> Add Document
-                  </Button>
-                </div>
+                  {activeWindow.documents.length > 0 ? (
+                    <pre className="text-[10px] font-mono leading-tight overflow-auto max-h-[400px] text-primary/80">
+                      <code>{
+                        // Dynamic Tree logic (internal to component for LUX view)
+                        activeWindow.documents.map(d => d.filePath || d.title).sort().map(p => `📄 ${p}`).join('\n')
+                      }</code>
+                    </pre>
+                  ) : (
+                    <p className="text-[10px] text-muted-foreground italic text-center py-10">Add files to see the project map.</p>
+                  )}
+                </Card>
 
-                <DataTable
-                  columns={docColumns}
-                  data={activeWindow.documents}
-                  filterField="title"
-                  renderCell={renderDocCell}
-                  emptyContent="No documents in this window. Add code or notes to start."
-                />
-              </Card>
+                {/* Documents Table */}
+                <Card className="p-0 lg:col-span-3 overflow-hidden border-divider shadow-sm">
+                  <div className="p-4 border-b border-divider flex items-center justify-between bg-muted/20">
+                    <h3 className="font-bold flex items-center gap-2 text-sm">
+                      <FileText className="size-4 text-primary" />
+                      Context Units
+                    </h3>
+                    <Button 
+                      color="primary" 
+                      variant="flat" 
+                      size="sm" 
+                      onPress={() => setShowAddDoc(true)}
+                      className="font-black text-[10px] uppercase h-7 px-3"
+                    >
+                      <Plus className="size-3 mr-1" /> Add Source
+                    </Button>
+                  </div>
+
+                  <DataTable
+                    columns={docColumns}
+                    data={activeWindow.documents}
+                    filterField="title"
+                    renderCell={renderDocCell}
+                    initialVisibleColumns={["title", "tokens", "priority", "actions"]}
+                    emptyContent="No documents in this window."
+                  />
+                </Card>
+              </div>
             </>
           ) : (
             <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center">
-              <div className="size-20 bg-muted rounded-full flex items-center justify-center mb-6">
-                <FolderPlus className="size-10 text-muted-foreground/40" />
+              <div className="size-24 bg-muted rounded-full flex items-center justify-center mb-6">
+                <FolderPlus className="size-12 text-muted-foreground/30" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Select a Context Window</h3>
-              <p className="text-muted-foreground max-w-xs">
-                Create a new context window or select one from the sidebar to start organizing your LLM prompts.
+              <h3 className="text-2xl font-black mb-2 opacity-80 text-foreground/50">Select or Create a Context</h3>
+              <p className="text-muted-foreground max-w-sm mx-auto font-medium">
+                Organize your project code, API docs, and instructions into a single AI-optimized payload.
               </p>
             </Card>
           )}
         </div>
       </div>
 
-      {/* Add Document Modal/Overlay (Simplified for logic) */}
+      {/* Add Document Modal (Luxury Design) */}
       {showAddDoc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <Card className="w-full max-w-xl p-6 shadow-2xl">
-            <h3 className="text-xl font-bold mb-4">Add New Document</h3>
-            <div className="space-y-4">
-              <Input label="Title" placeholder="e.g. auth-service.ts" id="doc-title" />
-              <div className="grid grid-cols-2 gap-4">
-                <select id="doc-type" className="rounded-xl border border-border bg-background p-2 text-sm outline-none focus:ring-2 focus:ring-primary/20">
-                  <option value="code">Code</option>
-                  <option value="documentation">Docs</option>
-                  <option value="api">API</option>
-                  <option value="notes">Notes</option>
-                </select>
-                <select id="doc-priority" className="rounded-xl border border-border bg-background p-2 text-sm outline-none focus:ring-2 focus:ring-primary/20">
-                  <option value="high">High Priority</option>
-                  <option value="medium">Medium</option>
-                  <option value="low">Low</option>
-                </select>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-md">
+          <Card className="w-full max-w-2xl p-8 shadow-2xl border-indigo-500/20">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-indigo-500 rounded-2xl text-white shadow-lg shadow-indigo-500/30">
+                <FileCode className="size-6" />
               </div>
-              <textarea
-                id="doc-content"
-                placeholder="Paste code or text here..."
-                className="h-60 w-full resize-none rounded-xl border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-              <div className="flex gap-2">
-                <Button className="flex-1 font-bold" color="primary" onPress={() => {
+              <div>
+                <h3 className="text-2xl font-black">Add Context Source</h3>
+                <p className="text-xs text-muted-foreground font-medium">Paste code, documentation or prompt instructions.</p>
+              </div>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <Input label="Title" placeholder="e.g. user-service.ts" id="doc-title" variant="bordered" className="font-bold" />
+                <Input label="File Path" placeholder="src/services/user-service.ts" id="doc-path" variant="bordered" />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Document Type</label>
+                  <select id="doc-type" className="w-full h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm focus:border-indigo-500 outline-none transition-all">
+                    <option value="code">Source Code</option>
+                    <option value="documentation">Technical Docs</option>
+                    <option value="api">API Specification</option>
+                    <option value="notes">Context Instructions</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Priority</label>
+                  <select id="doc-priority" className="w-full h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm focus:border-indigo-500 outline-none transition-all">
+                    <option value="high">High (Crucial Logic)</option>
+                    <option value="medium">Medium (Standard)</option>
+                    <option value="low">Low (Reference)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Content</label>
+                <textarea
+                  id="doc-content"
+                  placeholder="Paste context content here..."
+                  className="h-48 w-full resize-none rounded-2xl border-2 border-divider bg-background p-4 font-mono text-sm focus:border-indigo-500 outline-none transition-all shadow-inner"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <Button className="flex-1 font-black h-12 text-md shadow-xl shadow-indigo-500/20" color="primary" onPress={() => {
                   const title = (document.getElementById("doc-title") as HTMLInputElement).value;
                   const content = (document.getElementById("doc-content") as HTMLTextAreaElement).value;
+                  const filePath = (document.getElementById("doc-path") as HTMLInputElement).value;
                   const type = (document.getElementById("doc-type") as HTMLSelectElement).value as DocumentType;
                   const priority = (document.getElementById("doc-priority") as HTMLSelectElement).value as Priority;
                   if (title && content) {
-                    addDocument(activeWindowId!, { title, content, type, priority, tags: [] });
+                    addDocument(title, content, type, priority, [], filePath);
                     setShowAddDoc(false);
                   }
                 }}>
-                  Add to Context
+                  Ingest to Context
                 </Button>
-                <Button variant="ghost" className="font-bold" onPress={() => setShowAddDoc(false)}>Cancel</Button>
+                <Button variant="ghost" className="font-black h-12" onPress={() => setShowAddDoc(false)}>Cancel</Button>
               </div>
             </div>
           </Card>
