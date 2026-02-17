@@ -10,9 +10,13 @@ import {
   generateCode,
   isValidJson,
   formatJson,
+  parseJson,
+  generateMockData,
   EXAMPLE_JSON,
 } from "@/lib/application/dto-matic";
 import { useToolHistory } from "@/hooks/use-tool-history";
+import { useSmartNavigation } from "@/hooks/use-smart-navigation";
+import { useEffect } from "react";
 
 interface HistoryItem {
   id: string;
@@ -26,21 +30,37 @@ export function useDtoMatic() {
   const [jsonInput, setJsonInput] = useState("");
   const [config, setConfig] = useState<DtoMaticConfig>({
     mode: "clean-arch",
+    targetLanguage: "typescript",
     rootName: "Data",
     naming: "camelCase",
     optionalFields: true,
     detectDates: true,
+    detectSemanticTypes: true,
     exportTypes: true,
     readonlyEntities: true,
     generateMappers: true,
     generateZod: false,
+    javaPackage: "com.example.dto",
+    csharpNamespace: "App.Domain.Models",
+    goPackage: "models",
   });
   const [result, setResult] = useState<GenerationResult | null>(null);
+  const [mockData, setMockData] = useState<string | null>(null);
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { history, addToHistory: addItemToHistory, clearHistory } =
     useToolHistory<HistoryItem>("devflow-dto-matic-history", 10);
+  
+  const { getSharedData, clearSharedData } = useSmartNavigation();
+
+  useEffect(() => {
+    const shared = getSharedData();
+    if (shared) {
+      setJsonInput(shared);
+      // Optional: clearSharedData(); // Keep it for now in case of refresh
+    }
+  }, [getSharedData]);
 
   const addToHistory = useCallback((genResult: GenerationResult) => {
     const newItem: HistoryItem = {
@@ -71,6 +91,7 @@ export function useDtoMatic() {
 
     setIsGenerating(true);
     setError(null);
+    setMockData(null);
 
     try {
       const genResult = generateCode(jsonInput, config);
@@ -83,6 +104,17 @@ export function useDtoMatic() {
       setIsGenerating(false);
     }
   }, [jsonInput, config, addToHistory]);
+
+  const generateMock = useCallback((count: number = 5) => {
+    if (!isValidJson(jsonInput)) return;
+    try {
+      const parsed = parseJson(jsonInput);
+      const mock = generateMockData(parsed.fields, count);
+      setMockData(JSON.stringify(mock, null, 2));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [jsonInput]);
 
   const formatInput = useCallback(() => {
     if (isValidJson(jsonInput)) {
@@ -101,6 +133,7 @@ export function useDtoMatic() {
   const reset = useCallback(() => {
     setJsonInput("");
     setResult(null);
+    setMockData(null);
     setSelectedFileId(null);
     setError(null);
   }, []);
@@ -134,6 +167,7 @@ export function useDtoMatic() {
     jsonInput,
     config,
     result,
+    mockData,
     selectedFile,
     selectedFileId,
     isGenerating,
@@ -148,6 +182,7 @@ export function useDtoMatic() {
 
     // Actions
     generate,
+    generateMock,
     formatInput,
     loadExample,
     reset,

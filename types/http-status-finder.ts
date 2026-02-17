@@ -10,6 +10,9 @@ export interface HttpStatusCode {
   whenToUse: string;
   example: string;
   isCommon: boolean;
+  relatedHeaders?: string[];
+  rfcLink?: string;
+  snippets?: Record<string, string>;
 }
 
 export interface SearchResult {

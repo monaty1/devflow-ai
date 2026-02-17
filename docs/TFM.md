@@ -17,6 +17,7 @@ DevFlow AI es una plataforma open-source que centraliza **15 herramientas** esen
 **Solucion propuesta:** Una plataforma unificada, gratuita y de codigo abierto que ejecuta todo localmente en el navegador, sin necesidad de login, API keys ni backend.
 
 **Resultados:**
+
 - 15 herramientas funcionales end-to-end
 - 100% ejecucion local (sin APIs externas para procesamiento)
 - 644 tests con coverage estrategico 100/80/0 per-file
@@ -43,6 +44,7 @@ Ademas, los desarrolladores frontend enfrentan tareas repetitivas diarias: forma
 ### 1.2 Objetivos del Proyecto
 
 #### Objetivos Academicos
+
 - Aplicar React 19 y Next.js 16 con App Router y Server Components
 - Implementar Clean Architecture en un proyecto real de 15 herramientas
 - Crear una suite de tests comprehensiva (644 tests) con Vitest
@@ -50,6 +52,7 @@ Ademas, los desarrolladores frontend enfrentan tareas repetitivas diarias: forma
 - Demostrar dominio de TypeScript 5 en modo maximo estricto
 
 #### Objetivos Tecnicos
+
 - Construir 15 herramientas funcionales con patron arquitectonico consistente
 - Lograr coverage estrategico 100/80/0 con enforcement per-file
 - Deploy en produccion con CI/CD completo (lint, type-check, tests, build)
@@ -58,6 +61,7 @@ Ademas, los desarrolladores frontend enfrentan tareas repetitivas diarias: forma
 - Seguridad enterprise: CSP, HSTS, prototype pollution protection
 
 #### Objetivos de Producto
+
 - Ofrecer valor real a desarrolladores en su dia a dia
 - Ejecutar todo localmente (privacidad + coste cero)
 - UX fluida con dark/light mode, responsive design, accesibilidad WCAG AAA
@@ -70,7 +74,9 @@ Ademas, los desarrolladores frontend enfrentan tareas repetitivas diarias: forma
 ### 2.1 Fundamentos de IA Aplicados
 
 #### Large Language Models (LLMs)
+
 Los LLMs como GPT-4, Claude y Gemini procesan texto mediante tokenizacion. Cada modelo usa un algoritmo diferente (BPE para GPT, SentencePiece para Gemini), lo que afecta:
+
 - Coste por request (pricing por millon de tokens)
 - Context window disponible
 - Calidad de la respuesta
@@ -78,7 +84,9 @@ Los LLMs como GPT-4, Claude y Gemini procesan texto mediante tokenizacion. Cada 
 **Aplicacion en DevFlow AI:** Token Visualizer simula BPE y Cost Calculator compara precios de 10+ modelos en tiempo real.
 
 #### Prompt Engineering
+
 La calidad de un prompt impacta directamente en la respuesta del LLM. Tecnicas clave:
+
 - Role definition ("You are a senior developer...")
 - Context provision (ejemplos, restricciones)
 - Output format specification (JSON, XML, Markdown)
@@ -87,6 +95,7 @@ La calidad de un prompt impacta directamente en la respuesta del LLM. Tecnicas c
 **Aplicacion en DevFlow AI:** Prompt Analyzer evalua estos elementos, detecta vulnerabilidades y sugiere mejoras con scoring 1-10.
 
 #### Security Vulnerabilities
+
 - **Prompt Injection:** Manipular el system prompt con instrucciones del usuario
 - **Jailbreak (DAN):** Bypass de restricciones eticas
 - **Data Exfiltration:** Extraer el system prompt o datos sensibles
@@ -96,6 +105,7 @@ La calidad de un prompt impacta directamente en la respuesta del LLM. Tecnicas c
 ### 2.2 Arquitectura Frontend Moderna
 
 #### React 19
+
 - `ref` as prop: Simplificacion de forwarding
 - React Compiler: Optimizacion automatica sin useMemo/useCallback manuales
 - Mejoras en Suspense y streaming SSR
@@ -103,14 +113,16 @@ La calidad de un prompt impacta directamente en la respuesta del LLM. Tecnicas c
 **Aplicacion:** Hooks personalizados para cada herramienta, Context para favoritos, Zustand para estado global.
 
 #### Next.js 16
+
 - **App Router:** Routing basado en sistema de archivos con Server Components
 - **Turbopack:** Build 10x mas rapido que Webpack
-- **React Server Components (RSC):** Renderizado en servidor por defecto, zero JS para componentes estaticos
+- **React Server Components (RSC):** Renderizado en servidor por defecto, cero JS para componentes estaticos
 - **ISR (Incremental Static Regeneration):** Paginas estaticas con revalidacion periodica
 
 **Aplicacion:** Homepage como Server Component async con ISR. Client Components solo donde hay interactividad (GSAP, formularios). Fetch de GitHub API en el servidor.
 
 #### Tailwind CSS v4
+
 - **CSS-first config:** `@theme inline` en lugar de `tailwind.config.js`
 - **Variables CSS nativas:** Mejor integracion con el navegador
 - **Menor bundle size:** Purga mas agresiva
@@ -120,6 +132,7 @@ La calidad de un prompt impacta directamente en la respuesta del LLM. Tecnicas c
 ### 2.3 Clean Architecture
 
 #### Capas
+
 ```
 +------------------------------------------+
 |        Presentation Layer                |  <- app/, components/
@@ -135,6 +148,7 @@ La calidad de un prompt impacta directamente en la respuesta del LLM. Tecnicas c
 **Regla de dependencia:** Las flechas apuntan hacia adentro. Domain nunca depende de capas externas.
 
 **Aplicacion en DevFlow AI:**
+
 - `types/`: Define entidades puras (interfaces TypeScript)
 - `lib/application/`: Logica de negocio pura (sin React, sin browser APIs)
 - `hooks/`: Conectan UI con application layer (estado, localStorage, orquestacion)
@@ -148,60 +162,68 @@ La calidad de un prompt impacta directamente en la respuesta del LLM. Tecnicas c
 
 **RF-01 a RF-15: Las 15 Herramientas**
 
-| # | Herramienta | Descripcion | Complejidad |
-|---|------------|-------------|-------------|
-| 1 | **JSON Formatter** | Formatear, minificar, validar JSON. Extraer paths, diff, generar TS interfaces | Alta |
-| 2 | **Variable Name Wizard** | Generar nombres y convertir entre 8 convenciones (camel, snake, kebab...) | Media |
-| 3 | **Regex Humanizer** | Explicar regex en lenguaje natural, generar patrones, tester en tiempo real | Alta |
-| 4 | **Code Review Assistant** | Analisis de calidad: code smells, complejidad ciclomatica, refactoring | Alta |
-| 5 | **API Cost Calculator** | Comparar costes de 10+ modelos de IA con proyecciones mensuales | Media |
-| 6 | **Base64 Encoder/Decoder** | Encode/decode con soporte URL-safe, data URLs y Unicode | Media |
-| 7 | **UUID Generator** | Generar UUID v1, v4, v7. Validacion, parsing y bulk generation hasta 1000 | Media |
-| 8 | **DTO-Matic** | Convertir JSON a interfaces TypeScript, entities, mappers y schemas Zod | Alta |
-| 9 | **Git Commit Generator** | Commits convencionales con tipos, scopes, emojis y validacion | Media |
-| 10 | **Cron Builder** | Constructor visual de expresiones cron con preview de ejecuciones | Alta |
-| 11 | **Tailwind Sorter** | Ordenar clases por categoria, eliminar duplicados, ordenar variantes | Media |
-| 12 | **Prompt Analyzer** | Evaluar calidad de prompts, detectar inyecciones, sugerir mejoras | Alta |
-| 13 | **Token Visualizer** | Visualizar tokenizacion en tiempo real con estimacion de costes por token | Media |
-| 14 | **Context Manager** | Organizar context windows con chunking, prioridades y export XML/JSON/MD | Alta |
-| 15 | **HTTP Status Finder** | Referencia completa de 55+ codigos HTTP con ejemplos y guias de uso | Baja |
+| #   | Herramienta                | Descripcion                                                                    | Complejidad |
+| --- | -------------------------- | ------------------------------------------------------------------------------ | ----------- |
+| 1   | **JSON Formatter**         | Formatear, minificar, validar JSON. Extraer paths, diff, generar TS interfaces | Alta        |
+| 2   | **Variable Name Wizard**   | Generar nombres y convertir entre 8 convenciones (camel, snake, kebab...)      | Media       |
+| 3   | **Regex Humanizer**        | Explicar regex en lenguaje natural, generar patrones, tester en tiempo real    | Alta        |
+| 4   | **Code Review Assistant**  | Analisis de calidad: code smells, complejidad ciclomatica, refactoring         | Alta        |
+| 5   | **API Cost Calculator**    | Comparar costes de 10+ modelos de IA con proyecciones mensuales                | Media       |
+| 6   | **Base64 Encoder/Decoder** | Encode/decode con soporte URL-safe, data URLs y Unicode                        | Media       |
+| 7   | **UUID Generator**         | Generar UUID v1, v4, v7. Validacion, parsing y bulk generation hasta 1000      | Media       |
+| 8   | **DTO-Matic**              | Convertir JSON a interfaces TypeScript, entities, mappers y schemas Zod        | Alta        |
+| 9   | **Git Commit Generator**   | Commits convencionales con tipos, scopes, emojis y validacion                  | Media       |
+| 10  | **Cron Builder**           | Constructor visual de expresiones cron con preview de ejecuciones              | Alta        |
+| 11  | **Tailwind Sorter**        | Ordenar clases por categoria, eliminar duplicados, ordenar variantes           | Media       |
+| 12  | **Prompt Analyzer**        | Evaluar calidad de prompts, detectar inyecciones, sugerir mejoras              | Alta        |
+| 13  | **Token Visualizer**       | Visualizar tokenizacion en tiempo real con estimacion de costes por token      | Media       |
+| 14  | **Context Manager**        | Organizar context windows con chunking, prioridades y export XML/JSON/MD       | Alta        |
+| 15  | **HTTP Status Finder**     | Referencia completa de 55+ codigos HTTP con ejemplos y guias de uso            | Baja        |
 
 **RF-16: Sistema de Favoritos**
+
 - Persistencia en localStorage via React Context + useReducer
 
 **RF-17: Historial por Herramienta**
+
 - Hook generico `useToolHistory<T>` con max 50 items por herramienta
 
 **RF-18: Internacionalizacion**
+
 - 559 claves traducidas en English y Castellano
 - Cambio de idioma en tiempo real sin recarga
 
 ### 3.2 Requisitos No Funcionales
 
 **RNF-01: Performance**
+
 - Lighthouse Performance Desktop: 100
 - Server Components para renderizado instantaneo del HTML
 - ISR para datos dinamicos (GitHub stars) con revalidacion cada hora
 
 **RNF-02: Accesibilidad**
+
 - WCAG 2.1 Level AAA como objetivo
 - Navegacion por teclado completa
 - Screen reader support con ARIA labels
 - Skip links implementados
 
 **RNF-03: Responsive Design**
+
 - Mobile-first approach con Tailwind CSS v4
 - Breakpoints: 640px, 768px, 1024px, 1280px
 - Touch-friendly (min 44x44px targets)
 
 **RNF-04: Seguridad**
+
 - Content Security Policy estricta (sin `unsafe-eval`)
 - HSTS con max-age 2 anos y preload
 - Prototype pollution protection en procesamiento JSON
 - npm audit en CI + GitHub Dependabot
-- Zero secretos en codigo fuente
+- Cero secretos en codigo fuente
 
 **RNF-05: Mantenibilidad**
+
 - Coverage estrategico 100/80/0 con enforcement per-file
 - TypeScript maximum strict mode (15+ flags estrictos)
 - ESLint 9 flat config
@@ -210,23 +232,27 @@ La calidad de un prompt impacta directamente en la respuesta del LLM. Tecnicas c
 ### 3.3 Decisiones de Diseno
 
 **Por que Next.js 16 en lugar de Vite + React?**
+
 - Server Components: Reduce JS enviado al cliente, mejora LCP
 - ISR: Paginas estaticas con revalidacion sin rebuild completo
 - File-based routing: Menos boilerplate
 - Vercel integration: Deploy trivial con preview URLs
 
 **Por que analisis local en lugar de API calls?**
+
 - Privacidad: El codigo/prompts del usuario nunca salen de su navegador
 - Coste cero: No requiere API keys
 - Latencia: Respuesta inmediata sin round-trip
 - Offline-capable: Funciona sin internet
 
 **Por que HeroUI v3?**
+
 - Built on React Aria: Accesibilidad de primera clase
 - Compound patterns: API limpia y componible
 - Tailwind CSS v4 compatible: Mismo sistema de estilos
 
 **Por que el patron 5-capas por herramienta?**
+
 - Consistencia: Las 15 herramientas siguen el mismo patron
 - Testabilidad: La logica pura se testa sin React
 - Mantenibilidad: Cada capa tiene una responsabilidad clara
@@ -252,23 +278,23 @@ tests/unit/application/<tool>.test  → Tests unitarios de la logica pura
 
 Las 15 herramientas verificadas con 0 violaciones de capas:
 
-| # | Tool | types/ | lib/app/ | hooks/ | page | tests/ |
-|---|------|--------|----------|--------|------|--------|
-| 1 | JSON Formatter | ✓ | ✓ | ✓ | ✓ | ✓ |
-| 2 | Variable Name Wizard | ✓ | ✓ | ✓ | ✓ | ✓ |
-| 3 | Regex Humanizer | ✓ | ✓ | ✓ | ✓ | ✓ |
-| 4 | Code Review | ✓ | ✓ | ✓ | ✓ | ✓ |
-| 5 | Cost Calculator | ✓ | ✓ | ✓ | ✓ | ✓ |
-| 6 | Base64 | ✓ | ✓ | ✓ | ✓ | ✓ |
-| 7 | UUID Generator | ✓ | ✓ | ✓ | ✓ | ✓ |
-| 8 | DTO-Matic | ✓ | ✓ | ✓ | ✓ | ✓ |
-| 9 | Git Commit Generator | ✓ | ✓ | ✓ | ✓ | ✓ |
-| 10 | Cron Builder | ✓ | ✓ | ✓ | ✓ | ✓ |
-| 11 | Tailwind Sorter | ✓ | ✓ | ✓ | ✓ | ✓ |
-| 12 | Prompt Analyzer | ✓ | ✓ | ✓ | ✓ | ✓ |
-| 13 | Token Visualizer | ✓ | ✓ | ✓ | ✓ | ✓ |
-| 14 | Context Manager | ✓ | ✓ | ✓ | ✓ | ✓ |
-| 15 | HTTP Status Finder | ✓ | ✓ | ✓ | ✓ | ✓ |
+| #   | Tool                 | types/ | lib/app/ | hooks/ | page | tests/ |
+| --- | -------------------- | ------ | -------- | ------ | ---- | ------ |
+| 1   | JSON Formatter       | ✓      | ✓        | ✓      | ✓    | ✓      |
+| 2   | Variable Name Wizard | ✓      | ✓        | ✓      | ✓    | ✓      |
+| 3   | Regex Humanizer      | ✓      | ✓        | ✓      | ✓    | ✓      |
+| 4   | Code Review          | ✓      | ✓        | ✓      | ✓    | ✓      |
+| 5   | Cost Calculator      | ✓      | ✓        | ✓      | ✓    | ✓      |
+| 6   | Base64               | ✓      | ✓        | ✓      | ✓    | ✓      |
+| 7   | UUID Generator       | ✓      | ✓        | ✓      | ✓    | ✓      |
+| 8   | DTO-Matic            | ✓      | ✓        | ✓      | ✓    | ✓      |
+| 9   | Git Commit Generator | ✓      | ✓        | ✓      | ✓    | ✓      |
+| 10  | Cron Builder         | ✓      | ✓        | ✓      | ✓    | ✓      |
+| 11  | Tailwind Sorter      | ✓      | ✓        | ✓      | ✓    | ✓      |
+| 12  | Prompt Analyzer      | ✓      | ✓        | ✓      | ✓    | ✓      |
+| 13  | Token Visualizer     | ✓      | ✓        | ✓      | ✓    | ✓      |
+| 14  | Context Manager      | ✓      | ✓        | ✓      | ✓    | ✓      |
+| 15  | HTTP Status Finder   | ✓      | ✓        | ✓      | ✓    | ✓      |
 
 ### 4.2 Herramientas Destacadas
 
@@ -277,6 +303,7 @@ Las 15 herramientas verificadas con 0 violaciones de capas:
 **Archivo:** `lib/application/prompt-analyzer.ts`
 
 **Algoritmo:**
+
 1. Deteccion de security flags: regex patterns para injection, jailbreak, DAN
 2. Analisis de calidad: vagueness, role presence, output format, context adequacy
 3. Scoring: Base 10 con deducciones por issues y security flags
@@ -287,6 +314,7 @@ Las 15 herramientas verificadas con 0 violaciones de capas:
 **Archivo:** `lib/application/code-review.ts`
 
 **Deteccion de vulnerabilidades:**
+
 - `eval()` (severity: critical)
 - `innerHTML` / XSS (severity: critical)
 - Credenciales hardcodeadas (severity: critical)
@@ -295,6 +323,7 @@ Las 15 herramientas verificadas con 0 violaciones de capas:
 - Empty catch blocks (severity: critical)
 
 **Metricas calculadas:**
+
 - Lines of code (total, blank, comments, code)
 - Cyclomatic complexity (conteo de branches)
 - Duplicate risk (lineas unicas vs totales)
@@ -305,6 +334,7 @@ Las 15 herramientas verificadas con 0 violaciones de capas:
 **Archivo:** `lib/application/json-formatter.ts`
 
 **Features implementadas:**
+
 - Formatear con indentacion configurable
 - Minificar eliminando whitespace
 - Validar con mensajes de error detallados
@@ -319,6 +349,7 @@ Las 15 herramientas verificadas con 0 violaciones de capas:
 **Archivo:** `lib/application/cron-builder.ts`
 
 **Features:**
+
 - Constructor visual de expresiones cron
 - Traduccion a lenguaje natural (Castellano)
 - Calculo de proximas N ejecuciones con fechas reales
@@ -341,6 +372,7 @@ page.tsx (Server Component - async)
 ```
 
 **Impacto medido:**
+
 - GitHub stars: de fetch client-side a server fetch con revalidacion 1h
 - Hero y Footer: 0 bytes de JS enviados al navegador
 - LCP (mobile): reduccion significativa al renderizar HTML en el servidor
@@ -348,14 +380,17 @@ page.tsx (Server Component - async)
 ### 4.4 Gestion de Estado
 
 **Zustand (Locale):**
+
 - Store minimalista para idioma (en/es)
 - Persistido en localStorage key `devflow-locale`
 
 **React Context + useReducer (Favoritos):**
+
 - Patron funcional con dispatch de acciones
 - Persistido en localStorage key `devflow-favorites`
 
 **useToolHistory<T> (Historial por herramienta):**
+
 - Hook generico reutilizado en las 15 herramientas
 - Max 50 items por herramienta
 - Persistencia automatica en localStorage
@@ -363,6 +398,7 @@ page.tsx (Server Component - async)
 ### 4.5 Internacionalizacion (i18n)
 
 **Sistema custom ligero** (sin dependencia de i18next):
+
 - 559 claves de traduccion en `locales/en.json` y `locales/es.json`
 - Hook `useTranslation()` con interpolacion `{key}`
 - Funcion server-side `t()` para Server Components
@@ -372,16 +408,17 @@ page.tsx (Server Component - async)
 
 **HTTP Security Headers (via next.config.ts):**
 
-| Header | Valor |
-|--------|-------|
-| Content-Security-Policy | `default-src 'self'`, `object-src 'none'`, `frame-ancestors 'none'`, sin `unsafe-eval` |
-| Strict-Transport-Security | `max-age=63072000; includeSubDomains; preload` (2 anos) |
-| X-Frame-Options | DENY |
-| X-Content-Type-Options | nosniff |
-| Permissions-Policy | camera, microphone, geolocation disabled |
-| Referrer-Policy | strict-origin-when-cross-origin |
+| Header                    | Valor                                                                                  |
+| ------------------------- | -------------------------------------------------------------------------------------- |
+| Content-Security-Policy   | `default-src 'self'`, `object-src 'none'`, `frame-ancestors 'none'`, sin `unsafe-eval` |
+| Strict-Transport-Security | `max-age=63072000; includeSubDomains; preload` (2 anos)                                |
+| X-Frame-Options           | DENY                                                                                   |
+| X-Content-Type-Options    | nosniff                                                                                |
+| Permissions-Policy        | camera, microphone, geolocation disabled                                               |
+| Referrer-Policy           | strict-origin-when-cross-origin                                                        |
 
 **Application Security:**
+
 - Prototype pollution protection en JSON processing
 - ReDoS protection en Regex Humanizer (timeout 2s + limite 500 matches)
 - Zero `eval()`, zero `Function()`, zero `innerHTML` en el codigo fuente
@@ -397,11 +434,11 @@ page.tsx (Server Component - async)
 
 Modelo de coverage estrategico con enforcement per-file:
 
-| Tier | Ruta | Objetivo | Justificacion |
-|------|------|----------|---------------|
-| **CORE (100%)** | `lib/application/*.ts` | 80-100% per file | Logica de negocio pura, maxima criticidad |
-| **IMPORTANT (80%)** | `components/shared/*.tsx` | 80% | Componentes UI interactivos |
-| **INFRA (0%)** | `types/`, `config/`, `hooks/` | Excluido | TypeScript compiler garantiza correctitud |
+| Tier                | Ruta                          | Objetivo         | Justificacion                             |
+| ------------------- | ----------------------------- | ---------------- | ----------------------------------------- |
+| **CORE (100%)**     | `lib/application/*.ts`        | 80-100% per file | Logica de negocio pura, maxima criticidad |
+| **IMPORTANT (80%)** | `components/shared/*.tsx`     | 80%              | Componentes UI interactivos               |
+| **INFRA (0%)**      | `types/`, `config/`, `hooks/` | Excluido         | TypeScript compiler garantiza correctitud |
 
 **Enforcement:** Vitest con `perFile: true` — cada archivo individual debe cumplir los umbrales. No se permite que un archivo con alta cobertura compense uno con baja.
 
@@ -415,45 +452,49 @@ Duration    ~9s
 
 **Distribucion por herramienta:**
 
-| Test File | Tests | Lineas | Calidad |
-|-----------|-------|--------|---------|
-| uuid-generator | 65 | 449 | Excelente |
-| regex-humanizer | 59 | 442 | Excelente |
-| cron-builder | 52 | 498 | Excelente |
-| variable-name-wizard | 50 | ~400 | Excelente |
-| git-commit-generator | 48 | ~380 | Excelente |
-| base64 | 42 | 354 | Excelente |
-| json-formatter | 38 | 364 | Excelente |
-| dto-matic | 39 | ~350 | Muy bueno |
-| code-review | 32 | 440 | Muy bueno |
-| tailwind-sorter | 30 | ~300 | Muy bueno |
-| http-status-finder | 28 | 309 | Bueno |
-| prompt-analyzer | 19 | ~200 | Bueno |
-| cost-calculator | 17 | 146 | Bueno |
-| token-visualizer | 19 | ~180 | Bueno |
-| context-manager | 16 | ~150 | Bueno |
-| + 4 component tests | 41 | ~380 | Bueno |
-| + 1 domain test | 4 | 44 | Basico |
+| Test File            | Tests | Lineas | Calidad   |
+| -------------------- | ----- | ------ | --------- |
+| uuid-generator       | 65    | 449    | Excelente |
+| regex-humanizer      | 59    | 442    | Excelente |
+| cron-builder         | 52    | 498    | Excelente |
+| variable-name-wizard | 50    | ~400   | Excelente |
+| git-commit-generator | 48    | ~380   | Excelente |
+| base64               | 42    | 354    | Excelente |
+| json-formatter       | 38    | 364    | Excelente |
+| dto-matic            | 39    | ~350   | Muy bueno |
+| code-review          | 32    | 440    | Muy bueno |
+| tailwind-sorter      | 30    | ~300   | Muy bueno |
+| http-status-finder   | 28    | 309    | Bueno     |
+| prompt-analyzer      | 19    | ~200   | Bueno     |
+| cost-calculator      | 17    | 146    | Bueno     |
+| token-visualizer     | 19    | ~180   | Bueno     |
+| context-manager      | 16    | ~150   | Bueno     |
+| + 4 component tests  | 41    | ~380   | Bueno     |
+| + 1 domain test      | 4     | 44     | Basico    |
 
 ### 5.3 Tipos de Tests Implementados
 
 **Tests de logica pura (no mocks):**
+
 - Verificacion de outputs exactos: `expect(result).toBe('{"name":"John"}')`
 - Precision matematica: `expect(cost).toBeCloseTo(0.0025, 6)`
 - Roundtrip testing: encode → decode → verifica original
 - Edge cases: inputs vacios, Unicode, valores limite, estructuras anidadas
 
 **Tests de seguridad:**
+
 - Deteccion de `eval()` con severity critical
 - Deteccion de XSS via innerHTML
 - Deteccion de credenciales hardcodeadas
 - Prevencion de loops infinitos con zero-length matches
 
 **Tests de branches:**
+
 - 50+ tests explicitamente disenados para cubrir ramas no cubiertas
 - Secciones "uncovered branches" en multiples archivos de test
 
 **Tests de componentes:**
+
 - CopyButton: verificacion de cambio de icono y ARIA labels
 - StatusBadge: verificacion de clases CSS por variante
 - ToolHeader: verificacion de navegacion y slots
@@ -472,22 +513,22 @@ Build:         OK (28 paginas generadas)
 
 ## 6. Stack Tecnologico
 
-| Capa | Tecnologia | Version | Justificacion |
-|------|-----------|---------|---------------|
-| Framework | Next.js | 16.1.6 | App Router + Server Components + Turbopack |
-| UI Library | React | 19.2.3 | Hooks, Context, Compiler |
-| Language | TypeScript | 5.x | Maximum strict mode (15+ flags) |
-| Styling | Tailwind CSS | 4.x | CSS-first config, design tokens |
-| Components | HeroUI | v3 beta | Compound patterns, React Aria |
-| Icons | Lucide React | 0.563 | 500+ iconos, tree-shakeable |
-| Animations | GSAP + Framer Motion | 3.14 + 12.30 | Professional-grade |
-| State | Zustand | 5.0 | Lightweight, localStorage persist |
-| Forms | React Hook Form + Zod | 7.71 + 4.3 | Performant validation |
-| Testing | Vitest | 4.0 | Fast, compatible con Testing Library |
-| Linting | ESLint | 9.x | Flat config |
-| Error Tracking | Sentry | 10.38 | Client + Server + Edge |
-| CI/CD | GitHub Actions | - | 3 jobs paralelos |
-| Hosting | Vercel | - | Edge Network, ISR, preview URLs |
+| Capa           | Tecnologia            | Version      | Justificacion                              |
+| -------------- | --------------------- | ------------ | ------------------------------------------ |
+| Framework      | Next.js               | 16.1.6       | App Router + Server Components + Turbopack |
+| UI Library     | React                 | 19.2.3       | Hooks, Context, Compiler                   |
+| Language       | TypeScript            | 5.x          | Maximum strict mode (15+ flags)            |
+| Styling        | Tailwind CSS          | 4.x          | CSS-first config, design tokens            |
+| Components     | HeroUI                | v3 beta      | Compound patterns, React Aria              |
+| Icons          | Lucide React          | 0.563        | 500+ iconos, tree-shakeable                |
+| Animations     | GSAP + Framer Motion  | 3.14 + 12.30 | Professional-grade                         |
+| State          | Zustand               | 5.0          | Lightweight, localStorage persist          |
+| Forms          | React Hook Form + Zod | 7.71 + 4.3   | Performant validation                      |
+| Testing        | Vitest                | 4.0          | Fast, compatible con Testing Library       |
+| Linting        | ESLint                | 9.x          | Flat config                                |
+| Error Tracking | Sentry                | 10.38        | Client + Server + Edge                     |
+| CI/CD          | GitHub Actions        | -            | 3 jobs paralelos                           |
+| Hosting        | Vercel                | -            | Edge Network, ISR, preview URLs            |
 
 **Total dependencias produccion:** 18 (minimalista)
 **Total dependencias desarrollo:** 15
@@ -535,28 +576,28 @@ GitHub Actions ejecuta en cada push a `main`/`develop` y todas las PRs:
 
 ### 8.1 Metricas del Proyecto
 
-| Metrica | Valor |
-|---------|-------|
-| Herramientas | 15 |
-| Lineas de codigo (source) | ~18,450 |
-| Lineas de tests | ~5,550 |
-| Archivos fuente (.ts/.tsx) | 147 |
-| Componentes React | 21 |
-| Custom hooks | 20 |
-| Tests | 644 |
-| Paginas (routes) | 24 |
-| Claves i18n | 559 (x2 idiomas) |
-| Commits | 28+ |
-| Dependencias produccion | 18 |
+| Metrica                    | Valor            |
+| -------------------------- | ---------------- |
+| Herramientas               | 15               |
+| Lineas de codigo (source)  | ~18,450          |
+| Lineas de tests            | ~5,550           |
+| Archivos fuente (.ts/.tsx) | 147              |
+| Componentes React          | 21               |
+| Custom hooks               | 20               |
+| Tests                      | 644              |
+| Paginas (routes)           | 24               |
+| Claves i18n                | 559 (x2 idiomas) |
+| Commits                    | 28+              |
+| Dependencias produccion    | 18               |
 
 ### 8.2 Lighthouse Scores (Desktop)
 
-| Metrica | Score |
-|---------|-------|
-| Performance | **100** |
-| Accessibility | **100** |
+| Metrica        | Score   |
+| -------------- | ------- |
+| Performance    | **100** |
+| Accessibility  | **100** |
 | Best Practices | **100** |
-| SEO | **100** |
+| SEO            | **100** |
 
 ### 8.3 Requisitos del Curso Frontend Cumplidos
 
@@ -581,18 +622,18 @@ GitHub Actions ejecuta en cada push a `main`/`develop` y todas las PRs:
 
 ### 8.4 Comparativa con Alternativas
 
-| Feature | DevFlow AI | ChatGPT web | Alternatives |
-|---------|------------|-------------|--------------|
-| Herramientas | 15 | 0 | 1-3 |
-| Prompt security check | Si | No | No |
-| Code review local | Si | No | Parcial |
-| Multi-model cost compare | Si | No | No |
-| Token visualization | Si | No | Parcial |
-| Context export (XML/JSON/MD) | Si | No | No |
-| Ejecucion local (privacidad) | Si | No | No |
-| Open source | Si | No | Variable |
-| Gratuito | Si | Limitado | Limitado |
-| i18n | EN/ES | Multi | Ingles |
+| Feature                      | DevFlow AI | ChatGPT web | Alternatives |
+| ---------------------------- | ---------- | ----------- | ------------ |
+| Herramientas                 | 15         | 0           | 1-3          |
+| Prompt security check        | Si         | No          | No           |
+| Code review local            | Si         | No          | Parcial      |
+| Multi-model cost compare     | Si         | No          | No           |
+| Token visualization          | Si         | No          | Parcial      |
+| Context export (XML/JSON/MD) | Si         | No          | No           |
+| Ejecucion local (privacidad) | Si         | No          | No           |
+| Open source                  | Si         | No          | Variable     |
+| Gratuito                     | Si         | Limitado    | Limitado     |
+| i18n                         | EN/ES      | Multi       | Ingles       |
 
 ---
 
@@ -610,6 +651,7 @@ GitHub Actions ejecuta en cada push a `main`/`develop` y todas las PRs:
 ### 9.2 Aprendizajes Clave
 
 **Tecnicos:**
+
 - React Server Components reducen drasticamente el JS enviado al cliente
 - Next.js 16 ISR permite paginas estaticas con datos dinamicos sin rebuilds
 - Clean Architecture vale la pena: facilita testing, mantenimiento y escalabilidad
@@ -617,11 +659,13 @@ GitHub Actions ejecuta en cada push a `main`/`develop` y todas las PRs:
 - La estrategia de testing 100/80/0 es mas sostenible que buscar 100% global
 
 **Metodologicos:**
+
 - Claude Code como pair programmer aumenta productividad significativamente
 - El patron 5-capas por herramienta permite escalar sin perder consistencia
 - Coverage per-file evita la trampa de promediar archivos bien testeados con otros sin tests
 
 **Producto:**
+
 - Ejecucion local es ventaja competitiva real (privacidad + coste cero)
 - 15 herramientas > 5 herramientas: la breadth del toolkit es el value proposition
 - i18n desde el principio es mas facil que anadirlo despues
@@ -629,6 +673,7 @@ GitHub Actions ejecuta en cada push a `main`/`develop` y todas las PRs:
 ### 9.3 Limitaciones y Trabajo Futuro
 
 **Limitaciones Actuales:**
+
 - Tokenizacion BPE simulada (no 100% precisa vs tiktoken)
 - Sin cloud sync: datos solo en localStorage del navegador
 - Sin colaboracion: herramienta individual
@@ -636,18 +681,21 @@ GitHub Actions ejecuta en cada push a `main`/`develop` y todas las PRs:
 
 **Roadmap Futuro:**
 
-*Corto plazo (1-2 meses):*
+_Corto plazo (1-2 meses):_
+
 - E2E tests con Playwright para flujos criticos
 - PWA con service worker para uso offline completo
 - Export a PDF de reportes de analisis
 
-*Medio plazo (3-6 meses):*
+_Medio plazo (3-6 meses):_
+
 - Supabase integration para cloud sync
 - Team collaboration (context windows compartidos)
 - Browser extension (analizar prompts in-page)
 - Mas idiomas (FR, DE, PT)
 
-*Largo plazo (6-12 meses):*
+_Largo plazo (6-12 meses):_
+
 - Mobile app (React Native reutilizando lib/application/)
 - API publica para integracion programatica
 - AI-powered suggestions con Claude API
@@ -695,6 +743,7 @@ GitHub Actions ejecuta en cada push a `main`/`develop` y todas las PRs:
 https://github.com/albertoguinda/devflow-ai
 
 Archivos clave:
+
 - `lib/application/*.ts` - Logica pura de las 15 herramientas
 - `hooks/use-*.ts` - 20 custom hooks
 - `app/(dashboard)/tools/*/page.tsx` - UI de cada herramienta

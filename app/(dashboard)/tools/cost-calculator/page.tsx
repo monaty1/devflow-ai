@@ -1,58 +1,29 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import type { Selection, SortDescriptor, Key } from "@react-types/shared";
-import { Card, Button, Chip } from "@heroui/react";
-import {
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-} from "@heroui/table";
-import { Pagination } from "@heroui/pagination";
+import { useMemo } from "react";
+import { Card, Button, Chip, User, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react";
 import {
   RotateCcw,
   TrendingDown,
-  Search,
-  ChevronDown,
+  RefreshCw,
+  Cloud,
+  CloudOff,
+  Coins,
+  ArrowRight,
+  MoreVertical,
+  ExternalLink,
 } from "lucide-react";
 import { useCostCalculator } from "@/hooks/use-cost-calculator";
 import { useTranslation } from "@/hooks/use-translation";
 import { formatCost } from "@/lib/application/cost-calculator";
 import { ToolHeader } from "@/components/shared/tool-header";
-import { AI_MODELS, PROVIDER_LABELS } from "@/config/ai-models";
+import { DataTable, type ColumnConfig } from "@/components/ui";
+import { PROVIDER_LABELS } from "@/config/ai-models";
+import { cn } from "@/lib/utils";
 import type { CostCalculation } from "@/types/cost-calculator";
-
-type ColumnUid = "model" | "provider" | "inputCost" | "outputCost" | "totalCost" | "contextWindow";
-
-const providerOptions = [
-  { uid: "openai", name: "OpenAI" },
-  { uid: "anthropic", name: "Anthropic" },
-  { uid: "google", name: "Google" },
-  { uid: "meta", name: "Meta" },
-] as const;
-
-const INITIAL_VISIBLE_COLUMNS: ColumnUid[] = [
-  "model",
-  "provider",
-  "inputCost",
-  "outputCost",
-  "totalCost",
-];
 
 export default function CostCalculatorPage() {
   const { t } = useTranslation();
-
-  const columns = useMemo(() => [
-    { uid: "model" as const, name: t("costCalc.colModel"), sortable: true },
-    { uid: "provider" as const, name: t("costCalc.colProvider"), sortable: true },
-    { uid: "inputCost" as const, name: t("costCalc.colInputCost"), sortable: true },
-    { uid: "outputCost" as const, name: t("costCalc.colOutputCost"), sortable: true },
-    { uid: "totalCost" as const, name: t("costCalc.colTotal"), sortable: true },
-    { uid: "contextWindow" as const, name: t("costCalc.colContext"), sortable: true },
-  ], [t]);
 
   const {
     inputTokens,
@@ -61,626 +32,263 @@ export default function CostCalculatorPage() {
     setOutputTokens,
     dailyRequests,
     setDailyRequests,
-    selectedModelId,
-    setSelectedModelId,
     comparison,
     monthlyCost,
     reset,
+    isSyncing,
+    lastSync,
+    syncPrices,
   } = useCostCalculator();
 
-  const [view, setView] = useState<"comparison" | "monthly">("comparison");
-  const [filterValue, setFilterValue] = useState("");
-  const [selectedKeys, setSelectedKeys] = useState<Selection>(
-    new Set<Key>([])
-  );
-  const [visibleColumns, setVisibleColumns] = useState<Selection>(
-    new Set<Key>(INITIAL_VISIBLE_COLUMNS)
-  );
-  const [providerFilter, setProviderFilter] = useState<Selection>("all");
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
-    column: "totalCost",
-    direction: "ascending",
-  });
-  const [page, setPage] = useState(1);
-
   const cheapestId = comparison?.results[0]?.model.id;
-  const hasSearchFilter = Boolean(filterValue);
+  const bestValueId = useMemo(() => {
+    if (!comparison) return null;
+    return [...comparison.results].sort((a, b) => (b.valueScore ?? 0) - (a.valueScore ?? 0))[0]?.model.id;
+  }, [comparison]);
 
-  const headerColumns = useMemo(() => {
-    if (visibleColumns === "all") return [...columns];
-    return columns.filter((col) => visibleColumns.has(col.uid));
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- columns depends on t which is stable
-  }, [visibleColumns, t]);
+  const columns: ColumnConfig[] = [
+    { name: "MODEL", uid: "model", sortable: true },
+    { name: "PROVIDER", uid: "provider", sortable: true },
+    { name: "TOTAL COST", uid: "totalCost", sortable: true },
+    { name: "VALUE SCORE", uid: "value", sortable: true },
+    { name: "ACTIONS", uid: "actions" },
+  ];
 
-  const filteredItems = useMemo(() => {
-    if (!comparison) return [];
-    let filtered = [...comparison.results];
+  const renderCell = useCallback((result: CostCalculation, columnKey: React.Key) => {
+    const provider = PROVIDER_LABELS[result.model.provider];
+    const isCheapest = result.model.id === cheapestId;
+    const isBestValue = result.model.id === bestValueId;
 
-    if (hasSearchFilter) {
-      filtered = filtered.filter(
-        (r) =>
-          r.model.displayName
-            .toLowerCase()
-            .includes(filterValue.toLowerCase()) ||
-          r.model.provider
-            .toLowerCase()
-            .includes(filterValue.toLowerCase())
-      );
-    }
-
-    if (providerFilter !== "all" && providerFilter.size !== providerOptions.length) {
-      filtered = filtered.filter((r) => providerFilter.has(r.model.provider));
-    }
-
-    return filtered;
-  }, [comparison, filterValue, providerFilter, hasSearchFilter]);
-
-  const pages = Math.ceil(filteredItems.length / rowsPerPage) || 1;
-
-  const paginatedItems = useMemo(() => {
-    const start = (page - 1) * rowsPerPage;
-    return filteredItems.slice(start, start + rowsPerPage);
-  }, [page, filteredItems, rowsPerPage]);
-
-  const sortedItems = useMemo(() => {
-    return [...paginatedItems].sort((a, b) => {
-      const col = sortDescriptor.column as string;
-      let first: number | string;
-      let second: number | string;
-
-      switch (col) {
-        case "model":
-          first = a.model.displayName;
-          second = b.model.displayName;
-          break;
-        case "provider":
-          first = a.model.provider;
-          second = b.model.provider;
-          break;
-        case "inputCost":
-          first = a.inputCost;
-          second = b.inputCost;
-          break;
-        case "outputCost":
-          first = a.outputCost;
-          second = b.outputCost;
-          break;
-        case "totalCost":
-          first = a.totalCost;
-          second = b.totalCost;
-          break;
-        case "contextWindow":
-          first = a.model.contextWindow;
-          second = b.model.contextWindow;
-          break;
-        default:
-          return 0;
-      }
-
-      const cmp = first < second ? -1 : first > second ? 1 : 0;
-      return sortDescriptor.direction === "descending" ? -cmp : cmp;
-    });
-  }, [sortDescriptor, paginatedItems]);
-
-  const renderCell = useCallback(
-    (result: CostCalculation, columnKey: Key) => {
-      const provider = PROVIDER_LABELS[result.model.provider];
-      const isCheapest = result.model.id === cheapestId;
-
-      switch (columnKey) {
-        case "model":
-          return (
-            <div className="flex items-center gap-2">
-              {isCheapest && (
-                <Chip size="sm" color="success" variant="soft">
-                  {t("costCalc.best")}
-                </Chip>
-              )}
-              <span className="font-medium">{result.model.displayName}</span>
-              {result.model.isPopular && (
-                <Chip size="sm" color="warning" variant="soft">
-                  {t("costCalc.popular")}
-                </Chip>
-              )}
-            </div>
-          );
-        case "provider":
-          return (
-            <Chip size="sm" variant="soft" className={provider?.color ?? ""}>
-              {provider?.emoji} {provider?.label}
-            </Chip>
-          );
-        case "inputCost":
-          return (
-            <span className="text-sm">{formatCost(result.inputCost)}</span>
-          );
-        case "outputCost":
-          return (
-            <span className="text-sm">{formatCost(result.outputCost)}</span>
-          );
-        case "totalCost":
-          return (
-            <span
-              className={`font-semibold ${isCheapest ? "text-emerald-600" : ""}`}
-            >
+    switch (columnKey) {
+      case "model":
+        return (
+          <User
+            name={result.model.displayName}
+            description={result.model.id}
+            avatarProps={{
+              radius: "lg",
+              src: `https://avatar.vercel.sh/${result.model.provider}`,
+              fallback: result.model.provider[0].toUpperCase()
+            }}
+          >
+            {result.model.displayName}
+          </User>
+        );
+      case "provider":
+        return (
+          <Chip
+            variant="flat"
+            size="sm"
+            className={cn("capitalize", provider?.color)}
+            startContent={<span>{provider?.emoji}</span>}
+          >
+            {provider?.label}
+          </Chip>
+        );
+      case "totalCost":
+        return (
+          <div className="flex flex-col gap-1">
+            <span className={cn("font-bold", isCheapest ? "text-success" : "text-foreground")}>
               {formatCost(result.totalCost)}
             </span>
-          );
-        case "contextWindow":
-          return (
-            <span className="text-sm text-muted-foreground">
-              {result.model.contextWindow.toLocaleString()}
+            {isCheapest && <span className="text-[10px] text-success font-bold uppercase tracking-tighter">Cheapest</span>}
+          </div>
+        );
+      case "value":
+        return (
+          <div className="flex flex-col">
+            <span className={cn("font-medium", isBestValue ? "text-secondary" : "text-foreground")}>
+              {result.valueScore ? (result.valueScore / 1000000).toFixed(2) : "N/A"}
             </span>
-          );
-        default:
-          return null;
-      }
-    },
-    [cheapestId, t]
-  );
-
-  const onSearchChange = useCallback((value?: string) => {
-    if (value) {
-      setFilterValue(value);
-      setPage(1);
-    } else {
-      setFilterValue("");
+            {isBestValue && <span className="text-[10px] text-secondary font-bold uppercase tracking-tighter">Best Value</span>}
+          </div>
+        );
+      case "actions":
+        return (
+          <div className="relative flex justify-center items-center gap-2">
+            <Dropdown>
+              <DropdownTrigger>
+                <Button isIconOnly size="sm" variant="light">
+                  <MoreVertical className="text-default-300 size-4" />
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu aria-label="Action Menu">
+                <DropdownItem key="details" startContent={<ExternalLink className="size-3" />}>View Stats</DropdownItem>
+                <DropdownItem key="copy" startContent={<RotateCcw className="size-3" />}>Copy Config</DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          </div>
+        );
+      default:
+        return (result as any)[columnKey];
     }
-  }, []);
-
-  const onClear = useCallback(() => {
-    setFilterValue("");
-    setPage(1);
-  }, []);
-
-  const onRowsPerPageChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setRowsPerPage(Number(e.target.value));
-      setPage(1);
-    },
-    []
-  );
-
-  const topContent = useMemo(
-    () => (
-      <div className="flex flex-col gap-4">
-        <div className="flex items-end justify-between gap-3">
-          <div className="relative w-full sm:max-w-[44%]">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="text"
-              className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-              placeholder={t("costCalc.search")}
-              value={filterValue}
-              onChange={(e) => onSearchChange(e.target.value)}
-            />
-            {filterValue && (
-              <button
-                type="button"
-                onClick={onClear}
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-muted-foreground hover:text-foreground"
-                aria-label="Clear search"
-              >
-                <span className="text-xs">&#x2715;</span>
-              </button>
-            )}
-          </div>
-          <div className="flex gap-3">
-            <div className="relative">
-              <select
-                className="hidden appearance-none rounded-lg border border-default-200 bg-default-100 px-3 py-2 pr-8 text-sm sm:block"
-                multiple
-                value={
-                  providerFilter === "all"
-                    ? providerOptions.map((p) => p.uid)
-                    : Array.from(providerFilter).map(String)
-                }
-                onChange={(e) => {
-                  const selected = new Set<Key>(
-                    Array.from(e.target.selectedOptions, (o) => o.value)
-                  );
-                  setProviderFilter(
-                    selected.size === providerOptions.length
-                      ? "all"
-                      : selected
-                  );
-                }}
-              >
-                {providerOptions.map((p) => (
-                  <option key={p.uid} value={p.uid}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="relative hidden sm:block">
-              <details className="group">
-                <summary className="flex cursor-pointer items-center gap-1 rounded-lg border border-default-200 bg-default-100 px-3 py-2 text-sm">
-                  {t("costCalc.columns")}
-                  <ChevronDown className="size-4" />
-                </summary>
-                <div className="absolute right-0 z-10 mt-1 min-w-[160px] rounded-lg border border-default-200 bg-background p-2 shadow-lg">
-                  {columns.map((col) => (
-                    <label
-                      key={col.uid}
-                      className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-default-100"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={
-                          visibleColumns === "all" || visibleColumns.has(col.uid)
-                        }
-                        onChange={(e) => {
-                          const current =
-                            visibleColumns === "all"
-                              ? new Set<Key>(columns.map((c) => c.uid))
-                              : new Set(visibleColumns);
-                          if (e.target.checked) {
-                            current.add(col.uid);
-                          } else {
-                            current.delete(col.uid);
-                          }
-                          setVisibleColumns(current);
-                        }}
-                        className="rounded"
-                      />
-                      {col.name}
-                    </label>
-                  ))}
-                </div>
-              </details>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-small text-default-400">
-            {t("costCalc.modelsCount", { filtered: filteredItems.length, total: comparison?.results.length ?? 0 })}
-          </span>
-          <label className="flex items-center gap-1 text-small text-default-400">
-            {t("costCalc.rowsPerPage")}
-            <select
-              className="rounded bg-transparent text-small text-default-400 outline-none"
-              onChange={onRowsPerPageChange}
-              value={rowsPerPage}
-            >
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="15">15</option>
-            </select>
-          </label>
-        </div>
-      </div>
-    ),
-    [
-      filterValue,
-      visibleColumns,
-      onSearchChange,
-      onClear,
-      filteredItems.length,
-      comparison,
-      onRowsPerPageChange,
-      rowsPerPage,
-      providerFilter,
-      t,
-      columns,
-    ]
-  );
-
-  const bottomContent = useMemo(
-    () => (
-      <div className="flex items-center justify-between px-2 py-2">
-        <span className="w-[30%] text-small text-default-400">
-          {selectedKeys === "all"
-            ? t("costCalc.allSelected")
-            : t("costCalc.selectedCount", { count: selectedKeys.size, total: filteredItems.length })}
-        </span>
-        <Pagination
-          isCompact
-          showControls
-          showShadow
-          color="primary"
-          page={page}
-          total={pages}
-          onChange={setPage}
-        />
-        <div className="hidden w-[30%] justify-end gap-2 sm:flex">
-          <Button
-            isDisabled={pages === 1}
-            size="sm"
-            variant="ghost"
-            onPress={() => page > 1 && setPage(page - 1)}
-          >
-            {t("costCalc.previous")}
-          </Button>
-          <Button
-            isDisabled={pages === 1}
-            size="sm"
-            variant="ghost"
-            onPress={() => page < pages && setPage(page + 1)}
-          >
-            {t("costCalc.next")}
-          </Button>
-        </div>
-      </div>
-    ),
-    [selectedKeys, filteredItems.length, page, pages, t]
-  );
+  }, [cheapestId, bestValueId]);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6">
       {/* Header */}
       <ToolHeader
         title={t("costCalc.title")}
         description={t("costCalc.description")}
         breadcrumb
         actions={
-          <Button variant="outline" size="sm" onPress={reset} className="gap-2">
-            <RotateCcw className="size-4" />
-            {t("common.reset")}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="flat"
+              color="primary"
+              size="sm"
+              onPress={syncPrices}
+              isLoading={isSyncing}
+              className="gap-2"
+            >
+              <RefreshCw className={`size-4 ${isSyncing ? "animate-spin" : ""}`} />
+              {isSyncing ? "Syncing..." : "Sync Prices"}
+            </Button>
+            <Button variant="outline" size="sm" onPress={reset} className="gap-2">
+              <RotateCcw className="size-4" />
+              {t("common.reset")}
+            </Button>
+          </div>
         }
       />
 
-      {/* View Toggle */}
-      <div className="flex gap-2">
-        <Button
-          size="sm"
-          variant={view === "comparison" ? "secondary" : "outline"}
-          onPress={() => setView("comparison")}
-        >
-          {t("costCalc.perRequest")}
-        </Button>
-        <Button
-          size="sm"
-          variant={view === "monthly" ? "secondary" : "outline"}
-          onPress={() => setView("monthly")}
-        >
-          {t("costCalc.monthlyEstimate")}
-        </Button>
-      </div>
-
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Input Panel */}
-        <div className="space-y-4">
+        {/* Settings Panel */}
+        <div className="space-y-6">
           <Card className="p-6">
-            <Card.Header className="mb-4 p-0">
-              <Card.Title>{t("common.configuration")}</Card.Title>
-            </Card.Header>
-            <Card.Content className="space-y-4 p-0">
-              {/* Input Tokens */}
+            <div className="mb-4 flex items-center gap-2 border-b border-border pb-2">
+              <Coins className="size-5 text-primary" />
+              <h2 className="font-semibold">{t("common.configuration")}</h2>
+            </div>
+
+            <div className="space-y-6">
               <div>
-                <label
-                  htmlFor="input-tokens"
-                  className="text-sm font-medium text-muted-foreground"
-                >
+                <label className="mb-2 block text-sm font-medium">
                   {t("costCalc.inputTokens")}
                 </label>
-                <input
-                  id="input-tokens"
-                  type="number"
-                  min={0}
-                  value={inputTokens}
-                  onChange={(e) =>
-                    setInputTokens(Math.max(0, Number(e.target.value)))
-                  }
-                  className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-
-              {/* Output Tokens */}
-              <div>
-                <label
-                  htmlFor="output-tokens"
-                  className="text-sm font-medium text-muted-foreground"
-                >
-                  {t("costCalc.outputTokens")}
-                </label>
-                <input
-                  id="output-tokens"
-                  type="number"
-                  min={0}
-                  value={outputTokens}
-                  onChange={(e) =>
-                    setOutputTokens(Math.max(0, Number(e.target.value)))
-                  }
-                  className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-
-              {/* Monthly View Extra Fields */}
-              {view === "monthly" && (
-                <>
-                  <div>
-                    <label
-                      htmlFor="daily-requests"
-                      className="text-sm font-medium text-muted-foreground"
-                    >
-                      {t("costCalc.dailyRequests")}
-                    </label>
-                    <input
-                      id="daily-requests"
-                      type="number"
-                      min={1}
-                      value={dailyRequests}
-                      onChange={(e) =>
-                        setDailyRequests(Math.max(1, Number(e.target.value)))
-                      }
-                      className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="model-select"
-                      className="text-sm font-medium text-muted-foreground"
-                    >
-                      {t("costCalc.model")}
-                    </label>
-                    <select
-                      id="model-select"
-                      value={selectedModelId}
-                      onChange={(e) => setSelectedModelId(e.target.value)}
-                      className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    >
-                      {AI_MODELS.map((model) => (
-                        <option key={model.id} value={model.id}>
-                          {model.displayName} (
-                          {PROVIDER_LABELS[model.provider]?.label})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </>
-              )}
-
-              {/* Quick Presets */}
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">
-                  {t("costCalc.presets")}
-                </label>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {[
-                    { label: "Chat", input: 500, output: 200 },
-                    { label: "Code", input: 2000, output: 1000 },
-                    { label: "Analysis", input: 5000, output: 500 },
-                    { label: "Summary", input: 10000, output: 300 },
-                  ].map((preset) => (
-                    <button
-                      key={preset.label}
-                      type="button"
-                      onClick={() => {
-                        setInputTokens(preset.input);
-                        setOutputTokens(preset.output);
-                      }}
-                      className="rounded-full bg-muted px-3 py-1 text-xs transition-colors hover:bg-muted/80"
-                    >
-                      {preset.label}
-                    </button>
-                  ))}
+                <div className="flex items-center gap-4">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100000"
+                    step="1000"
+                    value={inputTokens}
+                    onChange={(e) => setInputTokens(parseInt(e.target.value))}
+                    className="flex-1 accent-primary"
+                  />
+                  <input
+                    type="number"
+                    value={inputTokens}
+                    onChange={(e) => setInputTokens(parseInt(e.target.value) || 0)}
+                    className="w-24 rounded-lg border border-border bg-background px-3 py-1 text-sm text-right font-mono"
+                  />
                 </div>
               </div>
-            </Card.Content>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium">
+                  {t("costCalc.outputTokens")}
+                </label>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="range"
+                    min="0"
+                    max="50000"
+                    step="500"
+                    value={outputTokens}
+                    onChange={(e) => setOutputTokens(parseInt(e.target.value))}
+                    className="flex-1 accent-primary"
+                  />
+                  <input
+                    type="number"
+                    value={outputTokens}
+                    onChange={(e) => setOutputTokens(parseInt(e.target.value) || 0)}
+                    className="w-24 rounded-lg border border-border bg-background px-3 py-1 text-sm text-right font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium">
+                  {t("costCalc.dailyRequests")}
+                </label>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="range"
+                    min="1"
+                    max="10000"
+                    step="100"
+                    value={dailyRequests}
+                    onChange={(e) => setDailyRequests(parseInt(e.target.value))}
+                    className="flex-1 accent-primary"
+                  />
+                  <input
+                    type="number"
+                    value={dailyRequests}
+                    onChange={(e) => setDailyRequests(parseInt(e.target.value) || 0)}
+                    className="w-24 rounded-lg border border-border bg-background px-3 py-1 text-sm text-right font-mono"
+                  />
+                </div>
+              </div>
+            </div>
           </Card>
 
-          {/* Monthly Cost Card */}
-          {view === "monthly" && (
-            <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 dark:from-blue-950/30 dark:to-indigo-950/30">
-              <Card.Content className="p-0 text-center">
-                <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                  {t("costCalc.estimatedMonthlyCost")}
-                </p>
-                <p className="mt-1 text-4xl font-bold text-blue-700 dark:text-blue-300">
-                  {formatCost(monthlyCost)}
-                </p>
-                <p className="mt-2 text-xs text-blue-500 dark:text-blue-400">
-                  {t("costCalc.reqPerDay", { count: dailyRequests })}
-                </p>
-              </Card.Content>
-            </Card>
-          )}
+          {/* Result Card */}
+          <Card className="p-6 bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+            <p className="text-sm opacity-80 uppercase tracking-wider font-semibold mb-1">
+              {t("costCalc.estimatedMonthlyCost")}
+            </p>
+            <p className="text-4xl font-bold mb-2">
+              {formatCost(monthlyCost)}
+            </p>
+            <div className="flex items-center gap-2 text-sm opacity-90">
+              <ArrowRight className="size-4" />
+              <span>{t("costCalc.reqPerDay", { count: dailyRequests.toLocaleString() })}</span>
+            </div>
+          </Card>
+
+          <div className="flex items-center justify-between px-2 text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
+            <div className="flex items-center gap-1">
+              {lastSync ? <Cloud className="size-3 text-emerald-500" /> : <CloudOff className="size-3 text-amber-500" />}
+              <span>Pricing Service: {lastSync ? "Online" : "Static Data"}</span>
+            </div>
+            {lastSync && <span>Last Sync: {new Date(lastSync).toLocaleDateString()}</span>}
+          </div>
         </div>
 
         {/* Comparison Table */}
         <div className="lg:col-span-2">
           <Card className="p-6">
-            <Card.Header className="mb-4 flex items-center justify-between p-0">
-              <Card.Title>
-                {view === "comparison" ? t("costCalc.priceComparison") : t("costCalc.allModels")}
-              </Card.Title>
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <TrendingDown className="size-5 text-emerald-500" />
+                {t("costCalc.priceComparison")}
+              </h2>
               {comparison && (
-                <div className="flex items-center gap-2 text-sm text-emerald-600">
-                  <TrendingDown className="size-4" />
+                <div className="hidden sm:flex items-center gap-2 text-sm text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-950/20 px-3 py-1 rounded-full border border-emerald-100 dark:border-emerald-900/30">
                   <span>
                     {t("costCalc.cheapest", { model: comparison.results[0]?.model.displayName ?? "" })}
                   </span>
                 </div>
               )}
-            </Card.Header>
-            <Card.Content className="p-0">
-              {comparison ? (
-                <Table
-                  isHeaderSticky
-                  aria-label="AI model cost comparison"
-                  bottomContent={bottomContent}
-                  bottomContentPlacement="outside"
-                  classNames={{
-                    wrapper: "max-h-[400px]",
-                  }}
-                  selectedKeys={selectedKeys}
-                  selectionMode="multiple"
-                  sortDescriptor={sortDescriptor}
-                  topContent={topContent}
-                  topContentPlacement="outside"
-                  onSelectionChange={setSelectedKeys}
-                  onSortChange={setSortDescriptor}
-                >
-                  <TableHeader columns={headerColumns}>
-                    {(column) => (
-                      <TableColumn
-                        key={column.uid}
-                        allowsSorting={column.sortable}
-                      >
-                        {column.name}
-                      </TableColumn>
-                    )}
-                  </TableHeader>
-                  <TableBody
-                    emptyContent={t("costCalc.noModels")}
-                    items={sortedItems}
-                  >
-                    {(item) => (
-                      <TableRow key={item.model.id}>
-                        {(columnKey) => (
-                          <TableCell>{renderCell(item, columnKey)}</TableCell>
-                        )}
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              ) : (
-                <p className="py-8 text-center text-muted-foreground">
-                  {t("costCalc.emptyState")}
-                </p>
-              )}
-            </Card.Content>
-          </Card>
+            </div>
 
-          {/* Context Windows Info */}
-          <Card className="mt-4 p-6">
-            <Card.Header className="mb-4 p-0">
-              <Card.Title className="text-sm text-muted-foreground">
-                {t("costCalc.contextWindows")}
-              </Card.Title>
-            </Card.Header>
-            <Card.Content className="space-y-3 p-0">
-              {AI_MODELS.filter((m) => m.isPopular).map((model) => {
-                const provider = PROVIDER_LABELS[model.provider];
-                const percentage = Math.min(
-                  (model.contextWindow / 1_000_000) * 100,
-                  100
-                );
-
-                return (
-                  <div key={model.id}>
-                    <div className="mb-1 flex justify-between text-sm">
-                      <span>
-                        {provider?.emoji} {model.displayName}
-                      </span>
-                      <span className="text-muted-foreground">
-                        {model.contextWindow.toLocaleString()} tokens
-                      </span>
-                    </div>
-                    <div className="h-2 w-full rounded-full bg-muted">
-                      <div
-                        className="h-2 rounded-full bg-blue-500"
-                        style={{ width: `${percentage}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </Card.Content>
+            {comparison ? (
+              <DataTable
+                columns={columns}
+                data={comparison.results}
+                filterField="model.displayName"
+                initialVisibleColumns={["model", "provider", "totalCost", "value", "actions"]}
+                renderCell={renderCell}
+                placeholder={t("costCalc.search")}
+                emptyContent={t("costCalc.noModels")}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-border rounded-xl">
+                <Coins className="size-10 text-muted-foreground/30 mb-2" />
+                <p className="text-muted-foreground">{t("costCalc.emptyState")}</p>
+              </div>
+            )}
           </Card>
         </div>
       </div>

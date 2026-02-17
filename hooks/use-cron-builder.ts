@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo } from "react";
 import type {
   CronExpression,
   CronField,
+  ConfigFormat,
 } from "@/types/cron-builder";
 import { DEFAULT_CRON } from "@/types/cron-builder";
 import {
@@ -12,6 +13,7 @@ import {
   validateExpression,
   explainExpression,
   calculateNextExecutions,
+  generateConfig,
   CRON_PRESETS,
 } from "@/lib/application/cron-builder";
 import { useToolHistory } from "@/hooks/use-tool-history";
@@ -26,6 +28,7 @@ interface HistoryItem {
 export function useCronBuilder() {
   const [expression, setExpressionState] = useState<CronExpression>(DEFAULT_CRON);
   const [rawExpression, setRawExpression] = useState(buildExpression(DEFAULT_CRON));
+  const [configFormat, setConfigFormat] = useState<ConfigFormat>("kubernetes");
   const { history, addToHistory: addItemToHistory, clearHistory } =
     useToolHistory<HistoryItem>("devflow-cron-history", 15);
   const [isManualMode, setIsManualMode] = useState(false);
@@ -46,6 +49,13 @@ export function useCronBuilder() {
     }
     return [];
   }, [rawExpression, validation.isValid]);
+
+  const config = useMemo(() => {
+    if (validation.isValid) {
+      return generateConfig(rawExpression, configFormat);
+    }
+    return null;
+  }, [rawExpression, configFormat, validation.isValid]);
 
   const setExpression = useCallback((newExpression: CronExpression) => {
     setExpressionState(newExpression);
@@ -126,6 +136,8 @@ export function useCronBuilder() {
     nextExecutions,
     validation,
     history,
+    config,
+    configFormat,
     isManualMode,
     presets: CRON_PRESETS,
 
@@ -133,6 +145,7 @@ export function useCronBuilder() {
     setExpression,
     setField,
     setRawExpression: setRawExpressionManual,
+    setConfigFormat,
 
     // Actions
     loadPreset,

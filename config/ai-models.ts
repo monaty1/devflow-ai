@@ -12,6 +12,9 @@ export const AI_MODELS: AIModel[] = [
     contextWindow: 128000,
     maxOutput: 16384,
     isPopular: true,
+    benchmarkScore: 88.7,
+    updatedAt: "2026-02-15",
+    category: "general"
   },
   {
     id: "gpt-4o-mini",
@@ -23,101 +26,116 @@ export const AI_MODELS: AIModel[] = [
     contextWindow: 128000,
     maxOutput: 16384,
     isPopular: true,
+    benchmarkScore: 82.0,
+    updatedAt: "2026-02-15",
+    category: "lightweight"
   },
   {
-    id: "gpt-4-turbo",
+    id: "o1",
     provider: "openai",
-    name: "gpt-4-turbo",
-    displayName: "GPT-4 Turbo",
-    inputPricePerMToken: 10.0,
-    outputPricePerMToken: 30.0,
-    contextWindow: 128000,
-    maxOutput: 4096,
-    isPopular: false,
-  },
-  {
-    id: "o1-preview",
-    provider: "openai",
-    name: "o1-preview",
-    displayName: "O1 Preview",
+    name: "o1-2024-12-17",
+    displayName: "O1 (Full Reasoning)",
     inputPricePerMToken: 15.0,
     outputPricePerMToken: 60.0,
     contextWindow: 128000,
     maxOutput: 32768,
-    isPopular: false,
+    isPopular: true,
+    benchmarkScore: 92.3,
+    updatedAt: "2026-02-15",
+    category: "reasoning"
   },
 
   // Anthropic
   {
-    id: "claude-opus-4-5",
+    id: "claude-3-7-sonnet",
     provider: "anthropic",
-    name: "claude-opus-4-5-20251101",
-    displayName: "Claude Opus 4.5",
-    inputPricePerMToken: 15.0,
-    outputPricePerMToken: 75.0,
-    contextWindow: 200000,
-    maxOutput: 16384,
-    isPopular: true,
-  },
-  {
-    id: "claude-sonnet-4-5",
-    provider: "anthropic",
-    name: "claude-sonnet-4-5-20250929",
-    displayName: "Claude Sonnet 4.5",
+    name: "claude-3-7-sonnet-20250219",
+    displayName: "Claude 3.7 Sonnet",
     inputPricePerMToken: 3.0,
     outputPricePerMToken: 15.0,
     contextWindow: 200000,
     maxOutput: 16384,
     isPopular: true,
+    benchmarkScore: 89.1,
+    updatedAt: "2026-02-17",
+    category: "general"
   },
   {
-    id: "claude-haiku-4-5",
+    id: "claude-3-5-haiku",
     provider: "anthropic",
-    name: "claude-haiku-4-5-20251001",
-    displayName: "Claude Haiku 4.5",
+    name: "claude-3-5-haiku-20241022",
+    displayName: "Claude 3.5 Haiku",
     inputPricePerMToken: 0.8,
     outputPricePerMToken: 4.0,
     contextWindow: 200000,
     maxOutput: 16384,
     isPopular: true,
+    benchmarkScore: 75.2,
+    updatedAt: "2026-02-15",
+    category: "lightweight"
+  },
+
+  // DeepSeek (High Value)
+  {
+    id: "deepseek-v3",
+    provider: "deepseek",
+    name: "deepseek-v3",
+    displayName: "DeepSeek V3",
+    inputPricePerMToken: 0.14,
+    outputPricePerMToken: 0.28,
+    contextWindow: 64000,
+    maxOutput: 8192,
+    isPopular: true,
+    benchmarkScore: 88.5,
+    updatedAt: "2026-02-15",
+    category: "general"
+  },
+  {
+    id: "deepseek-r1",
+    provider: "deepseek",
+    name: "deepseek-reasoner",
+    displayName: "DeepSeek R1 (Reasoning)",
+    inputPricePerMToken: 0.55,
+    outputPricePerMToken: 2.19,
+    contextWindow: 64000,
+    maxOutput: 8192,
+    isPopular: true,
+    benchmarkScore: 90.8,
+    updatedAt: "2026-02-15",
+    category: "reasoning"
+  },
+
+  // Groq (Performance/Speed)
+  {
+    id: "llama-3-1-70b-groq",
+    provider: "groq",
+    name: "llama-3.1-70b-versatile",
+    displayName: "Llama 3.1 70B (Groq)",
+    inputPricePerMToken: 0.59,
+    outputPricePerMToken: 0.79,
+    contextWindow: 128000,
+    maxOutput: 8192,
+    isPopular: true,
+    benchmarkScore: 86.0,
+    updatedAt: "2026-02-15",
+    category: "general"
   },
 
   // Google
   {
-    id: "gemini-pro",
+    id: "gemini-2-0-flash",
     provider: "google",
-    name: "gemini-1.5-pro",
-    displayName: "Gemini 1.5 Pro",
-    inputPricePerMToken: 1.25,
-    outputPricePerMToken: 5.0,
+    name: "gemini-2.0-flash-exp",
+    displayName: "Gemini 2.0 Flash",
+    inputPricePerMToken: 0.1,
+    outputPricePerMToken: 0.4,
     contextWindow: 1000000,
     maxOutput: 8192,
     isPopular: true,
-  },
-  {
-    id: "gemini-flash",
-    provider: "google",
-    name: "gemini-1.5-flash",
-    displayName: "Gemini 1.5 Flash",
-    inputPricePerMToken: 0.075,
-    outputPricePerMToken: 0.3,
-    contextWindow: 1000000,
-    maxOutput: 8192,
-    isPopular: false,
-  },
-
-  // Meta
-  {
-    id: "llama-3-70b",
-    provider: "meta",
-    name: "llama-3-70b-instruct",
-    displayName: "Llama 3 70B",
-    inputPricePerMToken: 0.9,
-    outputPricePerMToken: 2.7,
-    contextWindow: 8192,
-    maxOutput: 2048,
-    isPopular: false,
-  },
+    benchmarkScore: 82.5,
+    updatedAt: "2026-02-15",
+    category: "lightweight"
+  }
 ];
 
 export const PROVIDER_LABELS: Record<
@@ -126,18 +144,28 @@ export const PROVIDER_LABELS: Record<
 > = {
   openai: {
     label: "OpenAI",
-    color: "bg-gray-100 text-gray-900 dark:bg-gray-900/30 dark:text-gray-200",
+    color: "bg-zinc-100 text-zinc-900 dark:bg-zinc-900/30 dark:text-zinc-200",
     emoji: "🤖",
   },
   anthropic: {
     label: "Anthropic",
-    color: "bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-200",
+    color: "bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200",
     emoji: "🔮",
   },
   google: {
     label: "Google",
     color: "bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200",
     emoji: "🌐",
+  },
+  deepseek: {
+    label: "DeepSeek",
+    color: "bg-cyan-100 text-cyan-900 dark:bg-cyan-900/30 dark:text-cyan-200",
+    emoji: "🐋",
+  },
+  groq: {
+    label: "Groq",
+    color: "bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200",
+    emoji: "⚡",
   },
   meta: {
     label: "Meta",

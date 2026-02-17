@@ -14,287 +14,163 @@ interface Pattern {
   suggestion?: string;
 }
 
-const SECURITY_PATTERNS: Pattern[] = [
-  {
-    pattern: /\beval\s*\(/g,
-    severity: "critical",
-    category: "security",
-    message: "Avoid using eval() - it can execute arbitrary code",
-    suggestion: "Use JSON.parse() for JSON data or Function constructor for specific cases",
-  },
-  {
-    pattern: /\.innerHTML\s*=/g,
-    severity: "critical",
-    category: "security",
-    message: "innerHTML can lead to XSS vulnerabilities",
-    suggestion: "Use textContent or sanitize HTML with DOMPurify",
-  },
-  {
-    pattern: /\bdocument\.write\s*\(/g,
-    severity: "critical",
-    category: "security",
-    message: "document.write() can cause security issues and performance problems",
-    suggestion: "Use DOM manipulation methods instead",
-  },
+const COMMON_PATTERNS: Pattern[] = [
   {
     pattern: /(password|secret|api[_-]?key|token)\s*[:=]\s*["'`][^"'`]+["'`]/gi,
     severity: "critical",
     category: "security",
-    message: "Hardcoded credentials detected - use environment variables",
-    suggestion: "Move sensitive data to environment variables",
+    message: "Hardcoded credentials detected",
+    suggestion: "Use environment variables or a secret manager",
   },
   {
-    pattern: /new\s+Function\s*\(/g,
-    severity: "warning",
-    category: "security",
-    message: "Function constructor can execute arbitrary code",
-    suggestion: "Avoid dynamic code execution when possible",
-  },
+    pattern: /TODO|FIXME|HACK/gi,
+    severity: "info",
+    category: "maintainability",
+    message: "Technical debt marker found",
+  }
 ];
 
-const QUALITY_PATTERNS: Pattern[] = [
-  {
-    pattern: /console\.(log|debug|info|warn|error)\s*\(/g,
-    severity: "warning",
-    category: "best-practice",
-    message: "Console statements should be removed in production",
-    suggestion: "Use a proper logging library or remove debug statements",
-  },
-  {
-    pattern: /==(?!=)/g,
-    severity: "warning",
-    category: "best-practice",
-    message: "Use strict equality (===) instead of loose equality (==)",
-    suggestion: "Replace == with === for type-safe comparisons",
-  },
-  {
-    pattern: /!=(?!=)/g,
-    severity: "warning",
-    category: "best-practice",
-    message: "Use strict inequality (!==) instead of loose inequality (!=)",
-    suggestion: "Replace != with !== for type-safe comparisons",
-  },
-  {
-    pattern: /var\s+\w+/g,
-    severity: "info",
-    category: "best-practice",
-    message: "Use const or let instead of var",
-    suggestion: "Replace var with const for immutable values or let for mutable ones",
-  },
-  {
-    pattern: /catch\s*\([^)]*\)\s*\{\s*\}/g,
-    severity: "critical",
-    category: "maintainability",
-    message: "Empty catch block - errors are being silently ignored",
-    suggestion: "Handle the error or at least log it",
-  },
-  {
-    pattern: /TODO|FIXME|HACK|XXX/gi,
-    severity: "info",
-    category: "maintainability",
-    message: "TODO/FIXME comment found - consider addressing it",
-  },
-  {
-    pattern: /function\s+\w+\s*\([^)]{100,}\)/g,
-    severity: "warning",
-    category: "maintainability",
-    message: "Function has too many parameters",
-    suggestion: "Consider using an options object instead",
-  },
-  {
-    pattern: /if\s*\([^)]+\)\s*\{[^}]{500,}\}/gs,
-    severity: "warning",
-    category: "maintainability",
-    message: "Long conditional block detected",
-    suggestion: "Consider extracting into a separate function",
-  },
-];
+const LANGUAGE_PATTERNS: Record<SupportedLanguage, Pattern[]> = {
+  javascript: [
+    { pattern: /\beval\s*\(/g, severity: "critical", category: "security", message: "Avoid eval()", suggestion: "Use JSON.parse()" },
+    { pattern: /==(?!=)/g, severity: "warning", category: "best-practice", message: "Use strict equality (===)", suggestion: "Replace == with ===" },
+    { pattern: /var\s+\w+/g, severity: "info", category: "best-practice", message: "Avoid var", suggestion: "Use const or let" }
+  ],
+  typescript: [
+    { pattern: /:\s*any\b/g, severity: "warning", category: "best-practice", message: "Avoid 'any' type", suggestion: "Use a more specific type or 'unknown'" },
+    { pattern: /\beval\s*\(/g, severity: "critical", category: "security", message: "Avoid eval()", suggestion: "Use JSON.parse()" },
+    { pattern: /@ts-ignore/g, severity: "warning", category: "maintainability", message: "Avoid ts-ignore", suggestion: "Fix the type error or use @ts-expect-error" }
+  ],
+  python: [
+    { pattern: /\beval\s*\(/g, severity: "critical", category: "security", message: "Avoid eval()", suggestion: "Use ast.literal_eval()" },
+    { pattern: /\bos\.system\s*\(/g, severity: "critical", category: "security", message: "Insecure command execution", suggestion: "Use subprocess.run() with shell=False" },
+    { pattern: /except:\s*$/gm, severity: "critical", category: "best-practice", message: "Bare except block", suggestion: "Catch specific exceptions" }
+  ],
+  java: [
+    { pattern: /\.printStackTrace\(\)/g, severity: "warning", category: "best-practice", message: "Avoid printStackTrace()", suggestion: "Use a proper logger (SLF4J, Log4j2)" },
+    { pattern: /System\.out\.print/g, severity: "warning", category: "best-practice", message: "Avoid System.out.println", suggestion: "Use a logger" },
+    { pattern: /catch\s*\(Exception\s+e\)/g, severity: "warning", category: "best-practice", message: "Catching generic Exception", suggestion: "Catch specific checked exceptions" },
+    { pattern: /new\s+Thread\s*\(/g, severity: "info", category: "performance", message: "Manual thread creation", suggestion: "Use an ExecutorService" }
+  ],
+  php: [
+    { pattern: /\b(eval|exec|system|passthru|shell_exec)\s*\(/g, severity: "critical", category: "security", message: "Dangerous function execution", suggestion: "Avoid these functions as they are prone to injection" },
+    { pattern: /\$_GET| \$_POST| \$_REQUEST/g, severity: "warning", category: "security", message: "Direct superglobal access", suggestion: "Use filter_input() or a framework request object" },
+    { pattern: /mysql_query\s*\(/g, severity: "critical", category: "security", message: "Deprecated MySQL extension", suggestion: "Use PDO or MySQLi with prepared statements" },
+    { pattern: /@\w+\s*\(/g, severity: "warning", category: "best-practice", message: "Error suppression operator used (@)", suggestion: "Handle errors properly instead of suppressing them" }
+  ],
+  csharp: [
+    { pattern: /\bpublic\s+\w+\s+\w+;/g, severity: "warning", category: "best-practice", message: "Public field detected", suggestion: "Use properties with { get; set; } instead" },
+    { pattern: /catch\s*\{\s*\}/g, severity: "critical", category: "maintainability", message: "Empty catch block", suggestion: "Log or handle the exception" },
+    { pattern: /\.Result\b|\.Wait\(\)/g, severity: "warning", category: "performance", message: "Sync-over-async detected", suggestion: "Use await instead" }
+  ],
+  go: [
+    { pattern: /panic\s*\(/g, severity: "warning", category: "best-practice", message: "Use of panic()", suggestion: "Return an error instead of panicking" },
+    { pattern: /if\s+err\s*!=\s*nil\s*{\s*}/g, severity: "critical", category: "maintainability", message: "Empty error check", suggestion: "Handle or return the error" }
+  ],
+  rust: [
+    { pattern: /\.unwrap\(\)/g, severity: "warning", category: "best-practice", message: "Potential panic with .unwrap()", suggestion: "Use .expect() or handle the Option/Result" },
+    { pattern: /\bunsafe\b/g, severity: "info", category: "security", message: "Unsafe block detected", suggestion: "Ensure safety invariants are upheld" }
+  ]
+};
 
 function findLineNumber(code: string, index: number): number {
   return code.slice(0, index).split("\n").length;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Reserved for language-specific patterns
-function detectIssues(code: string, _language: SupportedLanguage): CodeIssue[] {
+export function detectIssues(code: string, language: SupportedLanguage): CodeIssue[] {
   const issues: CodeIssue[] = [];
-  const allPatterns = [...SECURITY_PATTERNS, ...QUALITY_PATTERNS];
+  const patterns = [...COMMON_PATTERNS, ...(LANGUAGE_PATTERNS[language] || [])];
 
-  for (const patternDef of allPatterns) {
+  for (const patternDef of patterns) {
     const regex = new RegExp(patternDef.pattern.source, patternDef.pattern.flags);
     let match;
 
     while ((match = regex.exec(code)) !== null) {
-      const issue: CodeIssue = {
+      issues.push({
         line: findLineNumber(code, match.index),
         severity: patternDef.severity,
         category: patternDef.category,
         message: patternDef.message,
-      };
-      if (patternDef.suggestion) {
-        issue.suggestion = patternDef.suggestion;
-      }
-      issues.push(issue);
+        suggestion: patternDef.suggestion,
+      });
     }
   }
 
-  return issues.sort((a, b) => {
-    const severityOrder = { critical: 0, warning: 1, info: 2 };
-    return severityOrder[a.severity] - severityOrder[b.severity];
-  });
+  return issues.sort((a, b) => a.line - b.line);
 }
 
-function calculateMetrics(code: string): CodeMetrics {
+export function calculateMetrics(code: string): CodeMetrics {
   const lines = code.split("\n");
-  const totalLines = lines.length;
-
-  let commentLines = 0;
-  let blankLines = 0;
-  let codeLines = 0;
-  let inMultilineComment = false;
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-
-    if (trimmed === "") {
-      blankLines++;
-      continue;
-    }
-
-    if (inMultilineComment) {
-      commentLines++;
-      if (trimmed.includes("*/")) {
-        inMultilineComment = false;
-      }
-      continue;
-    }
-
-    if (trimmed.startsWith("/*")) {
-      commentLines++;
-      if (!trimmed.includes("*/")) {
-        inMultilineComment = true;
-      }
-      continue;
-    }
-
-    if (trimmed.startsWith("//") || trimmed.startsWith("#")) {
-      commentLines++;
-      continue;
-    }
-
-    codeLines++;
-  }
-
-  // Simplified complexity calculation
-  const branchKeywords = /\b(if|else|for|while|switch|case|catch|&&|\|\||\?)\b/g;
-  const matches = code.match(branchKeywords);
-  const complexity = 1 + (matches?.length ?? 0);
-
-  // Maintainability Index (simplified)
-  const avgLineLength = code.length / Math.max(totalLines, 1);
-  const commentRatio = commentLines / Math.max(codeLines, 1);
-  const maintainabilityIndex = Math.min(
-    100,
-    Math.max(
-      0,
-      100 - complexity * 2 - avgLineLength * 0.1 + commentRatio * 20
-    )
-  );
+  const complexityKeywords = /\b(if|for|while|case|&&|\|\||catch|map|filter|reduce)\b/g;
+  const complexity = 1 + (code.match(complexityKeywords)?.length ?? 0);
+  
+  const codeLines = lines.filter(l => l.trim() && !l.trim().startsWith("//") && !l.trim().startsWith("#")).length;
+  const commentLines = lines.length - codeLines - lines.filter(l => !l.trim()).length;
 
   return {
-    totalLines,
+    totalLines: lines.length,
     codeLines,
     commentLines,
-    blankLines,
+    blankLines: lines.length - codeLines - commentLines,
     complexity,
-    maintainabilityIndex: Math.round(maintainabilityIndex),
+    maintainabilityIndex: Math.max(0, 100 - (complexity * 3) - (lines.length / 10))
   };
+}
+
+export function reviewCode(code: string, language: SupportedLanguage): CodeReviewResult {
+  const issues = detectIssues(code, language);
+  const metrics = calculateMetrics(code);
+  const refactoredCode = generateRefactoredCode(code, language, issues);
+  
+  let score = 100;
+  issues.forEach(i => {
+    if (i.severity === "critical") score -= 20;
+    if (i.severity === "warning") score -= 10;
+    if (i.severity === "info") score -= 2;
+  });
+
+  return {
+    id: crypto.randomUUID(),
+    code,
+    language,
+    issues,
+    metrics,
+    suggestions: generateSuggestions(issues, metrics),
+    overallScore: Math.max(0, score),
+    reviewedAt: new Date().toISOString(),
+    refactoredCode
+  };
+}
+
+function generateRefactoredCode(code: string, language: SupportedLanguage, issues: CodeIssue[]): string {
+  let refactored = code;
+
+  // Generic refactors
+  if (language === "javascript" || language === "typescript") {
+    refactored = refactored.replace(/\bvar\s+/g, "const ");
+    refactored = refactored.replace(/==(?!=)/g, "===");
+    refactored = refactored.replace(/!=(?!=)/g, "!==");
+  }
+
+  if (language === "java") {
+    refactored = refactored.replace(/\.printStackTrace\(\)/g, ".error(e.getMessage(), e)");
+    refactored = refactored.replace(/System\.out\.println/g, "logger.info");
+  }
+
+  if (language === "php") {
+    refactored = refactored.replace(/mysql_query\s*\(/g, "$pdo->query(");
+  }
+
+  // If no changes were made and there are critical issues, we don't return refactored code
+  // unless we have specific logic for it.
+  return refactored !== code ? refactored : "";
 }
 
 function generateSuggestions(issues: CodeIssue[], metrics: CodeMetrics): string[] {
   const suggestions: string[] = [];
-
-  const criticalCount = issues.filter((i) => i.severity === "critical").length;
-  const warningCount = issues.filter((i) => i.severity === "warning").length;
-
-  if (criticalCount > 0) {
-    suggestions.push(
-      `Address ${criticalCount} critical issue${criticalCount > 1 ? "s" : ""} immediately`
-    );
-  }
-
-  if (warningCount > 3) {
-    suggestions.push("Consider a code quality review session to address warnings");
-  }
-
-  if (metrics.complexity > 10) {
-    suggestions.push("High cyclomatic complexity - consider breaking into smaller functions");
-  }
-
-  if (metrics.commentLines === 0 && metrics.codeLines > 20) {
-    suggestions.push("Add comments to explain complex logic");
-  }
-
-  if (metrics.maintainabilityIndex < 50) {
-    suggestions.push("Low maintainability score - consider refactoring");
-  }
-
-  const hasSecurityIssues = issues.some((i) => i.category === "security");
-  if (hasSecurityIssues) {
-    suggestions.push("Security vulnerabilities detected - prioritize fixing them");
-  }
-
-  if (suggestions.length === 0) {
-    suggestions.push("Code looks good! Keep following best practices.");
-  }
-
+  if (issues.some(i => i.category === "security")) suggestions.push("Prioritize fixing security vulnerabilities");
+  if (metrics.complexity > 10) suggestions.push("Consider refactoring complex logic into smaller functions");
+  if (metrics.maintainabilityIndex < 60) suggestions.push("Improve code maintainability by reducing function size and adding documentation");
+  if (suggestions.length === 0) suggestions.push("Code quality is excellent, keep following these patterns!");
   return suggestions;
-}
-
-function calculateScore(issues: CodeIssue[], metrics: CodeMetrics): number {
-  let score = 100;
-
-  for (const issue of issues) {
-    switch (issue.severity) {
-      case "critical":
-        score -= 15;
-        break;
-      case "warning":
-        score -= 5;
-        break;
-      case "info":
-        score -= 1;
-        break;
-    }
-  }
-
-  // Adjust for metrics
-  if (metrics.complexity > 15) score -= 10;
-  else if (metrics.complexity > 10) score -= 5;
-
-  if (metrics.maintainabilityIndex < 40) score -= 10;
-  else if (metrics.maintainabilityIndex < 60) score -= 5;
-
-  return Math.max(0, Math.min(100, score));
-}
-
-export function reviewCode(
-  code: string,
-  language: SupportedLanguage
-): CodeReviewResult {
-  const trimmedCode = code.trim();
-  const issues = detectIssues(trimmedCode, language);
-  const metrics = calculateMetrics(trimmedCode);
-  const suggestions = generateSuggestions(issues, metrics);
-  const overallScore = calculateScore(issues, metrics);
-
-  return {
-    id: crypto.randomUUID(),
-    code: trimmedCode,
-    language,
-    issues,
-    metrics,
-    suggestions,
-    overallScore,
-    reviewedAt: new Date().toISOString(),
-  };
 }

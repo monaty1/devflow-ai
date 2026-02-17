@@ -1,512 +1,348 @@
 "use client";
 
-import { Card, Button } from "@heroui/react";
+import { useState, useMemo, useCallback } from "react";
+import {
+  Card,
+  Button,
+  Input,
+  Tabs,
+  Tab,
+  Chip,
+  Progress,
+  Tooltip,
+} from "@heroui/react";
 import {
   Regex,
-  CheckCircle2,
-  XCircle,
   Sparkles,
-  FlaskConical,
-  AlertCircle,
-  Trash2,
+  Search,
+  Zap,
+  RotateCcw,
+  ShieldCheck,
+  ShieldAlert,
+  AlertTriangle,
+  Info,
+  TextCursorInput,
+  Play,
+  Copy,
+  ChevronRight,
+  ListRestart,
+  Wand2,
 } from "lucide-react";
 import { useRegexHumanizer } from "@/hooks/use-regex-humanizer";
 import { useTranslation } from "@/hooks/use-translation";
-import { CopyButton } from "@/components/shared/copy-button";
 import { ToolHeader } from "@/components/shared/tool-header";
-import type { RegexMode } from "@/types/regex-humanizer";
-
-// Token type to color mapping
-const TOKEN_COLORS: Record<string, string> = {
-  anchor: "bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200",
-  group: "bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200",
-  quantifier: "bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-200",
-  charClass: "bg-green-50 text-green-800 dark:bg-green-950 dark:text-green-300",
-  escape: "bg-gray-100 text-gray-900 dark:bg-gray-700/30 dark:text-gray-200",
-  literal: "text-foreground",
-  alternation: "bg-pink-100 text-pink-900 dark:bg-pink-900/30 dark:text-pink-200",
-  flag: "bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-200",
-};
+import { CopyButton } from "@/components/shared/copy-button";
+import { DataTable, type ColumnConfig } from "@/components/ui";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { cn } from "@/lib/utils";
+import type { RegexGroup } from "@/types/regex-humanizer";
 
 export default function RegexHumanizerPage() {
   const { t } = useTranslation();
-
-  const TABS: { id: RegexMode; label: string; icon: typeof Regex }[] = [
-    { id: "explain", label: t("regex.tabExplain"), icon: Regex },
-    { id: "generate", label: t("regex.tabGenerate"), icon: Sparkles },
-    { id: "test", label: t("regex.tabTest"), icon: FlaskConical },
-  ];
-
   const {
-    mode,
     pattern,
-    description,
-    testInput,
-    analysis,
-    generatedPattern,
+    explanation,
     testResult,
-    isLoading,
-    error,
-    commonPatterns,
-    setMode,
+    isExplaining,
+    isGenerating,
     setPattern,
-    setDescription,
-    setTestInput,
     explain,
     generate,
     test,
     reset,
-    loadPreset,
-    isValidRegex,
   } = useRegexHumanizer();
 
-  const handleSubmit = () => {
-    if (mode === "explain") explain();
-    else if (mode === "generate") generate();
-    else if (mode === "test") test();
+  const [testText, setTestText] = useState("john.doe@example.com, test@devflow.ai, invalid-email");
+  const [activeTab, setActiveTab] = useState<"explain" | "generate" | "test">("explain");
+
+  const handleTest = useCallback(() => {
+    test(pattern, testText);
+  }, [pattern, testText, test]);
+
+  const groupColumns: ColumnConfig[] = [
+    { name: "INDEX", uid: "index", sortable: true },
+    { name: "PATTERN", uid: "pattern" },
+    { name: "EXPLANATION", uid: "description" },
+  ];
+
+  const renderGroupCell = (group: RegexGroup, columnKey: React.Key) => {
+    switch (columnKey) {
+      case "index":
+        return <span className="font-bold text-primary">#{group.index}</span>;
+      case "pattern":
+        return <code className="bg-muted px-1.5 py-0.5 rounded text-xs">{group.pattern}</code>;
+      case "description":
+        return <span className="text-sm">{group.description}</span>;
+      default:
+        return (group as any)[columnKey];
+    }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="mx-auto max-w-6xl space-y-6">
       <ToolHeader
         icon={Regex}
-        gradient="from-cyan-500 to-blue-600"
+        gradient="from-pink-500 to-rose-600"
         title={t("regex.title")}
         description={t("regex.description")}
         breadcrumb
+        actions={
+          <Button variant="outline" size="sm" onPress={reset} className="gap-2">
+            <RotateCcw className="size-4" />
+            {t("common.reset")}
+          </Button>
+        }
       />
 
-      {/* Tabs */}
-      <div className="flex flex-wrap gap-2">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setMode(tab.id)}
-            aria-current={mode === tab.id ? "true" : undefined}
-            className={`flex items-center gap-2 rounded-lg border-2 px-4 py-2.5 transition-all ${
-              mode === tab.id
-                ? "border-primary bg-primary/10"
-                : "border-border hover:border-primary/50"
-            }`}
+      <div className="grid gap-6 lg:grid-cols-5">
+        {/* Pattern Input & Generation */}
+        <Card className="p-6 lg:col-span-2 flex flex-col gap-6">
+          <Tabs 
+            selectedKey={activeTab} 
+            onSelectionChange={(key) => setActiveTab(key as any)}
+            variant="underlined"
+            classNames={{ tabList: "gap-6", cursor: "w-full bg-primary" }}
           >
-            <tab.icon className="size-4" />
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Input Panel */}
-        <Card className="p-6">
-          <h2 className="mb-4 text-lg font-semibold">
-            {mode === "explain" && t("regex.regularExpression")}
-            {mode === "generate" && t("regex.descriptionLabel")}
-            {mode === "test" && t("regex.patternAndText")}
-          </h2>
-
-          {/* Explain Mode */}
-          {mode === "explain" && (
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="regex-explain-input" className="mb-2 block text-sm font-medium text-muted-foreground">
-                  {t("regex.enterRegex")}
-                </label>
-                <div className="relative">
-                  <input
-                    id="regex-explain-input"
-                    type="text"
-                    value={pattern}
-                    onChange={(e) => setPattern(e.target.value)}
-                    placeholder="^[a-zA-Z0-9]+@[a-z]+\.[a-z]{2,}$"
-                    className="w-full rounded-lg border border-border bg-background px-4 py-3 font-mono text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                  {pattern && !isValidRegex(pattern) && (
-                    <div className="mt-2 flex items-center gap-2 text-sm text-red-500">
-                      <AlertCircle className="size-4" />
-                      {t("regex.invalidRegex")}
-                    </div>
-                  )}
+            <Tab 
+              key="explain" 
+              title={
+                <div className="flex items-center gap-2">
+                  <Search className="size-4" />
+                  <span>Explain</span>
                 </div>
-              </div>
-
-              {/* Presets */}
-              <div>
-                <label className="mb-2 block text-sm font-medium text-muted-foreground">
-                  {t("regex.commonPatterns")}
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {commonPatterns.map((preset) => (
-                    <button
-                      key={preset.id}
-                      type="button"
-                      onClick={() => loadPreset(preset.id)}
-                      className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/80"
-                    >
-                      {preset.name}
-                    </button>
-                  ))}
+              }
+            />
+            <Tab 
+              key="generate" 
+              title={
+                <div className="flex items-center gap-2">
+                  <Wand2 className="size-4" />
+                  <span>Generate</span>
                 </div>
-              </div>
-            </div>
-          )}
+              }
+            />
+          </Tabs>
 
-          {/* Generate Mode */}
-          {mode === "generate" && (
+          {activeTab === "explain" ? (
             <div className="space-y-4">
-              <div>
-                <label htmlFor="regex-description-input" className="mb-2 block text-sm font-medium text-muted-foreground">
-                  {t("regex.describeNeed")}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                  Regex Pattern
                 </label>
                 <textarea
-                  id="regex-description-input"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="E.g.: phone number with 10 digits starting with 1"
-                  rows={4}
-                  className="w-full resize-none rounded-lg border border-border bg-background px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-
-              <div className="rounded-lg bg-muted/50 p-4">
-                <h4 className="mb-2 text-sm font-medium">{t("regex.exampleDescs")}</h4>
-                <ul className="space-y-1 text-xs text-muted-foreground">
-                  <li>• &quot;valid email&quot;</li>
-                  <li>• &quot;US phone number&quot;</li>
-                  <li>• &quot;5 digits&quot;</li>
-                  <li>• &quot;ISO date (YYYY-MM-DD)&quot;</li>
-                  <li>• &quot;strong password&quot;</li>
-                </ul>
-              </div>
-            </div>
-          )}
-
-          {/* Test Mode */}
-          {mode === "test" && (
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="regex-test-pattern" className="mb-2 block text-sm font-medium text-muted-foreground">
-                  {t("regex.testRegex")}
-                </label>
-                <input
-                  id="regex-test-pattern"
-                  type="text"
                   value={pattern}
                   onChange={(e) => setPattern(e.target.value)}
-                  placeholder="/^\d{3}-\d{2}-\d{4}$/gi"
-                  className="w-full rounded-lg border border-border bg-background px-4 py-3 font-mono text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  placeholder="/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi"
+                  className="h-32 w-full resize-none rounded-xl border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-inner transition-all"
                 />
               </div>
-
-              <div>
-                <label htmlFor="regex-test-text" className="mb-2 block text-sm font-medium text-muted-foreground">
-                  {t("regex.testText")}
+              <Button 
+                onPress={() => explain(pattern)} 
+                isLoading={isExplaining}
+                color="primary"
+                className="w-full h-12 font-bold shadow-lg shadow-primary/20"
+              >
+                Analyze Pattern
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                  Natural Language Description
                 </label>
                 <textarea
-                  id="regex-test-text"
-                  value={testInput}
-                  onChange={(e) => setTestInput(e.target.value)}
-                  placeholder="Enter text to search for matches..."
-                  rows={4}
-                  className="w-full resize-none rounded-lg border border-border bg-background px-4 py-3 font-mono text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  placeholder="E.g.: A valid email address with optional plus signs"
+                  className="h-32 w-full resize-none rounded-xl border border-border bg-background p-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-inner transition-all"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      generate(e.currentTarget.value);
+                    }
+                  }}
                 />
               </div>
-
-              {/* Quick test presets */}
-              <div className="flex flex-wrap gap-2">
-                {commonPatterns.slice(0, 4).map((preset) => (
-                  <button
-                    key={preset.id}
-                    type="button"
-                    onClick={() => {
-                      loadPreset(preset.id);
-                      setTestInput(preset.examples[0] || "");
-                    }}
-                    className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/80"
-                  >
-                    {preset.name}
-                  </button>
-                ))}
-              </div>
+              <p className="text-[10px] text-muted-foreground italic">Press Enter to generate instantly</p>
             </div>
           )}
 
-          {/* Error Display */}
-          {error && (
-            <div role="alert" className="mt-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
-              <AlertCircle className="size-4 shrink-0" />
-              {error}
+          {/* Quick Cheat Sheet */}
+          <div className="mt-auto border-t border-divider pt-4">
+            <h4 className="text-[10px] font-bold text-muted-foreground uppercase mb-3">Quick Reference</h4>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { s: "\\d", d: "Digit" }, { s: "\\w", d: "Word" },
+                { s: "\\s", d: "Space" }, { s: ".", d: "Any" },
+                { s: "^", d: "Start" }, { s: "$", d: "End" }
+              ].map(ref => (
+                <div key={ref.s} className="flex justify-between items-center px-2 py-1 bg-muted/30 rounded text-[10px] font-mono">
+                  <span className="text-primary font-bold">{ref.s}</span>
+                  <span className="opacity-60">{ref.d}</span>
+                </div>
+              ))}
             </div>
-          )}
-
-          {/* Actions */}
-          <div className="mt-6 flex gap-3">
-            <Button
-              onPress={handleSubmit}
-              isPending={isLoading}
-              className="flex-1"
-            >
-              {mode === "explain" && t("regex.explain")}
-              {mode === "generate" && t("regex.tabGenerate")}
-              {mode === "test" && t("regex.test")}
-            </Button>
-            <Button variant="outline" onPress={reset}>
-              <Trash2 className="size-4" />
-            </Button>
           </div>
         </Card>
 
-        {/* Output Panel */}
-        <Card className="p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">{t("common.result")}</h2>
-            {(analysis || generatedPattern || testResult) && (
-              <CopyButton
-                getText={() =>
-                  analysis?.explanation ||
-                  generatedPattern ||
-                  JSON.stringify(testResult, null, 2) ||
-                  ""
-                }
-              />
-            )}
-          </div>
+        {/* Results Panel */}
+        <div className="lg:col-span-3 space-y-6">
+          {explanation ? (
+            <>
+              {/* Safety & Overview */}
+              <div className="grid gap-4 sm:grid-cols-3">
+                <Card className="p-6 col-span-1 flex flex-col items-center justify-center text-center">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase mb-3">Safety Score</p>
+                  <div className="relative mb-2">
+                    <svg className="size-20 transform -rotate-90">
+                      <circle cx="40" cy="40" r="32" stroke="currentColor" strokeWidth="6" fill="transparent" className="text-muted" />
+                      <circle
+                        cx="40" cy="40" r="32" stroke="currentColor" strokeWidth="6" fill="transparent"
+                        strokeDasharray={201}
+                        strokeDashoffset={201 - (201 * (explanation.safetyScore || 0)) / 100}
+                        className={cn(
+                          "transition-all duration-1000",
+                          explanation.isDangerous ? "text-danger" : "text-emerald-500"
+                        )}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center font-bold text-xl">
+                      {explanation.safetyScore}%
+                    </div>
+                  </div>
+                  <StatusBadge variant={explanation.isDangerous ? "danger" : "success"}>
+                    {explanation.isDangerous ? "Vulnerable" : "Secure"}
+                  </StatusBadge>
+                </Card>
 
-          {/* Explain Result */}
-          {mode === "explain" && analysis && (
-            <div className="space-y-4">
-              {/* Syntax Highlighted Pattern */}
-              <div className="rounded-lg bg-muted/50 p-4">
-                <h4 className="mb-2 text-sm font-medium">{t("regex.pattern")}</h4>
-                <div className="flex flex-wrap gap-1 font-mono text-sm">
-                  {analysis.tokens.map((token, i) => (
-                    <span
-                      key={i}
-                      className={`rounded px-1 ${TOKEN_COLORS[token.type]}`}
-                      title={token.description}
-                    >
-                      {token.value}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Color Legend */}
-              <div className="flex flex-wrap gap-2 text-xs">
-                <span className={`rounded px-2 py-0.5 ${TOKEN_COLORS["anchor"]}`}>
-                  {t("regex.anchors")}
-                </span>
-                <span className={`rounded px-2 py-0.5 ${TOKEN_COLORS["group"]}`}>
-                  {t("regex.groups")}
-                </span>
-                <span className={`rounded px-2 py-0.5 ${TOKEN_COLORS["quantifier"]}`}>
-                  {t("regex.quantifiers")}
-                </span>
-                <span className={`rounded px-2 py-0.5 ${TOKEN_COLORS["charClass"]}`}>
-                  {t("regex.classes")}
-                </span>
-                <span className={`rounded px-2 py-0.5 ${TOKEN_COLORS["escape"]}`}>
-                  {t("regex.escapes")}
-                </span>
-              </div>
-
-              {/* Explanation */}
-              <div className="rounded-lg border border-border p-4">
-                <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground">
-                  {analysis.explanation}
-                </pre>
-              </div>
-
-              {/* Groups */}
-              {analysis.groups.length > 0 && (
-                <div className="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
-                  <h4 className="mb-2 font-medium text-blue-700 dark:text-blue-300">
-                    {t("regex.captureGroups", { count: analysis.groups.length })}
-                  </h4>
-                  <ul className="space-y-2 text-sm">
-                    {analysis.groups.map((group) => (
-                      <li key={group.index} className="flex items-start gap-2">
-                        <span className="rounded bg-blue-200 px-1.5 py-0.5 font-mono text-xs dark:bg-blue-800">
-                          ${group.index}
-                        </span>
-                        <span className="text-muted-foreground">
-                          {group.description}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Generate Result */}
-          {mode === "generate" && generatedPattern && (
-            <div className="space-y-4">
-              <div className="rounded-lg bg-green-50 p-4 dark:bg-green-900/20">
-                <h4 className="mb-2 font-medium text-green-700 dark:text-green-300">
-                  {t("regex.generatedPattern")}
-                </h4>
-                <code className="block rounded bg-green-100 p-3 font-mono text-sm dark:bg-green-900/30">
-                  {generatedPattern}
-                </code>
-              </div>
-
-              <p className="text-sm text-muted-foreground">
-                {t("regex.testPatternHint")}
-              </p>
-
-              <Button
-                variant="outline"
-                onPress={() => {
-                  setMode("test");
-                  setPattern(generatedPattern);
-                }}
-              >
-                {t("regex.testThisPattern")}
-              </Button>
-            </div>
-          )}
-
-          {/* Test Result */}
-          {mode === "test" && testResult && (
-            <div className="space-y-4">
-              {/* Match Status */}
-              <div
-                className={`flex items-center gap-3 rounded-lg p-4 ${
-                  testResult.matches
-                    ? "bg-green-50 dark:bg-green-900/20"
-                    : "bg-red-50 dark:bg-red-900/20"
-                }`}
-              >
-                <span className="text-2xl">
-                  {testResult.matches ? <CheckCircle2 className="size-7 text-green-600 dark:text-green-400" /> : <XCircle className="size-7 text-red-600 dark:text-red-400" />}
-                </span>
-                <div>
-                  <p
-                    className={`font-medium ${
-                      testResult.matches
-                        ? "text-green-700 dark:text-green-300"
-                        : "text-red-700 dark:text-red-300"
-                    }`}
-                  >
-                    {testResult.matches
-                      ? t("regex.matchesFound", { count: testResult.allMatches.length })
-                      : t("regex.noMatches")}
-                  </p>
-                  {!testResult.isValid && (
-                    <p className="text-sm text-red-600">{testResult.error}</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Matches List */}
-              {testResult.allMatches.length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="font-medium">{t("regex.matches")}</h4>
-                  {testResult.allMatches.map((match, i) => (
-                    <div
-                      key={i}
-                      className="rounded-lg border border-border p-3"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="rounded bg-green-100 px-2 py-0.5 font-mono text-sm dark:bg-green-900/30">
-                          {match.match}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          index: {match.index}
-                        </span>
+                <Card className="p-6 col-span-2">
+                  <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
+                    <Info className="size-4 text-primary" />
+                    Structural Breakdown
+                  </h3>
+                  <div className="space-y-3">
+                    {explanation.warnings.length > 0 ? (
+                      explanation.warnings.map((w, i) => (
+                        <div key={i} className="flex items-start gap-2 p-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 rounded-lg">
+                          <AlertTriangle className="size-4 text-amber-600 mt-0.5" />
+                          <p className="text-xs text-amber-800 dark:text-amber-200">{w}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="flex items-center gap-2 p-2 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-lg">
+                        <ShieldCheck className="size-4 text-emerald-600" />
+                        <p className="text-xs text-emerald-800 dark:text-emerald-200">No catastrophic backtracking detected.</p>
                       </div>
+                    )}
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      <StatusBadge variant="info">{explanation.tokens.length} Tokens</StatusBadge>
+                      <StatusBadge variant="purple">{explanation.groups.length} Groups</StatusBadge>
+                      {explanation.commonPattern && (
+                        <StatusBadge variant="success">{explanation.commonPattern}</StatusBadge>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              </div>
 
-                      {Object.keys(match.groups).length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {Object.entries(match.groups).map(([key, value]) => (
-                            <span
-                              key={key}
-                              className="rounded bg-blue-100 px-2 py-0.5 text-xs dark:bg-blue-900/30"
-                            >
-                              {key}: {value}
-                            </span>
-                          ))}
+              {/* Dynamic Tabs for Analysis/Test */}
+              <Card className="overflow-hidden">
+                <Tabs 
+                  aria-label="Result Tabs"
+                  classNames={{
+                    base: "w-full",
+                    tabList: "w-full bg-muted/50 rounded-none border-b border-divider",
+                    tab: "h-12",
+                    cursor: "bg-primary",
+                  }}
+                >
+                  <Tab key="explanation" title="Explanation">
+                    <div className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-bold">Human Readable Logic</h3>
+                        <CopyButton text={explanation.explanation} />
+                      </div>
+                      <pre className="text-sm font-mono leading-relaxed bg-muted/30 p-4 rounded-xl whitespace-pre-wrap">
+                        {explanation.explanation}
+                      </pre>
+                    </div>
+                  </Tab>
+                  <Tab key="groups" title="Groups">
+                    <div className="p-0">
+                      <DataTable
+                        columns={groupColumns}
+                        data={explanation.groups.map(g => ({ ...g, id: g.index }))}
+                        filterField="description"
+                        renderCell={renderGroupCell}
+                        emptyContent="No capture groups found in this pattern."
+                      />
+                    </div>
+                  </Tab>
+                  <Tab key="test" title="Interactive Test">
+                    <div className="p-6 space-y-4">
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase">Sample Text to Test</label>
+                        <textarea
+                          value={testText}
+                          onChange={(e) => setTestText(e.target.value)}
+                          className="h-32 w-full resize-none rounded-xl border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                      </div>
+                      <Button onPress={handleTest} color="primary" variant="flat" className="w-full">
+                        <Play className="size-4 mr-2" /> Run Test Matches
+                      </Button>
+
+                      {testResult && (
+                        <div className="mt-4 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-bold">Matches Found: {testResult.allMatches.length}</span>
+                            <StatusBadge variant={testResult.matches ? "success" : "warning"}>
+                              {testResult.matches ? "Matching" : "No Matches"}
+                            </StatusBadge>
+                          </div>
+                          
+                          {testResult.allMatches.length > 0 && (
+                            <div className="max-h-48 overflow-y-auto border border-divider rounded-xl divide-y divide-divider bg-muted/10">
+                              {testResult.allMatches.map((m, i) => (
+                                <div key={i} className="p-3 text-xs flex flex-col gap-2">
+                                  <div className="flex justify-between">
+                                    <span className="font-mono bg-primary/10 text-primary px-1.5 rounded">Match {i + 1}</span>
+                                    <span className="text-muted-foreground italic">Index: {m.index}</span>
+                                  </div>
+                                  <p className="font-mono break-all font-bold">"{m.match}"</p>
+                                  {Object.keys(m.groups).length > 0 && (
+                                    <div className="flex flex-wrap gap-2 mt-1">
+                                      {Object.entries(m.groups).map(([key, val]) => (
+                                        <div key={key} className="flex items-center gap-1.5 bg-muted px-2 py-0.5 rounded border border-border/50">
+                                          <span className="font-bold opacity-50">{key}:</span>
+                                          <span className="font-mono text-primary">{val}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Highlighted Text Preview */}
-              {testResult.matches && testInput && (
-                <div className="rounded-lg bg-muted/50 p-4">
-                  <h4 className="mb-2 text-sm font-medium">{t("regex.preview")}</h4>
-                  <HighlightedText
-                    text={testInput}
-                    matches={testResult.allMatches}
-                  />
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Empty State */}
-          {!analysis && !generatedPattern && !testResult && (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <Regex className="mb-4 size-12 text-muted-foreground/30" />
-              <p className="text-muted-foreground">
-                {mode === "explain" && t("regex.emptyExplain")}
-                {mode === "generate" && t("regex.emptyGenerate")}
-                {mode === "test" && t("regex.emptyTest")}
+                  </Tab>
+                </Tabs>
+              </Card>
+            </>
+          ) : (
+            <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center">
+              <div className="size-20 bg-muted rounded-full flex items-center justify-center mb-6">
+                <Regex className="size-10 text-muted-foreground/40" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Ready to Decode</h3>
+              <p className="text-muted-foreground max-w-xs">
+                Paste a complex regex pattern or describe what you need to get a human-friendly analysis.
               </p>
-            </div>
+            </Card>
           )}
-        </Card>
+        </div>
       </div>
     </div>
   );
-}
-
-// Component to highlight matches in text
-function HighlightedText({
-  text,
-  matches,
-}: {
-  text: string;
-  matches: { match: string; index: number }[];
-}) {
-  if (matches.length === 0) return <span>{text}</span>;
-
-  const parts: React.ReactNode[] = [];
-  let lastIndex = 0;
-
-  // Sort matches by index
-  const sortedMatches = [...matches].sort((a, b) => a.index - b.index);
-
-  for (const match of sortedMatches) {
-    // Add text before match
-    if (match.index > lastIndex) {
-      parts.push(
-        <span key={`text-${lastIndex}`}>{text.slice(lastIndex, match.index)}</span>
-      );
-    }
-
-    // Add highlighted match
-    parts.push(
-      <mark
-        key={`match-${match.index}`}
-        className="rounded bg-yellow-200 px-0.5 dark:bg-yellow-700/50"
-      >
-        {match.match}
-      </mark>
-    );
-
-    lastIndex = match.index + match.match.length;
-  }
-
-  // Add remaining text
-  if (lastIndex < text.length) {
-    parts.push(<span key={`text-${lastIndex}`}>{text.slice(lastIndex)}</span>);
-  }
-
-  return <span className="font-mono text-sm">{parts}</span>;
 }

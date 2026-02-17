@@ -8,6 +8,7 @@ export interface PromptAnalysisResult {
   securityFlags: SecurityFlag[];
   analyzedAt: string;
   tokenCount: number;
+  refinedPrompt?: string;
 }
 
 export type ScoreCategory =
@@ -30,7 +31,17 @@ export type IssueType =
   | "no_output_format"
   | "too_long"
   | "redundant"
-  | "missing_role";
+  | "missing_role"
+  | "vague_terms"
+  | "no_constraints"
+  | "no_success_criteria"
+  | "no_audience"
+  | "missing_examples"
+  | "no_chain_of_thought"
+  | "missing_delimiters"
+  | "poor_structure"
+  | "payload_splitting_risk"
+  | "virtualization_risk";
 
 export interface SecurityFlag {
   type: SecurityFlagType;

@@ -1,322 +1,256 @@
 "use client";
 
-import { useState } from "react";
-import { Card, Button } from "@heroui/react";
+import { useState, useMemo, useCallback } from "react";
+import {
+  Card,
+  Button,
+  Input,
+  Tabs,
+  Tab,
+  Chip,
+  Tooltip,
+} from "@heroui/react";
 import {
   Clock,
-  AlertCircle,
   Calendar,
-  Zap,
   RotateCcw,
-  Save,
-  History,
-  Trash2,
+  Sparkles,
+  Info,
+  Play,
+  Copy,
   ChevronRight,
+  Terminal,
+  Zap,
+  Cloud,
+  Github,
+  Code2,
+  Box,
 } from "lucide-react";
 import { useCronBuilder } from "@/hooks/use-cron-builder";
 import { useTranslation } from "@/hooks/use-translation";
-import { CopyButton } from "@/components/shared/copy-button";
 import { ToolHeader } from "@/components/shared/tool-header";
-import type { CronField } from "@/types/cron-builder";
-import { CRON_FIELD_LABELS, CRON_FIELD_RANGES } from "@/types/cron-builder";
-
-const FIELD_ORDER: CronField[] = ["minute", "hour", "dayOfMonth", "month", "dayOfWeek"];
+import { CopyButton } from "@/components/shared/copy-button";
+import { DataTable, type ColumnConfig } from "@/components/ui";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { cn } from "@/lib/utils";
+import type { ConfigFormat, NextExecution } from "@/types/cron-builder";
 
 export default function CronBuilderPage() {
+  const { t } = useTranslation();
   const {
     expression,
-    rawExpression,
+    cron,
     explanation,
     nextExecutions,
-    validation,
+    config,
     history,
-    presets,
     setField,
-    setRawExpression,
+    setExpression,
     loadPreset,
-    saveToHistory,
-    loadFromHistory,
-    clearHistory,
+    loadConfig,
     reset,
   } = useCronBuilder();
 
-  const { t } = useTranslation();
-  const [showHistory, setShowHistory] = useState(false);
+  const [activeTab, setActiveTab] = useState<"builder" | "history">("builder");
+  const [configFormat, setConfigFormat] = useState<ConfigFormat>("kubernetes");
 
-  const handleSave = () => {
-    saveToHistory();
+  const executionColumns: ColumnConfig[] = [
+    { name: "DATE", uid: "formatted", sortable: true },
+    { name: "RELATIVE", uid: "relative", sortable: true },
+  ];
+
+  const renderExecutionCell = (exec: NextExecution, columnKey: React.Key) => {
+    switch (columnKey) {
+      case "formatted":
+        return (
+          <div className="flex items-center gap-2">
+            <Calendar className="size-3 text-primary" />
+            <span className="font-mono text-sm font-bold">{exec.formatted}</span>
+          </div>
+        );
+      case "relative":
+        return (
+          <Chip size="sm" variant="flat" color="secondary" className="font-black text-[10px] uppercase">
+            {exec.relative}
+          </Chip>
+        );
+      default:
+        return (exec as any)[columnKey];
+    }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="mx-auto max-w-6xl space-y-6">
       <ToolHeader
         icon={Clock}
-        gradient="from-violet-500 to-purple-600"
+        gradient="from-orange-500 to-amber-600"
         title={t("cron.title")}
         description={t("cron.description")}
         breadcrumb
+        actions={
+          <Button variant="outline" size="sm" onPress={reset} className="gap-2">
+            <RotateCcw className="size-4" />
+            {t("common.reset")}
+          </Button>
+        }
       />
 
-      {/* Presets */}
-      <Card className="p-4">
-        <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-          <Zap className="size-4" />
-          {t("cron.commonPresets")}
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {presets.map((preset) => (
-            <button
-              key={preset.id}
-              type="button"
-              onClick={() => loadPreset(preset.id)}
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm transition-colors hover:border-primary hover:bg-primary/5"
-              title={preset.description}
-            >
-              {preset.name}
-            </button>
-          ))}
-        </div>
-      </Card>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Builder Panel */}
-        <div className="space-y-4">
-          {/* Visual Builder */}
+      <div className="grid gap-6 lg:grid-cols-12">
+        {/* Visual Builder Column */}
+        <div className="lg:col-span-5 space-y-6">
           <Card className="p-6">
-            <h2 className="mb-4 text-lg font-semibold">{t("cron.visualBuilder")}</h2>
+            <div className="mb-6 flex items-center justify-between">
+              <h3 className="text-lg font-bold flex items-center gap-2">
+                <Terminal className="size-5 text-primary" />
+                Expression Builder
+              </h3>
+              <CopyButton text={expression} />
+            </div>
 
-            <div className="space-y-4">
-              {FIELD_ORDER.map((field) => (
-                <div key={field} className="flex items-center gap-4">
-                  <label className="w-32 text-sm font-medium text-muted-foreground">
-                    {CRON_FIELD_LABELS[field]}
-                  </label>
-                  <div className="flex-1">
-                    <input
-                      type="text"
-                      value={expression[field]}
-                      onChange={(e) => setField(field, e.target.value)}
-                      placeholder="*"
-                      className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    />
+            <div className="bg-muted/50 p-6 rounded-2xl border border-divider mb-8 text-center shadow-inner">
+              <p className="text-3xl font-black tracking-widest text-primary font-mono">
+                {expression}
+              </p>
+              <p className="text-[10px] uppercase font-black text-muted-foreground mt-2 tracking-tighter">
+                min · hour · day · month · week
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              {[
+                { field: "minute", label: "Minute", range: "0-59" },
+                { field: "hour", label: "Hour", range: "0-23" },
+                { field: "dayOfMonth", label: "Day", range: "1-31" },
+                { field: "month", label: "Month", range: "1-12" },
+                { field: "dayOfWeek", label: "Weekday", range: "0-6" },
+              ].map((f) => (
+                <div key={f.field} className="space-y-1.5">
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{f.label}</label>
+                    <span className="text-[10px] opacity-50 font-mono">{f.range}</span>
                   </div>
-                  <span className="w-20 text-xs text-muted-foreground">
-                    {CRON_FIELD_RANGES[field].min}-{CRON_FIELD_RANGES[field].max}
-                  </span>
+                  <Input
+                    size="sm"
+                    variant="bordered"
+                    value={(cron as any)[f.field]}
+                    onValueChange={(val) => setField(f.field as any, val)}
+                    classNames={{ input: "font-mono font-bold" }}
+                  />
                 </div>
               ))}
             </div>
-
-            {/* Quick reference */}
-            <div className="mt-4 rounded-lg bg-muted/50 p-3">
-              <p className="mb-2 text-xs font-medium text-muted-foreground">{t("cron.syntax")}</p>
-              <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                <span><code className="rounded bg-muted px-1">*</code> {t("cron.syntaxEveryValue")}</span>
-                <span><code className="rounded bg-muted px-1">*/n</code> {t("cron.syntaxEveryN")}</span>
-                <span><code className="rounded bg-muted px-1">n-m</code> {t("cron.syntaxRange")}</span>
-                <span><code className="rounded bg-muted px-1">a,b,c</code> {t("cron.syntaxList")}</span>
-              </div>
-            </div>
           </Card>
 
-          {/* Raw Expression */}
+          {/* Quick Presets */}
           <Card className="p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-semibold">{t("cron.cronExpression")}</h3>
-              <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onPress={handleSave}>
-                  <Save className="mr-1 size-4" />
-                  {t("cron.save")}
+            <h3 className="font-bold mb-4 flex items-center gap-2">
+              <Zap className="size-4 text-warning" />
+              Standard Presets
+            </h3>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { name: "Every Minute", exp: "* * * * *" },
+                { name: "Every 5m", exp: "*/5 * * * *" },
+                { name: "Hourly", exp: "0 * * * *" },
+                { name: "Daily 00:00", exp: "0 0 * * *" },
+                { name: "Weekly (Mon)", exp: "0 0 * * 1" },
+                { name: "Monthly (1st)", exp: "0 0 1 * *" },
+              ].map((p) => (
+                <Button
+                  key={p.name}
+                  size="sm"
+                  variant="flat"
+                  onPress={() => setExpression(p.exp)}
+                  className="font-bold text-[10px] h-8"
+                >
+                  {p.name}
                 </Button>
-                <CopyButton text={rawExpression} label={t("cron.copy")} />
-              </div>
-            </div>
-
-            <input
-              type="text"
-              value={rawExpression}
-              onChange={(e) => setRawExpression(e.target.value)}
-              className={`w-full rounded-lg border bg-background px-4 py-3 font-mono text-lg focus:outline-none focus:ring-2 focus:ring-primary/20 ${
-                validation.isValid
-                  ? "border-border focus:border-primary"
-                  : "border-red-500 focus:border-red-500"
-              }`}
-            />
-
-            {!validation.isValid && (
-              <div className="mt-2 space-y-1">
-                {validation.errors.map((error, i) => (
-                  <div key={i} className="flex items-center gap-2 text-sm text-red-500">
-                    <AlertCircle className="size-4" />
-                    {error.message}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="mt-4 flex gap-2">
-              <Button variant="outline" size="sm" onPress={reset}>
-                <RotateCcw className="mr-1 size-4" />
-                {t("cron.reset")}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onPress={() => setShowHistory(!showHistory)}
-              >
-                <History className="mr-1 size-4" />
-                {t("cron.history", { count: history.length })}
-              </Button>
+              ))}
             </div>
           </Card>
-
-          {/* History */}
-          {showHistory && history.length > 0 && (
-            <Card className="p-4">
-              <div className="mb-3 flex items-center justify-between">
-                <h4 className="text-sm font-semibold">{t("cron.historyTitle")}</h4>
-                <Button variant="ghost" size="sm" onPress={clearHistory}>
-                  <Trash2 className="size-4" />
-                </Button>
-              </div>
-              <div className="space-y-2">
-                {history.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => loadFromHistory(item)}
-                    className="flex w-full items-center justify-between rounded-lg border border-border p-2 text-left transition-colors hover:bg-muted/50"
-                  >
-                    <div>
-                      <code className="text-sm font-medium">{item.expression}</code>
-                      <p className="text-xs text-muted-foreground">{item.description}</p>
-                    </div>
-                    <ChevronRight className="size-4 text-muted-foreground" />
-                  </button>
-                ))}
-              </div>
-            </Card>
-          )}
         </div>
 
-        {/* Results Panel */}
-        <div className="space-y-4">
-          {/* Explanation */}
-          <Card className="p-6">
-            <h2 className="mb-4 text-lg font-semibold">{t("cron.explanation")}</h2>
+        {/* Intelligence Column */}
+        <div className="lg:col-span-7 space-y-6">
+          {/* Natural Explanation */}
+          <Card className="p-6 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+            <h3 className="text-xs font-black uppercase text-primary mb-3 tracking-widest">
+              Human-Readable Explanation
+            </h3>
+            <p className="text-xl font-bold leading-relaxed">
+              “{explanation.summary}”
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {explanation.details.map((d, i) => (
+                <Tooltip key={i} content={d.explanation}>
+                  <Chip size="sm" variant="dot" color="primary" className="cursor-default font-medium">
+                    {d.field}: {d.value}
+                  </Chip>
+                </Tooltip>
+              ))}
+            </div>
+          </Card>
 
-            {explanation ? (
-              <div className="space-y-4">
-                {/* Human readable summary */}
-                <div className="rounded-lg bg-primary/10 p-4">
-                  <p className="text-lg font-medium text-primary">
-                    {explanation.humanReadable}
-                  </p>
-                </div>
-
-                {/* Field details */}
-                <div className="space-y-2">
-                  {explanation.details.map((detail) => (
-                    <div
-                      key={detail.field}
-                      className="flex items-center justify-between rounded-lg border border-border p-3"
+          {/* Infrastructure Snippets */}
+          <Card className="p-0 overflow-hidden shadow-xl border-indigo-500/20">
+            <div className="p-4 border-b border-divider flex items-center justify-between bg-muted/20">
+              <h3 className="font-bold flex items-center gap-2 text-indigo-600">
+                <Box className="size-4" />
+                Infrastructure Deployment
+              </h3>
+              <div className="flex bg-muted p-1 rounded-xl">
+                {[
+                  { id: "kubernetes", icon: Cloud },
+                  { id: "github-actions", icon: Github },
+                  { id: "linux-crontab", icon: Terminal },
+                ].map((f) => {
+                  const Icon = f.icon;
+                  return (
+                    <Button
+                      key={f.id}
+                      isIconOnly
+                      size="sm"
+                      variant={configFormat === f.id ? "solid" : "light"}
+                      color={configFormat === f.id ? "primary" : "default"}
+                      onPress={() => {
+                        setConfigFormat(f.id as ConfigFormat);
+                        loadConfig(f.id as ConfigFormat);
+                      }}
+                      className="rounded-lg h-8 w-8"
                     >
-                      <div className="flex items-center gap-3">
-                        <span className="rounded bg-muted px-2 py-1 font-mono text-xs">
-                          {detail.value}
-                        </span>
-                        <span className="text-sm font-medium">
-                          {CRON_FIELD_LABELS[detail.field]}
-                        </span>
-                      </div>
-                      <span className="text-sm text-muted-foreground">
-                        {detail.explanation}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <AlertCircle className="mb-2 size-8 text-muted-foreground/30" />
-                <p className="text-muted-foreground">
-                  {validation.isValid
-                    ? t("cron.enterExpression")
-                    : t("cron.fixErrors")}
-                </p>
-              </div>
-            )}
-          </Card>
-
-          {/* Next Executions */}
-          <Card className="p-6">
-            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-              <Calendar className="size-5" />
-              {t("cron.nextExecutions")}
-            </h2>
-
-            {nextExecutions.length > 0 ? (
-              <div className="space-y-2">
-                {nextExecutions.map((execution, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between rounded-lg border border-border p-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
-                        {i + 1}
-                      </span>
-                      <span className="text-sm font-medium">
-                        {execution.formatted}
-                      </span>
-                    </div>
-                    <span className="rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">
-                      {execution.relative}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <Clock className="mb-2 size-8 text-muted-foreground/30" />
-                <p className="text-muted-foreground">
-                  {validation.isValid
-                    ? t("cron.noNextExecutions")
-                    : t("cron.fixErrorsExecutions")}
-                </p>
-              </div>
-            )}
-          </Card>
-
-          {/* Cheat Sheet */}
-          <Card className="p-6">
-            <h3 className="mb-4 text-sm font-semibold">{t("cron.quickReference")}</h3>
-            <div className="grid grid-cols-5 gap-2 text-center text-xs">
-              <div className="rounded bg-muted p-2">
-                <p className="font-mono font-bold">{t("cron.cheatMin")}</p>
-                <p className="text-muted-foreground">0-59</p>
-              </div>
-              <div className="rounded bg-muted p-2">
-                <p className="font-mono font-bold">{t("cron.cheatHour")}</p>
-                <p className="text-muted-foreground">0-23</p>
-              </div>
-              <div className="rounded bg-muted p-2">
-                <p className="font-mono font-bold">{t("cron.cheatDay")}</p>
-                <p className="text-muted-foreground">1-31</p>
-              </div>
-              <div className="rounded bg-muted p-2">
-                <p className="font-mono font-bold">{t("cron.cheatMonth")}</p>
-                <p className="text-muted-foreground">1-12</p>
-              </div>
-              <div className="rounded bg-muted p-2">
-                <p className="font-mono font-bold">{t("cron.cheatWeek")}</p>
-                <p className="text-muted-foreground">0-6</p>
+                      <Icon className="size-3.5" />
+                    </Button>
+                  );
+                })}
               </div>
             </div>
-            <p className="mt-3 text-center text-xs text-muted-foreground">
-              {t("cron.weekdayNote")}
-            </p>
+            <div className="p-0 flex flex-col">
+              <div className="p-4 bg-blue-50/50 dark:bg-blue-950/10 flex justify-between items-center">
+                <span className="text-[10px] font-black uppercase text-indigo-500 tracking-widest">
+                  {configFormat === "kubernetes" ? "k8s-cronjob.yaml" : configFormat === "github-actions" ? "workflow.yaml" : "crontab"}
+                </span>
+                <CopyButton text={config.code} />
+              </div>
+              <pre className="p-6 font-mono text-xs leading-relaxed overflow-auto max-h-[300px] bg-background">
+                <code>{config.code}</code>
+              </pre>
+            </div>
+          </Card>
+
+          {/* Execution Timeline */}
+          <Card className="p-6">
+            <h3 className="font-bold mb-6 flex items-center gap-2">
+              <Play className="size-4 text-emerald-500" />
+              Upcoming Executions (Next 10)
+            </h3>
+            <DataTable
+              columns={executionColumns}
+              data={nextExecutions.map((e, id) => ({ ...e, id }))}
+              filterField="formatted"
+              renderCell={renderExecutionCell}
+              initialVisibleColumns={["formatted", "relative"]}
+              emptyContent="No upcoming executions found within the next year."
+            />
           </Card>
         </div>
       </div>

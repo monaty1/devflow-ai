@@ -7,6 +7,7 @@ import type {
   CommitTypeInfo,
   CommitValidation,
   ParsedCommit,
+  DiffAnalysis,
 } from "@/types/git-commit-generator";
 
 export const COMMIT_TYPES: CommitTypeInfo[] = [
@@ -24,6 +25,8 @@ export const COMMIT_TYPES: CommitTypeInfo[] = [
 ];
 
 const VALID_TYPES = new Set<string>(COMMIT_TYPES.map((ct) => ct.type));
+
+// ... (existing constants)
 
 export const EXAMPLE_COMMITS: Record<CommitType, string> = {
   feat: "feat(auth): add OAuth2 login with Google provider",
@@ -52,6 +55,53 @@ const SCOPE_KEYWORDS: Record<string, string[]> = {
   perf: ["performance", "speed", "cache", "optimize", "lazy", "bundle", "memory"],
 };
 
+export function analyzeDiff(diff: string): DiffAnalysis {
+  const filesChanged = new Set<string>();
+  let isBreaking = false;
+  let hasTests = false;
+  let hasDocs = false;
+  let hasDeps = false;
+
+  const lines = diff.split("\n");
+  for (const line of lines) {
+    if (line.startsWith("diff --git")) {
+      const match = line.match(/b\/(.*)$/);
+      if (match && match[1]) filesChanged.add(match[1]);
+    }
+    if (line.includes("BREAKING CHANGE") || line.includes("DEPRECATED")) {
+      isBreaking = true;
+    }
+  }
+
+  const files = Array.from(filesChanged);
+  
+  // Basic heuristic for type
+  let suggestedType: CommitType = "feat";
+  if (files.some(f => f.includes("test") || f.includes(".spec.") || f.includes(".test."))) hasTests = true;
+  if (files.some(f => f.endsWith(".md") || f.includes("docs/"))) hasDocs = true;
+  if (files.some(f => f.includes("package.json") || f.includes("go.mod") || f.includes("Cargo.toml"))) hasDeps = true;
+
+  if (hasTests && !files.some(f => !f.includes("test"))) suggestedType = "test";
+  else if (hasDocs && !files.some(f => !f.endsWith(".md"))) suggestedType = "docs";
+  else if (hasDeps) suggestedType = "chore";
+  else if (files.some(f => f.includes("fix") || f.includes("bug"))) suggestedType = "fix";
+
+  // Heuristic for scope
+  let suggestedScope = "";
+  const firstFile = files[0];
+  if (firstFile) {
+    const parts = firstFile.split("/");
+    if (parts.length > 1) suggestedScope = parts[0]!; // Use top-level dir as scope
+  }
+
+  return {
+    suggestedType,
+    suggestedScope,
+    isBreaking,
+    filesChanged: files
+  };
+}
+
 /**
  * Generates a conventional commit message from config
  */
@@ -59,7 +109,15 @@ export function generateCommitMessage(config: CommitConfig): CommitResult {
   const parts: string[] = [];
 
   // Header: type(scope): description
-  let header = config.type;
+  let header = "";
+  
+  if (config.useEmojis) {
+    const typeInfo = getCommitTypeInfo(config.type);
+    header += `${typeInfo.emoji} `;
+  }
+
+  header += config.type;
+
   if (config.scope.trim()) {
     header += `(${config.scope.trim()})`;
   }

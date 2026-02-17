@@ -169,6 +169,32 @@ export function useBase64() {
     []
   );
 
+  const handleFileSelect = useCallback(async (file: File) => {
+    return new Promise<void>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        const base64 = dataUrl.split(",")[1];
+        if (base64) {
+          setInput(base64);
+          setMode("decode");
+          setResult(null);
+          // Manually process to get stats/detection
+          const res = processBase64(base64, "decode", config);
+          res.fileInfo = {
+            name: file.name,
+            mimeType: file.type,
+            size: file.size
+          };
+          setResult(res);
+        }
+        resolve();
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }, [config]);
+
   return {
     // State
     input,
@@ -197,5 +223,6 @@ export function useBase64() {
     applyOutput,
     toDataUrl,
     fromDataUrl,
+    handleFileSelect,
   };
 }

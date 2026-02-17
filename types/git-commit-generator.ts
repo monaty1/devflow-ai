@@ -20,6 +20,7 @@ export interface CommitConfig {
   body: string;
   breakingChange: string;
   issueRef: string;
+  useEmojis: boolean;
 }
 
 export const DEFAULT_COMMIT_CONFIG: CommitConfig = {
@@ -29,7 +30,15 @@ export const DEFAULT_COMMIT_CONFIG: CommitConfig = {
   body: "",
   breakingChange: "",
   issueRef: "",
+  useEmojis: true,
 };
+
+export interface DiffAnalysis {
+  suggestedType: CommitType;
+  suggestedScope: string;
+  isBreaking: boolean;
+  filesChanged: string[];
+}
 
 export interface CommitResult {
   id: string;

@@ -7,7 +7,23 @@ export interface SortResult {
   output: string;
   stats: SortStats;
   groups: ClassGroup[];
+  conflicts: TailwindConflict[];
+  audit: TailwindAuditItem[];
+  breakpoints: Record<string, string[]>;
   sortedAt: string;
+}
+
+export interface TailwindConflict {
+  classes: string[];
+  type: string;
+  message: string;
+}
+
+export interface TailwindAuditItem {
+  class: string;
+  reason: string;
+  suggestion?: string;
+  severity: "low" | "medium";
 }
 
 export interface SortStats {

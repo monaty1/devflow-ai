@@ -8,3 +8,6 @@ export { Card } from "./card";
 export type { CardProps, CardVariant } from "./card";
 
 export { FeatureCard } from "./feature-card";
+
+export { DataTable } from "./data-table";
+export type { Column } from "./data-table";

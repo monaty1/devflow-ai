@@ -24,15 +24,16 @@ export function usePromptAnalyzer(): UsePromptAnalyzerReturn {
     async (prompt: string): Promise<PromptAnalysisResult> => {
       setIsAnalyzing(true);
 
-      // Simulate network delay for better UX
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      const analysisResult = analyzePrompt(prompt);
-      setResult(analysisResult);
-      addToHistory(analysisResult);
-
-      setIsAnalyzing(false);
-      return analysisResult;
+      // Perform analysis immediately (CPU bound but fast for typical prompts)
+      // In a real heavy app, this could be moved to a Web Worker
+      try {
+        const analysisResult = analyzePrompt(prompt);
+        setResult(analysisResult);
+        addToHistory(analysisResult);
+        return analysisResult;
+      } finally {
+        setIsAnalyzing(false);
+      }
     },
     [addToHistory],
   );

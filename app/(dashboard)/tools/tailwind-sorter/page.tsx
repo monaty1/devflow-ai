@@ -1,339 +1,302 @@
 "use client";
 
-import { useState } from "react";
-import { Card, Button } from "@heroui/react";
+import { useState, useMemo, useCallback } from "react";
 import {
+  Card,
+  Button,
+  Tabs,
+  Tab,
+  Chip,
+  Progress,
+  Tooltip,
+} from "@heroui/react";
+import {
+  Type,
+  Layout,
   Palette,
-  AlertCircle,
-  Trash2,
-  History,
-  RotateCcw,
-  ArrowRight,
   Layers,
-  ChevronRight,
-  FileText,
+  MousePointer2,
+  RotateCcw,
+  Sparkles,
+  AlertTriangle,
+  CheckCircle2,
+  Trash2,
+  Copy,
+  ArrowRight,
+  ListFilter,
+  Monitor,
+  Smartphone,
+  Tablet,
+  Tv,
+  Eye,
+  Search,
 } from "lucide-react";
 import { useTailwindSorter } from "@/hooks/use-tailwind-sorter";
 import { useTranslation } from "@/hooks/use-translation";
-import { CopyButton } from "@/components/shared/copy-button";
 import { ToolHeader } from "@/components/shared/tool-header";
-import { CATEGORY_LABELS, type OutputFormat } from "@/types/tailwind-sorter";
+import { CopyButton } from "@/components/shared/copy-button";
+import { DataTable, type ColumnConfig } from "@/components/ui";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { cn } from "@/lib/utils";
+import type { TailwindAuditItem, TailwindConflict } from "@/types/tailwind-sorter";
 
 export default function TailwindSorterPage() {
   const { t } = useTranslation();
-
-  const OUTPUT_FORMATS: { id: OutputFormat; label: string; description: string }[] = [
-    { id: "single-line", label: t("tailwind.singleLine"), description: t("tailwind.singleLineDesc") },
-    { id: "multi-line", label: t("tailwind.multiLine"), description: t("tailwind.multiLineDesc") },
-    { id: "grouped", label: t("tailwind.grouped"), description: t("tailwind.groupedDesc") },
-  ];
   const {
     input,
     config,
     result,
-    history,
-    inputStats,
     setInput,
     updateConfig,
-    setOutputFormat,
     sort,
-    loadExample,
     reset,
-    clearHistory,
-    loadFromHistory,
-    applyToInput,
+    loadExample,
   } = useTailwindSorter();
 
-  const [showHistory, setShowHistory] = useState(false);
+  const [activeView, setActiveTab] = useState<"result" | "audit" | "breakpoints">("result");
+
+  const auditColumns: ColumnConfig[] = [
+    { name: "CLASS", uid: "class" },
+    { name: "ISSUE", uid: "reason" },
+    { name: "SEVERITY", uid: "severity", sortable: true },
+  ];
+
+  const renderAuditCell = (item: TailwindAuditItem, columnKey: React.Key) => {
+    switch (columnKey) {
+      case "class":
+        return <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-bold text-primary">{item.class}</code>;
+      case "reason":
+        return (
+          <div className="flex flex-col gap-0.5">
+            <span className="text-sm font-medium">{item.reason}</span>
+            {item.suggestion && (
+              <span className="text-xs text-success font-medium">Suggestion: {item.suggestion}</span>
+            )}
+          </div>
+        );
+      case "severity":
+        return (
+          <Chip size="sm" variant="flat" color={item.severity === "medium" ? "warning" : "primary"} className="capitalize font-black text-[10px]">
+            {item.severity}
+          </Chip>
+        );
+      default:
+        return (item as any)[columnKey];
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="mx-auto max-w-6xl space-y-6">
       <ToolHeader
         icon={Palette}
-        gradient="from-sky-500 to-cyan-600"
+        gradient="from-sky-500 to-blue-600"
         title={t("tailwind.title")}
         description={t("tailwind.description")}
         breadcrumb
+        actions={
+          <Button variant="outline" size="sm" onPress={reset} className="gap-2">
+            <RotateCcw className="size-4" />
+            {t("common.reset")}
+          </Button>
+        }
       />
 
-      {/* Quick Actions */}
-      <Card className="p-4">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onPress={() => loadExample("clean")}>
-              <FileText className="mr-1 size-4" />
-              {t("tailwind.cleanExample")}
-            </Button>
-            <Button variant="outline" size="sm" onPress={() => loadExample("messy")}>
-              <FileText className="mr-1 size-4" />
-              {t("tailwind.messyExample")}
-            </Button>
-          </div>
-          <div className="h-6 w-px bg-border" />
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">{t("tailwind.format")}</span>
-            {OUTPUT_FORMATS.map((format) => (
-              <button
-                key={format.id}
-                type="button"
-                onClick={() => setOutputFormat(format.id)}
-                className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
-                  config.outputFormat === format.id
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border hover:border-primary/50"
-                }`}
-                title={format.description}
-              >
-                {format.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </Card>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Input Panel */}
-        <div className="space-y-4">
+      <div className="grid gap-6 lg:grid-cols-12">
+        {/* Input Column */}
+        <div className="lg:col-span-5 space-y-6">
           <Card className="p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold">{t("tailwind.inputClasses")}</h2>
-              <div className="flex gap-2">
-                <CopyButton text={input} label={t("common.copy")} isDisabled={!input} />
-                <Button variant="ghost" size="sm" onPress={reset} isDisabled={!input}>
-                  <RotateCcw className="mr-1 size-4" />
-                  {t("common.clear")}
-                </Button>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold flex items-center gap-2 text-sky-600">
+                <ListFilter className="size-5" />
+                Raw Classes
+              </h3>
+              <div className="flex gap-1">
+                <Button size="sm" variant="flat" onPress={() => loadExample("messy")}>Example</Button>
+                <Button size="sm" variant="flat" color="danger" isIconOnly onPress={() => setInput("")}><Trash2 className="size-3" /></Button>
               </div>
             </div>
-
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Paste your Tailwind classes here...&#10;&#10;Example: flex p-4 bg-blue-500 text-white hover:bg-blue-600 mt-4 rounded-lg"
-              className="min-h-[200px] w-full resize-y rounded-lg border border-border bg-background p-4 font-mono text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              placeholder="Paste your messy tailwind classes here..."
+              className="h-48 w-full resize-none rounded-xl border border-divider bg-background p-4 font-mono text-sm focus:ring-2 focus:ring-sky-500/20 shadow-inner"
             />
-
-            {/* Input Stats */}
-            {input.trim() && (
-              <div className="mt-4 flex flex-wrap items-center gap-4">
-                <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-1.5">
-                  <Layers className="size-4 text-muted-foreground" />
-                  <span className="text-sm">
-                    {t("tailwind.classes", { count: inputStats.classCount })}
-                  </span>
-                </div>
-                {inputStats.duplicates.length > 0 && (
-                  <div className="flex items-center gap-2 rounded-lg bg-amber-500/10 px-3 py-1.5 text-amber-600">
-                    <AlertCircle className="size-4" />
-                    <span className="text-sm">
-                      {t("tailwind.duplicates", { count: inputStats.duplicates.length })}
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Config Options */}
-            <div className="mt-4 space-y-3 rounded-lg border border-border p-4">
-              <h4 className="text-sm font-medium">{t("common.options")}</h4>
-              <div className="space-y-2">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={config.removeDuplicates}
+            
+            <div className="mt-6 space-y-4">
+              <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Sorting Options</p>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-muted transition-colors">
+                  <input 
+                    type="checkbox" 
+                    checked={config.removeDuplicates} 
                     onChange={(e) => updateConfig("removeDuplicates", e.target.checked)}
-                    className="size-4 rounded border-border"
+                    className="size-4 rounded accent-sky-600"
                   />
-                  <span className="text-sm">{t("tailwind.removeDuplicates")}</span>
+                  <span className="text-xs font-bold">Unique Only</span>
                 </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={config.groupByCategory}
-                    onChange={(e) => updateConfig("groupByCategory", e.target.checked)}
-                    className="size-4 rounded border-border"
+                <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-muted transition-colors">
+                  <input 
+                    type="checkbox" 
+                    checked={config.sortWithinGroups} 
+                    onChange={(e) => updateConfig("sortWithinGroups", e.target.checked)}
+                    className="size-4 rounded accent-sky-600"
                   />
-                  <span className="text-sm">{t("tailwind.groupByCategory")}</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={config.preserveVariants}
-                    onChange={(e) => updateConfig("preserveVariants", e.target.checked)}
-                    className="size-4 rounded border-border"
-                  />
-                  <span className="text-sm">{t("tailwind.sortVariants")}</span>
+                  <span className="text-xs font-bold">Sort Logic</span>
                 </label>
               </div>
             </div>
 
-            {/* Sort Button */}
-            <div className="mt-4">
-              <Button
-                variant="primary"
-                size="lg"
-                className="w-full"
-                onPress={sort}
-                isDisabled={!inputStats.isValid}
-              >
-                <ArrowRight className="mr-2 size-5" />
-                {t("tailwind.sortClasses")}
-              </Button>
-            </div>
-
-            {/* History Toggle */}
-            <div className="mt-4 flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onPress={() => setShowHistory(!showHistory)}
-              >
-                <History className="mr-1 size-4" />
-                {t("common.history", { count: history.length })}
-              </Button>
-            </div>
+            <Button 
+              onPress={sort} 
+              color="primary"
+              className="w-full mt-6 h-12 font-bold shadow-lg shadow-sky-500/20"
+            >
+              <Sparkles className="size-4 mr-2" /> Optimize Classes
+            </Button>
           </Card>
 
-          {/* History */}
-          {showHistory && history.length > 0 && (
-            <Card className="p-4">
-              <div className="mb-3 flex items-center justify-between">
-                <h4 className="text-sm font-semibold">{t("common.recentHistory")}</h4>
-                <Button variant="ghost" size="sm" onPress={clearHistory}>
-                  <Trash2 className="size-4" />
-                </Button>
+          {/* Live Preview Card */}
+          <Card className="p-6 overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+            <h3 className="text-xs font-black uppercase opacity-60 mb-6 flex items-center gap-2 tracking-widest">
+              <Eye className="size-3" /> 
+              Instant Visual Preview
+            </h3>
+            <div className="flex items-center justify-center p-8 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm min-h-[150px]">
+              <div className={cn("transition-all duration-500", result?.output || "p-4 bg-sky-500 rounded text-white")}>
+                {result?.output ? "Applying Optimized Styles..." : "Sample Element"}
               </div>
-              <div className="space-y-2">
-                {history.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => loadFromHistory(item)}
-                    className="flex w-full items-center justify-between rounded-lg border border-border p-2 text-left transition-colors hover:bg-muted/50"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <code className="block truncate text-sm font-medium">{item.input}</code>
-                      <p className="text-xs text-muted-foreground">
-                        {t("tailwind.classes", { count: item.classCount })}
-                      </p>
-                    </div>
-                    <ChevronRight className="ml-2 size-4 shrink-0 text-muted-foreground" />
-                  </button>
-                ))}
-              </div>
-            </Card>
-          )}
+            </div>
+            <p className="text-[10px] text-center mt-4 opacity-40 italic">Note: Classes are applied to this element in real-time</p>
+          </Card>
         </div>
 
-        {/* Output Panel */}
-        <div className="space-y-4">
-          <Card className="p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold">{t("tailwind.sortedResult")}</h2>
-              <div className="flex gap-2">
-                <CopyButton getText={() => result?.output ?? ""} label={t("common.copy")} isDisabled={!result} />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onPress={applyToInput}
-                  isDisabled={!result}
+        {/* Results Column */}
+        <div className="lg:col-span-7 space-y-6">
+          {result ? (
+            <>
+              {/* Quick Stats */}
+              <div className="grid grid-cols-3 gap-4">
+                <Card className="p-4 text-center border-b-4 border-b-sky-500">
+                  <p className="text-[10px] font-black text-muted-foreground uppercase">Unique</p>
+                  <p className="text-2xl font-black">{result.stats.uniqueClasses}</p>
+                </Card>
+                <Card className="p-4 text-center border-b-4 border-b-amber-500">
+                  <p className="text-[10px] font-black text-muted-foreground uppercase">Conflicts</p>
+                  <p className="text-2xl font-black text-amber-600">{result.conflicts.length}</p>
+                </Card>
+                <Card className="p-4 text-center border-b-4 border-b-emerald-500">
+                  <p className="text-[10px] font-black text-muted-foreground uppercase">Optimization</p>
+                  <p className="text-2xl font-black text-emerald-600">
+                    {Math.round((result.stats.duplicatesRemoved / (result.stats.totalClasses || 1)) * 100)}%
+                  </p>
+                </Card>
+              </div>
+
+              {/* Analysis Tabs */}
+              <Card className="overflow-hidden border-divider shadow-xl">
+                <Tabs 
+                  selectedKey={activeView} 
+                  onSelectionChange={(k) => setActiveTab(k as any)}
+                  classNames={{
+                    tabList: "w-full rounded-none bg-muted/30 border-b border-divider p-0 h-14",
+                    tab: "h-full",
+                    cursor: "bg-sky-500",
+                  }}
                 >
-                  <ArrowRight className="mr-1 size-4" />
-                  {t("common.apply")}
-                </Button>
-              </div>
-            </div>
-
-            {result ? (
-              <>
-                <pre className="min-h-[200px] overflow-auto whitespace-pre-wrap rounded-lg border border-border bg-muted/50 p-4 font-mono text-sm">
-                  {result.output}
-                </pre>
-
-                {/* Stats */}
-                <div className="mt-4 grid grid-cols-3 gap-4">
-                  <div className="rounded-lg bg-primary/10 p-3 text-center">
-                    <p className="text-2xl font-bold text-primary">
-                      {result.stats.totalClasses}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{t("tailwind.total")}</p>
-                  </div>
-                  <div className="rounded-lg bg-green-500/10 p-3 text-center">
-                    <p className="text-2xl font-bold text-green-600">
-                      {result.stats.uniqueClasses}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{t("tailwind.unique")}</p>
-                  </div>
-                  <div className="rounded-lg bg-amber-500/10 p-3 text-center">
-                    <p className="text-2xl font-bold text-amber-600">
-                      {result.stats.duplicatesRemoved}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{t("tailwind.removed")}</p>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="flex min-h-[200px] flex-col items-center justify-center rounded-lg border border-dashed border-border text-center">
-                <Palette className="mb-2 size-12 text-muted-foreground/30" />
-                <p className="text-muted-foreground">
-                  {t("tailwind.emptyState")}
-                </p>
-                <p className="text-sm text-muted-foreground/70">
-                  {t("tailwind.emptyStateHint")}
-                </p>
-              </div>
-            )}
-          </Card>
-
-          {/* Groups Breakdown */}
-          {result && result.groups.length > 0 && (
-            <Card className="p-6">
-              <h3 className="mb-4 text-sm font-semibold">{t("tailwind.breakdown")}</h3>
-              <div className="space-y-3">
-                {result.groups.map((group) => (
-                  <div
-                    key={group.id}
-                    className="rounded-lg border border-border p-3"
+                  <Tab 
+                    key="result" 
+                    title={
+                      <div className="flex items-center gap-2 font-bold px-4">
+                        <CheckCircle2 className="size-4 text-emerald-500" />
+                        Sorted Result
+                      </div>
+                    }
                   >
-                    <div className="mb-2 flex items-center justify-between">
-                      <span className="font-medium">
-                        {CATEGORY_LABELS[group.id as keyof typeof CATEGORY_LABELS] || group.name}
-                      </span>
-                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
-                        {group.classes.length}
-                      </span>
+                    <div className="p-6 space-y-4">
+                      <div className="flex justify-between items-center bg-sky-50 dark:bg-sky-950/20 p-3 rounded-xl border border-sky-100 dark:border-sky-900/30">
+                        <span className="text-xs font-bold text-sky-700">Production-Ready Output</span>
+                        <CopyButton text={result.output} />
+                      </div>
+                      <div className="p-4 bg-muted/30 rounded-xl font-mono text-sm leading-relaxed border border-divider break-all">
+                        {result.output}
+                      </div>
                     </div>
-                    <div className="flex flex-wrap gap-1">
-                      {group.classes.map((cls, i) => (
-                        <code
-                          key={i}
-                          className="rounded bg-muted px-1.5 py-0.5 text-xs"
-                        >
-                          {cls}
-                        </code>
+                  </Tab>
+
+                  <Tab 
+                    key="audit" 
+                    title={
+                      <div className="flex items-center gap-2 font-bold px-4">
+                        <AlertTriangle className="size-4 text-amber-500" />
+                        Audit & Conflicts
+                      </div>
+                    }
+                  >
+                    <div className="p-0">
+                      {result.conflicts.length > 0 && (
+                        <div className="p-4 bg-red-50 dark:bg-red-950/20 border-b border-red-100 dark:border-red-900/30">
+                          <p className="text-xs font-black text-red-700 uppercase mb-2">Critical Property Conflicts</p>
+                          <div className="flex flex-wrap gap-2">
+                            {result.conflicts.map((c, i) => (
+                              <Chip key={i} size="sm" color="danger" variant="flat" className="font-bold">
+                                {c.classes.join(" vs ")}
+                              </Chip>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      <DataTable
+                        columns={auditColumns}
+                        data={result.audit.map((a, id) => ({ ...a, id }))}
+                        filterField="class"
+                        renderCell={renderAuditCell}
+                        emptyContent="Clean classes! No redundancies or conflicts found."
+                      />
+                    </div>
+                  </Tab>
+
+                  <Tab 
+                    key="breakpoints" 
+                    title={
+                      <div className="flex items-center gap-2 font-bold px-4">
+                        <Monitor className="size-4 text-blue-500" />
+                        Responsive Map
+                      </div>
+                    }
+                  >
+                    <div className="p-6 space-y-6">
+                      {Object.entries(result.breakpoints).map(([bp, classes]) => (
+                        <div key={bp} className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            {bp === "base" ? <Smartphone className="size-3 opacity-50" /> : bp === "sm" ? <Tablet className="size-3 opacity-50" /> : <Monitor className="size-3 opacity-50" />}
+                            <span className="text-[10px] font-black uppercase tracking-widest">{bp}</span>
+                            <Progress value={classes.length > 0 ? 100 : 0} size="sm" color={classes.length > 0 ? "primary" : "default"} className="h-1 flex-1" />
+                          </div>
+                          {classes.length > 0 ? (
+                            <div className="flex flex-wrap gap-1.5 pl-5">
+                              {classes.map((c, i) => <Chip key={i} size="sm" variant="dot" className="h-6 text-[10px]">{c}</Chip>)}
+                            </div>
+                          ) : (
+                            <p className="pl-5 text-[10px] text-muted-foreground italic">No classes for this breakpoint</p>
+                          )}
+                        </div>
                       ))}
                     </div>
-                  </div>
-                ))}
+                  </Tab>
+                </Tabs>
+              </Card>
+            </>
+          ) : (
+            <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center">
+              <div className="size-24 bg-muted rounded-full flex items-center justify-center mb-6">
+                <Layers className="size-12 text-muted-foreground/30" />
               </div>
+              <h3 className="text-2xl font-black mb-2 opacity-80">Design Analysis Ready</h3>
+              <p className="text-muted-foreground max-w-sm mx-auto font-medium">
+                Paste your class strings to detect conflicts, remove duplicates and visualize your responsive design distribution.
+              </p>
             </Card>
           )}
-
-          {/* Category Reference */}
-          <Card className="p-6">
-            <h3 className="mb-4 text-sm font-semibold">{t("tailwind.categoryOrder")}</h3>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              {Object.entries(CATEGORY_LABELS).slice(0, 12).map(([id, label], index) => (
-                <div key={id} className="flex items-center gap-2">
-                  <span className="flex size-5 items-center justify-center rounded bg-primary/10 text-xs font-medium text-primary">
-                    {index + 1}
-                  </span>
-                  <span className="text-muted-foreground">{label}</span>
-                </div>
-              ))}
-            </div>
-          </Card>
         </div>
       </div>
     </div>

@@ -14,6 +14,7 @@ import {
   COMMON_PATTERNS,
 } from "@/lib/application/regex-humanizer";
 import { useToolHistory } from "@/hooks/use-tool-history";
+import type { RegexFlavor } from "@/types/regex-humanizer";
 
 interface RegexHistoryItem {
   id: string;
@@ -24,6 +25,7 @@ interface RegexHistoryItem {
 
 export function useRegexHumanizer() {
   const [mode, setMode] = useState<RegexMode>("explain");
+  const [flavor, setFlavor] = useState<RegexFlavor>("javascript");
   const [pattern, setPattern] = useState("");
   const [description, setDescription] = useState("");
   const [testInput, setTestInput] = useState("");
@@ -63,7 +65,7 @@ export function useRegexHumanizer() {
     setError(null);
 
     try {
-      const result = explainRegex(pattern);
+      const result = explainRegex(pattern, flavor);
       setAnalysis(result);
       addToHistory(pattern, "explain");
     } catch (e) {
@@ -71,7 +73,7 @@ export function useRegexHumanizer() {
     } finally {
       setIsLoading(false);
     }
-  }, [pattern, addToHistory]);
+  }, [pattern, flavor, addToHistory]);
 
   const generate = useCallback(() => {
     if (!description.trim()) {
@@ -122,6 +124,7 @@ export function useRegexHumanizer() {
     setGeneratedPattern(null);
     setTestResult(null);
     setError(null);
+    setFlavor("javascript");
   }, []);
 
   const loadPreset = useCallback((presetId: string) => {
@@ -138,6 +141,7 @@ export function useRegexHumanizer() {
   return {
     // State
     mode,
+    flavor,
     pattern,
     description,
     testInput,
@@ -151,6 +155,7 @@ export function useRegexHumanizer() {
 
     // Setters
     setMode,
+    setFlavor,
     setPattern,
     setDescription,
     setTestInput,

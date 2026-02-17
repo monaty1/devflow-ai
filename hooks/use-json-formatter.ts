@@ -13,6 +13,7 @@ import {
   extractJsonPaths,
   jsonToTypeScript,
   compareJson,
+  fixJson,
   EXAMPLE_JSON,
 } from "@/lib/application/json-formatter";
 import { useToolHistory } from "@/hooks/use-tool-history";
@@ -130,6 +131,11 @@ export function useJsonFormatter() {
     setResult(null);
   }, []);
 
+  const fix = useCallback(() => {
+    const fixed = fixJson(input);
+    setInput(fixed);
+  }, [input]);
+
   const applyOutput = useCallback(() => {
     if (result?.output) {
       setInput(result.output);
@@ -164,6 +170,7 @@ export function useJsonFormatter() {
     compare,
     loadExample,
     reset,
+    fix,
     clearHistory,
     loadFromHistory,
     applyOutput,

@@ -17,6 +17,15 @@ export interface CronPreset {
   icon: string;
 }
 
+export type ConfigFormat = "kubernetes" | "github-actions" | "aws-eventbridge" | "linux-crontab";
+
+export interface CronConfig {
+  format: ConfigFormat;
+  label: string;
+  code: string;
+  language: string;
+}
+
 export interface CronExplanation {
   summary: string;
   details: CronFieldExplanation[];

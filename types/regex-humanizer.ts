@@ -22,14 +22,20 @@ export interface RegexToken {
   end: number;
 }
 
+export type RegexFlavor = "javascript" | "python" | "pcre" | "go" | "rust";
+
 export interface RegexAnalysis {
   id: string;
   pattern: string;
   flags: string;
+  flavor: RegexFlavor;
   explanation: string;
   tokens: RegexToken[];
   groups: RegexGroup[];
   commonPattern: string | null;
+  safetyScore: number;
+  isDangerous: boolean;
+  warnings: string[];
   analyzedAt: string;
 }
 
@@ -37,6 +43,7 @@ export interface TestMatch {
   match: string;
   index: number;
   groups: Record<string, string>;
+  groupColors: Record<string, string>;
 }
 
 export interface TestResult {

@@ -8,6 +8,7 @@ import {
   removeDocumentFromWindow,
   reorderDocuments,
   exportContext,
+  exportForAI,
 } from "@/lib/application/context-manager";
 import type {
   ContextWindow,
@@ -43,11 +44,14 @@ interface UseContextManagerReturn {
     content: string,
     type: DocumentType,
     priority: Priority,
-    tags: string[]
+    tags: string[],
+    filePath?: string,
+    instructions?: string
   ) => void;
   removeDocument: (documentId: string) => void;
   changePriority: (documentId: string, priority: Priority) => void;
   exportWindow: (format: "xml" | "json" | "markdown") => ExportedContext | null;
+  exportForAI: () => string | null;
 }
 
 export function useContextManager(): UseContextManagerReturn {
@@ -95,11 +99,13 @@ export function useContextManager(): UseContextManagerReturn {
       content: string,
       type: DocumentType,
       priority: Priority,
-      tags: string[]
+      tags: string[],
+      filePath?: string,
+      instructions?: string
     ) => {
       if (!activeWindow) return;
 
-      const doc = createDocument(title, content, type, priority, tags);
+      const doc = createDocument(title, content, type, priority, tags, filePath, instructions);
       const updated = windows.map((w) =>
         w.id === activeWindowId ? addDocumentToWindow(w, doc) : w
       );
@@ -140,6 +146,11 @@ export function useContextManager(): UseContextManagerReturn {
     [activeWindow]
   );
 
+  const exportForAIHandler = useCallback((): string | null => {
+    if (!activeWindow) return null;
+    return exportForAI(activeWindow);
+  }, [activeWindow]);
+
   return {
     windows,
     activeWindow,
@@ -151,5 +162,6 @@ export function useContextManager(): UseContextManagerReturn {
     removeDocument,
     changePriority,
     exportWindow: exportWindowHandler,
+    exportForAI: exportForAIHandler,
   };
 }

@@ -200,6 +200,9 @@ export function processBase64(
     }
 
     const stats = calculateBase64Stats(input, output, mode);
+    const detectedType = mode === "decode" 
+      ? detectContent(output, false) 
+      : detectContent(input, false);
 
     return {
       id: crypto.randomUUID(),
@@ -208,6 +211,7 @@ export function processBase64(
       mode,
       isValid: true,
       stats,
+      detectedType,
       timestamp: new Date().toISOString(),
     };
   } catch (e) {
@@ -229,6 +233,47 @@ export function processBase64(
       timestamp: new Date().toISOString(),
     };
   }
+}
+
+/**
+ * Detects the type of content in a decoded Base64 string or original input
+ */
+export function detectContent(text: string, isBase64: boolean = false): Base64Result["detectedType"] {
+  let content = text;
+  
+  if (isBase64) {
+    try {
+      // Small sample for detection
+      const sample = text.slice(0, 100);
+      if (sample.startsWith("data:image/")) return "image";
+      if (sample.startsWith("data:application/pdf")) return "pdf";
+      
+      // Try to decode to check binary headers
+      const decoded = atob(text.replace(/[\s\n\r]/g, "").slice(0, 100));
+      if (decoded.startsWith("\x89PNG") || decoded.startsWith("\xff\xd8") || decoded.startsWith("GIF8")) return "image";
+      if (decoded.startsWith("%PDF")) return "pdf";
+      content = atob(text.replace(/[\s\n\r]/g, ""));
+    } catch {
+      return "text";
+    }
+  }
+
+  const trimmed = content.trim();
+  
+  // JSON Check
+  if ((trimmed.startsWith("{") && trimmed.endsWith("}")) || (trimmed.startsWith("[") && trimmed.endsWith("]"))) {
+    try {
+      JSON.parse(trimmed);
+      return "json";
+    } catch { /* not json */ }
+  }
+
+  // JWT Check (three parts separated by dots)
+  if (/^[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+$/.test(trimmed)) {
+    return "jwt";
+  }
+
+  return "text";
 }
 
 /**

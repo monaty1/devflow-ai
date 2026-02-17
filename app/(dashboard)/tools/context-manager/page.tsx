@@ -1,472 +1,378 @@
 "use client";
 
-import { useState } from "react";
-import { Card, Button } from "@heroui/react";
-import { Plus, Trash2, Download, FolderPlus, FileText, BookOpen } from "lucide-react";
+import { useState, useMemo, useCallback } from "react";
+import {
+  Card,
+  Button,
+  Input,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  Progress,
+  Chip,
+  User,
+} from "@heroui/react";
+import {
+  Plus,
+  Trash2,
+  Download,
+  FolderPlus,
+  FileText,
+  BookOpen,
+  Coins,
+  MoreVertical,
+  FileCode,
+  Tags,
+  Share2,
+  LayoutGrid,
+  List as ListIcon,
+  ChevronRight,
+  Sparkles,
+} from "lucide-react";
 import { useContextManager } from "@/hooks/use-context-manager";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
+import { useSmartNavigation } from "@/hooks/use-smart-navigation";
 import { ToolHeader } from "@/components/shared/tool-header";
-import type { DocumentType, Priority } from "@/types/context-manager";
-
-const PRIORITY_COLORS: Record<Priority, string> = {
-  high: "bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-200",
-  medium: "bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
-  low: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
-};
-
-const TYPE_COLORS: Record<DocumentType, string> = {
-  code: "bg-blue-50 text-blue-900 dark:bg-blue-950 dark:text-blue-200",
-  documentation: "bg-purple-50 text-purple-900 dark:bg-purple-950 dark:text-purple-200",
-  api: "bg-emerald-50 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200",
-  notes: "bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
-  other: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
-};
+import { formatCost } from "@/lib/application/cost-calculator";
+import { AI_MODELS } from "@/config/ai-models";
+import { DataTable, type ColumnConfig } from "@/components/ui";
+import { cn } from "@/lib/utils";
+import type { Document, ContextWindow, Priority, DocumentType } from "@/types/context-manager";
 
 export default function ContextManagerPage() {
+  const { t } = useTranslation();
+  const { addToast } = useToast();
+  const { navigateTo } = useSmartNavigation();
   const {
     windows,
-    activeWindow,
     activeWindowId,
-    setActiveWindowId,
+    activeWindow,
     createWindow,
     deleteWindow,
+    setActiveWindow,
     addDocument,
     removeDocument,
     changePriority,
     exportWindow,
   } = useContextManager();
-  const { addToast } = useToast();
-  const { t } = useTranslation();
 
   const [showAddDoc, setShowAddDoc] = useState(false);
-  const [showCreateWindow, setShowCreateWindow] = useState(false);
   const [newWindowName, setNewWindowName] = useState("");
-  const [docForm, setDocForm] = useState({
-    title: "",
-    content: "",
-    type: "code" as DocumentType,
-    priority: "medium" as Priority,
-    tags: "",
-  });
+  const [exportProfile, setExportProfile] = useState<"xml" | "markdown" | "json">("xml");
 
-  const handleCreateWindow = () => {
-    if (!newWindowName.trim()) return;
-    createWindow(newWindowName.trim());
-    setNewWindowName("");
-    setShowCreateWindow(false);
-    addToast(t("ctxMgr.toastCreated"), "success");
-  };
+  const docColumns: ColumnConfig[] = [
+    { name: "DOCUMENT", uid: "title", sortable: true },
+    { name: "TYPE", uid: "type", sortable: true },
+    { name: "TOKENS", uid: "tokens", sortable: true },
+    { name: "PRIORITY", uid: "priority", sortable: true },
+    { name: "ACTIONS", uid: "actions" },
+  ];
 
-  const handleAddDocument = () => {
-    if (!docForm.title.trim() || !docForm.content.trim()) {
-      addToast(t("ctxMgr.toastFillIn"), "warning");
-      return;
+  const renderDocCell = useCallback((doc: Document, columnKey: React.Key) => {
+    switch (columnKey) {
+      case "title":
+        return (
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg text-primary">
+              {doc.type === "code" ? <FileCode className="size-4" /> : <FileText className="size-4" />}
+            </div>
+            <div className="flex flex-col">
+              <span className="font-bold text-sm">{doc.title}</span>
+              <span className="text-[10px] text-muted-foreground font-mono truncate max-w-[150px]">
+                {doc.id}
+              </span>
+            </div>
+          </div>
+        );
+      case "type":
+        return (
+          <Chip size="sm" variant="flat" className="capitalize text-[10px] font-bold">
+            {doc.type}
+          </Chip>
+        );
+      case "tokens":
+        return (
+          <div className="flex flex-col gap-1 min-w-[100px]">
+            <span className="font-mono text-xs font-bold">{doc.tokens.toLocaleString()}</span>
+            <Progress 
+              value={(doc.tokens / (activeWindow?.maxTokens || 1)) * 100} 
+              size="sm" 
+              color="primary" 
+              className="h-1"
+            />
+          </div>
+        );
+      case "priority":
+        const priorityMap = {
+          high: "danger",
+          medium: "warning",
+          low: "default",
+        } as const;
+        return (
+          <Dropdown>
+            <DropdownTrigger>
+              <Button size="sm" variant="flat" color={priorityMap[doc.priority]} className="capitalize font-bold h-6 text-[10px]">
+                {doc.priority}
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu onAction={(key) => changePriority(doc.id, key as Priority)}>
+              <DropdownItem key="high">High</DropdownItem>
+              <DropdownItem key="medium">Medium</DropdownItem>
+              <DropdownItem key="low">Low</DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+        );
+      case "actions":
+        return (
+          <Button isIconOnly size="sm" variant="light" color="danger" onPress={() => removeDocument(doc.id)}>
+            <Trash2 className="size-4" />
+          </Button>
+        );
+      default:
+        return (doc as any)[columnKey];
     }
-    addDocument(
-      docForm.title,
-      docForm.content,
-      docForm.type,
-      docForm.priority,
-      docForm.tags
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean)
-    );
-    setDocForm({
-      title: "",
-      content: "",
-      type: "code",
-      priority: "medium",
-      tags: "",
-    });
-    setShowAddDoc(false);
-    addToast(t("ctxMgr.toastDocAdded"), "success");
-  };
-
-  const handleExport = (format: "xml" | "json" | "markdown") => {
-    const exported = exportWindow(format);
-    if (!exported) return;
-
-    const blob = new Blob([exported.content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = exported.filename;
-    a.click();
-    URL.revokeObjectURL(url);
-    addToast(t("ctxMgr.toastExported", { format: format.toUpperCase() }), "success");
-  };
+  }, [activeWindow, changePriority, removeDocument]);
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      {/* Header */}
       <ToolHeader
+        icon={BookOpen}
+        gradient="from-blue-500 to-indigo-600"
         title={t("ctxMgr.title")}
         description={t("ctxMgr.description")}
         breadcrumb
-        actions={
-          <Button onPress={() => setShowCreateWindow(true)} aria-expanded={showCreateWindow} className="gap-2">
-            <FolderPlus className="size-4" />
-            {t("ctxMgr.newWindow")}
-          </Button>
-        }
       />
 
-      {/* Create Window Form */}
-      {showCreateWindow && (
-        <Card className="border-2 border-primary/30 p-4">
-          <div className="flex gap-3">
-            <label htmlFor="new-window-name" className="sr-only">{t("ctxMgr.windowName")}</label>
-            <input
-              id="new-window-name"
-              type="text"
+      <div className="grid gap-6 lg:grid-cols-4">
+        {/* Sidebar: Windows List */}
+        <Card className="p-4 lg:col-span-1 flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <Input
+              size="sm"
+              placeholder="New window name..."
               value={newWindowName}
               onChange={(e) => setNewWindowName(e.target.value)}
-              placeholder={t("ctxMgr.windowPlaceholder")}
-              className="flex-1 rounded-lg border border-border bg-background px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
-              autoFocus
-              onKeyDown={(e) => e.key === "Enter" && handleCreateWindow()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && newWindowName) {
+                  createWindow(newWindowName);
+                  setNewWindowName("");
+                }
+              }}
             />
-            <Button size="sm" onPress={handleCreateWindow}>
-              {t("ctxMgr.create")}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onPress={() => setShowCreateWindow(false)}
+            <Button 
+              size="sm" 
+              color="primary" 
+              variant="flat" 
+              onPress={() => {
+                if (newWindowName) {
+                  createWindow(newWindowName);
+                  setNewWindowName("");
+                }
+              }}
+              className="font-bold"
             >
-              {t("common.cancel")}
+              <Plus className="size-4 mr-1" /> Create Window
             </Button>
           </div>
-        </Card>
-      )}
 
-      <div className="grid gap-6 lg:grid-cols-4">
-        {/* Windows Sidebar */}
-        <div className="lg:col-span-1">
-          <Card className="p-4">
-            <Card.Header className="mb-3 p-0">
-              <Card.Title className="text-sm uppercase text-muted-foreground">
-                {t("ctxMgr.windows")}
-              </Card.Title>
-            </Card.Header>
-            <Card.Content className="space-y-1 p-0">
-              {windows.length === 0 ? (
-                <p className="py-4 text-center text-sm text-muted-foreground">
-                  {t("ctxMgr.noWindows")}
-                </p>
-              ) : (
-                windows.map((window) => (
-                  <button
-                    key={window.id}
-                    type="button"
-                    onClick={() => setActiveWindowId(window.id)}
-                    className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-colors ${
-                      window.id === activeWindowId
-                        ? "bg-primary/10 text-primary"
-                        : "hover:bg-muted"
-                    }`}
-                  >
-                    <span className="truncate text-sm font-medium">
-                      {window.name}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <span className="text-xs text-muted-foreground">
-                        {window.documents.length}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteWindow(window.id);
-                          addToast(t("ctxMgr.toastWindowDeleted"), "info");
-                        }}
-                        className="text-muted-foreground transition-colors hover:text-red-500"
-                        aria-label={t("ctxMgr.deleteWindowLabel", { name: window.name })}
-                      >
-                        <Trash2 className="size-3.5" />
-                      </button>
-                    </span>
-                  </button>
-                ))
-              )}
-            </Card.Content>
-          </Card>
-        </div>
+          <div className="space-y-2 mt-4">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-2">Your Windows</p>
+            {windows.map((w) => (
+              <div
+                key={w.id}
+                onClick={() => setActiveWindow(w.id)}
+                className={cn(
+                  "group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all border border-transparent",
+                  activeWindowId === w.id 
+                    ? "bg-primary/10 border-primary/20 text-primary shadow-sm" 
+                    : "hover:bg-muted text-muted-foreground"
+                )}
+              >
+                <div className="flex flex-col min-w-0">
+                  <span className="text-sm font-bold truncate">{w.name}</span>
+                  <span className="text-[10px] opacity-60">{w.documents.length} docs · {w.totalTokens.toLocaleString()} tokens</span>
+                </div>
+                <Button
+                  isIconOnly
+                  size="sm"
+                  variant="light"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    deleteWindow(w.id);
+                  }}
+                >
+                  <Trash2 className="size-3 text-danger" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </Card>
 
         {/* Main Content */}
-        <div className="space-y-6 lg:col-span-3">
+        <div className="lg:col-span-3 space-y-6">
           {activeWindow ? (
             <>
-              {/* Window Header */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-bold">{activeWindow.name}</h2>
-                  <p className="text-sm text-muted-foreground">
-                    {t("ctxMgr.documents", { count: activeWindow.documents.length, tokens: activeWindow.totalTokens.toLocaleString() })}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onPress={() => setShowAddDoc(true)}
-                    aria-expanded={showAddDoc}
-                    className="gap-2"
+              {/* Dashboard Row */}
+              <div className="grid gap-4 sm:grid-cols-3">
+                <Card className="p-6 bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-lg shadow-blue-500/20">
+                  <p className="text-[10px] font-bold uppercase opacity-80 mb-1">Context Utilization</p>
+                  <p className="text-3xl font-black mb-2">{activeWindow.utilizationPercentage}%</p>
+                  <Progress 
+                    value={activeWindow.utilizationPercentage} 
+                    color="warning" 
+                    className="h-2 bg-white/20"
+                  />
+                  <div className="mt-3 flex justify-between text-[10px] font-bold opacity-90">
+                    <span>{activeWindow.totalTokens.toLocaleString()} tokens</span>
+                    <span>{activeWindow.maxTokens.toLocaleString()} max</span>
+                  </div>
+                </Card>
+
+                <Card className="p-6 flex flex-col justify-center border-2 border-transparent hover:border-blue-500/20 transition-all">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-2xl text-blue-600">
+                      <Coins className="size-6" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Est. Cost (GPT-4o)</p>
+                      <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                        {formatCost((activeWindow.totalTokens / 1_000_000) * (AI_MODELS.find(m => m.id === "gpt-4o")?.inputPricePerMToken || 2.5))}
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    className="mt-4 font-bold border-blue-100 dark:border-blue-900"
+                    onPress={() => {
+                      const fullContent = activeWindow.documents.map(d => `--- ${d.title} ---\n${d.content}`).join("\n\n");
+                      navigateTo("token-visualizer", fullContent);
+                    }}
                   >
-                    <Plus className="size-4" />
-                    {t("ctxMgr.addDocument")}
+                    Deep Token Analysis
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onPress={() => handleExport("xml")}
-                    className="gap-2"
-                  >
-                    <Download className="size-4" />
-                    {t("ctxMgr.formatXml")}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onPress={() => handleExport("json")}
-                  >
-                    {t("ctxMgr.formatJson")}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onPress={() => handleExport("markdown")}
-                  >
-                    {t("ctxMgr.formatMd")}
-                  </Button>
-                </div>
+                </Card>
+
+                <Card className="p-6 flex flex-col gap-3">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase">Export Profile</p>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex p-1 bg-muted rounded-xl">
+                      {["xml", "markdown"].map((p) => (
+                        <button
+                          key={p}
+                          onClick={() => setExportProfile(p as any)}
+                          className={cn(
+                            "flex-1 py-1.5 text-[10px] font-black uppercase rounded-lg transition-all",
+                            exportProfile === p ? "bg-background shadow-sm text-primary" : "text-muted-foreground"
+                          )}
+                        >
+                          {p}
+                        </button>
+                      ))}
+                    </div>
+                    <Button 
+                      color="primary" 
+                      className="font-bold shadow-lg shadow-primary/20 h-10"
+                      onPress={() => {
+                        const content = exportWindow(exportProfile);
+                        navigator.clipboard.writeText(content);
+                        addToast(`Context exported as ${exportProfile.toUpperCase()}`, "success");
+                      }}
+                    >
+                      <Share2 className="size-4 mr-2" /> Copy for AI
+                    </Button>
+                  </div>
+                </Card>
               </div>
 
-              {/* Utilization Bar */}
-              <Card className="p-4">
-                <div className="mb-2 flex justify-between text-sm">
-                  <span className="font-medium">{t("ctxMgr.contextUtilization")}</span>
-                  <span className="text-muted-foreground">
-                    {activeWindow.totalTokens.toLocaleString()} /{" "}
-                    {activeWindow.maxTokens.toLocaleString()} tokens (
-                    {activeWindow.utilizationPercentage}%)
-                  </span>
+              {/* Documents Table */}
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-bold flex items-center gap-2">
+                    <FileText className="size-5 text-primary" />
+                    Context Documents
+                  </h3>
+                  <Button 
+                    color="primary" 
+                    variant="flat" 
+                    size="sm" 
+                    onPress={() => setShowAddDoc(true)}
+                    className="font-bold"
+                  >
+                    <Plus className="size-4 mr-1" /> Add Document
+                  </Button>
                 </div>
-                <div className="h-3 w-full rounded-full bg-muted">
-                  <div
-                    className={`h-3 rounded-full transition-all duration-500 ${
-                      activeWindow.utilizationPercentage >= 80
-                        ? "bg-red-500"
-                        : activeWindow.utilizationPercentage >= 60
-                          ? "bg-amber-500"
-                          : "bg-emerald-500"
-                    }`}
-                    style={{
-                      width: `${Math.min(activeWindow.utilizationPercentage, 100)}%`,
-                    }}
-                  />
-                </div>
+
+                <DataTable
+                  columns={docColumns}
+                  data={activeWindow.documents}
+                  filterField="title"
+                  renderCell={renderDocCell}
+                  emptyContent="No documents in this window. Add code or notes to start."
+                />
               </Card>
-
-              {/* Add Document Form */}
-              {showAddDoc && (
-                <Card className="border-2 border-primary/30 p-6">
-                  <Card.Header className="mb-4 p-0">
-                    <Card.Title>{t("ctxMgr.newDocument")}</Card.Title>
-                  </Card.Header>
-                  <Card.Content className="space-y-3 p-0">
-                    <div>
-                      <label htmlFor="doc-title" className="mb-1 block text-sm font-medium text-muted-foreground">
-                        {t("ctxMgr.docTitle")}
-                      </label>
-                      <input
-                        id="doc-title"
-                        type="text"
-                        value={docForm.title}
-                        onChange={(e) =>
-                          setDocForm((prev) => ({ ...prev, title: e.target.value }))
-                        }
-                        placeholder={t("ctxMgr.docTitlePlaceholder")}
-                        className="w-full rounded-lg border border-border bg-background px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
-                      />
-                    </div>
-                    <div className="grid grid-cols-3 gap-3">
-                      <div>
-                        <label htmlFor="doc-type" className="mb-1 block text-sm font-medium text-muted-foreground">
-                          {t("ctxMgr.docType")}
-                        </label>
-                        <select
-                          id="doc-type"
-                          value={docForm.type}
-                          onChange={(e) =>
-                            setDocForm((prev) => ({
-                              ...prev,
-                              type: e.target.value as DocumentType,
-                            }))
-                          }
-                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
-                        >
-                          <option value="code">{t("ctxMgr.typeCode")}</option>
-                          <option value="documentation">{t("ctxMgr.typeDocumentation")}</option>
-                          <option value="api">{t("ctxMgr.typeApi")}</option>
-                          <option value="notes">{t("ctxMgr.typeNotes")}</option>
-                          <option value="other">{t("ctxMgr.typeOther")}</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label htmlFor="doc-priority" className="mb-1 block text-sm font-medium text-muted-foreground">
-                          {t("ctxMgr.docPriority")}
-                        </label>
-                        <select
-                          id="doc-priority"
-                          value={docForm.priority}
-                          onChange={(e) =>
-                            setDocForm((prev) => ({
-                              ...prev,
-                              priority: e.target.value as Priority,
-                            }))
-                          }
-                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
-                        >
-                          <option value="high">{t("ctxMgr.priorityHigh")}</option>
-                          <option value="medium">{t("ctxMgr.priorityMedium")}</option>
-                          <option value="low">{t("ctxMgr.priorityLow")}</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label htmlFor="doc-tags" className="mb-1 block text-sm font-medium text-muted-foreground">
-                          {t("ctxMgr.docTags")}
-                        </label>
-                        <input
-                          id="doc-tags"
-                          type="text"
-                          value={docForm.tags}
-                          onChange={(e) =>
-                            setDocForm((prev) => ({ ...prev, tags: e.target.value }))
-                          }
-                          placeholder={t("ctxMgr.docTagsPlaceholder")}
-                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label htmlFor="doc-content" className="mb-1 block text-sm font-medium text-muted-foreground">
-                        {t("ctxMgr.docContent")}
-                      </label>
-                      <textarea
-                        id="doc-content"
-                        value={docForm.content}
-                        onChange={(e) =>
-                          setDocForm((prev) => ({ ...prev, content: e.target.value }))
-                        }
-                        placeholder={t("ctxMgr.docContentPlaceholder")}
-                        className="h-32 w-full resize-none rounded-lg border border-border bg-background p-3 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
-                      />
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onPress={() => setShowAddDoc(false)}
-                      >
-                        {t("common.cancel")}
-                      </Button>
-                      <Button size="sm" onPress={handleAddDocument}>
-                        {t("ctxMgr.add")}
-                      </Button>
-                    </div>
-                  </Card.Content>
-                </Card>
-              )}
-
-              {/* Documents List */}
-              {activeWindow.documents.length > 0 ? (
-                <div className="space-y-3">
-                  {activeWindow.documents.map((doc) => (
-                    <Card key={doc.id} className="p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="min-w-0 flex-1">
-                          <div className="mb-1 flex items-center gap-2">
-                            <h3 className="font-semibold">{doc.title}</h3>
-                            <span
-                              className={`rounded-full px-2 py-0.5 text-xs ${TYPE_COLORS[doc.type]}`}
-                            >
-                              {doc.type}
-                            </span>
-                          </div>
-                          <p className="line-clamp-2 text-sm text-muted-foreground">
-                            {doc.content}
-                          </p>
-                          <div className="mt-2 flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground">
-                              {t("common.tokens", { count: doc.tokenCount })}
-                            </span>
-                            {doc.tags.map((tag) => (
-                              <span
-                                key={tag}
-                                className="rounded-full bg-muted px-2 py-0.5 text-xs"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="ml-4 flex items-center gap-2">
-                          <select
-                            value={doc.priority}
-                            aria-label={`Priority for ${doc.title}`}
-                            onChange={(e) =>
-                              changePriority(doc.id, e.target.value as Priority)
-                            }
-                            className={`cursor-pointer rounded-full border-0 px-2 py-1 text-xs ${PRIORITY_COLORS[doc.priority]}`}
-                          >
-                            <option value="high">{t("ctxMgr.priorityHighShort")}</option>
-                            <option value="medium">{t("ctxMgr.priorityMediumShort")}</option>
-                            <option value="low">{t("ctxMgr.priorityLowShort")}</option>
-                          </select>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              removeDocument(doc.id);
-                              addToast(t("ctxMgr.toastDocRemoved"), "info");
-                            }}
-                            className="text-muted-foreground transition-colors hover:text-red-500"
-                            aria-label={t("ctxMgr.removeDocLabel", { name: doc.title })}
-                          >
-                            <Trash2 className="size-4" />
-                          </button>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <Card className="p-12">
-                  <Card.Content className="p-0 text-center">
-                    <FileText className="mx-auto mb-3 size-10 text-muted-foreground" />
-                    <p className="text-foreground">{t("ctxMgr.noDocuments")}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {t("ctxMgr.noDocumentsHint")}
-                    </p>
-                  </Card.Content>
-                </Card>
-              )}
             </>
           ) : (
-            <Card className="p-16">
-              <Card.Content className="p-0 text-center">
-                <BookOpen className="mx-auto mb-4 size-12 text-muted-foreground" />
-                <p className="text-lg text-foreground">{t("ctxMgr.noWindowsEmpty")}</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {t("ctxMgr.noWindowsHint")}
-                </p>
-              </Card.Content>
+            <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center">
+              <div className="size-20 bg-muted rounded-full flex items-center justify-center mb-6">
+                <FolderPlus className="size-10 text-muted-foreground/40" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Select a Context Window</h3>
+              <p className="text-muted-foreground max-w-xs">
+                Create a new context window or select one from the sidebar to start organizing your LLM prompts.
+              </p>
             </Card>
           )}
         </div>
       </div>
+
+      {/* Add Document Modal/Overlay (Simplified for logic) */}
+      {showAddDoc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <Card className="w-full max-w-xl p-6 shadow-2xl">
+            <h3 className="text-xl font-bold mb-4">Add New Document</h3>
+            <div className="space-y-4">
+              <Input label="Title" placeholder="e.g. auth-service.ts" id="doc-title" />
+              <div className="grid grid-cols-2 gap-4">
+                <select id="doc-type" className="rounded-xl border border-border bg-background p-2 text-sm outline-none focus:ring-2 focus:ring-primary/20">
+                  <option value="code">Code</option>
+                  <option value="documentation">Docs</option>
+                  <option value="api">API</option>
+                  <option value="notes">Notes</option>
+                </select>
+                <select id="doc-priority" className="rounded-xl border border-border bg-background p-2 text-sm outline-none focus:ring-2 focus:ring-primary/20">
+                  <option value="high">High Priority</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
+              <textarea
+                id="doc-content"
+                placeholder="Paste code or text here..."
+                className="h-60 w-full resize-none rounded-xl border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+              <div className="flex gap-2">
+                <Button className="flex-1 font-bold" color="primary" onPress={() => {
+                  const title = (document.getElementById("doc-title") as HTMLInputElement).value;
+                  const content = (document.getElementById("doc-content") as HTMLTextAreaElement).value;
+                  const type = (document.getElementById("doc-type") as HTMLSelectElement).value as DocumentType;
+                  const priority = (document.getElementById("doc-priority") as HTMLSelectElement).value as Priority;
+                  if (title && content) {
+                    addDocument(activeWindowId!, { title, content, type, priority, tags: [] });
+                    setShowAddDoc(false);
+                  }
+                }}>
+                  Add to Context
+                </Button>
+                <Button variant="ghost" className="font-bold" onPress={() => setShowAddDoc(false)}>Cancel</Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

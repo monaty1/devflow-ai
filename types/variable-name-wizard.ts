@@ -7,6 +7,12 @@ export interface NameSuggestion {
   convention: NamingConvention;
   score: number;
   reasoning: string;
+  audit?: NameAudit;
+}
+
+export interface NameAudit {
+  status: "good" | "warning" | "error";
+  findings: string[];
 }
 
 export interface ConversionResult {
@@ -48,11 +54,13 @@ export type VariableType =
   | "file"
   | "css-class";
 
+export type VariableLanguage = "typescript" | "javascript" | "python" | "go" | "rust" | "csharp" | "java" | "general";
+
 export interface WizardConfig {
   preferredConvention: NamingConvention;
   maxSuggestions: number;
   includeAbbreviations: boolean;
-  language: "typescript" | "javascript" | "python" | "go" | "rust" | "general";
+  language: VariableLanguage;
 }
 
 export const DEFAULT_WIZARD_CONFIG: WizardConfig = {

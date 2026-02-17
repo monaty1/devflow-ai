@@ -1,18 +1,20 @@
 // UUID Generator Types
 
 export type UuidVersion = "v1" | "v4" | "v7" | "nil" | "max";
-export type UuidFormat = "standard" | "uppercase" | "no-hyphens" | "braces" | "urn";
+export type UuidFormat = "standard" | "uppercase" | "no-hyphens" | "braces" | "urn" | "base64" | "base58";
 
 export interface UuidConfig {
   version: UuidVersion;
   format: UuidFormat;
   quantity: number;
+  exportFormat: "text" | "json" | "csv" | "sql";
 }
 
 export const DEFAULT_UUID_CONFIG: UuidConfig = {
   version: "v4",
   format: "standard",
   quantity: 1,
+  exportFormat: "text",
 };
 
 export interface UuidResult {
@@ -38,4 +40,6 @@ export interface UuidInfo {
   timestamp?: Date;
   clockSeq?: number;
   node?: string;
+  isExposed: boolean;
+  entropyScore: number;
 }

@@ -110,15 +110,30 @@ function analyzeValue(name: string, value: unknown): JsonField {
     };
   }
 
-  // String (check for date)
+  // String (check for date and semantic types)
   if (typeof value === "string") {
     const isDate = isDateString(value);
+    let semanticType: JsonField["semanticType"] = "none";
+
+    if (!isDate) {
+      if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) {
+        semanticType = "uuid";
+      } else if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value)) {
+        semanticType = "email";
+      } else if (/^https?:\/\//.test(value)) {
+        semanticType = "url";
+      } else if (/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(value)) {
+        semanticType = "ipv4";
+      }
+    }
+
     return {
       name,
       type: isDate ? "date" : "string",
       isOptional: false,
       isArray: false,
       isDate,
+      semanticType,
       originalValue: value,
     };
   }
@@ -179,12 +194,49 @@ export function generateCode(
   const parsed = parseJson(jsonString);
   const files: GeneratedFile[] = [];
   const stats = calculateStats(parsed.fields);
-
   const rootName = toPascalCase(config.rootName);
 
+  switch (config.targetLanguage) {
+    case "java":
+      files.push(...generateJava(parsed.fields, rootName, config));
+      break;
+    case "csharp":
+      files.push(...generateCSharp(parsed.fields, rootName, config));
+      break;
+    case "go":
+      files.push(...generateGo(parsed.fields, rootName, config));
+      break;
+    case "python":
+      files.push(...generatePython(parsed.fields, rootName, config));
+      break;
+    case "typescript":
+    default:
+      files.push(...generateTypeScript(parsed.fields, rootName, config));
+      break;
+  }
+
+  return {
+    id: crypto.randomUUID(),
+    inputJson: jsonString,
+    config,
+    files,
+    stats,
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+// --- TypeScript Generator ---
+
+function generateTypeScript(
+  fields: JsonField[],
+  rootName: string,
+  config: DtoMaticConfig
+): GeneratedFile[] {
+  const files: GeneratedFile[] = [];
+  
   // Generate DTO Interface
   const dtoContent = generateInterface(
-    parsed.fields,
+    fields,
     `${rootName}Dto`,
     config,
     true
@@ -199,7 +251,7 @@ export function generateCode(
 
   // Generate Entity (Clean Arch mode)
   if (config.mode === "clean-arch") {
-    const entityContent = generateEntity(parsed.fields, rootName, config);
+    const entityContent = generateEntity(fields, rootName, config);
     files.push({
       id: crypto.randomUUID(),
       name: `${toKebabCase(rootName)}.entity.ts`,
@@ -211,7 +263,7 @@ export function generateCode(
     // Generate Mapper
     if (config.generateMappers) {
       const mapperContent = generateMapper(
-        parsed.fields,
+        fields,
         rootName,
         config
       );
@@ -227,7 +279,7 @@ export function generateCode(
 
   // Generate Zod Schema
   if (config.generateZod) {
-    const zodContent = generateZodSchema(parsed.fields, rootName, config);
+    const zodContent = generateZodSchema(fields, rootName, config);
     files.push({
       id: crypto.randomUUID(),
       name: `${toKebabCase(rootName)}.schema.ts`,
@@ -249,14 +301,201 @@ export function generateCode(
     });
   }
 
-  return {
+  return files;
+}
+
+// --- Java Generator ---
+
+function generateJava(
+  fields: JsonField[],
+  rootName: string,
+  config: DtoMaticConfig
+): GeneratedFile[] {
+  const files: GeneratedFile[] = [];
+  const packageName = config.javaPackage || "com.example.dto";
+  const content = `package ${packageName};
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import java.util.List;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class ${rootName} {
+${generateJavaFields(fields, config)}
+}
+`;
+
+  files.push({
     id: crypto.randomUUID(),
-    inputJson: jsonString,
-    config,
-    files,
-    stats,
-    generatedAt: new Date().toISOString(),
-  };
+    name: `${rootName}.java`,
+    type: "class",
+    content,
+    language: "java",
+  });
+
+  return files;
+}
+
+function generateJavaFields(fields: JsonField[], config: DtoMaticConfig): string {
+  return fields.map(field => {
+    const type = getJavaType(field);
+    const name = applyNaming(field.name, "camelCase");
+    return `    private ${type} ${name};`;
+  }).join("\n");
+}
+
+function getJavaType(field: JsonField): string {
+  switch (field.type) {
+    case "string": return "String";
+    case "number": return "Integer"; // Simplified
+    case "boolean": return "Boolean";
+    case "date": return "String";
+    case "object": return "Object"; // Should handle nested
+    default: return "Object";
+  }
+}
+
+// --- C# Generator ---
+
+function generateCSharp(
+  fields: JsonField[],
+  rootName: string,
+  config: DtoMaticConfig
+): GeneratedFile[] {
+  const files: GeneratedFile[] = [];
+  const namespace = config.csharpNamespace || "App.Domain.Models";
+  const content = `using System;
+using System.Collections.Generic;
+
+namespace ${namespace}
+{
+    public class ${rootName}
+    {
+${generateCSharpFields(fields, config)}
+    }
+}
+`;
+
+  files.push({
+    id: crypto.randomUUID(),
+    name: `${rootName}.cs`,
+    type: "class",
+    content,
+    language: "csharp",
+  });
+
+  return files;
+}
+
+function generateCSharpFields(fields: JsonField[], config: DtoMaticConfig): string {
+  return fields.map(field => {
+    const type = getCSharpType(field);
+    const name = applyNaming(field.name, "PascalCase");
+    return `        public ${type} ${name} { get; set; }`;
+  }).join("\n");
+}
+
+function getCSharpType(field: JsonField): string {
+  switch (field.type) {
+    case "string": return "string";
+    case "number": return "int";
+    case "boolean": return "bool";
+    case "date": return "DateTime";
+    default: return "object";
+  }
+}
+
+// --- Go Generator ---
+
+function generateGo(
+  fields: JsonField[],
+  rootName: string,
+  config: DtoMaticConfig
+): GeneratedFile[] {
+  const files: GeneratedFile[] = [];
+  const packageName = config.goPackage || "models";
+  const content = `package ${packageName}
+
+type ${rootName} struct {
+${generateGoFields(fields, config)}
+}
+`;
+
+  files.push({
+    id: crypto.randomUUID(),
+    name: `${toSnakeCase(rootName)}.go`,
+    type: "struct",
+    content,
+    language: "go",
+  });
+
+  return files;
+}
+
+function generateGoFields(fields: JsonField[], config: DtoMaticConfig): string {
+  return fields.map(field => {
+    const type = getGoType(field);
+    const name = applyNaming(field.name, "PascalCase");
+    const jsonTag = field.name;
+    return `\t${name} ${type} \`json:"${jsonTag}"\``;
+  }).join("\n");
+}
+
+function getGoType(field: JsonField): string {
+  switch (field.type) {
+    case "string": return "string";
+    case "number": return "int";
+    case "boolean": return "bool";
+    case "date": return "string";
+    default: return "interface{}";
+  }
+}
+
+// --- Python Generator ---
+
+function generatePython(
+  fields: JsonField[],
+  rootName: string,
+  config: DtoMaticConfig
+): GeneratedFile[] {
+  const files: GeneratedFile[] = [];
+  const content = `from pydantic import BaseModel
+from typing import List, Optional
+
+class ${rootName}(BaseModel):
+${generatePythonFields(fields, config)}
+`;
+
+  files.push({
+    id: crypto.randomUUID(),
+    name: `${toSnakeCase(rootName)}.py`,
+    type: "class",
+    content,
+    language: "python",
+  });
+
+  return files;
+}
+
+function generatePythonFields(fields: JsonField[], config: DtoMaticConfig): string {
+  return fields.map(field => {
+    const type = getPythonType(field);
+    const name = applyNaming(field.name, "snake_case");
+    return `    ${name}: ${type}`;
+  }).join("\n");
+}
+
+function getPythonType(field: JsonField): string {
+  switch (field.type) {
+    case "string": return "str";
+    case "number": return "int";
+    case "boolean": return "bool";
+    case "date": return "str";
+    default: return "Any";
+  }
 }
 
 function generateInterface(
@@ -778,6 +1017,76 @@ export function formatJson(str: string): string {
   } catch {
     return str;
   }
+}
+
+// --- Mock Data Generation ---
+
+export function generateMockData(fields: JsonField[], count: number = 1): any {
+  function generateItem(fieldList: JsonField[]): any {
+    const item: any = {};
+    
+    for (const field of fieldList) {
+      if (field.isOptional && Math.random() > 0.8) continue; // 20% chance of undefined
+
+      if (field.isArray) {
+        // Generate array of 1-3 items
+        if (field.type === "object" && field.children) {
+          item[field.name] = Array.from({ length: Math.floor(Math.random() * 3) + 1 }, () => generateItem(field.children!));
+        } else {
+          item[field.name] = Array.from({ length: 3 }, () => generateValue(field));
+        }
+      } else if (field.type === "object" && field.children) {
+        item[field.name] = generateItem(field.children);
+      } else {
+        item[field.name] = generateValue(field);
+      }
+    }
+    
+    return item;
+  }
+
+  const data = Array.from({ length: count }, () => generateItem(fields));
+  return count === 1 ? data[0] : data;
+}
+
+function generateValue(field: JsonField): any {
+  const name = field.name.toLowerCase();
+  
+  if (field.semanticType === "uuid" || name.includes("id") || name.includes("uuid")) {
+    return "550e8400-e29b-41d4-a716-44665544" + Math.floor(Math.random() * 10000).toString().padStart(4, "0");
+  }
+  
+  if (field.semanticType === "email" || name.includes("email")) {
+    return `user${Math.floor(Math.random() * 1000)}@example.com`;
+  }
+  
+  if (field.semanticType === "url" || name.includes("url") || name.includes("link") || name.includes("avatar")) {
+    return `https://example.com/resource/${Math.floor(Math.random() * 100)}`;
+  }
+
+  if (field.isDate || name.includes("date") || name.includes("at")) {
+    return new Date(Date.now() - Math.floor(Math.random() * 10000000000)).toISOString();
+  }
+
+  if (field.type === "string") {
+    if (name.includes("name")) return ["Alice", "Bob", "Charlie", "David"][Math.floor(Math.random() * 4)];
+    if (name.includes("title")) return "Lorem Ipsum Dolor Sit Amet";
+    if (name.includes("desc")) return "This is a sample description for testing purposes.";
+    return "sample_string";
+  }
+
+  if (field.type === "number") {
+    if (name.includes("age")) return Math.floor(Math.random() * 60) + 18;
+    if (name.includes("price") || name.includes("cost")) return parseFloat((Math.random() * 100).toFixed(2));
+    if (name.includes("count") || name.includes("total")) return Math.floor(Math.random() * 100);
+    return Math.floor(Math.random() * 1000);
+  }
+
+  if (field.type === "boolean") {
+    return Math.random() > 0.5;
+  }
+
+  return null;
 }
 
 // --- Example JSON ---

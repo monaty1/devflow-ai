@@ -37,9 +37,97 @@ export function validateJson(input: string): { isValid: boolean; error?: JsonVal
         line,
         column,
         message: error.message.replace(/^JSON\.parse: /, ""),
+        fixable: /unexpected|expected|token/i.test(error.message),
       },
     };
   }
+}
+
+/**
+ * Attempts to fix common JSON syntax errors
+ */
+export function fixJson(input: string): string {
+  let fixed = input.trim();
+
+  // 1. Replace single quotes with double quotes (basic heuristic)
+  fixed = fixed.replace(/'([^']*)'/g, '"$1"');
+
+  // 2. Remove trailing commas
+  fixed = fixed.replace(/,\s*([}\]])/g, "$1");
+
+  // 3. Add quotes to unquoted keys
+  fixed = fixed.replace(/([{,]\s*)([a-zA-Z0-9_]+)(\s*:)/g, '$1"$2"$3');
+
+  // 4. Fix missing opening/closing braces if very simple
+  const openBraces = (fixed.match(/{/g) || []).length;
+  const closeBraces = (fixed.match(/}/g) || []).length;
+  if (openBraces > closeBraces) fixed += "}".repeat(openBraces - closeBraces);
+  
+  const openBrackets = (fixed.match(/\[/g) || []).length;
+  const closeBrackets = (fixed.match(/\]/g) || []).length;
+  if (openBrackets > closeBrackets) fixed += "]".repeat(openBrackets - closeBrackets);
+
+  return fixed;
+}
+
+/**
+ * Basic JSON to YAML conversion (without external libs for weight)
+ */
+export function jsonToYaml(obj: any, indent = 0): string {
+  const spaces = "  ".repeat(indent);
+  if (obj === null) return "null";
+  if (typeof obj !== "object") return String(obj);
+
+  if (Array.isArray(obj)) {
+    return obj.map(item => `\n${spaces}- ${jsonToYaml(item, indent + 1)}`).join("").trim();
+  }
+
+  return Object.entries(obj)
+    .map(([key, value]) => {
+      const val = typeof value === "object" && value !== null 
+        ? `\n${jsonToYaml(value, indent + 1)}` 
+        : ` ${value}`;
+      return `${spaces}${key}:${val}`;
+    })
+    .join("\n");
+}
+
+/**
+ * Basic JSON to XML conversion
+ */
+export function jsonToXml(obj: any, rootName = "root"): string {
+  function toXml(val: any, name: string): string {
+    if (val === null) return `<${name}/>`;
+    if (Array.isArray(val)) {
+      return val.map(item => toXml(item, "item")).join("");
+    }
+    if (typeof val === "object") {
+      const children = Object.entries(val)
+        .map(([k, v]) => toXml(v, k))
+        .join("");
+      return `<${name}>${children}</${name}>`;
+    }
+    return `<${name}>${val}</${name}>`;
+  }
+  return `<?xml version="1.0" encoding="UTF-8"?>\n${toXml(obj, rootName)}`;
+}
+
+/**
+ * Basic JSON to CSV conversion
+ */
+export function jsonToCsv(obj: any): string {
+  const arr = Array.isArray(obj) ? obj : [obj];
+  if (arr.length === 0) return "";
+  
+  const headers = Object.keys(arr[0] || {});
+  const rows = arr.map(item => 
+    headers.map(header => {
+      const val = item[header];
+      return typeof val === "string" ? `"${val.replace(/"/g, '""')}"` : val;
+    }).join(",")
+  );
+  
+  return [headers.join(","), ...rows].join("\n");
 }
 
 /**
@@ -351,6 +439,15 @@ export function processJson(
       break;
     case "validate":
       output = formatJson(input, config);
+      break;
+    case "to-yaml":
+      output = jsonToYaml(JSON.parse(input));
+      break;
+    case "to-xml":
+      output = jsonToXml(JSON.parse(input));
+      break;
+    case "to-csv":
+      output = jsonToCsv(JSON.parse(input));
       break;
     default:
       output = input;

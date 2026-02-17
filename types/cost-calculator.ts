@@ -8,9 +8,20 @@ export interface AIModel {
   contextWindow: number;
   maxOutput: number;
   isPopular: boolean;
+  benchmarkScore?: number; // MMLU or similar
+  updatedAt: string;
+  category: "general" | "reasoning" | "coding" | "lightweight";
 }
 
-export type AIProvider = "openai" | "anthropic" | "google" | "meta";
+export type AIProvider =
+  | "openai"
+  | "anthropic"
+  | "google"
+  | "meta"
+  | "mistral"
+  | "groq"
+  | "deepseek"
+  | "together";
 
 export interface CostCalculation {
   id: string;
@@ -21,6 +32,7 @@ export interface CostCalculation {
   outputCost: number;
   totalCost: number;
   calculatedAt: string;
+  valueScore?: number;
 }
 
 export interface CostComparison {

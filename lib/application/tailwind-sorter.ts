@@ -211,6 +211,107 @@ const VARIANT_ORDER = [
   "peer-hover", "peer-focus", "peer-active", "peer-checked", "peer-disabled",
 ];
 
+// --- Conflict Detection ---
+
+function findConflicts(classes: string[]): TailwindConflict[] {
+  const conflicts: TailwindConflict[] = [];
+  const propertyMap = new Map<string, string[]>();
+
+  for (const cls of classes) {
+    const base = getBaseClass(cls);
+    const variants = getVariants(cls).sort().join(":");
+    
+    // Group by common prefix (e.g., p-, m-, text-, bg-)
+    const prop = base.split("-")[0] || base;
+    
+    // Handle special cases like 'flex-row' vs 'flex-col' which are both 'flex-'
+    let key = `${variants}:${prop}`;
+    if (base.startsWith("flex-") && !base.startsWith("flex-grow") && !base.startsWith("flex-shrink")) {
+      key = `${variants}:flex-direction`;
+    }
+
+    if (!propertyMap.has(key)) {
+      propertyMap.set(key, []);
+    }
+    propertyMap.get(key)!.push(cls);
+  }
+
+  for (const [key, list] of propertyMap.entries()) {
+    if (list.length > 1) {
+      conflicts.push({
+        classes: list,
+        type: key.split(":").pop() || "property",
+        message: `Potential conflict between ${list.join(", ")}`,
+      });
+    }
+  }
+
+  return conflicts;
+}
+
+// --- Semantic Audit ---
+
+function performAudit(classes: string[]): TailwindAuditItem[] {
+  const audit: TailwindAuditItem[] = [];
+  const baseClasses = classes.map(getBaseClass);
+  const classSet = new Set(baseClasses);
+
+  for (const cls of classes) {
+    const base = getBaseClass(cls);
+    
+    if (base === "block" && classSet.has("flex")) {
+      audit.push({
+        class: cls,
+        reason: "'block' is redundant when 'flex' is present",
+        suggestion: "remove 'block'",
+        severity: "low",
+      });
+    }
+    
+    if (base === "w-full" && (classSet.has("flex-col") || classSet.has("grid"))) {
+      audit.push({
+        class: cls,
+        reason: "'w-full' is often redundant in flex-col or grid containers",
+        severity: "low",
+      });
+    }
+
+    if (base === "inline" && (base.includes("p-") || base.includes("m-"))) {
+      audit.push({
+        class: cls,
+        reason: "Vertical padding/margin may not work as expected on 'inline' elements",
+        suggestion: "use 'inline-block' instead",
+        severity: "medium",
+      });
+    }
+  }
+
+  return audit;
+}
+
+// --- Breakpoint Analysis ---
+
+function analyzeBreakpoints(classes: string[]): Record<string, string[]> {
+  const breakpoints: Record<string, string[]> = {
+    base: [],
+    sm: [],
+    md: [],
+    lg: [],
+    xl: [],
+    "2xl": [],
+  };
+
+  for (const cls of classes) {
+    const variants = getVariants(cls);
+    const bp = variants.find(v => ["sm", "md", "lg", "xl", "2xl"].includes(v)) || "base";
+    if (breakpoints[bp]) {
+      breakpoints[bp]!.push(cls);
+    }
+  }
+
+  return breakpoints;
+}
+
 // --- Main Sort Function ---
 
 export function sortClasses(input: string, config: SorterConfig): SortResult {
@@ -220,6 +321,11 @@ export function sortClasses(input: string, config: SorterConfig): SortResult {
     : classes;
 
   const duplicatesRemoved = classes.length - uniqueClasses.length;
+
+  // Analysis
+  const conflicts = findConflicts(uniqueClasses);
+  const audit = performAudit(uniqueClasses);
+  const breakpoints = analyzeBreakpoints(uniqueClasses);
 
   // Categorize classes
   const categorized = categorizeClasses(uniqueClasses);
@@ -246,6 +352,9 @@ export function sortClasses(input: string, config: SorterConfig): SortResult {
       groupsCount: groups.filter((g) => g.classes.length > 0).length,
     },
     groups,
+    conflicts,
+    audit,
+    breakpoints,
     sortedAt: new Date().toISOString(),
   };
 }

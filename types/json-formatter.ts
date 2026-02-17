@@ -1,23 +1,27 @@
 // JSON Formatter Types
 
-export type JsonFormatMode = "format" | "minify" | "validate";
+export type JsonFormatMode = "format" | "minify" | "validate" | "to-yaml" | "to-xml" | "to-csv";
 
 export interface JsonFormatterConfig {
   indentSize: 2 | 4;
   sortKeys: boolean;
   quoteStyle: "double" | "single";
+  escapeHtml: boolean;
 }
 
 export const DEFAULT_FORMATTER_CONFIG: JsonFormatterConfig = {
   indentSize: 2,
   sortKeys: false,
   quoteStyle: "double",
+  escapeHtml: false,
 };
 
 export interface JsonValidationError {
   line: number;
   column: number;
   message: string;
+  fixable?: boolean;
+  suggestedFix?: string;
 }
 
 export interface JsonFormatResult {

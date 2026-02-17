@@ -3,26 +3,33 @@
 
 export type GenerationMode = "quick" | "clean-arch" | "zod";
 
+export type TargetLanguage = "typescript" | "java" | "csharp" | "go" | "python";
+
 export type NamingConvention = "camelCase" | "PascalCase" | "snake_case";
 
 export interface DtoMaticConfig {
   mode: GenerationMode;
+  targetLanguage: TargetLanguage;
   rootName: string;
   naming: NamingConvention;
   optionalFields: boolean;
   detectDates: boolean;
+  detectSemanticTypes: boolean;
   exportTypes: boolean;
   readonlyEntities: boolean;
   generateMappers: boolean;
   generateZod: boolean;
+  javaPackage?: string;
+  csharpNamespace?: string;
+  goPackage?: string;
 }
 
 export interface GeneratedFile {
   id: string;
   name: string;
-  type: "interface" | "entity" | "mapper" | "zod" | "index";
+  type: "interface" | "entity" | "mapper" | "zod" | "index" | "class" | "struct" | "record";
   content: string;
-  language: "typescript";
+  language: TargetLanguage;
 }
 
 export interface GenerationResult {
@@ -48,6 +55,7 @@ export interface JsonField {
   isOptional: boolean;
   isArray: boolean;
   isDate: boolean;
+  semanticType?: "uuid" | "email" | "url" | "ipv4" | "none";
   children?: JsonField[];
   originalValue: unknown;
 }
@@ -69,12 +77,17 @@ export interface ParsedJson {
 
 export const DEFAULT_CONFIG: DtoMaticConfig = {
   mode: "clean-arch",
+  targetLanguage: "typescript",
   rootName: "Data",
   naming: "camelCase",
   optionalFields: true,
   detectDates: true,
+  detectSemanticTypes: true,
   exportTypes: true,
   readonlyEntities: true,
   generateMappers: true,
   generateZod: false,
+  javaPackage: "com.example.dto",
+  csharpNamespace: "App.Domain.Models",
+  goPackage: "models",
 };

@@ -1,489 +1,292 @@
 "use client";
 
-import { useState } from "react";
-import { Card, Button } from "@heroui/react";
+import { useState, useCallback, useMemo } from "react";
+import {
+  Card,
+  Button,
+  Tabs,
+  Tab,
+  Chip,
+  Progress,
+  Tooltip,
+  Input,
+} from "@heroui/react";
 import {
   Wand2,
-  ArrowRight,
-  History,
-  Trash2,
-  ChevronRight,
+  ArrowRightLeft,
   RotateCcw,
-  Maximize2,
-  Minimize2,
   Sparkles,
-  RefreshCw,
+  Search,
+  CheckCircle2,
+  AlertTriangle,
+  Info,
+  ChevronRight,
+  Copy,
+  LayoutGrid,
+  List as ListIcon,
+  BookOpen,
+  Code2,
+  ShieldCheck,
+  ShieldAlert,
 } from "lucide-react";
 import { useVariableNameWizard } from "@/hooks/use-variable-name-wizard";
 import { useTranslation } from "@/hooks/use-translation";
-import { CopyButton } from "@/components/shared/copy-button";
 import { ToolHeader } from "@/components/shared/tool-header";
-import {
-  CONVENTION_LABELS,
-  CONVENTION_EXAMPLES,
-  TYPE_LABELS,
-  type NamingConvention,
-  type VariableType,
-} from "@/types/variable-name-wizard";
-
-const VARIABLE_TYPES: VariableType[] = [
-  "variable",
-  "function",
-  "class",
-  "constant",
-  "interface",
-  "type",
-  "enum",
-  "component",
-  "hook",
-  "file",
-  "css-class",
-];
-
-const CONVENTIONS: NamingConvention[] = [
-  "camelCase",
-  "PascalCase",
-  "snake_case",
-  "SCREAMING_SNAKE_CASE",
-  "kebab-case",
-  "flatcase",
-];
+import { CopyButton } from "@/components/shared/copy-button";
+import { DataTable, type ColumnConfig } from "@/components/ui";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { cn } from "@/lib/utils";
+import type { NameSuggestion, VariableType, NamingConvention } from "@/types/variable-name-wizard";
 
 export default function VariableNameWizardPage() {
+  const { t } = useTranslation();
   const {
     input,
     mode,
-    variableType,
+    config,
     conversionResult,
     generationResult,
-    history,
-    inputStats,
     setInput,
     setMode,
-    setVariableType,
+    updateConfig,
     convert,
     generate,
-    loadExample,
     reset,
-    clearHistory,
-    loadFromHistory,
-    expand,
-    abbreviate,
-    applyConversion,
-    applySuggestion,
+    loadExample,
   } = useVariableNameWizard();
-  const { t } = useTranslation();
 
-  const [showHistory, setShowHistory] = useState(false);
+  const [activeTab, setActiveTab] = useState<"convert" | "generate">("generate");
 
-  const handleAction = () => {
-    if (mode === "convert") {
-      convert();
-    } else {
-      generate();
+  const suggestionColumns: ColumnConfig[] = [
+    { name: "NAME", uid: "name", sortable: true },
+    { name: "SCORE", uid: "score", sortable: true },
+    { name: "REASONING", uid: "reasoning" },
+    { name: "AUDIT", uid: "audit" },
+    { name: "ACTIONS", uid: "actions" },
+  ];
+
+  const renderSuggestionCell = (suggestion: NameSuggestion, columnKey: React.Key) => {
+    switch (columnKey) {
+      case "name":
+        return (
+          <div className="flex flex-col gap-0.5">
+            <span className="font-mono text-sm font-bold text-primary">{suggestion.name}</span>
+            <span className="text-[10px] text-muted-foreground uppercase font-black tracking-tighter">
+              {suggestion.convention}
+            </span>
+          </div>
+        );
+      case "score":
+        return (
+          <div className="flex items-center gap-2">
+            <Progress 
+              value={suggestion.score} 
+              size="sm" 
+              color={suggestion.score > 80 ? "success" : suggestion.score > 50 ? "warning" : "danger"} 
+              className="w-12 h-1.5"
+            />
+            <span className="text-xs font-black">{suggestion.score}%</span>
+          </div>
+        );
+      case "reasoning":
+        return <span className="text-xs text-muted-foreground italic line-clamp-1">{suggestion.reasoning}</span>;
+      case "audit":
+        const audit = suggestion.audit;
+        const Icon = audit.status === "good" ? ShieldCheck : audit.status === "warning" ? AlertTriangle : ShieldAlert;
+        return (
+          <Tooltip content={audit.findings.join(". ")}>
+            <div className="flex items-center">
+              <Icon className={cn(
+                "size-4",
+                audit.status === "good" ? "text-emerald-500" : audit.status === "warning" ? "text-amber-500" : "text-danger"
+              )} />
+            </div>
+          </Tooltip>
+        );
+      case "actions":
+        return <CopyButton text={suggestion.name} size="sm" variant="ghost" />;
+      default:
+        return (suggestion as any)[columnKey];
     }
   };
 
+  const TYPE_OPTIONS: { id: VariableType; label: string; icon: React.ElementType }[] = [
+    { id: "variable", label: "Variable", icon: Code2 },
+    { id: "function", label: "Function", icon: Wand2 },
+    { id: "constant", label: "Constant", icon: ListIcon },
+    { id: "class", label: "Class/Type", icon: BookOpen },
+    { id: "hook", label: "React Hook", icon: Sparkles },
+    { id: "component", label: "Component", icon: LayoutGrid },
+  ];
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="mx-auto max-w-6xl space-y-6">
       <ToolHeader
         icon={Wand2}
-        gradient="from-fuchsia-500 to-pink-600"
+        gradient="from-violet-500 to-purple-600"
         title={t("varName.title")}
         description={t("varName.description")}
         breadcrumb
+        actions={
+          <Button variant="outline" size="sm" onPress={reset} className="gap-2">
+            <RotateCcw className="size-4" />
+            {t("common.reset")}
+          </Button>
+        }
       />
 
-      {/* Mode Toggle */}
-      <Card className="p-4">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex rounded-lg border border-border p-1">
-            <button
-              type="button"
-              onClick={() => setMode("convert")}
-              className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-                mode === "convert"
-                  ? "bg-primary text-primary-foreground"
-                  : "hover:bg-muted"
-              }`}
-            >
-              <RefreshCw className="mr-2 inline-block size-4" />
-              {t("varName.convert")}
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode("generate")}
-              className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-                mode === "generate"
-                  ? "bg-primary text-primary-foreground"
-                  : "hover:bg-muted"
-              }`}
-            >
-              <Sparkles className="mr-2 inline-block size-4" />
-              {t("varName.generate")}
-            </button>
-          </div>
-
-          <div className="h-6 w-px bg-border" />
-
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onPress={() => loadExample(0)}>
-              {t("varName.example", { n: 1 })}
-            </Button>
-            <Button variant="outline" size="sm" onPress={() => loadExample(1)}>
-              {t("varName.example", { n: 2 })}
-            </Button>
-            <Button variant="outline" size="sm" onPress={() => loadExample(2)}>
-              {t("varName.example", { n: 3 })}
-            </Button>
-          </div>
-        </div>
-      </Card>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Input Panel */}
-        <div className="space-y-4">
+      <div className="grid gap-6 lg:grid-cols-12">
+        {/* Input Column */}
+        <div className="lg:col-span-4 space-y-6">
           <Card className="p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold">
-                {mode === "convert" ? t("varName.nameToConvert") : t("varName.nameDescription")}
-              </h2>
-              <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onPress={expand} isDisabled={!input}>
-                  <Maximize2 className="mr-1 size-4" />
-                  {t("varName.expand")}
-                </Button>
-                <Button variant="ghost" size="sm" onPress={abbreviate} isDisabled={!input}>
-                  <Minimize2 className="mr-1 size-4" />
-                  {t("varName.abbreviate")}
-                </Button>
-              </div>
-            </div>
-
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder={
-                mode === "convert"
-                  ? t("varName.convertPlaceholder")
-                  : t("varName.generatePlaceholder")
-              }
-              className="w-full rounded-lg border border-border bg-background px-4 py-3 font-mono text-lg focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && inputStats.isValid) {
-                  handleAction();
-                }
+            <Tabs 
+              selectedKey={activeTab} 
+              onSelectionChange={(k) => {
+                const key = k as "convert" | "generate";
+                setActiveTab(key);
+                setMode(key);
               }}
-            />
+              variant="underlined"
+              classNames={{ tabList: "gap-6 mb-4", cursor: "bg-primary" }}
+            >
+              <Tab key="generate" title="Create Names" />
+              <Tab key="convert" title="Reformat" />
+            </Tabs>
 
-            {/* Input Stats */}
-            {input.trim() && (
-              <div className="mt-4 flex flex-wrap items-center gap-3">
-                <div className="rounded-lg bg-muted px-3 py-1.5 text-sm">
-                  {t("varName.words", { count: inputStats.wordCount })}
-                </div>
-                {inputStats.detectedConvention !== "unknown" && (
-                  <div className="rounded-lg bg-primary/10 px-3 py-1.5 text-sm text-primary">
-                    {t("varName.detected", { convention: inputStats.detectedConvention })}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Variable Type (for generate mode) */}
-            {mode === "generate" && (
-              <div className="mt-4">
-                <label className="mb-2 block text-sm font-medium">
-                  {t("varName.identifierType")}
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
+                  {activeTab === "generate" ? "Describe your variable" : "Enter current name"}
                 </label>
-                <div className="flex flex-wrap gap-2">
-                  {VARIABLE_TYPES.map((type) => (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={() => setVariableType(type)}
-                      className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
-                        variableType === type
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border hover:border-primary/50"
-                      }`}
-                    >
-                      {TYPE_LABELS[type]}
-                    </button>
-                  ))}
-                </div>
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={activeTab === "generate" ? "e.g. status of the user authentication" : "e.g. user_auth_status"}
+                  className="h-24 w-full resize-none rounded-xl border border-divider bg-background p-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 shadow-inner"
+                />
               </div>
-            )}
 
-            {/* Action Button */}
-            <div className="mt-6">
-              <Button
-                variant="primary"
-                size="lg"
-                className="w-full"
-                onPress={handleAction}
-                isDisabled={!inputStats.isValid}
-              >
-                {mode === "convert" ? (
-                  <>
-                    <RefreshCw className="mr-2 size-5" />
-                    {t("varName.convertAll")}
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="mr-2 size-5" />
-                    {t("varName.generateSuggestions")}
-                  </>
-                )}
-              </Button>
-            </div>
+              {activeTab === "generate" && (
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Target Context</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {TYPE_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.id}
+                        onClick={() => updateConfig("type", opt.id)}
+                        className={cn(
+                          "flex items-center gap-2 p-2 rounded-lg border transition-all text-left",
+                          config.type === opt.id 
+                            ? "bg-primary/10 border-primary/30 text-primary shadow-sm" 
+                            : "bg-muted/30 border-transparent hover:bg-muted/50 text-muted-foreground"
+                        )}
+                      >
+                        <opt.icon className="size-3.5" />
+                        <span className="text-[10px] font-bold uppercase">{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-            {/* History Toggle */}
-            <div className="mt-4 flex gap-2">
-              <Button variant="outline" size="sm" onPress={reset} isDisabled={!input}>
-                <RotateCcw className="mr-1 size-4" />
-                {t("common.clear")}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onPress={() => setShowHistory(!showHistory)}
+              <Button 
+                onPress={activeTab === "generate" ? generate : convert} 
+                color="primary"
+                className="w-full h-12 font-bold shadow-lg shadow-primary/20"
               >
-                <History className="mr-1 size-4" />
-                {t("common.history", { count: history.length })}
+                <Sparkles className="size-4 mr-2" /> 
+                {activeTab === "generate" ? "Generate Magic Names" : "Apply Transformations"}
               </Button>
             </div>
           </Card>
 
-          {/* History */}
-          {showHistory && history.length > 0 && (
-            <Card className="p-4">
-              <div className="mb-3 flex items-center justify-between">
-                <h4 className="text-sm font-semibold">{t("common.recentHistory")}</h4>
-                <Button variant="ghost" size="sm" onPress={clearHistory}>
-                  <Trash2 className="size-4" />
-                </Button>
-              </div>
-              <div className="space-y-2">
-                {history.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => loadFromHistory(item)}
-                    className="flex w-full items-center justify-between rounded-lg border border-border p-2 text-left transition-colors hover:bg-muted/50"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <code className="block truncate text-sm font-medium">
-                        {item.input}
-                      </code>
-                      <p className="text-xs text-muted-foreground">
-                        {item.mode === "convert" ? t("varName.conversion") : t("varName.generation")}
-                      </p>
-                    </div>
-                    <ChevronRight className="ml-2 size-4 shrink-0 text-muted-foreground" />
-                  </button>
-                ))}
-              </div>
-            </Card>
-          )}
-
-          {/* Convention Reference */}
-          <Card className="p-6">
-            <h3 className="mb-4 text-sm font-semibold">{t("varName.namingConventions")}</h3>
-            <div className="space-y-2">
-              {CONVENTIONS.map((conv) => (
-                <div
-                  key={conv}
-                  className="flex items-center justify-between rounded-lg border border-border p-2"
-                >
-                  <div>
-                    <span className="font-mono text-sm font-medium">
-                      {CONVENTION_LABELS[conv]}
-                    </span>
-                    <p className="text-xs text-muted-foreground">
-                      {CONVENTION_EXAMPLES[conv]}
-                    </p>
-                  </div>
+          {/* Quick Recommendations */}
+          <Card className="p-6 bg-gradient-to-br from-violet-600 to-indigo-700 text-white shadow-xl shadow-violet-500/20">
+            <h3 className="text-xs font-black uppercase opacity-80 mb-4 flex items-center gap-2 tracking-widest">
+              <BookOpen className="size-3" /> Standard Best Practices
+            </h3>
+            <div className="space-y-3">
+              {[
+                { l: "Variables", c: "camelCase" },
+                { l: "Constants", c: "SCREAMING_SNAKE" },
+                { l: "Classes", c: "PascalCase" },
+                { l: "Private", c: "_camelCase" },
+              ].map(rec => (
+                <div key={rec.l} className="flex justify-between items-center bg-white/10 p-2 rounded-lg backdrop-blur-sm">
+                  <span className="text-[10px] font-black uppercase">{rec.l}</span>
+                  <Chip size="sm" variant="flat" className="bg-white/20 text-white font-mono text-[10px] h-5">{rec.c}</Chip>
                 </div>
               ))}
             </div>
           </Card>
         </div>
 
-        {/* Results Panel */}
-        <div className="space-y-4">
-          {/* Conversion Results */}
-          {mode === "convert" && conversionResult && (
-            <Card className="p-6">
-              <h2 className="mb-4 text-lg font-semibold">{t("varName.conversions")}</h2>
-
-              <div className="mb-4 rounded-lg bg-muted/50 p-3">
-                <span className="text-sm text-muted-foreground">{t("varName.original")}</span>
-                <code className="font-mono font-medium">{conversionResult.original}</code>
-                {conversionResult.originalConvention !== "unknown" && (
-                  <span className="ml-2 rounded bg-primary/10 px-2 py-0.5 text-xs text-primary">
-                    {conversionResult.originalConvention}
-                  </span>
-                )}
+        {/* Results Column */}
+        <div className="lg:col-span-8 space-y-6">
+          {activeTab === "generate" && generationResult ? (
+            <>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                <Card className="p-4 text-center border-b-4 border-b-emerald-500">
+                  <p className="text-[10px] font-black text-muted-foreground uppercase">Top Suggestion</p>
+                  <p className="text-lg font-black truncate text-primary">{generationResult.suggestions[0]?.name}</p>
+                </Card>
+                <Card className="p-4 text-center border-b-4 border-b-violet-500">
+                  <p className="text-[10px] font-black text-muted-foreground uppercase">Options</p>
+                  <p className="text-2xl font-black">{generationResult.suggestions.length}</p>
+                </Card>
+                <Card className="p-4 text-center border-b-4 border-b-indigo-500">
+                  <p className="text-[10px] font-black text-muted-foreground uppercase">Type</p>
+                  <p className="text-sm font-black capitalize">{generationResult.type}</p>
+                </Card>
+                <Card className="p-4 text-center border-b-4 border-b-amber-500">
+                  <p className="text-[10px] font-black text-muted-foreground uppercase">Audit Status</p>
+                  <div className="flex justify-center pt-1">
+                    <StatusBadge variant={generationResult.suggestions[0]?.audit.status === "good" ? "success" : "warning"}>
+                      {generationResult.suggestions[0]?.audit.status.toUpperCase()}
+                    </StatusBadge>
+                  </div>
+                </Card>
               </div>
 
-              <div className="space-y-2">
-                {(Object.entries(conversionResult.conversions) as [NamingConvention, string][]).map(
-                  ([convention, value]) => (
-                    <div
-                      key={convention}
-                      className="flex items-center justify-between rounded-lg border border-border p-3 transition-colors hover:bg-muted/50"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <span className="text-xs text-muted-foreground">
-                          {CONVENTION_LABELS[convention]}
-                        </span>
-                        <code className="block truncate font-mono font-medium">{value}</code>
-                      </div>
-                      <div className="ml-2 flex shrink-0 gap-1">
-                        <CopyButton text={value} />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onPress={() => applyConversion(convention)}
-                        >
-                          <ArrowRight className="size-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  )
-                )}
+              <Card className="p-0 overflow-hidden shadow-xl border-divider">
+                <div className="p-4 bg-muted/30 border-b border-divider flex items-center justify-between">
+                  <h3 className="font-bold flex items-center gap-2">
+                    <Sparkles className="size-4 text-primary" />
+                    Recommended Professional Names
+                  </h3>
+                </div>
+                <DataTable
+                  columns={suggestionColumns}
+                  data={generationResult.suggestions}
+                  filterField="name"
+                  renderCell={renderSuggestionCell}
+                  initialVisibleColumns={["name", "score", "audit", "actions"]}
+                />
+              </Card>
+            </>
+          ) : activeTab === "convert" && conversionResult ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {Object.entries(conversionResult.conversions).map(([convention, value]) => (
+                <Card key={convention} className="p-4 group hover:border-primary/30 transition-all border-2 border-transparent">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-[10px] font-black uppercase text-muted-foreground tracking-tighter">
+                      {convention}
+                    </span>
+                    <CopyButton text={value} size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                  <p className="font-mono text-sm font-bold text-primary break-all">{value}</p>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center">
+              <div className="size-24 bg-muted rounded-full flex items-center justify-center mb-6">
+                <Wand2 className="size-12 text-muted-foreground/30" />
               </div>
-            </Card>
-          )}
-
-          {/* Generation Results */}
-          {mode === "generate" && generationResult && (
-            <Card className="p-6">
-              <h2 className="mb-4 text-lg font-semibold">{t("varName.suggestions")}</h2>
-
-              <div className="mb-4 rounded-lg bg-muted/50 p-3">
-                <span className="text-sm text-muted-foreground">{t("varName.context")}</span>
-                <span className="font-medium">{generationResult.context}</span>
-                <span className="ml-2 rounded bg-primary/10 px-2 py-0.5 text-xs text-primary">
-                  {TYPE_LABELS[generationResult.type]}
-                </span>
-              </div>
-
-              {generationResult.suggestions.length > 0 ? (
-                <div className="space-y-3">
-                  {generationResult.suggestions.map((suggestion, index) => (
-                    <div
-                      key={suggestion.id}
-                      className="rounded-lg border border-border p-4 transition-colors hover:bg-muted/50"
-                    >
-                      <div className="mb-2 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
-                            {index + 1}
-                          </span>
-                          <code className="font-mono text-lg font-semibold">
-                            {suggestion.name}
-                          </code>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="rounded bg-muted px-2 py-0.5 text-xs">
-                            {suggestion.convention}
-                          </span>
-                          <span
-                            className={`rounded px-2 py-0.5 text-xs font-medium ${
-                              suggestion.score >= 80
-                                ? "bg-green-500/10 text-green-600"
-                                : suggestion.score >= 60
-                                  ? "bg-amber-500/10 text-amber-600"
-                                  : "bg-muted text-muted-foreground"
-                            }`}
-                          >
-                            {suggestion.score}%
-                          </span>
-                        </div>
-                      </div>
-                      <p className="mb-3 text-sm text-muted-foreground">
-                        {suggestion.reasoning}
-                      </p>
-                      <div className="flex gap-2">
-                        <CopyButton text={suggestion.name} label={t("common.copy")} variant="outline" />
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onPress={() => applySuggestion(suggestion.name)}
-                        >
-                          <ArrowRight className="mr-1 size-4" />
-                          {t("varName.use")}
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <Wand2 className="mb-2 size-12 text-muted-foreground/30" />
-                  <p className="text-muted-foreground">
-                    {t("varName.noSuggestions")}
-                  </p>
-                </div>
-              )}
-            </Card>
-          )}
-
-          {/* Empty State */}
-          {!conversionResult && !generationResult && (
-            <Card className="p-6">
-              <div className="flex min-h-[300px] flex-col items-center justify-center text-center">
-                <Wand2 className="mb-4 size-16 text-muted-foreground/30" />
-                <h3 className="mb-2 text-lg font-medium">
-                  {mode === "convert"
-                    ? t("varName.convertEmptyTitle")
-                    : t("varName.generateEmptyTitle")}
-                </h3>
-                <p className="max-w-sm text-sm text-muted-foreground">
-                  {mode === "convert"
-                    ? t("varName.convertEmptyDesc")
-                    : t("varName.generateEmptyDesc")}
-                </p>
-              </div>
-            </Card>
-          )}
-
-          {/* Type Recommendations */}
-          {mode === "generate" && (
-            <Card className="p-6">
-              <h3 className="mb-4 text-sm font-semibold">
-                {t("varName.recommendedTitle")}
-              </h3>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="rounded-lg bg-muted p-2">
-                  <span className="font-medium">{t("varName.recVariables")}</span>
-                  <p className="text-xs text-muted-foreground">camelCase</p>
-                </div>
-                <div className="rounded-lg bg-muted p-2">
-                  <span className="font-medium">{t("varName.recConstants")}</span>
-                  <p className="text-xs text-muted-foreground">SCREAMING_SNAKE</p>
-                </div>
-                <div className="rounded-lg bg-muted p-2">
-                  <span className="font-medium">{t("varName.recClassesTypes")}</span>
-                  <p className="text-xs text-muted-foreground">PascalCase</p>
-                </div>
-                <div className="rounded-lg bg-muted p-2">
-                  <span className="font-medium">{t("varName.recHooks")}</span>
-                  <p className="text-xs text-muted-foreground">useXxxXxx</p>
-                </div>
-                <div className="rounded-lg bg-muted p-2">
-                  <span className="font-medium">{t("varName.recComponents")}</span>
-                  <p className="text-xs text-muted-foreground">PascalCase</p>
-                </div>
-                <div className="rounded-lg bg-muted p-2">
-                  <span className="font-medium">{t("varName.recFiles")}</span>
-                  <p className="text-xs text-muted-foreground">kebab-case</p>
-                </div>
-              </div>
+              <h3 className="text-2xl font-black mb-2 opacity-80">Ready to Magic Name</h3>
+              <p className="text-muted-foreground max-w-sm mx-auto font-medium">
+                Describe the purpose of your variable or paste a name to transform it into professional naming conventions.
+              </p>
             </Card>
           )}
         </div>

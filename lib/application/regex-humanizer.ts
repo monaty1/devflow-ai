@@ -5,96 +5,30 @@ import type {
   TestResult,
   TestMatch,
   CommonPattern,
+  RegexFlavor,
 } from "@/types/regex-humanizer";
 
-// --- Common Patterns Database ---
-export const COMMON_PATTERNS: CommonPattern[] = [
+// --- Advanced Safety Patterns (ReDoS Detection) ---
+const DANGEROUS_PATTERNS = [
   {
-    id: "email",
-    name: "Email",
-    pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
-    description: "Dirección de correo electrónico",
-    examples: ["user@example.com", "name.surname@domain.org"],
+    pattern: /(\(.*\)\*|\(.*\)\+|\(.*\){\d+,})\*/,
+    message: "Nested quantifiers (e.g., (a*)*) can cause catastrophic backtracking.",
+    severity: "critical"
   },
   {
-    id: "url",
-    name: "URL",
-    pattern: "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
-    description: "URL web (http o https)",
-    examples: ["https://example.com", "http://www.test.org/path?query=1"],
+    pattern: /(\.\*){3,}/,
+    message: "Multiple overlapping wildcards (.*.*.*) may degrade performance.",
+    severity: "warning"
   },
   {
-    id: "phone-es",
-    name: "Teléfono ES",
-    pattern: "^[679]\\d{8}$",
-    description: "Teléfono móvil español (9 dígitos)",
-    examples: ["612345678", "912345678"],
-  },
-  {
-    id: "date-iso",
-    name: "Fecha ISO",
-    pattern: "^\\d{4}-\\d{2}-\\d{2}$",
-    description: "Fecha en formato ISO (YYYY-MM-DD)",
-    examples: ["2024-01-15", "2023-12-31"],
-  },
-  {
-    id: "ipv4",
-    name: "IPv4",
-    pattern: "^(\\d{1,3}\\.){3}\\d{1,3}$",
-    description: "Dirección IP versión 4",
-    examples: ["192.168.1.1", "10.0.0.255"],
-  },
-  {
-    id: "password",
-    name: "Password",
-    pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$",
-    description: "Contraseña segura (8+ chars, mayúscula, minúscula, número)",
-    examples: ["Password1", "Secure123"],
-  },
-  {
-    id: "dni-es",
-    name: "DNI España",
-    pattern: "^\\d{8}[A-Z]$",
-    description: "DNI español (8 dígitos + letra)",
-    examples: ["12345678A", "87654321Z"],
-  },
-  {
-    id: "hex-color",
-    name: "Color Hex",
-    pattern: "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
-    description: "Color hexadecimal (#RGB o #RRGGBB)",
-    examples: ["#FFF", "#3498db"],
-  },
+    pattern: /\[.*\]\*|\+/,
+    message: "Loose character classes with quantifiers can be slow if followed by overlapping literal characters.",
+    severity: "info"
+  }
 ];
 
-// --- Token Explanations (Spanish) ---
-const TOKEN_EXPLANATIONS: Record<string, string> = {
-  "^": "Inicio de la línea/cadena",
-  "$": "Final de la línea/cadena",
-  ".": "Cualquier carácter (excepto salto de línea)",
-  "*": "Cero o más repeticiones del elemento anterior",
-  "+": "Una o más repeticiones del elemento anterior",
-  "?": "Cero o una repetición (opcional)",
-  "\\d": "Cualquier dígito (0-9)",
-  "\\D": "Cualquier carácter que NO sea dígito",
-  "\\w": "Carácter de palabra (letra, dígito o guión bajo)",
-  "\\W": "Carácter que NO sea de palabra",
-  "\\s": "Espacio en blanco (espacio, tab, salto de línea)",
-  "\\S": "Cualquier carácter que NO sea espacio en blanco",
-  "\\b": "Límite de palabra",
-  "\\B": "NO límite de palabra",
-  "\\n": "Salto de línea",
-  "\\t": "Tabulador",
-  "\\r": "Retorno de carro",
-  "|": "Alternativa (OR): coincide con lo de la izquierda O la derecha",
-  "\\\\": "Barra invertida literal",
-  "\\.": "Punto literal",
-  "\\@": "Arroba literal",
-  "\\-": "Guión literal",
-};
-
 // --- Parse and Explain Regex ---
-export function explainRegex(patternInput: string): RegexAnalysis {
+export function explainRegex(patternInput: string, flavor: RegexFlavor = "javascript"): RegexAnalysis {
   // Extract pattern and flags
   let pattern = patternInput;
   let flags = "";
@@ -109,6 +43,7 @@ export function explainRegex(patternInput: string): RegexAnalysis {
   const tokens = tokenizeRegex(pattern);
   const groups = extractGroups(pattern);
   const commonPattern = detectCommonPattern(pattern);
+  const safety = performSafetyAnalysis(pattern);
 
   // Build explanation
   const explanation = buildExplanation(tokens, groups, commonPattern, flags);
@@ -117,11 +52,35 @@ export function explainRegex(patternInput: string): RegexAnalysis {
     id: crypto.randomUUID(),
     pattern,
     flags,
+    flavor,
     explanation,
     tokens,
     groups,
     commonPattern: commonPattern?.name ?? null,
+    safetyScore: safety.score,
+    isDangerous: safety.isDangerous,
+    warnings: safety.warnings,
     analyzedAt: new Date().toISOString(),
+  };
+}
+
+function performSafetyAnalysis(pattern: string): { score: number; isDangerous: boolean; warnings: string[] } {
+  const warnings: string[] = [];
+  let score = 100;
+
+  for (const danger of DANGEROUS_PATTERNS) {
+    if (danger.pattern.test(pattern)) {
+      warnings.push(danger.message);
+      if (danger.severity === "critical") score -= 50;
+      if (danger.severity === "warning") score -= 20;
+      if (danger.severity === "info") score -= 5;
+    }
+  }
+
+  return {
+    score: Math.max(0, score),
+    isDangerous: score <= 50,
+    warnings
   };
 }
 
@@ -535,6 +494,15 @@ export function generateRegex(description: string): string {
   return "^.*$";
 }
 
+const GROUP_COLORS = [
+  "text-blue-600 dark:text-blue-400",
+  "text-emerald-600 dark:text-emerald-400",
+  "text-purple-600 dark:text-purple-400",
+  "text-amber-600 dark:text-amber-400",
+  "text-rose-600 dark:text-rose-400",
+  "text-indigo-600 dark:text-indigo-400",
+];
+
 // --- Test Regex ---
 export function testRegex(patternInput: string, input: string): TestResult {
   let pattern = patternInput;
@@ -562,6 +530,7 @@ export function testRegex(patternInput: string, input: string): TestResult {
       }
 
       const groups: Record<string, string> = {};
+      const groupColors: Record<string, string> = {};
 
       // Named groups
       if (match.groups) {
@@ -573,6 +542,7 @@ export function testRegex(patternInput: string, input: string): TestResult {
         const groupValue = match[i];
         if (groupValue !== undefined) {
           groups[`$${i}`] = groupValue;
+          groupColors[`$${i}`] = GROUP_COLORS[(i - 1) % GROUP_COLORS.length]!;
         }
       }
 
@@ -580,6 +550,7 @@ export function testRegex(patternInput: string, input: string): TestResult {
         match: match[0] ?? "",
         index: match.index,
         groups,
+        groupColors,
       });
 
       // Prevent infinite loops with zero-length matches

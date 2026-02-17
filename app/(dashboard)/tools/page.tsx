@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { Search } from "lucide-react";
 import { ToolCard } from "@/components/tools";
+import { MagicInput } from "@/components/tools/magic-input";
 import { TOOLS_DATA } from "@/config/tools-data";
 import { useTranslation } from "@/hooks/use-translation";
 import { ToolHeader } from "@/components/shared/tool-header";
@@ -39,6 +40,11 @@ export default function ToolsPage() {
         title={t("tools.title")}
         description={t("tools.subtitle")}
       />
+
+      {/* Magic Input */}
+      <div className="mx-auto max-w-2xl">
+        <MagicInput />
+      </div>
 
       {/* Search + Filters */}
       <div className="space-y-4">

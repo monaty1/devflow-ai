@@ -10,14 +10,21 @@ import {
   AlertTriangle,
   FileText,
   Clock,
+  Zap,
+  ArrowRight,
+  Download,
+  Coins,
+  ScanSearch,
 } from "lucide-react";
 import { usePromptAnalyzer } from "@/hooks/use-prompt-analyzer";
 import { useToast } from "@/hooks/use-toast";
+import { useSmartNavigation } from "@/hooks/use-smart-navigation";
 import { useTranslation } from "@/hooks/use-translation";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { ScoreBadge } from "@/components/tools/score-badge";
 import { SecurityFlagsList } from "@/components/tools/security-flag";
 import { PromptAnalyzerSkeleton } from "@/components/shared/skeletons";
+import { CopyButton } from "@/components/shared/copy-button";
 import type { PromptIssue } from "@/types/prompt-analyzer";
 
 const SEVERITY_COLORS = {
@@ -37,11 +44,22 @@ export default function PromptAnalyzerPage() {
     too_long: t("promptAnalyzer.issueTooLong"),
     redundant: t("promptAnalyzer.issueRedundant"),
     missing_role: t("promptAnalyzer.issueMissingRole"),
+    vague_terms: t("promptAnalyzer.issueVagueTerms"),
+    no_constraints: t("promptAnalyzer.issueNoConstraints"),
+    no_success_criteria: t("promptAnalyzer.issueNoSuccessCriteria"),
+    no_audience: t("promptAnalyzer.issueNoAudience"),
+    missing_examples: t("promptAnalyzer.issueMissingExamples"),
+    no_chain_of_thought: t("promptAnalyzer.issueNoChainOfThought"),
+    missing_delimiters: t("promptAnalyzer.issueMissingDelimiters"),
+    poor_structure: t("promptAnalyzer.issuePoorStructure"),
+    payload_splitting_risk: t("promptAnalyzer.issuePayloadSplitting"),
+    virtualization_risk: t("promptAnalyzer.issueVirtualization"),
   };
   const [showHistory, setShowHistory] = useState(false);
   const { result, history, isAnalyzing, analyze, clearHistory, removeFromHistory } =
     usePromptAnalyzer();
   const { addToast } = useToast();
+  const { navigateTo } = useSmartNavigation();
 
   const handleAnalyze = async () => {
     if (!prompt.trim()) {
@@ -68,6 +86,32 @@ export default function PromptAnalyzerPage() {
     setPrompt(historyPrompt);
     setShowHistory(false);
     addToast(t("promptAnalyzer.toastLoaded"), "info");
+  };
+
+  const handleExport = () => {
+    if (!result) return;
+    const report = `# Prompt Analysis Report
+Date: ${new Date().toLocaleString()}
+Score: ${result.score}/10 (${result.category})
+
+## Original Prompt
+${result.prompt}
+
+## Issues Found
+${result.issues.map(i => `- [${i.severity.toUpperCase()}] ${ISSUE_LABELS[i.type]}: ${i.message}`).join("\n")}
+
+## Suggestions
+${result.suggestions.map(s => `- ${s}`).join("\n")}
+
+${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
+`;
+    const blob = new Blob([report], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `prompt-analysis-${new Date().toISOString().slice(0, 10)}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -218,9 +262,14 @@ export default function PromptAnalyzerPage() {
                 size="lg"
               />
               <div className="flex-1 text-center sm:text-left">
-                <h2 className="text-xl font-semibold text-foreground">
-                  {t("promptAnalyzer.analysisComplete")}
-                </h2>
+                <div className="flex items-start justify-between">
+                  <h2 className="text-xl font-semibold text-foreground">
+                    {t("promptAnalyzer.analysisComplete")}
+                  </h2>
+                  <Button variant="ghost" size="sm" onPress={handleExport}>
+                    <Download className="size-4" />
+                  </Button>
+                </div>
                 <p className="mt-1 text-muted-foreground">
                   {t("promptAnalyzer.scoreResult", { score: result.score, category: result.category })}
                 </p>
@@ -238,9 +287,64 @@ export default function PromptAnalyzerPage() {
                     <span>{t("promptAnalyzer.securityFlags", { count: result.securityFlags.length })}</span>
                   </div>
                 </div>
+                
+                <div className="mt-4 flex gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="flat" 
+                    onPress={() => navigateTo("token-visualizer", result.prompt)}
+                  >
+                    <ScanSearch className="mr-1.5 size-3.5" />
+                    Check Tokens
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="flat" 
+                    onPress={() => navigateTo("cost-calculator", result.prompt)}
+                  >
+                    <Coins className="mr-1.5 size-3.5" />
+                    Estimate Cost
+                  </Button>
+                </div>
               </div>
             </div>
           </Card>
+
+          {/* Refined Prompt */}
+          {result.refinedPrompt && result.refinedPrompt !== result.prompt && (
+            <Card className="p-6 border-primary/20 bg-primary/5">
+              <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h3 className="flex items-center gap-2 font-semibold text-foreground">
+                    <Zap className="size-5 text-primary fill-primary/20" />
+                    {t("promptAnalyzer.refinedPrompt")}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {t("promptAnalyzer.refinedDescription")}
+                  </p>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <CopyButton text={result.refinedPrompt} label={t("common.copy")} />
+                  <Button
+                    size="sm"
+                    color="primary"
+                    variant="flat"
+                    onPress={() => {
+                      setPrompt(result.refinedPrompt!);
+                      addToast(t("promptAnalyzer.toastApplied"), "success");
+                    }}
+                    className="gap-1.5"
+                  >
+                    <ArrowRight className="size-4" />
+                    {t("promptAnalyzer.useRefined")}
+                  </Button>
+                </div>
+              </div>
+              <div className="rounded-lg border border-primary/10 bg-background/50 p-4 font-mono text-sm leading-relaxed whitespace-pre-wrap">
+                {result.refinedPrompt}
+              </div>
+            </Card>
+          )}
 
           {/* Security Flags */}
           <Card className="p-6">

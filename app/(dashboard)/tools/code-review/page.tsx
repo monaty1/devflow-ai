@@ -1,12 +1,38 @@
 "use client";
 
-import { useState } from "react";
-import { Card, Button } from "@heroui/react";
-import { RotateCcw, AlertTriangle, CheckCircle, Info, Search } from "lucide-react";
+import { useState, useCallback } from "react";
+import {
+  Card,
+  Button,
+  Chip,
+  Progress,
+  User,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from "@heroui/react";
+import {
+  RotateCcw,
+  AlertTriangle,
+  CheckCircle,
+  Info,
+  Search,
+  Zap,
+  ArrowRight,
+  ShieldAlert,
+  MoreVertical,
+  Wand2,
+  ExternalLink,
+} from "lucide-react";
 import { useCodeReview } from "@/hooks/use-code-review";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
 import { ToolHeader } from "@/components/shared/tool-header";
+import { CopyButton } from "@/components/shared/copy-button";
+import { DataTable, type ColumnConfig } from "@/components/ui";
+import { useSmartNavigation } from "@/hooks/use-smart-navigation";
+import { cn } from "@/lib/utils";
 import type { SupportedLanguage, CodeIssue } from "@/types/code-review";
 
 const LANGUAGES: { value: SupportedLanguage; label: string }[] = [
@@ -15,24 +41,10 @@ const LANGUAGES: { value: SupportedLanguage; label: string }[] = [
   { value: "python", label: "Python" },
   { value: "go", label: "Go" },
   { value: "rust", label: "Rust" },
+  { value: "java", label: "Java" },
+  { value: "php", label: "PHP" },
+  { value: "csharp", label: "C#" },
 ];
-
-const SEVERITY_STYLES: Record<
-  CodeIssue["severity"],
-  { bg: string; text: string; icon: typeof AlertTriangle }
-> = {
-  critical: { bg: "bg-red-50", text: "text-red-700", icon: AlertTriangle },
-  warning: { bg: "bg-amber-50", text: "text-amber-700", icon: Info },
-  info: { bg: "bg-blue-50", text: "text-blue-700", icon: Info },
-};
-
-const CATEGORY_COLORS: Record<string, string> = {
-  security: "bg-red-100 text-red-900 dark:bg-red-900/30 dark:text-red-200",
-  performance: "bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-200",
-  maintainability: "bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200",
-  "best-practice": "bg-emerald-100 text-emerald-900 dark:bg-emerald-900/30 dark:text-emerald-200",
-  style: "bg-gray-100 text-gray-900 dark:bg-gray-900/30 dark:text-gray-200",
-};
 
 export default function CodeReviewPage() {
   const { t } = useTranslation();
@@ -40,6 +52,7 @@ export default function CodeReviewPage() {
   const [language, setLanguage] = useState<SupportedLanguage>("typescript");
   const { result, isReviewing, review, reset } = useCodeReview();
   const { addToast } = useToast();
+  const { navigateTo } = useSmartNavigation();
 
   const handleReview = async () => {
     if (!code.trim()) {
@@ -68,8 +81,81 @@ export default function CodeReviewPage() {
     reset();
   };
 
+  const issueColumns: ColumnConfig[] = [
+    { name: "LINE", uid: "line", sortable: true },
+    { name: "ISSUE", uid: "message", sortable: true },
+    { name: "SEVERITY", uid: "severity", sortable: true },
+    { name: "ACTIONS", uid: "actions" },
+  ];
+
+  const renderIssueCell = useCallback((issue: CodeIssue, columnKey: React.Key) => {
+    switch (columnKey) {
+      case "line":
+        return <span className="font-mono text-muted-foreground text-xs font-bold bg-muted px-1.5 py-0.5 rounded">L{issue.line}</span>;
+      case "message":
+        return (
+          <div className="flex flex-col gap-0.5">
+            <span className="font-medium text-sm">{issue.message}</span>
+            {issue.suggestion && (
+              <span className="text-xs text-primary/70 italic flex items-center gap-1">
+                <Wand2 className="size-3" /> {issue.suggestion}
+              </span>
+            )}
+            <span className="text-[10px] uppercase font-bold opacity-40 mt-1">{issue.category}</span>
+          </div>
+        );
+      case "severity":
+        const severityMap = {
+          critical: { color: "danger", icon: ShieldAlert },
+          warning: { color: "warning", icon: AlertTriangle },
+          info: { color: "primary", icon: Info },
+        } as const;
+        const config = severityMap[issue.severity as keyof typeof severityMap];
+        const Icon = config.icon;
+        return (
+          <Chip
+            size="sm"
+            color={config.color}
+            variant="flat"
+            startContent={<Icon className="size-3 mr-1" />}
+            className="capitalize font-bold h-6"
+          >
+            {issue.severity}
+          </Chip>
+        );
+      case "actions":
+        return (
+          <Dropdown>
+            <DropdownTrigger>
+              <Button isIconOnly size="sm" variant="light">
+                <MoreVertical className="size-4 text-default-300" />
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu aria-label="Issue Actions">
+              <DropdownItem 
+                key="wizard" 
+                startContent={<Wand2 className="size-3" />}
+                onDescription="Generate better names for this context"
+                onPress={() => navigateTo("variable-name-wizard", issue.message)}
+              >
+                Improve Names
+              </DropdownItem>
+              <DropdownItem 
+                key="docs" 
+                startContent={<ExternalLink className="size-3" />}
+              >
+                View Best Practices
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+        );
+      default:
+        return (issue as any)[columnKey];
+    }
+  }, [navigateTo]);
+
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6">
       {/* Header */}
       <ToolHeader
         title={t("codeReview.title")}
@@ -83,214 +169,188 @@ export default function CodeReviewPage() {
         }
       />
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-5">
         {/* Input Panel */}
-        <Card className="p-6">
-          <Card.Header className="mb-4 p-0">
-            <Card.Title>{t("codeReview.codeInput")}</Card.Title>
-          </Card.Header>
-          <Card.Content className="space-y-4 p-0">
-            {/* Language Selector */}
-            <div>
-              <label htmlFor="code-review-language" className="text-sm font-medium text-muted-foreground">
-                {t("codeReview.language")}
-              </label>
-              <select
-                id="code-review-language"
-                value={language}
-                onChange={(e) => setLanguage(e.target.value as SupportedLanguage)}
-                className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
-              >
-                {LANGUAGES.map((lang) => (
-                  <option key={lang.value} value={lang.value}>
-                    {lang.label}
-                  </option>
-                ))}
-              </select>
+        <Card className="p-6 lg:col-span-2">
+          <div className="mb-4 flex flex-col gap-4">
+            <h2 className="text-lg font-bold flex items-center gap-2">
+              <FileCode className="size-5 text-primary" />
+              {t("codeReview.codeInput")}
+            </h2>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  {t("codeReview.language")}
+                </label>
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value as SupportedLanguage)}
+                  className="w-full rounded-xl border border-border bg-muted/50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                >
+                  {LANGUAGES.map((lang) => (
+                    <option key={lang.value} value={lang.value}>
+                      {lang.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  Lines
+                </label>
+                <div className="h-10 flex items-center px-3 bg-muted/30 rounded-xl border border-border/50 font-mono text-sm">
+                  {code.split("\n").length}
+                </div>
+              </div>
             </div>
 
-            {/* Code Editor */}
-            <div>
-              <label htmlFor="code-review-input" className="text-sm font-medium text-muted-foreground">
-                {t("codeReview.pasteCode")}
-              </label>
-              <textarea
-                id="code-review-input"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder={t("codeReview.placeholder")}
-                className="mt-1 h-80 w-full resize-none rounded-lg border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                spellCheck={false}
-              />
-            </div>
+            <textarea
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder={t("codeReview.placeholder")}
+              className="h-[400px] w-full resize-none rounded-xl border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-inner transition-all"
+              spellCheck={false}
+            />
 
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
-                {t("common.lines", { count: code.split("\n").length })}
-              </span>
-              <Button
-                onPress={handleReview}
-                isPending={isReviewing}
-                isDisabled={!code.trim()}
-              >
-                {t("codeReview.reviewCode")}
-              </Button>
-            </div>
-          </Card.Content>
+            <Button
+              onPress={handleReview}
+              isPending={isReviewing}
+              isDisabled={!code.trim()}
+              color="primary"
+              className="h-12 text-md font-bold shadow-lg shadow-primary/20"
+            >
+              <Sparkles className="mr-2 size-5" />
+              {t("codeReview.reviewCode")}
+            </Button>
+          </div>
         </Card>
 
         {/* Results Panel */}
-        <div className="space-y-4">
+        <div className="lg:col-span-3 space-y-6">
           {result ? (
             <>
-              {/* Score Card */}
-              <Card className="p-6">
-                <Card.Content className="p-0">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        {t("codeReview.overallScore")}
-                      </p>
-                      <p
-                        className={`text-4xl font-bold ${
-                          result.overallScore >= 80
-                            ? "text-emerald-600"
-                            : result.overallScore >= 50
-                              ? "text-amber-600"
-                              : "text-red-600"
-                        }`}
-                      >
-                        {result.overallScore}/100
-                      </p>
-                    </div>
-                    {result.overallScore >= 80 ? (
-                      <CheckCircle className="size-12 text-emerald-500" />
-                    ) : (
-                      <AlertTriangle className="size-12 text-amber-500" />
-                    )}
+              {/* Score & Metrics Dashboard */}
+              <div className="grid gap-4 sm:grid-cols-3">
+                <Card className="p-6 col-span-1 flex flex-col items-center justify-center text-center bg-gradient-to-br from-background to-muted/50">
+                   <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">
+                    {t("codeReview.overallScore")}
+                  </p>
+                  <div className="relative">
+                     <svg className="size-24 transform -rotate-90">
+                        <circle
+                          cx="48" cy="48" r="40"
+                          stroke="currentColor" strokeWidth="8" fill="transparent"
+                          className="text-muted"
+                        />
+                        <circle
+                          cx="48" cy="48" r="40"
+                          stroke="currentColor" strokeWidth="8" fill="transparent"
+                          strokeDasharray={251.2}
+                          strokeDashoffset={251.2 - (251.2 * result.overallScore) / 100}
+                          className={cn(
+                            "transition-all duration-1000",
+                            result.overallScore >= 80 ? "text-emerald-500" : result.overallScore >= 50 ? "text-amber-500" : "text-red-500"
+                          )}
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center font-bold text-2xl">
+                        {result.overallScore}
+                      </div>
                   </div>
-                </Card.Content>
-              </Card>
+                </Card>
 
-              {/* Metrics */}
-              <Card className="p-6">
-                <Card.Header className="mb-4 p-0">
-                  <Card.Title className="text-sm">{t("codeReview.metrics")}</Card.Title>
-                </Card.Header>
-                <Card.Content className="p-0">
+                <Card className="p-6 col-span-2">
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-xs text-muted-foreground">{t("codeReview.totalLines")}</p>
-                      <p className="font-semibold">{result.metrics.totalLines}</p>
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase">{t("codeReview.complexity")}</p>
+                      <p className="text-xl font-bold flex items-center gap-2">
+                        {result.metrics.complexity}
+                        <StatusBadge variant={result.metrics.complexity > 10 ? "warning" : "success"}>
+                          {result.metrics.complexity > 10 ? "High" : "Optimal"}
+                        </StatusBadge>
+                      </p>
                     </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">{t("codeReview.codeLines")}</p>
-                      <p className="font-semibold">{result.metrics.codeLines}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">{t("codeReview.comments")}</p>
-                      <p className="font-semibold">{result.metrics.commentLines}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">{t("codeReview.complexity")}</p>
-                      <p className="font-semibold">{result.metrics.complexity}</p>
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase">{t("codeReview.maintainability")}</p>
+                      <p className="text-xl font-bold text-emerald-500">{result.metrics.maintainabilityIndex}%</p>
                     </div>
                   </div>
-                  <div className="mt-4">
-                    <div className="mb-1 flex justify-between text-sm">
-                      <span className="text-muted-foreground">{t("codeReview.maintainability")}</span>
-                      <span>{result.metrics.maintainabilityIndex}%</span>
+                  <div className="mt-4 space-y-2">
+                    <div className="flex justify-between text-xs font-medium">
+                      <span>Documentation Coverage</span>
+                      <span>{Math.round((result.metrics.commentLines / result.metrics.totalLines) * 100)}%</span>
                     </div>
-                    <div className="h-2 w-full rounded-full bg-muted">
-                      <div
-                        className={`h-2 rounded-full ${
-                          result.metrics.maintainabilityIndex >= 70
-                            ? "bg-emerald-500"
-                            : result.metrics.maintainabilityIndex >= 40
-                              ? "bg-amber-500"
-                              : "bg-red-500"
-                        }`}
-                        style={{
-                          width: `${result.metrics.maintainabilityIndex}%`,
-                        }}
-                      />
-                    </div>
+                    <Progress 
+                      value={(result.metrics.commentLines / result.metrics.totalLines) * 100} 
+                      color="secondary" 
+                      size="sm" 
+                      className="h-1.5"
+                    />
                   </div>
-                </Card.Content>
+                </Card>
+              </div>
+
+              {/* Issues DataTable */}
+              <Card className="p-6">
+                <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                  <ShieldAlert className="size-5 text-danger" />
+                  Detailed Audit Findings
+                </h3>
+                <DataTable
+                  columns={issueColumns}
+                  data={result.issues.map((issue, id) => ({ ...issue, id }))}
+                  filterField="message"
+                  renderCell={renderIssueCell}
+                  emptyContent="No issues found. Your code is clean!"
+                />
               </Card>
 
-              {/* Issues */}
-              {result.issues.length > 0 && (
-                <Card className="p-6">
-                  <Card.Header className="mb-4 p-0">
-                    <Card.Title className="text-sm">
-                      {t("codeReview.issues", { count: result.issues.length })}
-                    </Card.Title>
-                  </Card.Header>
-                  <Card.Content className="max-h-64 space-y-2 overflow-y-auto p-0">
-                    {result.issues.map((issue, i) => {
-                      const style = SEVERITY_STYLES[issue.severity];
-                      const Icon = style.icon;
-                      return (
-                        <div
-                          key={i}
-                          className={`flex items-start gap-3 rounded-lg p-3 ${style.bg}`}
-                        >
-                          <Icon className={`mt-0.5 size-4 shrink-0 ${style.text}`} />
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs text-muted-foreground">
-                                {t("codeReview.line", { line: issue.line })}
-                              </span>
-                              <span
-                                className={`rounded-full px-2 py-0.5 text-xs ${CATEGORY_COLORS[issue.category]}`}
-                              >
-                                {issue.category}
-                              </span>
-                            </div>
-                            <p className={`text-sm font-medium ${style.text}`}>
-                              {issue.message}
-                            </p>
-                            {issue.suggestion && (
-                              <p className="mt-1 text-xs text-muted-foreground">
-                                {issue.suggestion}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </Card.Content>
+              {/* Smart Refactor Preview */}
+              {result.refactoredCode && (
+                <Card className="p-6 border-primary/20 bg-primary/5 shadow-xl shadow-primary/5">
+                  <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <h3 className="flex items-center gap-2 font-bold text-lg">
+                        <Zap className="size-5 text-primary fill-primary/20" />
+                        Senior Developer Refactor
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        Optimized version applying clean code and design patterns.
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <CopyButton text={result.refactoredCode} label={t("common.copy")} />
+                      <Button
+                        size="sm"
+                        color="primary"
+                        onPress={() => {
+                          setCode(result.refactoredCode!);
+                          addToast(t("codeReview.toastRefactoredApplied"), "success");
+                        }}
+                        className="font-bold"
+                      >
+                        Apply Changes
+                      </Button>
+                    </div>
+                  </div>
+                  <pre className="rounded-xl border border-primary/10 bg-background/80 p-5 font-mono text-sm leading-relaxed overflow-auto max-h-[300px] shadow-inner">
+                    <code>{result.refactoredCode}</code>
+                  </pre>
                 </Card>
               )}
-
-              {/* Suggestions */}
-              <Card className="p-6">
-                <Card.Header className="mb-4 p-0">
-                  <Card.Title className="text-sm">{t("codeReview.suggestions")}</Card.Title>
-                </Card.Header>
-                <Card.Content className="space-y-2 p-0">
-                  {result.suggestions.map((s, i) => (
-                    <div
-                      key={i}
-                      className="flex items-start gap-3 rounded-lg border border-blue-100 bg-blue-50 p-3 dark:border-blue-900 dark:bg-blue-950/30"
-                    >
-                      <span className="font-bold text-blue-600">{i + 1}</span>
-                      <p className="text-sm text-blue-800 dark:text-blue-200">{s}</p>
-                    </div>
-                  ))}
-                </Card.Content>
-              </Card>
             </>
           ) : (
-            <Card className="p-16">
-              <Card.Content className="p-0 text-center">
-                <Search className="mx-auto mb-4 size-12 text-muted-foreground" />
-                <p className="text-foreground">{t("codeReview.emptyState")}</p>
-                <p className="mt-1 text-sm text-muted-foreground">
+            <Card className="p-20 border-dashed border-2 bg-muted/20">
+              <div className="text-center">
+                <div className="size-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Search className="size-10 text-muted-foreground/40" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">{t("codeReview.emptyState")}</h3>
+                <p className="text-muted-foreground max-w-xs mx-auto">
                   {t("codeReview.emptyStateHint")}
                 </p>
-              </Card.Content>
+              </div>
             </Card>
           )}
         </div>

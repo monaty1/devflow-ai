@@ -31,8 +31,8 @@ export function FeaturesSection() {
               <FeatureCard
                 key={tool.id}
                 icon={Icon}
-                title={tool.name}
-                description={tool.description}
+                title={t(`tool.${tool.slug}.name`)}
+                description={t(`tool.${tool.slug}.description`)}
               />
             );
           })}

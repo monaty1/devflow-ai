@@ -7,6 +7,7 @@ export interface CodeReviewResult {
   suggestions: string[];
   overallScore: number;
   reviewedAt: string;
+  refactoredCode?: string;
 }
 
 export type SupportedLanguage =
@@ -14,7 +15,10 @@ export type SupportedLanguage =
   | "javascript"
   | "python"
   | "go"
-  | "rust";
+  | "rust"
+  | "java"
+  | "php"
+  | "csharp";
 
 export interface CodeIssue {
   line: number;

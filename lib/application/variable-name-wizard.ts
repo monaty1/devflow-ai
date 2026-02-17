@@ -325,6 +325,49 @@ function generateReasoning(
   return parts.length > 0 ? parts.join(". ") : "Nombre descriptivo";
 }
 
+// --- Auditing ---
+
+function performAudit(name: string, type: VariableType): NameAudit {
+  const findings: string[] = [];
+  const words = splitIntoWords(name);
+  const lowerName = name.toLowerCase();
+
+  // 1. Generic names
+  const genericTerms = ["data", "info", "item", "value", "obj", "object", "thing", "process"];
+  if (words.length === 1 && genericTerms.includes(words[0]!)) {
+    findings.push(`Nombre demasiado genérico: "${words[0]}" no describe el contenido.`);
+  }
+
+  // 2. Length issues
+  if (name.length < 3 && !["i", "j", "x", "y"].includes(name)) {
+    findings.push("Nombre demasiado corto, puede ser poco claro.");
+  }
+  if (name.length > 35) {
+    findings.push("Nombre excesivamente largo, considera simplificar.");
+  }
+
+  // 3. Boolean prefixing
+  if (lowerName.includes("loading") && !/^(is|has|should|can|will)/.test(lowerName)) {
+    findings.push('Los estados booleanos deberían empezar por un verbo (is, has, can...).');
+  }
+
+  // 4. Numbers in names
+  if (/\d/.test(name)) {
+    findings.push("Evita usar números en los nombres a menos que sea estrictamente necesario.");
+  }
+
+  // 5. Hungarian notation detection
+  if (/^(str|int|arr|obj|bool|fn)[A-Z]/.test(name)) {
+    findings.push("Evita la notación húngara (strName, intCount); el tipo ya lo define el lenguaje.");
+  }
+
+  let status: NameAudit["status"] = "good";
+  if (findings.length >= 2) status = "error";
+  else if (findings.length === 1) status = "warning";
+
+  return { status, findings };
+}
+
 /**
  * Generate name suggestions based on context
  */
@@ -368,6 +411,7 @@ export function generateSuggestions(
 
       const score = scoreSuggestion(variation, type, convention);
       const reasoning = generateReasoning(variation, type, convention);
+      const audit = performAudit(name, type);
 
       suggestions.push({
         id: crypto.randomUUID(),
@@ -375,6 +419,7 @@ export function generateSuggestions(
         convention,
         score,
         reasoning,
+        audit
       });
     }
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useLocaleStore } from "@/lib/stores/locale-store";
 import en from "@/locales/en.json";
 import es from "@/locales/es.json";
@@ -9,6 +9,11 @@ const TRANSLATIONS: Record<string, Record<string, string>> = { en, es };
 
 export function useTranslation() {
   const locale = useLocaleStore((s) => s.locale);
+
+  // Sync locale to cookie so Server Components can read it
+  useEffect(() => {
+    document.cookie = `devflow-locale=${locale};path=/;max-age=31536000;SameSite=Lax`;
+  }, [locale]);
 
   const t = useCallback(
     (key: string, params?: Record<string, string | number>): string => {

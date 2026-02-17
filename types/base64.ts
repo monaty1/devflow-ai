@@ -27,6 +27,12 @@ export interface Base64Result {
   error?: string;
   stats: Base64Stats;
   timestamp: string;
+  fileInfo?: {
+    name: string;
+    mimeType: string;
+    size: number;
+  };
+  detectedType?: "image" | "pdf" | "json" | "jwt" | "text";
 }
 
 export interface Base64Stats {

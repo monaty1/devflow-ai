@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Zap, Monitor, LockOpen, Star, Shield, TrendingUp } from "lucide-react";
-import { t } from "@/lib/i18n-server";
+import { t, getServerLocale } from "@/lib/i18n-server";
 import { GsapReveal } from "@/components/marketing/gsap-reveal";
 import { GitHubStarsServer } from "@/components/marketing/github-stars-server";
 import { FeaturesSection } from "@/components/marketing/features-section";
@@ -22,7 +22,7 @@ async function getGitHubStars(): Promise<number | null> {
 }
 
 export default async function HomePage() {
-  const stars = await getGitHubStars();
+  const [stars, locale] = await Promise.all([getGitHubStars(), getServerLocale()]);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -34,18 +34,18 @@ export default async function HomePage() {
           <div className="mx-auto max-w-4xl space-y-6 text-center">
             <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-900 dark:bg-blue-900/30 dark:text-blue-200">
               <Zap className="size-4" />
-              {t("home.badge")}
+              {t("home.badge", locale)}
             </span>
 
             <h1 className="text-5xl font-bold leading-tight text-foreground md:text-7xl">
-              {t("home.title1")}
+              {t("home.title1", locale)}
               <span className="block text-foreground bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                {t("home.title2")}
+                {t("home.title2", locale)}
               </span>
             </h1>
 
             <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
-              {t("home.subtitle")}
+              {t("home.subtitle", locale)}
             </p>
 
             <div className="flex flex-col justify-center gap-4 pt-4 sm:flex-row">
@@ -53,13 +53,13 @@ export default async function HomePage() {
                 href="/tools"
                 className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg bg-primary px-8 text-base font-semibold text-primary-foreground transition-colors hover:opacity-90"
               >
-                {t("home.getStarted")}
+                {t("home.getStarted", locale)}
               </Link>
               <Link
                 href="/tools"
                 className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg border border-border px-8 text-base font-medium transition-colors hover:bg-muted"
               >
-                {t("home.viewTools")}
+                {t("home.viewTools", locale)}
               </Link>
             </div>
           </div>
@@ -71,10 +71,10 @@ export default async function HomePage() {
         <h2 className="sr-only">Project Stats</h2>
         <div className="mx-auto grid max-w-4xl grid-cols-2 gap-6 md:grid-cols-4">
           {[
-            { label: t("home.freeTools"), value: "15", icon: <Zap className="size-6" /> },
-            { label: t("home.openSource"), value: "100%", icon: <Monitor className="size-6" /> },
-            { label: t("home.noApiKey"), value: "0", icon: <LockOpen className="size-6" /> },
-            { label: t("home.githubStars"), value: null, icon: <Star className="size-6" /> },
+            { label: t("home.freeTools", locale), value: "15", icon: <Zap className="size-6" /> },
+            { label: t("home.openSource", locale), value: "100%", icon: <Monitor className="size-6" /> },
+            { label: t("home.noApiKey", locale), value: "0", icon: <LockOpen className="size-6" /> },
+            { label: t("home.githubStars", locale), value: null, icon: <Star className="size-6" /> },
           ].map((stat) => (
             <div
               key={stat.label}
@@ -101,9 +101,9 @@ export default async function HomePage() {
       <section className="py-20">
         <div className="container mx-auto max-w-5xl px-4">
           <div className="mb-12 text-center">
-            <h2 className="mb-3 text-4xl font-bold">{t("home.whyTitle")}</h2>
+            <h2 className="mb-3 text-4xl font-bold">{t("home.whyTitle", locale)}</h2>
             <p className="text-muted-foreground">
-              {t("home.whySubtitle")}
+              {t("home.whySubtitle", locale)}
             </p>
           </div>
 
@@ -111,18 +111,18 @@ export default async function HomePage() {
             {[
               {
                 icon: Shield,
-                title: t("home.securityTitle"),
-                description: t("home.securityDesc"),
+                title: t("home.securityTitle", locale),
+                description: t("home.securityDesc", locale),
               },
               {
                 icon: TrendingUp,
-                title: t("home.costTitle"),
-                description: t("home.costDesc"),
+                title: t("home.costTitle", locale),
+                description: t("home.costDesc", locale),
               },
               {
                 icon: Zap,
-                title: t("home.dxTitle"),
-                description: t("home.dxDesc"),
+                title: t("home.dxTitle", locale),
+                description: t("home.dxDesc", locale),
               },
             ].map((item) => (
               <div key={item.title} className="p-6 text-center">
@@ -143,17 +143,17 @@ export default async function HomePage() {
       <GsapReveal className="container mx-auto px-4 py-24">
         <div className="mx-auto max-w-3xl rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 p-12 text-center">
           <h2 className="mb-4 text-3xl font-bold text-white">
-            {t("home.ctaTitle")}
+            {t("home.ctaTitle", locale)}
           </h2>
           <p className="mb-8 text-white/90">
-            {t("home.ctaSubtitle")}
+            {t("home.ctaSubtitle", locale)}
           </p>
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
             <Link
               href="/tools"
               className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg bg-white px-8 font-semibold text-blue-900 transition-colors hover:bg-blue-50"
             >
-              {t("home.startUsing")}
+              {t("home.startUsing", locale)}
             </Link>
             <Link
               href="https://github.com/albertoguinda/devflow-ai"
@@ -161,7 +161,7 @@ export default async function HomePage() {
               rel="noopener noreferrer"
               className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg border-2 border-white px-8 font-semibold text-white transition-colors hover:bg-white/10"
             >
-              {t("home.starGithub")}
+              {t("home.starGithub", locale)}
             </Link>
           </div>
         </div>
@@ -179,14 +179,14 @@ export default async function HomePage() {
           >
             Alberto Guinda
           </Link>
-          {" "}&middot; {t("home.footerFreeOS")} &middot;{" "}
+          {" "}&middot; {t("home.footerFreeOS", locale)} &middot;{" "}
           <Link
             href="https://github.com/albertoguinda/devflow-ai"
             target="_blank"
             rel="noopener noreferrer"
             className="underline hover:text-foreground"
           >
-            {t("home.starGithub")}
+            {t("home.starGithub", locale)}
           </Link>
         </div>
       </footer>

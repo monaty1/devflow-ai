@@ -12,6 +12,13 @@ export function calculateCost(
 ): CostCalculation {
   const inputCost = (inputTokens / 1_000_000) * model.inputPricePerMToken;
   const outputCost = (outputTokens / 1_000_000) * model.outputPricePerMToken;
+  const totalCost = inputCost + outputCost;
+
+  // Calculate Value Score: Performance per Million Dollars
+  // higher is better
+  const valueScore = model.benchmarkScore 
+    ? (model.benchmarkScore / (totalCost || 0.000001))
+    : undefined;
 
   return {
     id: `${model.id}-${Date.now()}`,
@@ -20,16 +27,19 @@ export function calculateCost(
     outputTokens,
     inputCost,
     outputCost,
-    totalCost: inputCost + outputCost,
+    totalCost,
     calculatedAt: new Date().toISOString(),
+    valueScore
   };
 }
 
 export function compareAllModels(
   inputTokens: number,
-  outputTokens: number
+  outputTokens: number,
+  customModels?: AIModel[]
 ): CostComparison {
-  const results = AI_MODELS.map((model) =>
+  const models = customModels || AI_MODELS;
+  const results = models.map((model) =>
     calculateCost(model, inputTokens, outputTokens)
   ).sort((a, b) => a.totalCost - b.totalCost);
 

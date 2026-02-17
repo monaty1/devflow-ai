@@ -237,7 +237,20 @@ export function parseUuid(input: string): UuidInfo {
     version: validation.version ?? "unknown",
     variant: validation.variant ?? "unknown",
     isValid: true,
+    isExposed: false,
+    entropyScore: 100,
   };
+
+  // Entropy calculation (simplified)
+  if (validation.version === "v1") {
+    result.entropyScore = 40; // High deterministic part (time + node)
+    result.isExposed = true; // Node (MAC) and exact time are leaked
+  } else if (validation.version === "v7") {
+    result.entropyScore = 70; // Time is deterministic, rest is random
+    result.isExposed = true; // Exact time is leaked
+  } else if (validation.version === "v4") {
+    result.entropyScore = 98; // Almost fully random
+  }
 
   // Extract timestamp for v1 and v7
   if (validation.version === "v1") {
@@ -312,6 +325,24 @@ export function validateUuids(
     uuid,
     validation: validateUuid(uuid),
   }));
+}
+
+/**
+ * Formats multiple UUIDs for bulk export
+ */
+export function formatBulkExport(uuids: string[], format: "text" | "json" | "csv" | "sql"): string {
+  switch (format) {
+    case "json":
+      return JSON.stringify(uuids, null, 2);
+    case "csv":
+      return "uuid\n" + uuids.join("\n");
+    case "sql":
+      return "INSERT INTO table_name (uuid_column) VALUES\n" + 
+             uuids.map(u => `('${u}')`).join(",\n") + ";";
+    case "text":
+    default:
+      return uuids.join("\n");
+  }
 }
 
 // Example UUIDs for demo

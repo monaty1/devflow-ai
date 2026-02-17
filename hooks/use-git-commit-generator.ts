@@ -12,6 +12,7 @@ import {
   generateCommitMessage,
   parseCommitMessage,
   suggestScope,
+  analyzeDiff,
   EXAMPLE_COMMITS,
 } from "@/lib/application/git-commit-generator";
 import { useToolHistory } from "@/hooks/use-tool-history";
@@ -27,6 +28,7 @@ export function useGitCommitGenerator() {
   const [config, setConfig] = useState<CommitConfig>(DEFAULT_COMMIT_CONFIG);
   const [result, setResult] = useState<CommitResult | null>(null);
   const [parseInput, setParseInput] = useState("");
+  const [diffInput, setDiffInput] = useState("");
   const [parsedCommit, setParsedCommit] = useState<ParsedCommit | null>(null);
   const { history, addToHistory: addItemToHistory, clearHistory } =
     useToolHistory<HistoryItem>("devflow-git-commit-generator-history", 10);
@@ -58,6 +60,18 @@ export function useGitCommitGenerator() {
     setParsedCommit(parsed);
   }, [parseInput]);
 
+  const analyze = useCallback(() => {
+    if (!diffInput.trim()) return;
+    const analysis = analyzeDiff(diffInput);
+    
+    setConfig(prev => ({
+      ...prev,
+      type: analysis.suggestedType,
+      scope: analysis.suggestedScope,
+      breakingChange: analysis.isBreaking ? "Breaking change detected in diff" : "",
+    }));
+  }, [diffInput]);
+
   const loadExample = useCallback((type: CommitType) => {
     const example = EXAMPLE_COMMITS[type];
     setParseInput(example);
@@ -80,6 +94,7 @@ export function useGitCommitGenerator() {
     setConfig(DEFAULT_COMMIT_CONFIG);
     setResult(null);
     setParseInput("");
+    setDiffInput("");
     setParsedCommit(null);
   }, []);
 
@@ -94,16 +109,19 @@ export function useGitCommitGenerator() {
     config,
     result,
     parseInput,
+    diffInput,
     parsedCommit,
     history,
 
     // Setters
     setParseInput,
+    setDiffInput,
     updateConfig,
 
     // Actions
     generate,
     parse,
+    analyze,
     loadExample,
     getSuggestions,
     reset,

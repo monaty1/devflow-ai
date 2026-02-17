@@ -17,7 +17,9 @@ export function createDocument(
   content: string,
   type: DocumentType,
   priority: Priority,
-  tags: string[]
+  tags: string[],
+  filePath?: string,
+  instructions?: string
 ): ContextDocument {
   return {
     id: crypto.randomUUID(),
@@ -28,6 +30,8 @@ export function createDocument(
     tags,
     tokenCount: estimateTokens(content),
     createdAt: new Date().toISOString(),
+    filePath,
+    instructions,
   };
 }
 
@@ -151,6 +155,34 @@ function exportAsXml(window: ContextWindow): string {
 <context name="${escapeXml(window.name)}" totalTokens="${window.totalTokens}">
 ${docs}
 </context>`;
+}
+
+export function exportForAI(window: ContextWindow): string {
+  const fileTree = window.documents
+    .map(doc => `- ${doc.filePath || doc.title}`)
+    .join("\n");
+
+  const docs = window.documents
+    .map(
+      (doc) => `<file path="${doc.filePath || doc.title}" type="${doc.type}">
+${doc.instructions ? `<instructions>${doc.instructions}</instructions>\n` : ""}<content>
+${doc.content}
+</content>
+</file>`
+    )
+    .join("\n\n");
+
+  return `I am providing context for a software development task. Please act as a Senior Software Engineer.
+
+<project_map>
+${fileTree}
+</project_map>
+
+<context_documents>
+${docs}
+</context_documents>
+
+Please analyze the provided context and wait for my specific instructions.`;
 }
 
 function escapeXml(text: string): string {

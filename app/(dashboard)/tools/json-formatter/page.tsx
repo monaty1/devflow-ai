@@ -1,8 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { Card, Button } from "@heroui/react";
-import { StatusBadge } from "@/components/shared/status-badge";
+import { useState, useCallback, useMemo } from "react";
+import {
+  Card,
+  Button,
+  Tabs,
+  Tab,
+  Chip,
+  Progress,
+  Tooltip,
+} from "@heroui/react";
 import {
   Braces,
   AlertCircle,
@@ -14,21 +21,32 @@ import {
   ArrowRightLeft,
   List,
   Wand2,
+  FileSpreadsheet,
+  FileJson2,
+  Wrench,
+  Search,
+  Code2,
+  Database,
+  Layers,
+  ChevronRight,
+  Fingerprint,
 } from "lucide-react";
 import { useJsonFormatter } from "@/hooks/use-json-formatter";
 import { useTranslation } from "@/hooks/use-translation";
+import { useToast } from "@/hooks/use-toast";
+import { useSmartNavigation } from "@/hooks/use-smart-navigation";
 import { CopyButton } from "@/components/shared/copy-button";
 import { ToolHeader } from "@/components/shared/tool-header";
-import type { JsonFormatMode } from "@/types/json-formatter";
+import { DataTable, type ColumnConfig } from "@/components/ui";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { cn } from "@/lib/utils";
+import type { JsonFormatMode, JsonPathResult } from "@/types/json-formatter";
 
 export default function JsonFormatterPage() {
   const { t } = useTranslation();
+  const { addToast } = useToast();
+  const { navigateTo } = useSmartNavigation();
 
-  const MODE_OPTIONS: { id: JsonFormatMode; label: string; icon: React.ElementType }[] = [
-    { id: "format", label: t("jsonFmt.modeFormat"), icon: Braces },
-    { id: "minify", label: t("jsonFmt.modeMinify"), icon: Minimize2 },
-    { id: "validate", label: t("jsonFmt.modeValidate"), icon: CheckCircle },
-  ];
   const {
     input,
     mode,
@@ -48,307 +66,247 @@ export default function JsonFormatterPage() {
     loadExample,
     reset,
     applyOutput,
+    fix,
   } = useJsonFormatter();
 
   const [activeTab, setActiveTab] = useState<"output" | "paths" | "typescript" | "compare">("output");
 
-  const paths = inputValidation.isValid ? getPaths() : [];
-  const tsOutput = inputValidation.isValid ? toTypeScript("Root") : "";
+  const pathColumns: ColumnConfig[] = [
+    { name: "PATH", uid: "path", sortable: true },
+    { name: "TYPE", uid: "type", sortable: true },
+    { name: "VALUE", uid: "value" },
+  ];
+
+  const renderPathCell = useCallback((item: JsonPathResult, columnKey: React.Key) => {
+    switch (columnKey) {
+      case "path":
+        return <code className="text-xs font-bold text-primary">{item.path}</code>;
+      case "type":
+        return (
+          <Chip size="sm" variant="flat" className="capitalize text-[10px] font-black bg-muted">
+            {item.type}
+          </Chip>
+        );
+      case "value":
+        const valStr = String(item.value);
+        return <span className="text-xs text-muted-foreground truncate max-w-[200px] inline-block">{valStr}</span>;
+      default:
+        return (item as any)[columnKey];
+    }
+  }, []);
+
+  const paths = useMemo(() => (inputValidation.isValid ? getPaths() : []), [inputValidation.isValid, getPaths]);
+  const tsOutput = useMemo(() => (inputValidation.isValid ? toTypeScript("Root") : ""), [inputValidation.isValid, toTypeScript]);
   const isEqual = activeTab === "compare" && compareInput ? compare() : null;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="mx-auto max-w-7xl space-y-6">
       <ToolHeader
         icon={Braces}
-        gradient="from-yellow-500 to-amber-600"
+        gradient="from-amber-500 to-orange-600"
         title={t("jsonFmt.title")}
         description={t("jsonFmt.description")}
         breadcrumb
+        actions={
+          <Button variant="outline" size="sm" onPress={reset} className="gap-2">
+            <RotateCcw className="size-4" />
+            {t("common.reset")}
+          </Button>
+        }
       />
 
-      {/* Mode Selector */}
-      <div className="flex flex-wrap gap-3">
-        {MODE_OPTIONS.map((opt) => (
-          <button
-            key={opt.id}
-            type="button"
-            onClick={() => setMode(opt.id)}
-            aria-current={mode === opt.id ? "true" : undefined}
-            className={`flex items-center gap-2 rounded-lg border-2 px-4 py-2.5 transition-all ${
-              mode === opt.id
-                ? "border-primary bg-primary/10"
-                : "border-border hover:border-primary/50"
-            }`}
-          >
-            <opt.icon className="size-4" />
-            <span className="font-medium">{opt.label}</span>
-          </button>
-        ))}
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Input Panel */}
-        <div className="space-y-4">
+      <div className="grid gap-6 lg:grid-cols-12">
+        {/* Input Column */}
+        <div className="lg:col-span-5 space-y-6">
           <Card className="p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <label htmlFor="json-input" className="text-lg font-semibold">{t("jsonFmt.inputJson")}</label>
-              <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onPress={() => loadExample("simple")}>
-                  <Wand2 className="mr-1 size-4" />
-                  {t("jsonFmt.simple")}
-                </Button>
-                <Button variant="ghost" size="sm" onPress={() => loadExample("complex")}>
-                  <Wand2 className="mr-1 size-4" />
-                  {t("jsonFmt.complex")}
-                </Button>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold flex items-center gap-2">
+                <Database className="size-4 text-primary" />
+                Raw JSON Input
+              </h3>
+              <div className="flex gap-1">
+                <Button size="sm" variant="flat" onPress={() => loadExample("complex")}>Example</Button>
+                <Button size="sm" variant="flat" color="danger" isIconOnly onPress={() => setInput("")}><Trash2 className="size-3" /></Button>
               </div>
             </div>
-
+            
             <textarea
-              id="json-input"
-              aria-invalid={input ? !inputValidation.isValid : undefined}
-              aria-describedby={input && !inputValidation.isValid ? "json-input-error" : undefined}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={t("jsonFmt.jsonPlaceholder")}
-              rows={14}
-              className={`w-full resize-none rounded-lg border bg-background px-4 py-3 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 ${
-                input && !inputValidation.isValid
-                  ? "border-red-500 focus-visible:border-red-500"
-                  : "border-border focus-visible:border-primary"
-              }`}
+              placeholder='{"paste": "json here"}'
+              className={cn(
+                "h-80 w-full resize-none rounded-xl border p-4 font-mono text-xs focus:ring-2 transition-all shadow-inner",
+                input && !inputValidation.isValid ? "border-danger ring-danger/10" : "border-divider focus:ring-primary/20"
+              )}
             />
 
-            {input && !inputValidation.isValid && inputValidation.error && (
-              <div id="json-input-error" role="alert" className="mt-2 flex items-center gap-2 text-sm text-red-500">
-                <AlertCircle className="size-4" />
-                {t("jsonFmt.syntaxError", { line: inputValidation.error.line, col: inputValidation.error.column })}{" "}
-                {inputValidation.error.message}
+            {!inputValidation.isValid && input && (
+              <div className="mt-4 p-3 bg-danger/10 rounded-xl border border-danger/20 flex flex-col gap-2">
+                <div className="flex items-center gap-2 text-danger text-xs font-bold uppercase">
+                  <AlertCircle className="size-4" />
+                  Syntax Error: L{inputValidation.error?.line} C{inputValidation.error?.column}
+                </div>
+                <p className="text-xs text-danger/80 italic">{inputValidation.error?.message}</p>
+                <Button size="sm" color="danger" variant="flat" className="mt-1 font-bold" onPress={fix}>
+                  <Wrench className="size-3 mr-1" /> Auto-Repair Syntax
+                </Button>
               </div>
             )}
 
-            {/* Input Stats */}
-            <div className="mt-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
-              <span>{t("common.characters", { count: inputStats.characters })}</span>
-              <span>{t("common.lines", { count: inputStats.lines })}</span>
-              {inputStats.isValid && <span className="text-green-600">{t("jsonFmt.validJson")}</span>}
+            <div className="grid grid-cols-2 gap-3 mt-6">
+              <Button color="primary" className="font-bold" onPress={() => { setMode("format"); process(); }}>
+                <Braces className="size-4 mr-2" /> Format
+              </Button>
+              <Button variant="flat" color="primary" className="font-bold" onPress={() => { setMode("minify"); process(); }}>
+                <Minimize2 className="size-4 mr-2" /> Minify
+              </Button>
             </div>
           </Card>
 
-          {/* Configuration */}
-          <Card className="p-6">
-            <h3 className="mb-4 font-semibold">{t("common.configuration")}</h3>
-
-            <div className="space-y-4">
-              {/* Indent Size */}
-              <div>
-                <label className="mb-2 block text-sm font-medium text-muted-foreground">
-                  {t("jsonFmt.indentSize")}
-                </label>
-                <div className="flex gap-2">
-                  {[2, 4].map((size) => (
-                    <button
-                      key={size}
-                      type="button"
-                      onClick={() => updateConfig("indentSize", size as 2 | 4)}
-                      className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
-                        config.indentSize === size
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground hover:bg-muted/80"
-                      }`}
-                    >
-                      {t("jsonFmt.spaces", { size })}
-                    </button>
-                  ))}
-                </div>
+          <Card className="p-6 bg-gradient-to-br from-amber-600 to-orange-700 text-white shadow-xl shadow-orange-500/20">
+            <h3 className="text-xs font-black uppercase opacity-80 mb-4 flex items-center gap-2 tracking-widest">
+              <Fingerprint className="size-3" /> Data Fingerprint
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+                <p className="text-[10px] font-bold uppercase opacity-60">Keys</p>
+                <p className="text-xl font-black">{result?.stats.keys || 0}</p>
               </div>
-
-              {/* Sort Keys */}
-              <label className="flex cursor-pointer items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={config.sortKeys}
-                  onChange={(e) => updateConfig("sortKeys", e.target.checked)}
-                  className="size-4 rounded border-border accent-primary"
-                />
-                <span className="text-sm">{t("jsonFmt.sortKeys")}</span>
-              </label>
-            </div>
-
-            {/* Actions */}
-            <div className="mt-6 flex gap-3">
-              <Button
-                onPress={process}
-                isDisabled={!inputValidation.isValid}
-                className="flex-1"
-              >
-                <Sparkles className="mr-2 size-4" />
-                {mode === "format" ? t("jsonFmt.modeFormat") : mode === "minify" ? t("jsonFmt.modeMinify") : t("jsonFmt.modeValidate")}
-              </Button>
-              <Button variant="outline" onPress={reset}>
-                <Trash2 className="size-4" />
-              </Button>
+              <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+                <p className="text-[10px] font-bold uppercase opacity-60">Max Depth</p>
+                <p className="text-xl font-black">{result?.stats.depth || 0}</p>
+              </div>
+              <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+                <p className="text-[10px] font-bold uppercase opacity-60">Size</p>
+                <p className="text-sm font-black">{((result?.stats.sizeBytes || 0) / 1024).toFixed(2)} KB</p>
+              </div>
+              <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+                <p className="text-[10px] font-bold uppercase opacity-60">Arrays</p>
+                <p className="text-xl font-black">{result?.stats.arrays || 0}</p>
+              </div>
             </div>
           </Card>
         </div>
 
-        {/* Output Panel */}
-        <Card className="flex flex-col p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">{t("jsonFmt.output")}</h2>
-            {result?.output && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onPress={applyOutput}
-              >
-                <ArrowRightLeft className="mr-1 size-4" />
-                {t("jsonFmt.applyToInput")}
-              </Button>
-            )}
-          </div>
+        {/* Results Column */}
+        <div className="lg:col-span-7 space-y-6">
+          {result && inputValidation.isValid ? (
+            <>
+              <div className="flex justify-between items-center">
+                <Tabs 
+                  selectedKey={activeTab} 
+                  onSelectionChange={(k) => setActiveTab(k as any)}
+                  variant="solid"
+                  color="primary"
+                  classNames={{ tabList: "bg-muted/50 rounded-xl p-1" }}
+                >
+                  <Tab key="output" title="Output" />
+                  <Tab key="paths" title="Path Explorer" />
+                  <Tab key="typescript" title="TypeScript" />
+                  <Tab key="compare" title="Compare" />
+                </Tabs>
+                <Button size="sm" variant="flat" onPress={() => navigateTo("dto-matic", input)}>
+                  <Code2 className="size-3 mr-1" /> Send to DTO-Matic
+                </Button>
+              </div>
 
-          {/* Output Tabs */}
-          <div className="mb-3 flex flex-wrap gap-2 border-b border-border pb-3">
-            {[
-              { id: "output", label: t("jsonFmt.tabResult"), icon: Braces },
-              { id: "paths", label: t("jsonFmt.tabPaths"), icon: List },
-              { id: "typescript", label: t("jsonFmt.tabTypeScript"), icon: FileCode },
-              { id: "compare", label: t("jsonFmt.tabCompare"), icon: ArrowRightLeft },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                  activeTab === tab.id
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:bg-muted/80"
-                }`}
-              >
-                <tab.icon className="size-3.5" />
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Tab Content */}
-          <div className="flex-1">
-            {activeTab === "output" && (
-              <>
-                {result ? (
-                  <div className="relative">
-                    {/* Stats */}
-                    {result.isValid && (
-                      <div className="mb-3 flex flex-wrap gap-2">
-                        <StatusBadge variant="info">{t("jsonFmt.keys", { count: result.stats.keys })}</StatusBadge>
-                        <StatusBadge variant="success">{t("jsonFmt.depth", { count: result.stats.depth })}</StatusBadge>
-                        <StatusBadge variant="purple">{t("jsonFmt.bytes", { count: result.stats.sizeBytes })}</StatusBadge>
-                        {result.stats.arrays > 0 && (
-                          <StatusBadge variant="warning">{t("jsonFmt.arrays", { count: result.stats.arrays })}</StatusBadge>
-                        )}
-                      </div>
-                    )}
-
-                    <CopyButton text={result.output} className="absolute right-2 top-2 z-10" />
-                    <pre className="max-h-[400px] overflow-auto rounded-lg bg-muted/50 p-4 font-mono text-sm">
-                      <code>{result.output || t("jsonFmt.validJson")}</code>
-                    </pre>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <Braces className="mb-4 size-12 text-muted-foreground/30" />
-                    <p className="text-muted-foreground">
-                      {t("jsonFmt.emptyState")}
-                    </p>
-                  </div>
-                )}
-              </>
-            )}
-
-            {activeTab === "paths" && (
-              <div className="relative">
-                {paths.length > 0 ? (
-                  <>
-                    <CopyButton getText={() => paths.map(p => p.path).join("\n")} className="absolute right-2 top-2 z-10" />
-                    <div className="max-h-[400px] overflow-auto rounded-lg bg-muted/50 p-4">
-                      {paths.map((p, i) => (
-                        <div key={i} className="flex items-center gap-2 py-1 font-mono text-sm">
-                          <span className="text-blue-600 dark:text-blue-400">{p.path}</span>
-                          <span className="text-muted-foreground">:</span>
-                          <span className="rounded bg-muted px-1.5 py-0.5 text-xs">{p.type}</span>
-                        </div>
+              {activeTab === "output" && (
+                <Card className="p-0 border-divider shadow-xl overflow-hidden h-[600px] flex flex-col">
+                  <div className="p-4 border-b border-divider flex justify-between items-center bg-muted/20">
+                    <div className="flex gap-2">
+                      {["to-yaml", "to-xml", "to-csv"].map((m) => (
+                        <Button 
+                          key={m} 
+                          size="xs" 
+                          variant={mode === m ? "solid" : "flat"} 
+                          onPress={() => { setMode(m as any); process(); }}
+                          className="h-7 px-2 text-[10px] font-black uppercase"
+                        >
+                          {m.split("-")[1]}
+                        </Button>
                       ))}
                     </div>
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <List className="mb-4 size-12 text-muted-foreground/30" />
-                    <p className="text-muted-foreground">
-                      {t("jsonFmt.pathsEmpty")}
-                    </p>
+                    <CopyButton text={result.output} />
                   </div>
-                )}
-              </div>
-            )}
+                  <pre className="p-6 font-mono text-xs leading-relaxed overflow-auto flex-1 bg-background">
+                    <code>{result.output}</code>
+                  </pre>
+                </Card>
+              )}
 
-            {activeTab === "typescript" && (
-              <div className="relative">
-                {tsOutput ? (
-                  <>
-                    <CopyButton text={tsOutput} className="absolute right-2 top-2 z-10" />
-                    <pre className="max-h-[400px] overflow-auto rounded-lg bg-muted/50 p-4 font-mono text-sm">
-                      <code>{tsOutput}</code>
-                    </pre>
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <FileCode className="mb-4 size-12 text-muted-foreground/30" />
-                    <p className="text-muted-foreground">
-                      {t("jsonFmt.tsEmpty")}
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
+              {activeTab === "paths" && (
+                <Card className="p-0 overflow-hidden shadow-xl border-divider">
+                  <DataTable
+                    columns={pathColumns}
+                    data={paths.map((p, id) => ({ ...p, id }))}
+                    filterField="path"
+                    renderCell={renderPathCell}
+                    initialVisibleColumns={["path", "type", "value"]}
+                  />
+                </Card>
+              )}
 
-            {activeTab === "compare" && (
-              <div className="space-y-4">
-                <label htmlFor="json-compare" className="block text-sm font-medium text-muted-foreground">
-                  {t("jsonFmt.compareLabel")}
-                </label>
-                <textarea
-                  id="json-compare"
-                  value={compareInput}
-                  onChange={(e) => setCompareInput(e.target.value)}
-                  placeholder={t("jsonFmt.comparePlaceholder")}
-                  rows={8}
-                  className="w-full resize-none rounded-lg border border-border bg-background px-4 py-3 font-mono text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-                {compareInput && input && (
-                  <div className={`flex items-center gap-2 rounded-lg p-3 ${
-                    isEqual
-                      ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400"
-                      : "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400"
-                  }`}>
-                    {isEqual ? (
-                      <>
-                        <CheckCircle className="size-5" />
-                        <span className="font-medium">{t("jsonFmt.jsonEqual")}</span>
-                      </>
-                    ) : (
-                      <>
-                        <AlertCircle className="size-5" />
-                        <span className="font-medium">{t("jsonFmt.jsonDifferent")}</span>
-                      </>
-                    )}
+              {activeTab === "typescript" && (
+                <Card className="p-0 border-divider shadow-xl overflow-hidden h-[600px] flex flex-col">
+                  <div className="p-4 border-b border-divider flex justify-between items-center bg-muted/20">
+                    <span className="text-xs font-black text-primary uppercase tracking-widest">Interface Schema</span>
+                    <CopyButton text={tsOutput} />
                   </div>
-                )}
+                  <pre className="p-6 font-mono text-xs leading-relaxed overflow-auto flex-1 bg-background text-blue-600 dark:text-blue-400">
+                    <code>{tsOutput}</code>
+                  </pre>
+                </Card>
+              )}
+
+              {activeTab === "compare" && (
+                <div className="grid gap-6">
+                  <Card className="p-6">
+                    <h3 className="font-bold mb-4 flex items-center gap-2">
+                      <ArrowRightLeft className="size-4 text-primary" />
+                      Comparison Source
+                    </h3>
+                    <textarea
+                      value={compareInput}
+                      onChange={(e) => setCompareInput(e.target.value)}
+                      placeholder="Paste JSON to compare..."
+                      className="h-40 w-full resize-none rounded-xl border border-divider bg-background p-4 font-mono text-xs focus:ring-2 focus:ring-primary/20 shadow-inner"
+                    />
+                  </Card>
+                  {compareInput && (
+                    <Card className={cn(
+                      "p-6 flex items-center justify-center border-2",
+                      isEqual ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-danger-50 border-danger-200 text-danger-700"
+                    )}>
+                      {isEqual ? (
+                        <div className="flex flex-col items-center gap-2">
+                          <CheckCircle className="size-10" />
+                          <p className="text-xl font-black">JSONs are Identical</p>
+                          <p className="text-xs opacity-70">Structural fingerprint match (keys sorted)</p>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-2">
+                          <AlertCircle className="size-10" />
+                          <p className="text-xl font-black">JSONs are Different</p>
+                          <p className="text-xs opacity-70">Structural or value mismatch detected</p>
+                        </div>
+                      )}
+                    </Card>
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
+            <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center">
+              <div className="size-24 bg-muted rounded-full flex items-center justify-center mb-6">
+                <Layers className="size-12 text-muted-foreground/30" />
               </div>
-            )}
-          </div>
-        </Card>
+              <h3 className="text-2xl font-black mb-2 opacity-80">JSON Lab</h3>
+              <p className="text-muted-foreground max-w-sm mx-auto font-medium">
+                Format, minify, and analyze your JSON. Explore internal paths, generate TypeScript interfaces, or compare multiple payloads.
+              </p>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );

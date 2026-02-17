@@ -10,8 +10,73 @@ import type {
   NextExecution,
   CronValidation,
   CronFieldError,
+  ConfigFormat,
+  CronConfig,
 } from "@/types/cron-builder";
 import { CRON_FIELD_RANGES, CRON_FIELD_LABELS } from "@/types/cron-builder";
+
+// --- IaC Generators ---
+
+export function generateConfig(expression: string, format: ConfigFormat): CronConfig {
+  switch (format) {
+    case "kubernetes":
+      return {
+        format,
+        label: "Kubernetes CronJob",
+        language: "yaml",
+        code: `apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: my-cron-job
+spec:
+  schedule: "${expression}"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: job
+            image: my-image:latest
+          restartPolicy: OnFailure`,
+      };
+    case "github-actions":
+      return {
+        format,
+        label: "GitHub Actions",
+        language: "yaml",
+        code: `name: Scheduled Job
+on:
+  schedule:
+    - cron: '${expression}'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run script
+        run: echo "Running scheduled task"`,
+      };
+    case "aws-eventbridge":
+      return {
+        format,
+        label: "AWS EventBridge",
+        language: "json",
+        code: `{
+  "Name": "my-scheduled-rule",
+  "ScheduleExpression": "cron(${expression.replace(/\*/g, "?")})", # Note: AWS uses ? for wildcards sometimes
+  "State": "ENABLED"
+}`,
+      };
+    case "linux-crontab":
+    default:
+      return {
+        format,
+        label: "Linux Crontab",
+        language: "bash",
+        code: `${expression} /usr/bin/python3 /path/to/script.py >> /var/log/cron.log 2>&1`,
+      };
+  }
+}
 
 // --- Common Presets ---
 
