@@ -79,7 +79,7 @@ function findLineNumber(code: string, index: number): number {
 
 export function detectIssues(code: string, language: SupportedLanguage): CodeIssue[] {
   const issues: CodeIssue[] = [];
-  const patterns = [...COMMON_PATTERNS, ...(LANGUAGE_PATTERNS[language] || [])];
+  const patterns = [...COMMON_PATTERNS, ...(LANGUAGE_PATTERNS[language] ?? [])];
 
   for (const patternDef of patterns) {
     const regex = new RegExp(patternDef.pattern.source, patternDef.pattern.flags);

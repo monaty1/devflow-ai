@@ -5,7 +5,7 @@ import type {
   ConversionResult,
   GenerationResult,
   WizardConfig,
-  VariableType,
+  NamingConvention,
 } from "@/types/variable-name-wizard";
 import { VARIABLE_NAME_WIZARD_WORKER_SOURCE } from "@/lib/application/variable-name-wizard/worker-source";
 
@@ -29,9 +29,11 @@ export function useVariableNameWizard(): UseVariableNameWizardReturn {
   const [input, setInput] = useState("");
   const [mode, setMode] = useState<"convert" | "generate">("generate");
   const [config, setConfig] = useState<WizardConfig>({
-    type: "variable",
+    preferredConvention: "camelCase",
     maxSuggestions: 10,
-    language: "typescript" as any,
+    includeAbbreviations: false,
+    language: "typescript",
+    type: "variable",
   });
   const [conversionResult, setConversionResult] = useState<ConversionResult | null>(null);
   const [generationResult, setGenerationResult] = useState<GenerationResult | null>(null);
@@ -48,7 +50,7 @@ export function useVariableNameWizard(): UseVariableNameWizardReturn {
     };
   }, []);
 
-  const runWorker = useCallback((action: string, payload: any): Promise<any> => {
+  const runWorker = useCallback((action: string, payload: Record<string, unknown>): Promise<Record<string, unknown>> => {
     return new Promise((resolve, reject) => {
       if (!workerRef.current) {
         reject(new Error("Worker not initialized"));
@@ -81,7 +83,7 @@ export function useVariableNameWizard(): UseVariableNameWizardReturn {
         id: crypto.randomUUID(),
         original: input,
         originalConvention: "unknown",
-        conversions: result.conversions,
+        conversions: result['conversions'] as Record<NamingConvention, string>,
         timestamp: new Date().toISOString()
       });
     } catch (e) {
@@ -95,12 +97,12 @@ export function useVariableNameWizard(): UseVariableNameWizardReturn {
     if (!input.trim()) return;
     setIsProcessing(true);
     try {
-      const result = await runWorker("generate", { 
-        context: input, 
-        type: config.type, 
-        language: config.language 
+      const result = await runWorker("generate", {
+        context: input,
+        language: config.language,
+        type: config.type
       });
-      setGenerationResult(result);
+      setGenerationResult(result as unknown as GenerationResult);
     } catch (e) {
       console.error(e);
     } finally {

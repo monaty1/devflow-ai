@@ -2,67 +2,46 @@
 
 import { useState, useCallback, useMemo } from "react";
 import {
-  Card,
-  Button,
   Tabs,
   Tab,
   Chip,
-  Progress,
-  Tooltip,
-  Input,
 } from "@heroui/react";
 import {
   Braces,
   AlertCircle,
-  Sparkles,
-  Trash2,
   Minimize2,
   CheckCircle,
-  FileCode,
-  ArrowRightLeft,
-  List,
-  Wand2,
-  FileSpreadsheet,
-  FileJson2,
+  Trash2,
   Wrench,
   Search,
   Code2,
   Database,
-  Layers,
-  ChevronRight,
+  ArrowRightLeft,
   Fingerprint,
-  Zap,
-  Activity,
-  History,
 } from "lucide-react";
 import { useJsonFormatter } from "@/hooks/use-json-formatter";
 import { useTranslation } from "@/hooks/use-translation";
-import { useToast } from "@/hooks/use-toast";
 import { useSmartNavigation } from "@/hooks/use-smart-navigation";
 import { CopyButton } from "@/components/shared/copy-button";
 import { ToolHeader } from "@/components/shared/tool-header";
-import { DataTable, type ColumnConfig } from "@/components/ui";
+import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { cn } from "@/lib/utils";
-import type { JsonFormatMode, JsonPathResult } from "@/types/json-formatter";
+import type { JsonPathResult } from "@/types/json-formatter";
 
 export default function JsonFormatterPage() {
   const { t } = useTranslation();
-  const { addToast } = useToast();
   const { navigateTo } = useSmartNavigation();
 
   const {
     input,
     mode,
-    config,
     result,
     compareInput,
-    inputStats,
     inputValidation,
     setInput,
     setMode,
     setCompareInput,
-    updateConfig,
     process,
     getPaths,
     toTypeScript,
@@ -73,7 +52,7 @@ export default function JsonFormatterPage() {
     fix,
   } = useJsonFormatter();
 
-  const [activeTab, setActiveTab] = useState<"output" | "paths" | "typescript" | "compare">("output");
+  const [activeTab, setActiveTab] = useState<"output" | "paths" | "typescript" | "compare" | string>("output");
 
   const pathColumns: ColumnConfig[] = [
     { name: "PATH", uid: "path", sortable: true },
@@ -82,12 +61,13 @@ export default function JsonFormatterPage() {
   ];
 
   const renderPathCell = useCallback((item: JsonPathResult, columnKey: React.Key) => {
-    switch (columnKey) {
+    const key = columnKey.toString();
+    switch (key) {
       case "path":
         return <code className="text-[11px] font-bold text-primary bg-primary/5 px-1.5 py-0.5 rounded">{item.path}</code>;
       case "type":
         return (
-          <Chip size="sm" variant="flat" className="capitalize text-[9px] font-black h-5">
+          <Chip size="sm" variant="primary" className="capitalize text-[9px] font-black h-5">
             {item.type}
           </Chip>
         );
@@ -95,7 +75,7 @@ export default function JsonFormatterPage() {
         const valStr = String(item.value);
         return <span className="text-[11px] text-muted-foreground truncate max-w-[250px] inline-block font-mono">{valStr}</span>;
       default:
-        return (item as any)[columnKey];
+        return (item as any)[key];
     }
   }, []);
 
@@ -113,7 +93,7 @@ export default function JsonFormatterPage() {
         breadcrumb
         actions={
           <Button variant="outline" size="sm" onPress={reset} className="gap-2">
-            <RotateCcw className="size-4" />
+            <ArrowRightLeft className="size-4" />
             {t("common.reset")}
           </Button>
         }
@@ -129,8 +109,8 @@ export default function JsonFormatterPage() {
                 Raw Payload
               </h3>
               <div className="flex gap-1">
-                <Button size="sm" variant="flat" onPress={() => loadExample("complex")}>Example</Button>
-                <Button size="sm" variant="flat" color="danger" isIconOnly onPress={() => setInput("")}><Trash2 className="size-3.5" /></Button>
+                <Button size="sm" variant="ghost" onPress={() => loadExample("complex")}>Example</Button>
+                <Button size="sm" variant="ghost" onPress={() => setInput("")}><Trash2 className="size-3.5 text-danger" /></Button>
               </div>
             </div>
             
@@ -147,7 +127,7 @@ export default function JsonFormatterPage() {
               />
               {!inputValidation.isValid && input && (
                 <div className="absolute top-4 right-4 animate-pulse">
-                  <StatusBadge variant="danger">ERROR</StatusBadge>
+                  <StatusBadge variant="error">ERROR</StatusBadge>
                 </div>
               )}
             </div>
@@ -161,24 +141,24 @@ export default function JsonFormatterPage() {
                 <p className="text-xs text-danger/80 font-medium italic">
                   L{inputValidation.error?.line} C{inputValidation.error?.column}: {inputValidation.error?.message}
                 </p>
-                <Button size="sm" color="danger" className="w-full font-black shadow-lg shadow-danger/20" onPress={fix}>
+                <Button size="sm" variant="danger" className="w-full font-black shadow-lg shadow-danger/20" onPress={fix}>
                   <Wrench className="size-3.5 mr-2" /> Auto-Repair Structure
                 </Button>
               </div>
             )}
 
             <div className="grid grid-cols-2 gap-3 mt-6">
-              <Button color="primary" className="font-black h-12 text-md shadow-xl shadow-primary/20" onPress={() => { setMode("format"); process(); }}>
+              <Button variant="primary" className="font-black h-12 text-md shadow-xl shadow-primary/20" onPress={() => { setMode("format"); process(); }}>
                 <Braces className="size-4 mr-2" /> Format
               </Button>
-              <Button variant="flat" color="primary" className="font-black h-12 text-md" onPress={() => { setMode("minify"); process(); }}>
+              <Button variant="ghost" className="font-black h-12 text-md text-primary" onPress={() => { setMode("minify"); process(); }}>
                 <Minimize2 className="size-4 mr-2" /> Minify
               </Button>
             </div>
           </Card>
 
           {/* Luxury Analytics Card */}
-          <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl shadow-slate-500/20">
+          <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl shadow-slate-500/20 border-none">
             <h3 className="text-xs font-black uppercase opacity-60 mb-6 flex items-center gap-2 tracking-widest">
               <Fingerprint className="size-3 text-orange-400" /> 
               Structural Fingerprint
@@ -206,7 +186,12 @@ export default function JsonFormatterPage() {
                   <span>Formatting Efficiency</span>
                   <span>{Math.round(((result?.stats.minifiedSize || 0) / (result?.stats.sizeBytes || 1)) * 100)}%</span>
                </div>
-               <Progress value={(result?.stats.minifiedSize || 0) / (result?.stats.sizeBytes || 1) * 100} size="sm" color="warning" className="h-1.5 bg-white/10" />
+               <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-orange-400" 
+                    style={{ width: `${Math.min(100, ((result?.stats.minifiedSize || 0) / (result?.stats.sizeBytes || 1)) * 100)}%` }} 
+                  />
+               </div>
             </div>
           </Card>
         </div>
@@ -215,24 +200,22 @@ export default function JsonFormatterPage() {
         <div className="lg:col-span-8 space-y-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <Tabs 
-              selectedKey={activeTab} 
-              onSelectionChange={(k) => setActiveTab(k as any)}
-              variant="solid"
-              color="primary"
-              classNames={{ tabList: "bg-muted/50 rounded-xl p-1", cursor: "shadow-md" }}
+              selectedKey={activeTab as string} 
+              onSelectionChange={(k) => setActiveTab(k as string)}
+              variant="primary"
             >
-              <Tab key="output" title="Output" />
-              <Tab key="paths" title="Path Explorer" />
-              <Tab key="typescript" title="Schema" />
-              <Tab key="compare" title="Diff Analysis" />
+              <Tab key="output">Output</Tab>
+              <Tab key="paths">Path Explorer</Tab>
+              <Tab key="typescript">Schema</Tab>
+              <Tab key="compare">Diff Analysis</Tab>
             </Tabs>
             
             <div className="flex gap-2 w-full sm:w-auto">
-              <Button size="sm" variant="flat" color="secondary" className="font-bold flex-1 sm:flex-none" onPress={() => navigateTo("dto-matic", input)}>
-                <Code2 className="size-3.5 mr-1.5" /> Architect Layer
+              <Button size="sm" variant="ghost" className="font-bold flex-1 sm:flex-none" onPress={() => navigateTo("dto-matic", input)}>
+                <Code2 className="size-3.5 mr-1.5 text-secondary" /> Architect Layer
               </Button>
-              <Button size="sm" variant="flat" className="font-bold flex-1 sm:flex-none" onPress={applyOutput} isDisabled={!result?.output}>
-                <ArrowRightLeft className="size-3.5 mr-1.5" /> Set as Input
+              <Button size="sm" variant="ghost" className="font-bold flex-1 sm:flex-none" onPress={applyOutput} isDisabled={!result?.output}>
+                <ArrowRightLeft className="size-3.5 mr-1.5 text-primary" /> Set as Input
               </Button>
             </div>
           </div>
@@ -242,16 +225,15 @@ export default function JsonFormatterPage() {
               <Card className="p-0 border-divider shadow-xl overflow-hidden h-[650px] flex flex-col">
                 <div className="p-4 border-b border-divider flex justify-between items-center bg-muted/20">
                   <div className="flex gap-1">
-                    {["to-yaml", "to-xml", "to-csv"].map((m) => (
+                    {["format", "minify", "to-yaml", "to-xml", "to-csv"].map((m) => (
                       <Button 
                         key={m} 
                         size="sm" 
-                        variant={mode === m ? "solid" : "flat"} 
-                        color={mode === m ? "primary" : "default"}
+                        variant={mode === m ? "primary" : "ghost"} 
                         onPress={() => { setMode(m as any); process(); }}
                         className="h-8 px-3 text-[10px] font-black uppercase tracking-tighter"
                       >
-                        {m.split("-")[1]}
+                        {m.includes("-") ? m.split("-")[1] : m}
                       </Button>
                     ))}
                   </div>
@@ -273,7 +255,7 @@ export default function JsonFormatterPage() {
             {activeTab === "paths" && (
               <Card className="p-0 overflow-hidden shadow-xl border-divider min-h-[650px]">
                 <div className="p-4 border-b border-divider bg-muted/20 flex items-center gap-2">
-                  <List className="size-4 text-primary" />
+                  <Search className="size-4 text-primary" />
                   <span className="text-xs font-black uppercase tracking-widest">JSON Object Hierarchy</span>
                 </div>
                 <DataTable
@@ -288,7 +270,7 @@ export default function JsonFormatterPage() {
             )}
 
             {activeTab === "typescript" && (
-              <Card className="p-0 border-divider shadow-xl overflow-hidden h-[650px] flex flex-col">
+              <Card className="p-0 border-divider shadow-xl overflow-hidden h-[650px] flex flex-col border-none">
                 <div className="p-4 border-b border-divider flex justify-between items-center bg-muted/20">
                   <span className="text-[10px] font-black text-primary uppercase tracking-widest ml-2">TypeScript Definition</span>
                   <CopyButton text={tsOutput} />

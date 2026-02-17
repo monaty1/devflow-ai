@@ -944,8 +944,8 @@ function applyNaming(name: string, convention: NamingConvention): string {
 
 function toCamelCase(str: string): string {
   return str
-    .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ""))
-    .replace(/^[A-Z]/, (c) => c.toLowerCase());
+    .replace(/[-_\s]+(.)?/g, (_: string, c: string | undefined) => (c ? c.toUpperCase() : ""))
+    .replace(/^[A-Z]/, (c: string) => c.toLowerCase());
 }
 
 function toPascalCase(str: string): string {
@@ -1021,9 +1021,9 @@ export function formatJson(str: string): string {
 
 // --- Mock Data Generation ---
 
-export function generateMockData(fields: JsonField[], count: number = 1): any {
-  function generateItem(fieldList: JsonField[]): any {
-    const item: any = {};
+export function generateMockData(fields: JsonField[], count: number = 1): unknown {
+  function generateItem(fieldList: JsonField[]): Record<string, unknown> {
+    const item: Record<string, unknown> = {};
     
     for (const field of fieldList) {
       if (field.isOptional && Math.random() > 0.8) continue; // 20% chance of undefined
@@ -1049,7 +1049,7 @@ export function generateMockData(fields: JsonField[], count: number = 1): any {
   return count === 1 ? data[0] : data;
 }
 
-function generateValue(field: JsonField): any {
+function generateValue(field: JsonField): unknown {
   const name = field.name.toLowerCase();
   
   if (field.semanticType === "uuid" || name.includes("id") || name.includes("uuid")) {

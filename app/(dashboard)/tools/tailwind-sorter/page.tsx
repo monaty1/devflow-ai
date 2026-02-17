@@ -1,35 +1,20 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState } from "react";
 import {
-  Card,
-  Button,
   Tabs,
   Tab,
   Chip,
-  Progress,
-  Tooltip,
 } from "@heroui/react";
 import {
-  Type,
-  Layout,
   Palette,
-  Layers,
-  MousePointer2,
   RotateCcw,
-  Sparkles,
-  AlertTriangle,
-  CheckCircle2,
-  Trash2,
-  Copy,
-  ArrowRight,
   ListFilter,
+  Trash2,
+  CheckCircle2,
+  AlertTriangle,
   Monitor,
-  Smartphone,
-  Tablet,
-  Tv,
   Eye,
-  Search,
   Zap,
   Activity,
 } from "lucide-react";
@@ -37,10 +22,9 @@ import { useTailwindSorter } from "@/hooks/use-tailwind-sorter";
 import { useTranslation } from "@/hooks/use-translation";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
-import { DataTable, type ColumnConfig } from "@/components/ui";
-import { StatusBadge } from "@/components/shared/status-badge";
+import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { cn } from "@/lib/utils";
-import type { TailwindAuditItem, TailwindConflict } from "@/types/tailwind-sorter";
+import type { TailwindAuditItem } from "@/types/tailwind-sorter";
 
 export default function TailwindSorterPage() {
   const { t } = useTranslation();
@@ -51,12 +35,11 @@ export default function TailwindSorterPage() {
     isSorting,
     setInput,
     updateConfig,
-    sort,
     reset,
     loadExample,
   } = useTailwindSorter();
 
-  const [activeView, setActiveTab] = useState<"result" | "audit" | "breakpoints">("result");
+  const [activeView, setActiveTab] = useState<"result" | "audit" | "breakpoints" | string>("result");
 
   const auditColumns: ColumnConfig[] = [
     { name: "CLASS", uid: "class" },
@@ -65,19 +48,20 @@ export default function TailwindSorterPage() {
   ];
 
   const renderAuditCell = (item: TailwindAuditItem, columnKey: React.Key) => {
-    switch (columnKey) {
+    const key = columnKey.toString();
+    switch (key) {
       case "class":
         return <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-bold text-primary">{item.class}</code>;
       case "reason":
         return <span className="text-sm font-medium">{item.reason}</span>;
       case "severity":
         return (
-          <Chip size="sm" variant="flat" color={item.severity === "medium" ? "warning" : "primary"} className="capitalize font-black text-[10px]">
+          <Chip size="sm" variant="soft" color={item.severity === "medium" ? "warning" : "default"} className="capitalize font-black text-[10px]">
             {item.severity}
           </Chip>
         );
       default:
-        return (item as any)[columnKey];
+        return (item as any)[key];
     }
   };
 
@@ -107,8 +91,8 @@ export default function TailwindSorterPage() {
                 Raw Classes
               </h3>
               <div className="flex gap-1">
-                <Button size="sm" variant="flat" onPress={() => loadExample("messy")}>Example</Button>
-                <Button size="sm" variant="flat" color="danger" isIconOnly onPress={() => setInput("")}><Trash2 className="size-3" /></Button>
+                <Button size="sm" variant="ghost" onPress={() => loadExample("messy")}>Example</Button>
+                <Button size="sm" variant="ghost" onPress={() => setInput("")} isIconOnly><Trash2 className="size-3 text-danger" /></Button>
               </div>
             </div>
             <textarea
@@ -147,7 +131,7 @@ export default function TailwindSorterPage() {
           </Card>
 
           {/* Live Preview Card */}
-          <Card className="p-6 overflow-hidden bg-slate-900 text-white relative">
+          <Card className="p-6 overflow-hidden bg-slate-900 text-white relative border-none">
             <div className="absolute top-0 right-0 p-4 opacity-10">
               <Zap className="size-20" />
             </div>
@@ -170,15 +154,15 @@ export default function TailwindSorterPage() {
             <>
               {/* Quick Stats */}
               <div className="grid grid-cols-3 gap-4">
-                <Card className="p-4 text-center border-b-4 border-b-sky-500">
+                <Card className="p-4 text-center border-b-4 border-b-sky-500 rounded-b-none">
                   <p className="text-[10px] font-black text-muted-foreground uppercase">Classes</p>
                   <p className="text-2xl font-black">{result.stats.uniqueClasses}</p>
                 </Card>
-                <Card className="p-4 text-center border-b-4 border-b-amber-500">
+                <Card className="p-4 text-center border-b-4 border-b-amber-500 rounded-b-none">
                   <p className="text-[10px] font-black text-muted-foreground uppercase">Conflicts</p>
                   <p className="text-2xl font-black text-amber-600">{result.conflicts.length}</p>
                 </Card>
-                <Card className="p-4 text-center border-b-4 border-b-emerald-500">
+                <Card className="p-4 text-center border-b-4 border-b-emerald-500 rounded-b-none">
                   <p className="text-[10px] font-black text-muted-foreground uppercase">Efficiency</p>
                   <p className="text-2xl font-black text-emerald-600">
                     {Math.round((result.stats.duplicatesRemoved / (result.stats.totalClasses || 1)) * 100)}%
@@ -187,25 +171,19 @@ export default function TailwindSorterPage() {
               </div>
 
               {/* Analysis Tabs */}
-              <Card className="overflow-hidden border-divider shadow-xl">
+              <Card className="p-0 overflow-hidden shadow-xl">
                 <Tabs 
-                  selectedKey={activeView} 
-                  onSelectionChange={(k) => setActiveTab(k as any)}
-                  classNames={{
-                    tabList: "w-full rounded-none bg-muted/30 border-b border-divider p-0 h-14",
-                    tab: "h-full px-6",
-                    cursor: "bg-sky-500",
-                  }}
+                  selectedKey={activeView as string} 
+                  onSelectionChange={(k) => setActiveTab(k as string)}
+                  variant="primary"
                 >
                   <Tab 
                     key="result" 
-                    title={
-                      <div className="flex items-center gap-2 font-bold">
-                        <CheckCircle2 className="size-4 text-emerald-500" />
-                        Sorted List
-                      </div>
-                    }
                   >
+                    <div className="flex items-center gap-2 font-bold">
+                      <CheckCircle2 className="size-4 text-emerald-500" />
+                      Sorted List
+                    </div>
                     <div className="p-6 space-y-4">
                       <div className="flex justify-between items-center bg-sky-50 dark:bg-sky-950/20 p-3 rounded-xl border border-sky-100 dark:border-sky-900/30">
                         <span className="text-xs font-bold text-sky-700">Production-Ready Output</span>
@@ -219,20 +197,18 @@ export default function TailwindSorterPage() {
 
                   <Tab 
                     key="audit" 
-                    title={
-                      <div className="flex items-center gap-2 font-bold">
-                        <AlertTriangle className="size-4 text-amber-500" />
-                        Issues ({result.audit.length + result.conflicts.length})
-                      </div>
-                    }
                   >
+                    <div className="flex items-center gap-2 font-bold">
+                      <AlertTriangle className="size-4 text-amber-500" />
+                      Issues ({result.audit.length + result.conflicts.length})
+                    </div>
                     <div className="p-0">
                       {result.conflicts.length > 0 && (
                         <div className="p-4 bg-red-50 dark:bg-red-950/20 border-b border-red-100 dark:border-red-900/30">
                           <p className="text-xs font-black text-red-700 uppercase mb-3">Critical Logic Conflicts</p>
                           <div className="flex flex-wrap gap-2">
                             {result.conflicts.map((c, i) => (
-                              <Chip key={i} size="sm" color="danger" variant="flat" className="font-bold border border-danger/20">
+                              <Chip key={i} size="sm" color="danger" variant="soft" className="font-bold border border-danger/20">
                                 {c.classes.join(" vs ")}
                               </Chip>
                             ))}
@@ -252,13 +228,11 @@ export default function TailwindSorterPage() {
 
                   <Tab 
                     key="breakpoints" 
-                    title={
-                      <div className="flex items-center gap-2 font-bold">
-                        <Monitor className="size-4 text-blue-500" />
-                        Responsive
-                      </div>
-                    }
                   >
+                    <div className="flex items-center gap-2 font-bold">
+                      <Monitor className="size-4 text-blue-500" />
+                      Responsive
+                    </div>
                     <div className="p-6 space-y-6">
                       {Object.entries(result.breakpoints).map(([bp, classes]) => (
                         <div key={bp} className="space-y-2">
@@ -270,7 +244,7 @@ export default function TailwindSorterPage() {
                           </div>
                           <div className="flex flex-wrap gap-1.5 pl-10">
                             {classes.length > 0 ? (
-                              classes.map((c, i) => <Chip key={i} size="sm" variant="flat" className="h-6 text-[10px] font-bold">{c}</Chip>)
+                              classes.map((c, i) => <Chip key={i} size="sm" variant="soft" className="h-6 text-[10px] font-bold">{c}</Chip>)
                             ) : (
                               <span className="text-[10px] text-muted-foreground italic">No overrides for this size</span>
                             )}

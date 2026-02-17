@@ -13,7 +13,6 @@ import {
   processUuidGeneration,
   validateUuid,
   parseUuid,
-  EXAMPLE_UUIDS,
   formatBulkExport,
 } from "@/lib/application/uuid-generator";
 import { useToolHistory } from "@/hooks/use-tool-history";

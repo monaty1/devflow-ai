@@ -156,15 +156,11 @@ function refinePrompt(prompt, issues) {
   let refined = prompt;
 
   if (issues.some(i => i.type === "missing_role")) {
-    refined = "Act as an expert in this field.
-
-" + refined;
+    refined = "Act as an expert in this field.\\n\\n" + refined;
   }
 
   if (issues.some(i => i.type === "no_output_format")) {
-    refined += "
-
-Please format the output clearly.";
+    refined += "\\n\\nPlease format the output clearly.";
   }
 
   if (issues.some(i => i.type === "vague_instruction")) {

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Card, Button } from "@heroui/react";
 import {
   Sparkles,
   History,
@@ -25,6 +24,7 @@ import { ScoreBadge } from "@/components/tools/score-badge";
 import { SecurityFlagsList } from "@/components/tools/security-flag";
 import { PromptAnalyzerSkeleton } from "@/components/shared/skeletons";
 import { CopyButton } from "@/components/shared/copy-button";
+import { Card, Button } from "@/components/ui";
 import type { PromptIssue } from "@/types/prompt-analyzer";
 
 const SEVERITY_COLORS = {
@@ -157,7 +157,7 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
             </span>
             <Button
               onPress={handleAnalyze}
-              isPending={isAnalyzing}
+              isLoading={isAnalyzing}
               isDisabled={!prompt.trim()}
               className="gap-2"
             >
@@ -291,7 +291,7 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
                 <div className="mt-4 flex gap-2">
                   <Button 
                     size="sm" 
-                    variant="flat" 
+                    variant="ghost" 
                     onPress={() => navigateTo("token-visualizer", result.prompt)}
                   >
                     <ScanSearch className="mr-1.5 size-3.5" />
@@ -299,7 +299,7 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
                   </Button>
                   <Button 
                     size="sm" 
-                    variant="flat" 
+                    variant="ghost" 
                     onPress={() => navigateTo("cost-calculator", result.prompt)}
                   >
                     <Coins className="mr-1.5 size-3.5" />
@@ -327,8 +327,7 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
                   <CopyButton text={result.refinedPrompt} label={t("common.copy")} />
                   <Button
                     size="sm"
-                    color="primary"
-                    variant="flat"
+                    variant="primary"
                     onPress={() => {
                       setPrompt(result.refinedPrompt!);
                       addToast(t("promptAnalyzer.toastApplied"), "success");

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { processBase64 } from "@/lib/application/base64";
 import type { Base64Result, Base64Config, Base64Mode } from "@/types/base64";
 import { DEFAULT_BASE64_CONFIG } from "@/types/base64";

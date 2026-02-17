@@ -1,38 +1,25 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useCallback } from "react";
 import {
-  Card,
-  Button,
-  Input,
   Tabs,
   Tab,
-  Chip,
-  Progress,
-  Tooltip,
 } from "@heroui/react";
 import {
   Regex,
-  Sparkles,
   Search,
-  Zap,
   RotateCcw,
   ShieldCheck,
-  ShieldAlert,
   AlertTriangle,
   Info,
-  TextCursorInput,
   Play,
-  Copy,
-  ChevronRight,
-  ListRestart,
   Wand2,
 } from "lucide-react";
 import { useRegexHumanizer } from "@/hooks/use-regex-humanizer";
 import { useTranslation } from "@/hooks/use-translation";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
-import { DataTable, type ColumnConfig } from "@/components/ui";
+import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { cn } from "@/lib/utils";
 import type { RegexGroup } from "@/types/regex-humanizer";
@@ -44,7 +31,6 @@ export default function RegexHumanizerPage() {
     explanation,
     testResult,
     isExplaining,
-    isGenerating,
     setPattern,
     explain,
     generate,
@@ -53,7 +39,7 @@ export default function RegexHumanizerPage() {
   } = useRegexHumanizer();
 
   const [testText, setTestText] = useState("john.doe@example.com, test@devflow.ai, invalid-email");
-  const [activeTab, setActiveTab] = useState<"explain" | "generate" | "test">("explain");
+  const [activeTab, setActiveTab] = useState<"explain" | "generate" | string>("explain");
 
   const handleTest = useCallback(() => {
     test(pattern, testText);
@@ -66,7 +52,8 @@ export default function RegexHumanizerPage() {
   ];
 
   const renderGroupCell = (group: RegexGroup, columnKey: React.Key) => {
-    switch (columnKey) {
+    const key = columnKey.toString();
+    switch (key) {
       case "index":
         return <span className="font-bold text-primary">#{group.index}</span>;
       case "pattern":
@@ -74,7 +61,7 @@ export default function RegexHumanizerPage() {
       case "description":
         return <span className="text-sm">{group.description}</span>;
       default:
-        return (group as any)[columnKey];
+        return (group as any)[key];
     }
   };
 
@@ -98,33 +85,30 @@ export default function RegexHumanizerPage() {
         {/* Pattern Input & Generation */}
         <Card className="p-6 lg:col-span-2 flex flex-col gap-6">
           <Tabs 
-            selectedKey={activeTab} 
-            onSelectionChange={(key) => setActiveTab(key as any)}
-            variant="underlined"
-            classNames={{ tabList: "gap-6", cursor: "w-full bg-primary" }}
+            selectedKey={activeTab as string} 
+            onSelectionChange={(key) => setActiveTab(key as string)}
+            variant="primary"
           >
             <Tab 
               key="explain" 
-              title={
-                <div className="flex items-center gap-2">
-                  <Search className="size-4" />
-                  <span>Explain</span>
-                </div>
-              }
-            />
+            >
+              <div className="flex items-center gap-2">
+                <Search className="size-4" />
+                <span>Explain</span>
+              </div>
+            </Tab>
             <Tab 
               key="generate" 
-              title={
-                <div className="flex items-center gap-2">
-                  <Wand2 className="size-4" />
-                  <span>Generate</span>
-                </div>
-              }
-            />
+            >
+              <div className="flex items-center gap-2">
+                <Wand2 className="size-4" />
+                <span>Generate</span>
+              </div>
+            </Tab>
           </Tabs>
 
           {activeTab === "explain" ? (
-            <div className="space-y-4">
+            <div className="space-y-4 mt-4">
               <div className="space-y-2">
                 <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
                   Regex Pattern
@@ -139,14 +123,14 @@ export default function RegexHumanizerPage() {
               <Button 
                 onPress={() => explain(pattern)} 
                 isLoading={isExplaining}
-                color="primary"
+                variant="primary"
                 className="w-full h-12 font-bold shadow-lg shadow-primary/20"
               >
                 Analyze Pattern
               </Button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 mt-4">
               <div className="space-y-2">
                 <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
                   Natural Language Description
@@ -209,7 +193,7 @@ export default function RegexHumanizerPage() {
                       {explanation.safetyScore}%
                     </div>
                   </div>
-                  <StatusBadge variant={explanation.isDangerous ? "danger" : "success"}>
+                  <StatusBadge variant={explanation.isDangerous ? "error" : "success"}>
                     {explanation.isDangerous ? "Vulnerable" : "Secure"}
                   </StatusBadge>
                 </Card>
@@ -245,17 +229,13 @@ export default function RegexHumanizerPage() {
               </div>
 
               {/* Dynamic Tabs for Analysis/Test */}
-              <Card className="overflow-hidden">
+              <Card className="p-0 overflow-hidden">
                 <Tabs 
                   aria-label="Result Tabs"
-                  classNames={{
-                    base: "w-full",
-                    tabList: "w-full bg-muted/50 rounded-none border-b border-divider",
-                    tab: "h-12",
-                    cursor: "bg-primary",
-                  }}
+                  variant="primary"
                 >
-                  <Tab key="explanation" title="Explanation">
+                  <Tab key="explanation">
+                    <div className="flex items-center gap-2">Explanation</div>
                     <div className="p-6">
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="font-bold">Human Readable Logic</h3>
@@ -266,7 +246,8 @@ export default function RegexHumanizerPage() {
                       </pre>
                     </div>
                   </Tab>
-                  <Tab key="groups" title="Groups">
+                  <Tab key="groups">
+                    <div className="flex items-center gap-2">Groups</div>
                     <div className="p-0">
                       <DataTable
                         columns={groupColumns}
@@ -277,7 +258,8 @@ export default function RegexHumanizerPage() {
                       />
                     </div>
                   </Tab>
-                  <Tab key="test" title="Interactive Test">
+                  <Tab key="test">
+                    <div className="flex items-center gap-2">Interactive Test</div>
                     <div className="p-6 space-y-4">
                       <div className="flex flex-col gap-2">
                         <label className="text-[10px] font-bold text-muted-foreground uppercase">Sample Text to Test</label>
@@ -287,7 +269,7 @@ export default function RegexHumanizerPage() {
                           className="h-32 w-full resize-none rounded-xl border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                         />
                       </div>
-                      <Button onPress={handleTest} color="primary" variant="flat" className="w-full">
+                      <Button onPress={handleTest} variant="ghost" className="w-full text-primary">
                         <Play className="size-4 mr-2" /> Run Test Matches
                       </Button>
 
@@ -331,7 +313,7 @@ export default function RegexHumanizerPage() {
               </Card>
             </>
           ) : (
-            <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center">
+            <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center h-full">
               <div className="size-20 bg-muted rounded-full flex items-center justify-center mb-6">
                 <Regex className="size-10 text-muted-foreground/40" />
               </div>

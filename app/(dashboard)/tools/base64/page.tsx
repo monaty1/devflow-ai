@@ -6,29 +6,20 @@ import {
   Button,
   Tabs,
   Tab,
-  Chip,
-  Progress,
-  Tooltip,
 } from "@heroui/react";
 import {
   Binary,
   RotateCcw,
   Sparkles,
-  ArrowRightLeft,
   FileJson,
-  FileText,
-  Image as ImageIcon,
   FileDigit,
-  ShieldCheck,
   Settings2,
   Trash2,
   Download,
-  Eye,
   ArrowRight,
   Database,
   Search,
   Cpu,
-  Hash,
 } from "lucide-react";
 import { useBase64 } from "@/hooks/use-base64";
 import { useTranslation } from "@/hooks/use-translation";
@@ -37,7 +28,6 @@ import { CopyButton } from "@/components/shared/copy-button";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { DataTable, type ColumnConfig } from "@/components/ui";
-import { cn } from "@/lib/utils";
 
 export default function Base64Page() {
   const { t } = useTranslation();
@@ -78,12 +68,13 @@ export default function Base64Page() {
   }, [result]);
 
   const renderByteCell = useCallback((item: any, columnKey: React.Key) => {
-    switch (columnKey) {
+    const key = columnKey.toString();
+    switch (key) {
       case "offset": return <span className="font-mono text-[10px] text-muted-foreground">0x{item.offset}</span>;
       case "hex": return <span className="font-mono text-xs font-black text-primary">{item.hex}</span>;
       case "binary": return <span className="font-mono text-[10px] opacity-60">{item.binary}</span>;
       case "decimal": return <span className="font-mono text-xs">{item.decimal}</span>;
-      default: return item[columnKey];
+      default: return item[key];
     }
   }, []);
 
@@ -124,12 +115,12 @@ export default function Base64Page() {
           <Card className="p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex bg-muted p-1 rounded-xl">
-                <Button size="sm" variant={mode === "encode" ? "solid" : "light"} color={mode === "encode" ? "primary" : "default"} onPress={() => setMode("encode")} className="font-bold h-8">Encode</Button>
-                <Button size="sm" variant={mode === "decode" ? "solid" : "light"} color={mode === "decode" ? "primary" : "default"} onPress={() => setMode("decode")} className="font-bold h-8">Decode</Button>
+                <Button size="sm" variant={mode === "encode" ? "primary" : "ghost"} onPress={() => setMode("encode")} className="font-bold h-8">Encode</Button>
+                <Button size="sm" variant={mode === "decode" ? "primary" : "ghost"} onPress={() => setMode("decode")} className="font-bold h-8">Decode</Button>
               </div>
               <div className="flex gap-1">
-                <Button size="sm" variant="flat" onPress={() => loadExample("json")}>Example</Button>
-                <Button size="sm" variant="flat" color="danger" isIconOnly onPress={() => setInput("")}><Trash2 className="size-3.5" /></Button>
+                <Button size="sm" variant="ghost" onPress={() => loadExample("json")}>Example</Button>
+                <Button size="sm" variant="ghost" onPress={() => setInput("")} isIconOnly><Trash2 className="size-3.5 text-danger" /></Button>
               </div>
             </div>
 
@@ -145,12 +136,12 @@ export default function Base64Page() {
                 <Settings2 className="size-3" /> Base64 Configuration
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <Button size="sm" variant={config.variant === "standard" ? "solid" : "flat"} onPress={() => updateConfig("variant", "standard")} className="font-bold">Standard</Button>
-                <Button size="sm" variant={config.variant === "url-safe" ? "solid" : "flat"} onPress={() => updateConfig("variant", "url-safe")} className="font-bold">URL-Safe</Button>
+                <Button size="sm" variant={config.variant === "standard" ? "primary" : "ghost"} onPress={() => updateConfig("variant", "standard")} className="font-bold">Standard</Button>
+                <Button size="sm" variant={config.variant === "url-safe" ? "primary" : "ghost"} onPress={() => updateConfig("variant", "url-safe")} className="font-bold">URL-Safe</Button>
               </div>
             </div>
 
-            <Button onPress={process} color="primary" className="w-full mt-6 h-12 font-black shadow-xl shadow-primary/20 text-md">
+            <Button onPress={process} variant="primary" className="w-full mt-6 h-12 font-black shadow-xl shadow-primary/20 text-md">
               <Sparkles className="size-4 mr-2" /> {mode === "encode" ? "Generate Encoding" : "Execute Decoding"}
             </Button>
           </Card>
@@ -170,7 +161,12 @@ export default function Base64Page() {
                     <span>Byte Overhead</span>
                     <span>{Math.round(result.stats.compressionRatio * 100)}%</span>
                   </div>
-                  <Progress value={result.stats.compressionRatio * 100} size="sm" color="primary" className="h-1 bg-white/5" />
+                  <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-cyan-400" 
+                      style={{ width: `${Math.min(100, result.stats.compressionRatio * 100)}%` }} 
+                    />
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 pt-4 border-t border-white/5">
                   <StatusBadge variant="info">{result.detectedType?.toUpperCase()} DETECTED</StatusBadge>
@@ -186,18 +182,16 @@ export default function Base64Page() {
             <Tabs 
               selectedKey={activeView} 
               onSelectionChange={(k) => setActiveView(k as any)}
-              variant="solid"
-              color="primary"
-              classNames={{ tabList: "bg-muted/50 rounded-xl p-1" }}
+              variant="primary"
             >
-              <Tab key="text" title="Text View" />
-              <Tab key="preview" title="Smart Preview" />
-              <Tab key="inspector" title="Byte Inspector" />
+              <Tab key="text">Text View</Tab>
+              <Tab key="preview">Smart Preview</Tab>
+              <Tab key="inspector">Byte Inspector</Tab>
             </Tabs>
             <div className="flex gap-2">
               {result?.detectedType === "json" && (
-                <Button size="sm" variant="flat" color="secondary" className="font-bold" onPress={() => navigateTo("json-formatter", mode === "decode" ? result.output : result.input)}>
-                  <FileJson className="size-3.5 mr-1.5" /> JSON Lab
+                <Button size="sm" variant="ghost" className="font-bold" onPress={() => navigateTo("json-formatter", mode === "decode" ? result.output : result.input)}>
+                  <FileJson className="size-3.5 mr-1.5 text-secondary" /> JSON Lab
                 </Button>
               )}
               <CopyButton text={result?.output || ""} />
@@ -239,7 +233,7 @@ export default function Base64Page() {
                 {result?.detectedType === "image" && (
                   <Card className="p-12 flex flex-col items-center justify-center bg-muted/10 border-dashed border-2">
                     <img src={mode === "decode" ? `data:image/png;base64,${result.input}` : `data:image/png;base64,${result.output}`} alt="Preview" className="max-w-full max-h-[350px] rounded-2xl shadow-2xl border-4 border-white dark:border-slate-800" />
-                    <Button size="md" color="primary" className="mt-8 font-black shadow-lg" onPress={() => {
+                    <Button size="md" variant="primary" className="mt-8 font-black shadow-lg" onPress={() => {
                       const a = document.createElement("a");
                       a.href = mode === "decode" ? `data:image/png;base64,${result.input}` : `data:image/png;base64,${result.output}`;
                       a.download = "devflow-decoded.png"; a.click();
@@ -255,7 +249,7 @@ export default function Base64Page() {
                       <h3 className="font-black text-emerald-600 flex items-center gap-2 text-md italic">
                         <Database className="size-5" /> Structured Object
                       </h3>
-                      <Button size="sm" variant="flat" color="success" className="font-black" onPress={() => navigateTo("json-formatter", mode === "decode" ? result.output : result.input)}>
+                      <Button size="sm" variant="ghost" className="font-black text-success" onPress={() => navigateTo("json-formatter", mode === "decode" ? result.output : result.input)}>
                         Full Analysis <ArrowRight className="size-3.5 ml-1" />
                       </Button>
                     </div>

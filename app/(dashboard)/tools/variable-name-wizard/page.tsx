@@ -1,15 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import {
-  Card,
-  Button,
   Tabs,
   Tab,
-  Chip,
-  Progress,
-  Tooltip,
-  Input,
 } from "@heroui/react";
 import {
   Wand2,
@@ -35,7 +29,7 @@ import { useVariableNameWizard } from "@/hooks/use-variable-name-wizard";
 import { useTranslation } from "@/hooks/use-translation";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
-import { DataTable, type ColumnConfig } from "@/components/ui";
+import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { cn } from "@/lib/utils";
 import type { NameSuggestion, VariableType } from "@/types/variable-name-wizard";
@@ -49,7 +43,6 @@ export default function VariableNameWizardPage() {
     generationResult,
     isProcessing,
     setInput,
-    setMode,
     updateConfig,
     convert,
     generate,
@@ -57,7 +50,7 @@ export default function VariableNameWizardPage() {
     loadExample,
   } = useVariableNameWizard();
 
-  const [activeTab, setActiveTab] = useState<"generate" | "convert">("generate");
+  const [activeTab, setActiveTab] = useState<"generate" | "convert" | string>("generate");
 
   const suggestionColumns: ColumnConfig[] = [
     { name: "NAME", uid: "name", sortable: true },
@@ -67,7 +60,8 @@ export default function VariableNameWizardPage() {
   ];
 
   const renderSuggestionCell = (suggestion: NameSuggestion, columnKey: React.Key) => {
-    switch (columnKey) {
+    const key = columnKey.toString();
+    switch (key) {
       case "name":
         return (
           <div className="flex flex-col gap-0.5">
@@ -94,21 +88,21 @@ export default function VariableNameWizardPage() {
         );
       case "audit":
         const audit = suggestion.audit;
-        const Icon = audit.status === "good" ? ShieldCheck : audit.status === "warning" ? AlertTriangle : ShieldAlert;
+        const Icon = audit?.status === "good" ? ShieldCheck : audit?.status === "warning" ? AlertTriangle : ShieldAlert;
         return (
-          <Tooltip content={audit.findings.length > 0 ? audit.findings.join(". ") : "Perfect naming logic applied."}>
+          <span title={audit?.findings?.length ? audit.findings.join(". ") : "Perfect naming logic applied."}>
             <div className="flex items-center cursor-help">
               <Icon className={cn(
                 "size-4",
-                audit.status === "good" ? "text-emerald-500" : audit.status === "warning" ? "text-amber-500" : "text-danger"
+                audit?.status === "good" ? "text-emerald-500" : audit?.status === "warning" ? "text-amber-500" : "text-danger"
               )} />
             </div>
-          </Tooltip>
+          </span>
         );
       case "actions":
         return <CopyButton text={suggestion.name} size="sm" variant="ghost" />;
       default:
-        return (suggestion as any)[columnKey];
+        return (suggestion as any)[key];
     }
   };
 
@@ -154,7 +148,7 @@ export default function VariableNameWizardPage() {
                 <Settings2 className="size-4 text-primary" />
                 Wizard Setup
               </h3>
-              <Button size="sm" variant="flat" onPress={loadExample}>Example</Button>
+              <Button size="sm" variant="ghost" onPress={loadExample}>Example</Button>
             </div>
 
             <div className="space-y-6">
@@ -178,7 +172,7 @@ export default function VariableNameWizardPage() {
                       className={cn(
                         "flex items-center gap-2 p-2 rounded-lg border transition-all text-left",
                         config.language === lang.id 
-                          ? "bg-primary text-primary-foreground border-primary shadow-md" 
+                          ? "bg-primary text-white border-primary shadow-md" 
                           : "bg-muted/30 border-transparent hover:bg-muted text-muted-foreground hover:text-foreground"
                       )}
                     >
@@ -202,8 +196,8 @@ export default function VariableNameWizardPage() {
 
               <Button 
                 onPress={activeTab === "generate" ? generate : convert} 
-                color="primary"
-                className="w-full h-12 font-black shadow-lg shadow-primary/20 text-md"
+                variant="primary"
+                className="w-full h-12 font-black shadow-xl shadow-primary/20 text-md"
                 isLoading={isProcessing}
               >
                 <Sparkles className="size-4 mr-2" /> 
@@ -214,9 +208,9 @@ export default function VariableNameWizardPage() {
 
           {/* Luxury Score Summary */}
           {generationResult && (
-            <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl shadow-slate-500/20">
+            <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl shadow-slate-500/20 border-none">
               <h3 className="text-xs font-black uppercase opacity-60 mb-6 flex items-center gap-2 tracking-widest">
-                <Activity className="size-3" /> Semantical Analysis
+                <Activity className="size-3 text-emerald-400" /> Semantical Analysis
               </h3>
               <div className="space-y-6">
                 <div className="flex justify-around items-center">
@@ -244,14 +238,12 @@ export default function VariableNameWizardPage() {
         {/* Results Column */}
         <div className="lg:col-span-8 space-y-6">
           <Tabs 
-            selectedKey={activeTab} 
-            onSelectionChange={(k) => setActiveTab(k as any)}
-            variant="solid"
-            color="primary"
-            classNames={{ tabList: "bg-muted/50 rounded-xl p-1" }}
+            selectedKey={activeTab as string} 
+            onSelectionChange={(k) => setActiveTab(k as string)}
+            variant="primary"
           >
-            <Tab key="generate" title="Smart Suggestions" />
-            <Tab key="convert" title="Case Transformer" />
+            <Tab key="generate">Smart Suggestions</Tab>
+            <Tab key="convert">Case Transformer</Tab>
           </Tabs>
 
           {activeTab === "generate" && generationResult ? (
@@ -268,7 +260,7 @@ export default function VariableNameWizardPage() {
                   </div>
                   <div className="mt-4 flex gap-2">
                     <CopyButton text={generationResult.suggestions[0]?.name || ""} size="sm" />
-                    <Button size="sm" variant="flat" color="success" className="font-bold">Usage Guide</Button>
+                    <Button size="sm" variant="ghost" className="font-bold text-success">Usage Guide</Button>
                   </div>
                 </Card>
                 
@@ -280,7 +272,12 @@ export default function VariableNameWizardPage() {
                     </div>
                     <div className="p-2 bg-blue-500/20 rounded-full text-blue-600"><Star className="size-5 fill-current" /></div>
                   </div>
-                  <Progress value={generationResult.suggestions[0]?.score} color="primary" className="h-1.5 mt-4" />
+                  <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden mt-4">
+                    <div 
+                      className="h-full bg-primary" 
+                      style={{ width: `${generationResult.suggestions[0]?.score}%` }} 
+                    />
+                  </div>
                 </Card>
               </div>
 
@@ -313,9 +310,9 @@ export default function VariableNameWizardPage() {
                     <span className="text-[10px] font-black uppercase text-muted-foreground tracking-tighter">
                       {convention}
                     </span>
-                    <CopyButton text={value} size="xs" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <CopyButton text={value as string} size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
-                  <p className="font-mono text-sm font-black text-primary break-all">{value}</p>
+                  <p className="font-mono text-sm font-black text-primary break-all">{value as string}</p>
                 </Card>
               ))}
             </div>

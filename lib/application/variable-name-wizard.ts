@@ -6,6 +6,7 @@ import type {
   VariableType,
   ConversionResult,
   GenerationResult,
+  NameAudit,
   NameSuggestion,
   WizardConfig,
 } from "@/types/variable-name-wizard";

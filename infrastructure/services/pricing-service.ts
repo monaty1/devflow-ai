@@ -37,7 +37,7 @@ export async function fetchLatestPrices(): Promise<AIModel[]> {
         contextWindow: info.max_tokens || 0,
         maxOutput: 4096, // Default as it's not always in the JSON
         isPopular: isPopularModel(id),
-        updatedAt: new Date().toISOString().split("T")[0],
+        updatedAt: new Date().toISOString().split("T")[0] ?? "",
         category: mapCategory(id, info.mode || "")
       });
     }
@@ -61,7 +61,7 @@ function mapProvider(litellmProvider: string): AIProvider | null {
   return null;
 }
 
-function mapCategory(id: string, mode: string): AIModel["category"] {
+function mapCategory(id: string, _mode: string): AIModel["category"] {
   const lowId = id.toLowerCase();
   if (lowId.includes("o1") || lowId.includes("reasoner") || lowId.includes("r1")) return "reasoning";
   if (lowId.includes("mini") || lowId.includes("flash") || lowId.includes("haiku")) return "lightweight";

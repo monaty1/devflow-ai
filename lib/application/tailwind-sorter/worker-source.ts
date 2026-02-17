@@ -113,7 +113,7 @@ function getBaseClass(className) {
   const withoutNegative = isNegative ? className.slice(1) : className;
   const parts = withoutNegative.split(":");
   const baseClass = parts[parts.length - 1];
-  return isNegative ? `-\${baseClass}` : baseClass;
+  return isNegative ? \`-\${baseClass}\` : baseClass;
 }
 
 function getVariants(className) {
@@ -151,7 +151,7 @@ function findConflicts(classes) {
     const base = getBaseClass(cls);
     const variants = getVariants(cls).sort().join(":");
     const prop = base.split("-")[0] || base;
-    const key = `\${variants}:\${prop}`;
+    const key = \`\${variants}:\${prop}\`;
     if (!propertyMap.has(key)) propertyMap.set(key, []);
     propertyMap.get(key).push(cls);
   }

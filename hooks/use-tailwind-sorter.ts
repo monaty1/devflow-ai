@@ -22,6 +22,7 @@ export function useTailwindSorter(): UseTailwindSorterReturn {
     removeDuplicates: true,
     sortWithinGroups: true,
     groupByCategory: true,
+    preserveVariants: true,
     outputFormat: "single-line",
   });
   const [result, setResult] = useState<SortResult | null>(null);

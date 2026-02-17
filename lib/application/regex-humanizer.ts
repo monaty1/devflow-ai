@@ -27,6 +27,103 @@ const DANGEROUS_PATTERNS = [
   }
 ];
 
+// --- Token Explanations ---
+const TOKEN_EXPLANATIONS: Record<string, string> = {
+  "\\d": "Cualquier dígito (0-9)",
+  "\\D": "Cualquier carácter que NO sea dígito",
+  "\\w": "Cualquier carácter de palabra (a-z, A-Z, 0-9, _)",
+  "\\W": "Cualquier carácter que NO sea de palabra",
+  "\\s": "Cualquier espacio en blanco (espacio, tab, nueva línea)",
+  "\\S": "Cualquier carácter que NO sea espacio en blanco",
+  "\\b": "Límite de palabra",
+  "\\B": "NO límite de palabra",
+  "\\n": "Nueva línea",
+  "\\t": "Tabulación",
+  "\\r": "Retorno de carro",
+  "\\0": "Carácter nulo",
+  "\\.": "Punto literal",
+  "\\\\": "Barra invertida literal",
+  "\\(": "Paréntesis de apertura literal",
+  "\\)": "Paréntesis de cierre literal",
+  "\\[": "Corchete de apertura literal",
+  "\\]": "Corchete de cierre literal",
+  "\\{": "Llave de apertura literal",
+  "\\}": "Llave de cierre literal",
+  "\\+": "Signo más literal",
+  "\\*": "Asterisco literal",
+  "\\?": "Signo de interrogación literal",
+  "\\^": "Acento circunflejo literal",
+  "\\$": "Signo de dólar literal",
+  "\\|": "Barra vertical literal",
+  "*": "Cero o más repeticiones (greedy)",
+  "+": "Una o más repeticiones (greedy)",
+  "?": "Cero o una repetición (opcional)",
+  "^": "Inicio de cadena",
+  "$": "Fin de cadena",
+  "|": "Alternación (OR)",
+  ".": "Cualquier carácter excepto nueva línea",
+};
+
+// --- Common Patterns ---
+export const COMMON_PATTERNS: CommonPattern[] = [
+  {
+    id: "email",
+    name: "Email",
+    pattern: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+    description: "Valida una dirección de correo electrónico básica",
+    examples: ["user@example.com", "nombre.apellido@dominio.es"],
+  },
+  {
+    id: "url",
+    name: "URL",
+    pattern: "^https?:\\/\\/[\\w\\-]+(\\.[\\w\\-]+)+([\\w.,@?^=%&:/~+#\\-]*[\\w@?^=%&/~+#\\-])?$",
+    description: "Valida una URL HTTP o HTTPS",
+    examples: ["https://example.com", "http://www.ejemplo.es/ruta"],
+  },
+  {
+    id: "phone-es",
+    name: "Teléfono (España)",
+    pattern: "^(\\+34)?[6-9]\\d{8}$",
+    description: "Valida un número de teléfono español",
+    examples: ["+34612345678", "612345678"],
+  },
+  {
+    id: "date-iso",
+    name: "Fecha ISO 8601",
+    pattern: "^\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2})?",
+    description: "Valida una fecha en formato ISO 8601",
+    examples: ["2024-01-15", "2024-01-15T10:30:00"],
+  },
+  {
+    id: "ipv4",
+    name: "IPv4",
+    pattern: "^(?:(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)$",
+    description: "Valida una dirección IPv4",
+    examples: ["192.168.1.1", "10.0.0.1"],
+  },
+  {
+    id: "password",
+    name: "Contraseña Segura",
+    pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
+    description: "Mínimo 8 caracteres con mayúscula, minúscula, dígito y carácter especial",
+    examples: ["P@ssw0rd!", "Segura#123"],
+  },
+  {
+    id: "dni-es",
+    name: "DNI/NIF (España)",
+    pattern: "^\\d{8}[A-Z]$",
+    description: "Valida un DNI/NIF español",
+    examples: ["12345678Z", "00000000T"],
+  },
+  {
+    id: "hex-color",
+    name: "Color Hexadecimal",
+    pattern: "^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$",
+    description: "Valida un código de color hexadecimal",
+    examples: ["#FFF", "#FF5733"],
+  },
+];
+
 // --- Parse and Explain Regex ---
 export function explainRegex(patternInput: string, flavor: RegexFlavor = "javascript"): RegexAnalysis {
   // Extract pattern and flags
@@ -96,7 +193,7 @@ function tokenizeRegex(pattern: string): RegexToken[] {
     if (char === "\\") {
       const escapeSeq = char + (nextChar || "");
       const description =
-        TOKEN_EXPLANATIONS[escapeSeq] ||
+        TOKEN_EXPLANATIONS[escapeSeq] ??
         `Carácter escapado: "${nextChar}" literal`;
       tokens.push({
         type: "escape",
@@ -161,7 +258,7 @@ function tokenizeRegex(pattern: string): RegexToken[] {
       tokens.push({
         type: "quantifier",
         value: char,
-        description: TOKEN_EXPLANATIONS[char] || `Cuantificador: ${char}`,
+        description: TOKEN_EXPLANATIONS[char] ?? `Cuantificador: ${char}`,
         start: i,
         end: i + 1,
       });
@@ -174,7 +271,7 @@ function tokenizeRegex(pattern: string): RegexToken[] {
       tokens.push({
         type: "anchor",
         value: char,
-        description: TOKEN_EXPLANATIONS[char] || `Ancla: ${char}`,
+        description: TOKEN_EXPLANATIONS[char] ?? `Ancla: ${char}`,
         start: i,
         end: i + 1,
       });

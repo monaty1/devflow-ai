@@ -213,7 +213,7 @@
   "uuid.leakWarning": "Atención: Este UUID revela el dispositivo o tiempo exacto de creación.",
   "uuid.secureRandom": "Este UUID es altamente aleatorio y seguro para identificadores públicos.",
   "uuid.collisionProb": "Probabilidad de Colisión: Prácticamente nula (~1 entre 10^30)",
-  "uuid.exportFormat": "Formato de Exportación",,
+  "uuid.exportFormat": "Formato de Exportación",
 
   "httpStatus.title": "HTTP Status Finder",
   "httpStatus.description": "Busca y aprende sobre códigos de estado HTTP",
@@ -309,7 +309,7 @@
   "base64.detectedType": "Tipo Detectado: {type}",
   "base64.overhead": "Sobrecarga de tamaño: ~33%",
   "base64.jsonView": "Vista JSON Estructurada",
-  "base64.jwtView": "Vista JWT (Header/Payload)",,
+  "base64.jwtView": "Vista JWT (Header/Payload)",
 
   "common.reset": "Reiniciar",
   "common.copy": "Copiar",
@@ -486,7 +486,7 @@
   "tailwind.audit": "Sugerencias de Optimización",
   "tailwind.breakpoints": "Distribución Responsive",
   "tailwind.noIssues": "No se detectaron conflictos ni redundancias.",
-  "tailwind.redundant": "Redundante",,
+  "tailwind.redundant": "Redundante",
 
   "ctxMgr.title": "Context Manager",
   "ctxMgr.description": "Organiza y exporta tus ventanas de contexto LLM",
@@ -578,7 +578,7 @@
   "varName.auditError": "Code Smell Detectado",
   "varName.langJava": "Java",
   "varName.langCSharp": "C# / .NET",
-  "varName.language": "Lenguaje Target",,
+  "varName.language": "Lenguaje Target",
 
   "regex.title": "Regex Humanizer",
   "regex.description": "Explica regex en lenguaje simple, genera patrones desde descripciones",

@@ -1,18 +1,11 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import {
-  Card,
-  Button,
-  Chip,
   Tabs,
   Tab,
+  Chip,
   Input,
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-  Tooltip,
 } from "@heroui/react";
 import {
   FileJson,
@@ -20,27 +13,22 @@ import {
   Sparkles,
   Trash2,
   Code2,
-  FileCode,
   FolderTree,
   Wand2,
   Database,
-  Download,
-  Copy,
-  Settings2,
-  ChevronRight,
   Braces,
   Binary,
   Layers,
   Box,
+  FileCode,
 } from "lucide-react";
 import { ToolHeader } from "@/components/shared/tool-header";
-import { StatusBadge } from "@/components/shared/status-badge";
 import { useDtoMatic } from "@/hooks/use-dto-matic";
 import { useTranslation } from "@/hooks/use-translation";
 import { CopyButton } from "@/components/shared/copy-button";
-import { DataTable, type ColumnConfig } from "@/components/ui";
+import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { cn } from "@/lib/utils";
-import type { GenerationMode, NamingConvention, TargetLanguage, GeneratedFile } from "@/types/dto-matic";
+import type { TargetLanguage, GeneratedFile } from "@/types/dto-matic";
 
 export default function DtoMaticPage() {
   const { t } = useTranslation();
@@ -52,9 +40,7 @@ export default function DtoMaticPage() {
     selectedFile,
     selectedFileId,
     isGenerating,
-    error,
     setJsonInput,
-    setMockData,
     setSelectedFileId,
     updateConfig,
     setMode,
@@ -66,7 +52,7 @@ export default function DtoMaticPage() {
     isValidJson,
   } = useDtoMatic();
 
-  const [view, setView] = useState<"code" | "schema" | "mock">("code");
+  const [view, setView] = useState<"code" | "schema" | "mock" | string>("code");
 
   const fileColumns: ColumnConfig[] = [
     { name: "FILE NAME", uid: "name", sortable: true },
@@ -76,7 +62,8 @@ export default function DtoMaticPage() {
   ];
 
   const renderFileCell = useCallback((file: GeneratedFile, columnKey: React.Key) => {
-    switch (columnKey) {
+    const key = columnKey.toString();
+    switch (key) {
       case "name":
         return (
           <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setSelectedFileId(file.id)}>
@@ -98,7 +85,7 @@ export default function DtoMaticPage() {
           class: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-200",
         };
         return (
-          <Chip size="sm" variant="flat" className={cn("capitalize text-[10px] font-black h-6", typeColors[file.type] || "bg-gray-100")}>
+          <Chip size="sm" variant="primary" className={cn("capitalize text-[10px] font-black h-6", typeColors[file.type] || "bg-gray-100")}>
             {file.type}
           </Chip>
         );
@@ -111,7 +98,7 @@ export default function DtoMaticPage() {
           </div>
         );
       default:
-        return (file as any)[columnKey];
+        return (file as any)[key];
     }
   }, [selectedFileId, setSelectedFileId]);
 
@@ -141,12 +128,8 @@ export default function DtoMaticPage() {
                 Payload Source
               </h3>
               <div className="flex gap-1">
-                <Tooltip content="Load Example">
-                  <Button isIconOnly size="sm" variant="flat" onPress={loadExample}><Wand2 className="size-3.5" /></Button>
-                </Tooltip>
-                <Tooltip content="Format JSON">
-                  <Button isIconOnly size="sm" variant="flat" onPress={formatInput}><Braces className="size-3.5" /></Button>
-                </Tooltip>
+                <Button isIconOnly size="sm" variant="ghost" onPress={loadExample}><Wand2 className="size-3.5" /></Button>
+                <Button isIconOnly size="sm" variant="ghost" onPress={formatInput}><Braces className="size-3.5" /></Button>
               </div>
             </div>
             
@@ -171,7 +154,7 @@ export default function DtoMaticPage() {
             <Button 
               onPress={generate} 
               isLoading={isGenerating}
-              color="primary"
+              variant="primary"
               className="w-full mt-4 font-bold h-12 shadow-lg shadow-primary/20 text-md"
               isDisabled={!jsonInput.trim()}
             >
@@ -181,19 +164,18 @@ export default function DtoMaticPage() {
 
           <Card className="p-6">
             <h3 className="font-bold mb-4 flex items-center gap-2 text-foreground/80">
-              <Settings2 className="size-4" />
+              <Braces className="size-4" />
               Generator Config
             </h3>
             <div className="space-y-5">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Root Name</label>
                 <Input 
-                  size="sm" 
+                  variant="primary"
                   value={config.rootName} 
                   onChange={(e) => updateConfig("rootName", e.target.value)}
-                  variant="bordered"
                   placeholder="e.g. UserResponse"
-                  classNames={{ input: "font-bold" }}
+                  className="font-bold"
                 />
               </div>
               
@@ -213,7 +195,7 @@ export default function DtoMaticPage() {
                       className={cn(
                         "px-3 py-2 rounded-xl text-xs font-bold transition-all border text-left",
                         config.targetLanguage === opt.val 
-                          ? "bg-primary text-primary-foreground border-primary shadow-md" 
+                          ? "bg-primary text-white border-primary shadow-md" 
                           : "bg-muted/30 border-transparent hover:bg-muted text-muted-foreground hover:text-foreground"
                       )}
                     >
@@ -227,23 +209,20 @@ export default function DtoMaticPage() {
                 <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Output Mode</label>
                 <div className="flex gap-2">
                   <Chip 
-                    size="md" 
-                    variant={config.mode === "clean-arch" ? "solid" : "flat"} 
-                    color="primary"
+                    size="sm" 
+                    variant={config.mode === "clean-arch" ? "primary" : "soft"} 
                     className="cursor-pointer font-bold h-8"
                     onClick={() => setMode("clean-arch")}
                   >Clean Arch</Chip>
                   <Chip 
-                    size="md" 
-                    variant={config.mode === "zod" ? "solid" : "flat"} 
-                    color="warning"
+                    size="sm" 
+                    variant={config.mode === "zod" ? "primary" : "soft"} 
                     className="cursor-pointer font-bold h-8"
                     onClick={() => setMode("zod")}
                   >Zod Schema</Chip>
                   <Chip 
-                    size="md" 
-                    variant={config.mode === "quick" ? "solid" : "flat"} 
-                    color="default"
+                    size="sm" 
+                    variant={config.mode === "quick" ? "primary" : "soft"} 
                     className="cursor-pointer font-bold h-8"
                     onClick={() => setMode("quick")}
                   >DTO Only</Chip>
@@ -281,42 +260,32 @@ export default function DtoMaticPage() {
               <div className="flex flex-col gap-4">
                 <div className="flex justify-between items-end">
                   <Tabs 
-                    selectedKey={view} 
-                    onSelectionChange={(k) => setView(k as any)}
-                    variant="underlined"
-                    classNames={{ tabList: "gap-6", cursor: "w-full bg-primary" }}
+                    selectedKey={view as string} 
+                    onSelectionChange={(k) => setView(k as string)}
+                    variant="primary"
                   >
-                    <Tab 
-                      key="code" 
-                      title={
-                        <div className="flex items-center gap-2">
-                          <Code2 className="size-4" />
-                          <span>Generated Code</span>
-                        </div>
-                      } 
-                    />
-                    <Tab 
-                      key="schema" 
-                      title={
-                        <div className="flex items-center gap-2">
-                          <FolderTree className="size-4" />
-                          <span>Schema Tree</span>
-                        </div>
-                      } 
-                    />
-                    <Tab 
-                      key="mock" 
-                      title={
-                        <div className="flex items-center gap-2">
-                          <Database className="size-4" />
-                          <span>Mock Data</span>
-                        </div>
-                      } 
-                    />
+                    <Tab key="code">
+                      <div className="flex items-center gap-2">
+                        <Code2 className="size-4" />
+                        <span>Generated Code</span>
+                      </div>
+                    </Tab>
+                    <Tab key="schema">
+                      <div className="flex items-center gap-2">
+                        <FolderTree className="size-4" />
+                        <span>Schema Tree</span>
+                      </div>
+                    </Tab>
+                    <Tab key="mock">
+                      <div className="flex items-center gap-2">
+                        <Database className="size-4" />
+                        <span>Mock Data</span>
+                      </div>
+                    </Tab>
                   </Tabs>
                   
                   {view === "mock" && (
-                    <Button size="sm" color="secondary" variant="flat" onPress={() => generateMock(5)} className="font-bold">
+                    <Button size="sm" variant="ghost" onPress={() => generateMock(5)} className="font-bold text-secondary">
                       <Wand2 className="size-3 mr-1" /> Re-roll Data
                     </Button>
                   )}
@@ -338,9 +307,9 @@ export default function DtoMaticPage() {
                     </div>
                     
                     <div className="lg:col-span-3 h-full">
-                      <Card className="h-full p-0 border-primary/20 shadow-lg overflow-hidden bg-[#1e1e1e] text-white flex flex-col">
+                      <Card className="h-full p-0 border-primary/20 shadow-lg overflow-hidden bg-[#1e1e1e] text-white flex flex-col border-none">
                         <div className="p-3 bg-white/5 border-b border-white/10 flex justify-between items-center">
-                          <span className="text-xs font-mono font-bold text-primary-400 ml-2">{selectedFile?.name}</span>
+                          <span className="text-xs font-mono font-bold text-primary ml-2">{selectedFile?.name}</span>
                           <CopyButton text={selectedFile?.content || ""} variant="ghost" size="sm" className="text-white hover:bg-white/10" />
                         </div>
                         <pre className="p-6 font-mono text-xs leading-relaxed overflow-auto flex-1 scrollbar-hide text-gray-300">
@@ -362,9 +331,9 @@ export default function DtoMaticPage() {
                 )}
 
                 {view === "mock" && (
-                  <Card className="p-0 border-secondary/20 shadow-lg overflow-hidden h-[600px] flex flex-col">
-                    <div className="p-4 border-b border-divider flex justify-between items-center bg-secondary/5">
-                      <span className="text-xs font-bold text-secondary-600 flex items-center gap-2 uppercase tracking-wider">
+                  <Card className="p-0 overflow-hidden h-[600px] flex flex-col border-none">
+                    <div className="p-4 border-b border-divider flex justify-between items-center bg-muted/20">
+                      <span className="text-xs font-bold text-secondary flex items-center gap-2 uppercase tracking-wider">
                         <Box className="size-4" /> Generated JSON Response (5 items)
                       </span>
                       <CopyButton text={mockData || ""} />
@@ -381,7 +350,7 @@ export default function DtoMaticPage() {
               <div className="size-24 bg-muted rounded-full flex items-center justify-center mb-6">
                 <FolderTree className="size-12 text-muted-foreground/30" />
               </div>
-              <h3 className="text-2xl font-black mb-2 opacity-80">Architectural Engine</h3>
+              <h3 className="text-2xl font-black mb-2 opacity-80 text-foreground/50">Architectural Engine</h3>
               <p className="text-muted-foreground max-w-sm mx-auto font-medium">
                 Transform raw JSON into production-ready Clean Architecture layers. Supports TS, Java, Python, Go & C#.
               </p>

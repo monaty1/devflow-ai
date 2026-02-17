@@ -52,7 +52,7 @@ export function useDtoMatic() {
   const { history, addToHistory: addItemToHistory, clearHistory } =
     useToolHistory<HistoryItem>("devflow-dto-matic-history", 10);
   
-  const { getSharedData, clearSharedData } = useSmartNavigation();
+  const { getSharedData, clearSharedData: _clearSharedData } = useSmartNavigation();
 
   useEffect(() => {
     const shared = getSharedData();

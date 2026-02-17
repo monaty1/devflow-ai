@@ -14,7 +14,6 @@ import {
   suggestScope,
   analyzeDiff,
   EXAMPLE_COMMITS,
-  generateChangelog,
   validateCommitMessage,
 } from "@/lib/application/git-commit-generator";
 import { useToolHistory } from "@/hooks/use-tool-history";
@@ -50,10 +49,6 @@ export function useGitCommitGenerator() {
     setResult(commitResult);
     addToHistory(commitResult);
   }, [config, addToHistory]);
-
-  const getChangelog = useCallback(() => {
-    return generateChangelog(history);
-  }, [history]);
 
   const parse = useCallback(() => {
     if (!parseInput.trim()) {

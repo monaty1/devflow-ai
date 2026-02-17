@@ -121,7 +121,7 @@ self.onmessage = function(e) {
             name,
             convention: conv,
             score: totalScore,
-            reasoning: `Optimized for \${type} in \${language}`,
+            reasoning: \`Optimized for \${type} in \${language}\`,
             audit
           });
         }

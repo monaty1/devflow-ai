@@ -8,23 +8,23 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  SortDescriptor,
+} from "@heroui/table";
+import {
   Input,
-  Button,
   DropdownTrigger,
   Dropdown,
   DropdownMenu,
   DropdownItem,
-  Pagination,
-  Selection,
-  SortDescriptor,
 } from "@heroui/react";
+import { Pagination } from "@heroui/pagination";
+import type { Selection } from "@heroui/react";
 import { 
-  Search, 
   ChevronDown, 
   Plus, 
   Columns,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Button } from "./button";
 
 export interface ColumnConfig {
   name: string;
@@ -41,6 +41,7 @@ interface DataTableProps<T> {
   renderCell: (item: T, columnKey: React.Key) => React.ReactNode;
   onAdd?: () => void;
   emptyContent?: string;
+  placeholder?: string;
 }
 
 export function DataTable<T extends { id: string | number }>({
@@ -52,6 +53,7 @@ export function DataTable<T extends { id: string | number }>({
   renderCell,
   onAdd,
   emptyContent = "No items found",
+  placeholder = "Search...",
 }: DataTableProps<T>) {
   const [filterValue, setFilterValue] = useState("");
   const [selectedKeys, setSelectedKeys] = useState<Selection>(new Set([]));
@@ -61,7 +63,7 @@ export function DataTable<T extends { id: string | number }>({
   const [statusFilter, setStatusFilter] = useState<Selection>("all");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
-    column: columns[0]?.uid,
+    column: (columns[0]?.uid as any) || "",
     direction: "ascending",
   });
   const [page, setPage] = useState(1);
@@ -70,7 +72,8 @@ export function DataTable<T extends { id: string | number }>({
 
   const headerColumns = useMemo(() => {
     if (visibleColumns === "all") return columns;
-    return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
+    const visibleSet = visibleColumns as Set<string>;
+    return columns.filter((column) => visibleSet.has(column.uid));
   }, [visibleColumns, columns]);
 
   const filteredItems = useMemo(() => {
@@ -78,13 +81,14 @@ export function DataTable<T extends { id: string | number }>({
 
     if (hasSearchFilter) {
       filteredData = filteredData.filter((item: any) => {
-        const val = filterField.split('.').reduce((obj, key) => obj?.[key], item);
+        const val = filterField.split('.').reduce((obj: any, key: string) => obj?.[key], item);
         return String(val || "").toLowerCase().includes(filterValue.toLowerCase());
       });
     }
-    if (statusOptions && statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
+    if (statusOptions && statusFilter !== "all" && (statusFilter as Set<string>).size !== statusOptions.length) {
+      const filterSet = statusFilter as Set<string>;
       filteredData = filteredData.filter((item: any) =>
-        Array.from(statusFilter).includes(item.status)
+        filterSet.has(item.status)
       );
     }
 
@@ -102,8 +106,8 @@ export function DataTable<T extends { id: string | number }>({
 
   const sortedItems = useMemo(() => {
     return [...items].sort((a: any, b: any) => {
-      const first = sortDescriptor.column?.toString().split('.').reduce((obj, key) => obj?.[key], a);
-      const second = sortDescriptor.column?.toString().split('.').reduce((obj, key) => obj?.[key], b);
+      const first = sortDescriptor.column?.toString().split('.').reduce((obj: any, key: string) => obj?.[key], a);
+      const second = sortDescriptor.column?.toString().split('.').reduce((obj: any, key: string) => obj?.[key], b);
       const cmp = first < second ? -1 : first > second ? 1 : 0;
 
       return sortDescriptor.direction === "descending" ? -cmp : cmp;
@@ -124,27 +128,24 @@ export function DataTable<T extends { id: string | number }>({
       <div className="flex flex-col gap-4">
         <div className="flex justify-between gap-3 items-end">
           <Input
-            isClearable
             className="w-full sm:max-w-[44%]"
-            placeholder={`Search...`}
-            startContent={<Search className="size-4 text-default-300" />}
+            placeholder={placeholder}
             value={filterValue}
-            onClear={() => setFilterValue("")}
-            onValueChange={onSearchChange}
-            variant="bordered"
+            onChange={(e) => onSearchChange(e.target.value)}
+            variant="primary"
           />
           <div className="flex gap-3">
             {statusOptions && (
               <Dropdown>
                 <DropdownTrigger className="hidden sm:flex">
-                  <Button endContent={<ChevronDown className="text-small" />} variant="flat">
+                  <Button variant="ghost" className="gap-2">
                     Status
+                    <ChevronDown className="text-small" />
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu
                   disallowEmptySelection
                   aria-label="Table Columns"
-                  closeOnSelect={false}
                   selectedKeys={statusFilter}
                   selectionMode="multiple"
                   onSelectionChange={setStatusFilter}
@@ -159,14 +160,14 @@ export function DataTable<T extends { id: string | number }>({
             )}
             <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
-                <Button endContent={<Columns className="size-4" />} variant="flat">
+                <Button variant="ghost" className="gap-2">
                   Columns
+                  <Columns className="size-4" />
                 </Button>
               </DropdownTrigger>
               <DropdownMenu
                 disallowEmptySelection
                 aria-label="Table Columns"
-                closeOnSelect={false}
                 selectedKeys={visibleColumns}
                 selectionMode="multiple"
                 onSelectionChange={setVisibleColumns}
@@ -179,7 +180,8 @@ export function DataTable<T extends { id: string | number }>({
               </DropdownMenu>
             </Dropdown>
             {onAdd && (
-              <Button color="primary" endContent={<Plus className="size-4" />} onPress={onAdd}>
+              <Button variant="primary" className="gap-2" onPress={onAdd}>
+                <Plus className="size-4" />
                 Add New
               </Button>
             )}
@@ -202,7 +204,7 @@ export function DataTable<T extends { id: string | number }>({
         </div>
       </div>
     );
-  }, [filterValue, statusFilter, visibleColumns, data.length, onSearchChange, statusOptions, columns, onAdd, rowsPerPage]);
+  }, [filterValue, statusFilter, visibleColumns, data.length, onSearchChange, statusOptions, columns, onAdd, rowsPerPage, placeholder]);
 
   const bottomContent = useMemo(() => {
     return (
@@ -210,22 +212,19 @@ export function DataTable<T extends { id: string | number }>({
         <span className="w-[30%] text-small text-default-400">
           {selectedKeys === "all"
             ? "All items selected"
-            : `${selectedKeys.size} of ${filteredItems.length} selected`}
+            : `${(selectedKeys as Set<any>).size} of ${filteredItems.length} selected`}
         </span>
         <Pagination
-          isCompact
-          showControls
-          showShadow
           color="primary"
           page={page}
           total={pages}
           onChange={setPage}
         />
         <div className="hidden sm:flex w-[30%] justify-end gap-2">
-          <Button isDisabled={pages === 1} size="sm" variant="flat" onPress={() => setPage(p => Math.max(1, p - 1))}>
+          <Button isDisabled={pages === 1} size="sm" variant="ghost" onPress={() => setPage(p => Math.max(1, p - 1))}>
             Previous
           </Button>
-          <Button isDisabled={pages === 1} size="sm" variant="flat" onPress={() => setPage(p => Math.min(pages, p + 1))}>
+          <Button isDisabled={pages === 1} size="sm" variant="ghost" onPress={() => setPage(p => Math.min(pages, p + 1))}>
             Next
           </Button>
         </div>
@@ -253,7 +252,7 @@ export function DataTable<T extends { id: string | number }>({
       onSortChange={setSortDescriptor}
     >
       <TableHeader columns={headerColumns}>
-        {(column) => (
+        {(column: any) => (
           <TableColumn
             key={column.uid}
             align={column.uid === "actions" ? "center" : "start"}
@@ -264,9 +263,9 @@ export function DataTable<T extends { id: string | number }>({
         )}
       </TableHeader>
       <TableBody emptyContent={emptyContent} items={sortedItems}>
-        {(item) => (
+        {(item: any) => (
           <TableRow key={item.id}>
-            {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
+            {(columnKey: any) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
           </TableRow>
         )}
       </TableBody>

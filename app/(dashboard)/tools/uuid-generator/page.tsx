@@ -1,14 +1,9 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState } from "react";
 import {
-  Card,
-  Button,
   Tabs,
   Tab,
-  Chip,
-  Progress,
-  Tooltip,
   Input,
   Dropdown,
   DropdownTrigger,
@@ -20,21 +15,13 @@ import {
   RotateCcw,
   Sparkles,
   Search,
-  CheckCircle2,
-  AlertTriangle,
-  Info,
-  Copy,
   Download,
   List,
-  ShieldCheck,
-  ShieldAlert,
   Clock,
-  Database,
   ChevronDown,
   Activity,
   Cpu,
   Binary,
-  Hash,
 } from "lucide-react";
 import { useUuidGenerator } from "@/hooks/use-uuid-generator";
 import { useTranslation } from "@/hooks/use-translation";
@@ -42,9 +29,9 @@ import { useToast } from "@/hooks/use-toast";
 import { CopyButton } from "@/components/shared/copy-button";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { DataTable, type ColumnConfig } from "@/components/ui";
+import { Button, Card } from "@/components/ui";
 import { cn } from "@/lib/utils";
-import type { UuidInfo, UuidVersion, UuidFormat } from "@/types/uuid-generator";
+import type { UuidVersion, UuidFormat } from "@/types/uuid-generator";
 
 export default function UuidGeneratorPage() {
   const { t } = useTranslation();
@@ -60,7 +47,7 @@ export default function UuidGeneratorPage() {
     exportBulk,
   } = useUuidGenerator();
 
-  const [activeTab, setActiveTab] = useState<"generate" | "analyze">("generate");
+  const [activeTab, setActiveTab] = useState<"generate" | "analyze" | string>("generate");
   const [analyzeInput, setAnalyzeInput] = useState("");
   const [exportFormat, setExportFormat] = useState<"text" | "json" | "csv" | "sql">("text");
 
@@ -114,17 +101,16 @@ export default function UuidGeneratorPage() {
         <div className="lg:col-span-4 space-y-6">
           <Card className="p-6">
             <Tabs 
-              selectedKey={activeTab} 
-              onSelectionChange={(k) => setActiveTab(k as any)}
-              variant="underlined"
-              classNames={{ tabList: "gap-6 mb-6", cursor: "bg-primary" }}
+              selectedKey={activeTab as string} 
+              onSelectionChange={(k) => setActiveTab(k as string)}
+              variant="primary"
             >
-              <Tab key="generate" title="Generator" />
-              <Tab key="analyze" title="Analyzer" />
+              <Tab key="generate">Generator</Tab>
+              <Tab key="analyze">Analyzer</Tab>
             </Tabs>
 
             {activeTab === "generate" ? (
-              <div className="space-y-6">
+              <div className="space-y-6 mt-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Version</label>
                   <div className="grid gap-2">
@@ -135,7 +121,7 @@ export default function UuidGeneratorPage() {
                         className={cn(
                           "flex flex-col items-start p-3 rounded-xl border transition-all text-left",
                           config.version === v.id 
-                            ? "bg-primary/10 border-primary/30 text-primary shadow-sm" 
+                            ? "bg-primary/10 border-primary/20 text-primary shadow-sm" 
                             : "bg-muted/30 border-transparent hover:bg-muted/50"
                         )}
                       >
@@ -149,12 +135,10 @@ export default function UuidGeneratorPage() {
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Custom Prefix (Hex)</label>
                   <Input 
-                    size="sm" 
+                    variant="primary"
                     placeholder="e.g. deadbeef" 
                     value={config.prefix}
                     onChange={(e) => updateConfig("prefix", e.target.value)}
-                    variant="bordered"
-                    startContent={<Hash className="size-3 opacity-40" />}
                   />
                 </div>
 
@@ -167,7 +151,7 @@ export default function UuidGeneratorPage() {
                       max={1000} 
                       value={config.quantity.toString()} 
                       onChange={(e) => updateConfig("quantity", parseInt(e.target.value) || 1)}
-                      variant="bordered"
+                      variant="primary"
                     />
                   </div>
                   <div className="space-y-2">
@@ -184,14 +168,14 @@ export default function UuidGeneratorPage() {
 
                 <Button 
                   onPress={generate} 
-                  color="primary"
+                  variant="primary"
                   className="w-full h-12 font-black shadow-lg shadow-primary/20 text-md"
                 >
                   <Sparkles className="size-4 mr-2" /> Generate Sequence
                 </Button>
               </div>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-6 mt-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">UUID to Inspect</label>
                   <textarea
@@ -203,8 +187,8 @@ export default function UuidGeneratorPage() {
                 </div>
                 <Button 
                   onPress={() => analyze(analyzeInput)} 
-                  color="secondary"
-                  className="w-full h-12 font-black shadow-lg shadow-secondary/20"
+                  variant="primary"
+                  className="w-full h-12 font-black shadow-lg shadow-primary/20 bg-secondary"
                   isDisabled={!analyzeInput.trim()}
                 >
                   <Search className="size-4 mr-2" /> Deep Audit
@@ -214,7 +198,7 @@ export default function UuidGeneratorPage() {
           </Card>
 
           {activeTab === "generate" && result && (
-            <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl">
+            <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl border-none">
               <h3 className="text-xs font-black uppercase opacity-60 mb-6 tracking-widest flex items-center gap-2">
                 <Activity className="size-3 text-emerald-400" /> Collision Health
               </h3>
@@ -247,8 +231,11 @@ export default function UuidGeneratorPage() {
                 <div className="flex gap-2 w-full sm:w-auto">
                   <Dropdown>
                     <DropdownTrigger>
-                      <Button size="sm" variant="flat" endContent={<ChevronDown className="size-3" />} className="font-black flex-1 sm:flex-none">
-                        {exportFormat.toUpperCase()}
+                      <Button size="sm" variant="ghost" className="font-black flex-1 sm:flex-none border border-divider">
+                        <div className="flex items-center gap-2">
+                          {exportFormat.toUpperCase()}
+                          <ChevronDown className="size-3" />
+                        </div>
                       </Button>
                     </DropdownTrigger>
                     <DropdownMenu onAction={(k) => setExportFormat(k as any)}>
@@ -258,7 +245,7 @@ export default function UuidGeneratorPage() {
                       <DropdownItem key="sql">SQL Insert</DropdownItem>
                     </DropdownMenu>
                   </Dropdown>
-                  <Button size="sm" color="primary" onPress={handleExport} className="font-black">
+                  <Button size="sm" variant="primary" onPress={handleExport} className="font-black">
                     <Download className="size-3 mr-1" /> Save
                   </Button>
                   <CopyButton getText={() => result.uuids.join("\n")} />
@@ -276,18 +263,18 @@ export default function UuidGeneratorPage() {
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
               {/* Analysis Overview Cards */}
               <div className="grid gap-4 sm:grid-cols-3">
-                <Card className="p-6 text-center border-b-4 border-b-primary">
+                <Card className="p-6 text-center border-b-4 border-b-primary rounded-b-none">
                   <p className="text-[10px] font-black text-muted-foreground uppercase mb-1">Version</p>
                   <p className="text-3xl font-black text-primary">v{analysis.version}</p>
                 </Card>
-                <Card className="p-6 text-center border-b-4 border-b-secondary">
-                  <p className="text-[10px] font-black text-muted-foreground uppercase mb-1">Entropia</p>
+                <Card className="p-6 text-center border-b-4 border-b-secondary rounded-b-none">
+                  <p className="text-[10px] font-black text-muted-foreground uppercase mb-1">Entropy</p>
                   <p className="text-3xl font-black text-secondary">{analysis.entropyScore}%</p>
                 </Card>
-                <Card className="p-6 text-center border-b-4 border-b-emerald-500">
+                <Card className="p-6 text-center border-b-4 border-b-emerald-500 rounded-b-none">
                   <p className="text-[10px] font-black text-muted-foreground uppercase mb-1">Status</p>
                   <div className="flex justify-center pt-1">
-                    <StatusBadge variant={analysis.isValid ? "success" : "danger"}>
+                    <StatusBadge variant={analysis.isValid ? "success" : "error"}>
                       {analysis.isValid ? "SECURE" : "CORRUPT"}
                     </StatusBadge>
                   </div>
@@ -301,7 +288,7 @@ export default function UuidGeneratorPage() {
                 </h3>
                 <div className="flex flex-wrap gap-1 font-mono text-[9px] leading-none mb-10">
                   {analysis.binaryView?.map((part, i) => (
-                    <Tooltip key={i} content={part.label}>
+                    <span key={i} title={part.label}>
                       <div className={cn("flex flex-wrap gap-0.5 p-1 rounded transition-colors hover:bg-muted cursor-help", part.color)}>
                         {part.bits.split('').map((bit, j) => (
                           <span key={j} className={cn("w-2 h-3 flex items-center justify-center rounded-[1px]", bit === '1' ? "bg-current text-white" : "bg-muted text-muted-foreground")}>
@@ -309,7 +296,7 @@ export default function UuidGeneratorPage() {
                           </span>
                         ))}
                       </div>
-                    </Tooltip>
+                    </span>
                   ))}
                 </div>
                 
@@ -327,7 +314,7 @@ export default function UuidGeneratorPage() {
               </Card>
 
               {/* Technical Profile */}
-              <Card className="p-6 bg-muted/10 border-divider">
+              <Card className="p-6 bg-muted/10">
                 <h3 className="font-bold flex items-center gap-2 mb-4 text-sm">
                   <Cpu className="size-4" /> Technical Profile
                 </h3>

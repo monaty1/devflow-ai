@@ -381,11 +381,12 @@ export function generateChangelog(commits: CommitResult[]): string {
     const info = getCommitTypeInfo(type);
     const line = `- ${info.emoji} **${c.scope || "general"}**: ${c.description} ${c.issueRef ? `(${c.issueRef})` : ""}`;
     
-    if (sections[type]) {
-      sections[type].push(line);
+    const existing = sections[type];
+    if (existing) {
+      existing.push(line);
     } else {
-      if (!sections.other) sections.other = [];
-      sections.other.push(line);
+      if (!sections["other"]) sections["other"] = [];
+      sections["other"]!.push(line);
     }
   });
 
@@ -403,7 +404,7 @@ export function generateChangelog(commits: CommitResult[]): string {
 
   Object.entries(sections).forEach(([type, items]) => {
     if (items.length > 0) {
-      changelog += `## ${labels[type] || type}\\n${items.join("\\n")}\\n\\n`;
+      changelog += `## ${labels[type] ?? type}\\n${items.join("\\n")}\\n\\n`;
     }
   });
 

@@ -2,11 +2,7 @@
 
 import { useState, useCallback } from "react";
 import {
-  Card,
-  Button,
   Chip,
-  Progress,
-  User,
   Dropdown,
   DropdownTrigger,
   DropdownMenu,
@@ -15,25 +11,27 @@ import {
 import {
   RotateCcw,
   AlertTriangle,
-  CheckCircle,
   Info,
   Search,
   Zap,
-  ArrowRight,
   ShieldAlert,
   MoreVertical,
   Wand2,
   ExternalLink,
+  FileCode,
+  Sparkles,
 } from "lucide-react";
 import { useCodeReview } from "@/hooks/use-code-review";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
-import { DataTable, type ColumnConfig } from "@/components/ui";
+import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { useSmartNavigation } from "@/hooks/use-smart-navigation";
 import { cn } from "@/lib/utils";
+import { StatusBadge } from "@/components/shared/status-badge";
 import type { SupportedLanguage, CodeIssue } from "@/types/code-review";
+import type { ToolRoute } from "@/hooks/use-smart-navigation";
 
 const LANGUAGES: { value: SupportedLanguage; label: string }[] = [
   { value: "typescript", label: "TypeScript" },
@@ -89,7 +87,8 @@ export default function CodeReviewPage() {
   ];
 
   const renderIssueCell = useCallback((issue: CodeIssue, columnKey: React.Key) => {
-    switch (columnKey) {
+    const key = columnKey.toString();
+    switch (key) {
       case "line":
         return <span className="font-mono text-muted-foreground text-xs font-bold bg-muted px-1.5 py-0.5 rounded">L{issue.line}</span>;
       case "message":
@@ -106,51 +105,56 @@ export default function CodeReviewPage() {
         );
       case "severity":
         const severityMap = {
-          critical: { color: "danger", icon: ShieldAlert },
-          warning: { color: "warning", icon: AlertTriangle },
-          info: { color: "primary", icon: Info },
+          critical: { color: "danger" as const, icon: ShieldAlert },
+          warning: { color: "warning" as const, icon: AlertTriangle },
+          info: { color: "primary" as const, icon: Info },
         } as const;
         const config = severityMap[issue.severity as keyof typeof severityMap];
         const Icon = config.icon;
         return (
           <Chip
             size="sm"
-            color={config.color}
-            variant="flat"
-            startContent={<Icon className="size-3 mr-1" />}
+            color={config.color as any}
+            variant="soft"
             className="capitalize font-bold h-6"
           >
-            {issue.severity}
+            <div className="flex items-center gap-1">
+              <Icon className="size-3" />
+              {issue.severity}
+            </div>
           </Chip>
         );
       case "actions":
         return (
           <Dropdown>
             <DropdownTrigger>
-              <Button isIconOnly size="sm" variant="light">
+              <Button isIconOnly size="sm" variant="ghost">
                 <MoreVertical className="size-4 text-default-300" />
               </Button>
             </DropdownTrigger>
             <DropdownMenu aria-label="Issue Actions">
               <DropdownItem 
                 key="wizard" 
-                startContent={<Wand2 className="size-3" />}
-                onDescription="Generate better names for this context"
-                onPress={() => navigateTo("variable-name-wizard", issue.message)}
+                onPress={() => navigateTo("variable-name-wizard" as ToolRoute, issue.message)}
               >
-                Improve Names
+                <div className="flex items-center gap-2">
+                  <Wand2 className="size-3" />
+                  <span>Improve Names</span>
+                </div>
               </DropdownItem>
               <DropdownItem 
                 key="docs" 
-                startContent={<ExternalLink className="size-3" />}
               >
-                View Best Practices
+                <div className="flex items-center gap-2">
+                  <ExternalLink className="size-3" />
+                  <span>View Best Practices</span>
+                </div>
               </DropdownItem>
             </DropdownMenu>
           </Dropdown>
         );
       default:
-        return (issue as any)[columnKey];
+        return (issue as any)[key];
     }
   }, [navigateTo]);
 
@@ -215,9 +219,9 @@ export default function CodeReviewPage() {
 
             <Button
               onPress={handleReview}
-              isPending={isReviewing}
+              isLoading={isReviewing}
               isDisabled={!code.trim()}
-              color="primary"
+              variant="primary"
               className="h-12 text-md font-bold shadow-lg shadow-primary/20"
             >
               <Sparkles className="mr-2 size-5" />
@@ -281,12 +285,12 @@ export default function CodeReviewPage() {
                       <span>Documentation Coverage</span>
                       <span>{Math.round((result.metrics.commentLines / result.metrics.totalLines) * 100)}%</span>
                     </div>
-                    <Progress 
-                      value={(result.metrics.commentLines / result.metrics.totalLines) * 100} 
-                      color="secondary" 
-                      size="sm" 
-                      className="h-1.5"
-                    />
+                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-secondary" 
+                        style={{ width: `${Math.round((result.metrics.commentLines / result.metrics.totalLines) * 100)}%` }} 
+                      />
+                    </div>
                   </div>
                 </Card>
               </div>
@@ -323,7 +327,7 @@ export default function CodeReviewPage() {
                       <CopyButton text={result.refactoredCode} label={t("common.copy")} />
                       <Button
                         size="sm"
-                        color="primary"
+                        variant="primary"
                         onPress={() => {
                           setCode(result.refactoredCode!);
                           addToast(t("codeReview.toastRefactoredApplied"), "success");

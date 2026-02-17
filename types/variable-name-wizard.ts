@@ -61,6 +61,7 @@ export interface WizardConfig {
   maxSuggestions: number;
   includeAbbreviations: boolean;
   language: VariableLanguage;
+  type: VariableType;
 }
 
 export const DEFAULT_WIZARD_CONFIG: WizardConfig = {
@@ -68,6 +69,7 @@ export const DEFAULT_WIZARD_CONFIG: WizardConfig = {
   maxSuggestions: 5,
   includeAbbreviations: false,
   language: "typescript",
+  type: "variable",
 };
 
 export const CONVENTION_LABELS: Record<NamingConvention, string> = {

@@ -4,7 +4,7 @@ export const CODE_REVIEW_WORKER_SOURCE = `
 // --- Constants ---
 const COMMON_PATTERNS = [
   {
-    pattern: /(password|secret|api[_-]?key|token)\s*[:=]\s*["'`][^"'`]+["'`]/gi,
+    pattern: /(password|secret|api[_-]?key|token)\\s*[:=]\\s*["'\`][^"'\`]+["'\`]/gi,
     severity: "critical",
     category: "security",
     message: "Hardcoded credentials detected",
@@ -65,8 +65,7 @@ const LANGUAGE_PATTERNS = {
 // --- Helper Functions ---
 
 function findLineNumber(code, index) {
-  return code.slice(0, index).split("
-").length;
+  return code.slice(0, index).split("\\n").length;
 }
 
 function detectIssues(code, language) {
@@ -92,8 +91,7 @@ function detectIssues(code, language) {
 }
 
 function calculateMetrics(code) {
-  const lines = code.split("
-");
+  const lines = code.split("\\n");
   const complexityKeywords = /\b(if|for|while|case|&&|\|\||catch|map|filter|reduce)\b/g;
   const complexity = 1 + (code.match(complexityKeywords)?.length ?? 0);
   

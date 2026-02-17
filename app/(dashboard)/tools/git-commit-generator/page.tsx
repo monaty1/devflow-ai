@@ -2,51 +2,38 @@
 
 import { useState, useMemo, useCallback } from "react";
 import {
-  Card,
-  Button,
   Tabs,
   Tab,
-  Input,
   Chip,
-  Tooltip,
   Dropdown,
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
-  Textarea,
+  TextArea,
+  Input,
 } from "@heroui/react";
 import {
   GitCommit,
   RotateCcw,
   Sparkles,
-  Search,
-  CheckCircle2,
-  AlertTriangle,
-  Info,
-  Copy,
   Terminal,
   Github,
-  GitBranch,
   FileDiff,
-  Wand2,
   ChevronRight,
-  History,
-  FileText,
   ShieldCheck,
-  Zap,
-  LayoutList,
   MessageSquare,
+  LayoutList,
+  History,
   ListPlus,
-  Hash,
+  AlertTriangle,
 } from "lucide-react";
 import { useGitCommitGenerator } from "@/hooks/use-git-commit-generator";
 import { useTranslation } from "@/hooks/use-translation";
 import { useToast } from "@/hooks/use-toast";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
-import { DataTable, type ColumnConfig } from "@/components/ui";
+import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { cn } from "@/lib/utils";
 import type { CommitType } from "@/types/git-commit-generator";
 import { COMMIT_TYPES, getCommitTypeInfo } from "@/lib/application/git-commit-generator";
 
@@ -55,19 +42,17 @@ export default function GitCommitGeneratorPage() {
   const { addToast } = useToast();
   const {
     config,
-    result,
+    message,
+    validation,
     history,
-    parsedCommit,
     updateConfig,
     generate,
     analyze,
-    parse,
     reset,
     clearHistory,
-    getChangelog,
   } = useGitCommitGenerator();
 
-  const [activeTab, setActiveTab] = useState<"composer" | "parse" | "changelog">("composer");
+  const [activeTab, setActiveTab] = useState<"composer" | "changelog" | "history" | string>("composer");
   const [diffInput, setDiffInput] = useState("");
 
   const historyColumns: ColumnConfig[] = [
@@ -78,7 +63,8 @@ export default function GitCommitGeneratorPage() {
   ];
 
   const renderHistoryCell = useCallback((item: any, columnKey: React.Key) => {
-    switch (columnKey) {
+    const key = columnKey.toString();
+    switch (key) {
       case "message":
         return (
           <div className="flex flex-col gap-0.5 max-w-[300px]">
@@ -88,13 +74,13 @@ export default function GitCommitGeneratorPage() {
         );
       case "type":
         const info = getCommitTypeInfo(item.type);
-        return <Chip size="sm" variant="flat" className="font-black text-[10px] uppercase">{info.emoji} {item.type}</Chip>;
+        return <Chip size="sm" variant="primary" className="font-black text-[10px] uppercase">{info.emoji} {item.type}</Chip>;
       case "scope":
-        return item.scope ? <Chip size="sm" variant="dot" color="primary" className="font-bold text-[9px] uppercase">{item.scope}</Chip> : <span className="opacity-20">-</span>;
+        return item.scope ? <Chip size="sm" variant="primary" color="default" className="font-bold text-[9px] uppercase">{item.scope}</Chip> : <span className="opacity-20">-</span>;
       case "actions":
         return <CopyButton text={item.message} size="sm" variant="ghost" />;
       default:
-        return (item as any)[columnKey];
+        return (item as any)[key];
     }
   }, []);
 
@@ -104,7 +90,9 @@ export default function GitCommitGeneratorPage() {
     addToast("Diff analyzed! Suggestions applied to composer.", "success");
   };
 
-  const changelog = useMemo(() => getChangelog(), [getChangelog]);
+  const changelog = useMemo(() => {
+    return history.map(h => `- ${h.message.split('\n')[0]}`).join('\n');
+  }, [history]);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
@@ -144,7 +132,7 @@ export default function GitCommitGeneratorPage() {
                   <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Type</label>
                   <Dropdown>
                     <DropdownTrigger>
-                      <Button variant="bordered" className="w-full justify-between h-10 font-bold uppercase text-[10px]">
+                      <Button variant="outline" className="w-full justify-between h-10 font-bold uppercase text-[10px]">
                         {config.type ? (
                           <span className="flex items-center gap-2">
                             {getCommitTypeInfo(config.type).emoji} {config.type}
@@ -160,7 +148,15 @@ export default function GitCommitGeneratorPage() {
                       className="max-h-64 overflow-auto"
                     >
                       {COMMIT_TYPES.map(t => (
-                        <DropdownItem key={t.type} startContent={<span>{t.emoji}</span>} description={t.description}>{t.label}</DropdownItem>
+                        <DropdownItem key={t.type}>
+                          <div className="flex items-center gap-2">
+                            <span className="mr-2">{t.emoji}</span>
+                            <div className="flex flex-col">
+                              <span className="font-bold">{t.label}</span>
+                              <span className="text-[10px] opacity-60">{t.description}</span>
+                            </div>
+                          </div>
+                        </DropdownItem>
                       ))}
                     </DropdownMenu>
                   </Dropdown>
@@ -168,12 +164,11 @@ export default function GitCommitGeneratorPage() {
                 <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Scope</label>
                   <Input 
-                    size="sm" 
+                    variant="primary"
                     placeholder="e.g. auth, ui" 
                     value={config.scope} 
-                    onValueChange={(v) => updateConfig("scope", v)} 
-                    variant="bordered"
-                    classNames={{ input: "font-bold text-xs" }}
+                    onChange={(e) => updateConfig("scope", e.target.value)} 
+                    className="font-bold text-xs"
                   />
                 </div>
               </div>
@@ -181,11 +176,11 @@ export default function GitCommitGeneratorPage() {
               <div className="space-y-1">
                 <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Summary</label>
                 <Input 
+                  variant="primary"
                   placeholder="What changed?" 
                   value={config.description} 
-                  onValueChange={(v) => updateConfig("description", v)}
-                  variant="bordered"
-                  classNames={{ input: "font-medium" }}
+                  onChange={(e) => updateConfig("description", e.target.value)}
+                  className="font-medium"
                 />
               </div>
 
@@ -193,18 +188,18 @@ export default function GitCommitGeneratorPage() {
                 <div className="flex justify-between items-center px-1">
                   <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Description Body</label>
                   <button 
-                    onClick={() => updateConfig("body", config.body + "\\n- ")}
+                    onClick={() => updateConfig("body", config.body + "\n- ")}
                     className="text-[9px] font-black text-primary uppercase flex items-center gap-1 hover:underline"
                   >
                     <ListPlus className="size-2.5" /> Add Point
                   </button>
                 </div>
-                <Textarea
+                <TextArea
                   placeholder="Detailed explanation..."
                   value={config.body}
-                  onValueChange={(v) => updateConfig("body", v)}
+                  onChange={(e) => updateConfig("body", e.target.value)}
                   className="font-mono text-xs"
-                  minRows={4}
+                  rows={4}
                 />
               </div>
 
@@ -212,13 +207,11 @@ export default function GitCommitGeneratorPage() {
                   <div className="space-y-1">
                     <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Refs</label>
                     <Input 
-                      size="sm" 
+                      variant="primary"
                       placeholder="#123" 
                       value={config.issueRef} 
-                      onValueChange={(v) => updateConfig("issueRef", v)} 
-                      variant="bordered"
-                      startContent={<Hash className="size-3 opacity-40" />}
-                      color={config.requireIssue && !config.issueRef ? "danger" : "default"}
+                      onChange={(e) => updateConfig("issueRef", e.target.value)} 
+                      className="font-bold"
                     />
                   </div>
                   <div className="flex flex-col gap-2 justify-end pb-1.5">
@@ -253,7 +246,7 @@ export default function GitCommitGeneratorPage() {
                   </div>
                 )}
 
-                <Button onPress={generate} color="primary" className="w-full h-12 font-black shadow-xl shadow-primary/20 text-md" isDisabled={!validation.isValid}>
+                <Button onPress={generate} variant="primary" className="w-full h-12 font-black shadow-xl shadow-primary/20 text-md" isDisabled={!validation.isValid}>
                   <Sparkles className="size-4 mr-2" /> Forge Message
                 </Button>
             </div>
@@ -270,7 +263,7 @@ export default function GitCommitGeneratorPage() {
               onChange={(e) => setDiffInput(e.target.value)}
               value={diffInput}
             />
-            <Button size="sm" color="secondary" className="w-full font-black" onPress={handleDiffAnalysis} isDisabled={!diffInput.trim()}>
+            <Button size="sm" variant="ghost" className="w-full font-black text-secondary" onPress={handleDiffAnalysis} isDisabled={!diffInput.trim()}>
               Analyze & Prefill
             </Button>
           </Card>
@@ -279,27 +272,25 @@ export default function GitCommitGeneratorPage() {
         {/* Results Column */}
         <div className="lg:col-span-7 space-y-6">
           <Tabs 
-            selectedKey={activeTab} 
-            onSelectionChange={(k) => setActiveTab(k as any)}
-            variant="solid"
-            color="primary"
-            classNames={{ tabList: "bg-muted/50 rounded-xl p-1" }}
+            selectedKey={activeTab as string} 
+            onSelectionChange={(k) => setActiveTab(k as string)}
+            variant="primary"
           >
-            <Tab key="composer" title={
+            <Tab key="composer">
               <div className="flex items-center gap-2">
                 <MessageSquare className="size-4" /> <span>Result</span>
               </div>
-            } />
-            <Tab key="changelog" title={
+            </Tab>
+            <Tab key="changelog">
               <div className="flex items-center gap-2">
                 <LayoutList className="size-4" /> <span>Session Changelog</span>
               </div>
-            } />
-            <Tab key="history" title={
+            </Tab>
+            <Tab key="history">
               <div className="flex items-center gap-2">
                 <History className="size-4" /> <span>Registry</span>
               </div>
-            } />
+            </Tab>
           </Tabs>
 
           {activeTab === "composer" && (
@@ -344,7 +335,7 @@ export default function GitCommitGeneratorPage() {
                   </div>
                   <div className="flex justify-between items-center text-xs">
                     <span>Header length (&lt; 72 chars)</span>
-                    <StatusBadge variant={config.description.length <= 72 ? "success" : "danger"}>
+                    <StatusBadge variant={config.description.length <= 72 ? "success" : "error"}>
                       {config.description.length} chars
                     </StatusBadge>
                   </div>
@@ -358,10 +349,10 @@ export default function GitCommitGeneratorPage() {
           )}
 
           {activeTab === "changelog" && (
-            <Card className="p-0 border-divider shadow-xl overflow-hidden h-[600px] flex flex-col animate-in fade-in slide-in-from-right-4 duration-500">
+            <Card className="p-0 border-divider shadow-xl overflow-hidden h-[600px] flex flex-col animate-in fade-in slide-in-from-right-4 duration-500 border-none">
               <div className="p-4 border-b border-divider flex justify-between items-center bg-muted/20">
                 <div className="flex items-center gap-2">
-                  <FileText className="size-4 text-primary" />
+                  <Terminal className="size-4 text-primary" />
                   <span className="text-xs font-black uppercase tracking-widest">Automatic Session Changelog</span>
                 </div>
                 <CopyButton text={changelog} />
@@ -373,10 +364,10 @@ export default function GitCommitGeneratorPage() {
           )}
 
           {activeTab === "history" && (
-            <Card className="p-0 overflow-hidden shadow-xl border-divider h-[600px] animate-in fade-in slide-in-from-right-4 duration-500">
+            <Card className="p-0 overflow-hidden shadow-xl border-divider h-[600px] animate-in fade-in slide-in-from-right-4 duration-500 border-none">
               <div className="p-4 border-b border-divider bg-muted/20 flex items-center justify-between">
                 <span className="text-xs font-black uppercase tracking-widest">Commit Registry</span>
-                <Button size="xs" color="danger" variant="flat" onPress={clearHistory} className="font-black text-[9px]">WIPE CACHE</Button>
+                <Button size="sm" variant="ghost" onPress={clearHistory} className="font-black text-[9px] text-danger">WIPE CACHE</Button>
               </div>
               <DataTable
                 columns={historyColumns}

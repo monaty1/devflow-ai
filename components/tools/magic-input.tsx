@@ -5,14 +5,12 @@ import { useRouter } from "next/navigation";
 import { Card, Button } from "@heroui/react";
 import {
   Sparkles,
-  ArrowRight,
   FileJson,
   Clock,
   Binary,
   Code2,
   Regex,
-  Database,
-  FileText,
+  Search,
 } from "lucide-react";
 import { useTranslation } from "@/hooks/use-translation";
 
@@ -31,7 +29,7 @@ export function MagicInput() {
   const [input, setInput] = useState("");
   const [detectedType, setDetectedType] = useState<DetectedType>(null);
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t: _t } = useTranslation();
 
   useEffect(() => {
     const trimmed = input.trim();
@@ -87,7 +85,7 @@ export function MagicInput() {
     setDetectedType(null);
   }, [input]);
 
-  const handleAction = (tool: string, action: string) => {
+  const handleAction = (tool: string, _action: string) => {
     // In a real app, we would pass the 'input' via query param or global state context
     // For now, we just route to the tool
     // We could use localStorage to pass the data "magically"
@@ -144,8 +142,7 @@ export function MagicInput() {
           onChange={(e) => setInput(e.target.value)}
           placeholder="Paste anything here... JSON, Cron, JWT, Code, etc."
           className="w-full resize-none bg-transparent px-12 py-4 text-base placeholder:text-muted-foreground/50 focus:outline-none min-h-[60px]"
-          rows={Math.min(5, Math.max(2, input.split("
-").length))}
+          rows={Math.min(5, Math.max(2, input.split("\n").length))}
         />
         {detectedType && (
           <div className="absolute right-3 top-3 flex gap-2">
@@ -153,7 +150,7 @@ export function MagicInput() {
               <Button
                 key={action.label}
                 size="sm"
-                color="primary"
+                variant="primary"
                 className="shadow-sm"
                 onPress={() => handleAction(action.tool, action.label)}
               >

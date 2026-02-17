@@ -1,36 +1,24 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useCallback } from "react";
 import {
-  Card,
-  Button,
+  Chip,
   Input,
   Dropdown,
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
-  Progress,
-  Chip,
-  User,
   Checkbox,
 } from "@heroui/react";
 import {
   Plus,
   Trash2,
-  Download,
   FolderPlus,
   FileText,
   BookOpen,
   Coins,
-  MoreVertical,
   FileCode,
-  Tags,
   Share2,
-  LayoutGrid,
-  List as ListIcon,
-  ChevronRight,
-  Sparkles,
-  Search,
   FolderTree,
 } from "lucide-react";
 import { useContextManager } from "@/hooks/use-context-manager";
@@ -40,9 +28,10 @@ import { useSmartNavigation } from "@/hooks/use-smart-navigation";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { formatCost } from "@/lib/application/cost-calculator";
 import { AI_MODELS } from "@/config/ai-models";
-import { DataTable, type ColumnConfig } from "@/components/ui";
+import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { cn } from "@/lib/utils";
-import type { Document, ContextWindow, Priority, DocumentType } from "@/types/context-manager";
+import { StatusBadge } from "@/components/shared/status-badge";
+import type { ContextDocument as Document, Priority, DocumentType } from "@/types/context-manager";
 
 export default function ContextManagerPage() {
   const { t } = useTranslation();
@@ -58,7 +47,6 @@ export default function ContextManagerPage() {
     addDocument,
     removeDocument,
     changePriority,
-    exportWindow,
     exportForAI,
   } = useContextManager();
 
@@ -75,7 +63,8 @@ export default function ContextManagerPage() {
   ];
 
   const renderDocCell = useCallback((doc: Document, columnKey: React.Key) => {
-    switch (columnKey) {
+    const key = columnKey.toString();
+    switch (key) {
       case "title":
         return (
           <div className="flex items-center gap-3">
@@ -92,7 +81,7 @@ export default function ContextManagerPage() {
         );
       case "type":
         return (
-          <Chip size="sm" variant="flat" className="capitalize text-[10px] font-bold">
+          <Chip size="sm" variant="primary" className="capitalize text-[10px] font-bold">
             {doc.type}
           </Chip>
         );
@@ -100,24 +89,24 @@ export default function ContextManagerPage() {
         return (
           <div className="flex flex-col gap-1 min-w-[100px]">
             <span className="font-mono text-xs font-bold">{doc.tokenCount.toLocaleString()}</span>
-            <Progress 
-              value={(doc.tokenCount / (activeWindow?.maxTokens || 1)) * 100} 
-              size="sm" 
-              color="primary" 
-              className="h-1"
-            />
+            <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-primary" 
+                style={{ width: `${Math.min(100, (doc.tokenCount / (activeWindow?.maxTokens || 1)) * 100)}%` }} 
+              />
+            </div>
           </div>
         );
       case "priority":
         const priorityMap = {
-          high: "danger",
-          medium: "warning",
-          low: "default",
+          high: "danger" as const,
+          medium: "warning" as const,
+          low: "primary" as const,
         } as const;
         return (
           <Dropdown>
             <DropdownTrigger>
-              <Button size="sm" variant="flat" color={priorityMap[doc.priority]} className="capitalize font-bold h-6 text-[10px]">
+              <Button size="sm" variant="ghost" className="capitalize font-bold h-6 text-[10px]" style={{ color: (priorityMap as any)[doc.priority] }}>
                 {doc.priority}
               </Button>
             </DropdownTrigger>
@@ -130,12 +119,12 @@ export default function ContextManagerPage() {
         );
       case "actions":
         return (
-          <Button isIconOnly size="sm" variant="light" color="danger" onPress={() => removeDocument(doc.id)}>
-            <Trash2 className="size-4" />
+          <Button isIconOnly size="sm" variant="ghost" onPress={() => removeDocument(doc.id)}>
+            <Trash2 className="size-4 text-danger" />
           </Button>
         );
       default:
-        return (doc as any)[columnKey];
+        return (doc as any)[key];
     }
   }, [activeWindow, changePriority, removeDocument]);
 
@@ -154,7 +143,6 @@ export default function ContextManagerPage() {
         <Card className="p-4 lg:col-span-3 flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <Input
-              size="sm"
               placeholder="New window name..."
               value={newWindowName}
               onChange={(e) => setNewWindowName(e.target.value)}
@@ -164,18 +152,18 @@ export default function ContextManagerPage() {
                   setNewWindowName("");
                 }
               }}
+              variant="primary"
             />
             <Button 
               size="sm" 
-              color="primary" 
-              variant="flat" 
+              variant="ghost" 
               onPress={() => {
                 if (newWindowName) {
                   createWindow(newWindowName);
                   setNewWindowName("");
                 }
               }}
-              className="font-bold"
+              className="font-bold text-primary"
             >
               <Plus className="size-4 mr-1" /> Create Window
             </Button>
@@ -201,10 +189,9 @@ export default function ContextManagerPage() {
                 <Button
                   isIconOnly
                   size="sm"
-                  variant="light"
+                  variant="ghost"
                   className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  onPress={(e) => {
-                    e.stopPropagation();
+                  onPress={() => {
                     deleteWindow(w.id);
                   }}
                 >
@@ -221,17 +208,18 @@ export default function ContextManagerPage() {
             <>
               {/* Dashboard Row */}
               <div className="grid gap-4 sm:grid-cols-3">
-                <Card className="p-6 bg-gradient-to-br from-indigo-600 to-blue-700 text-white shadow-lg shadow-indigo-500/20">
+                <Card className="p-6 bg-gradient-to-br from-indigo-600 to-blue-700 text-white shadow-lg shadow-indigo-500/20 border-none">
                   <div className="flex items-center justify-between mb-4">
                     <p className="text-[10px] font-bold uppercase opacity-80">Utilization</p>
                     <StatusBadge variant="info">{activeWindow.totalTokens.toLocaleString()} t</StatusBadge>
                   </div>
                   <p className="text-4xl font-black mb-2">{activeWindow.utilizationPercentage}%</p>
-                  <Progress 
-                    value={activeWindow.utilizationPercentage} 
-                    color="warning" 
-                    className="h-2 bg-white/20"
-                  />
+                  <div className="h-2 w-full bg-white/20 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-warning" 
+                      style={{ width: `${Math.min(100, activeWindow.utilizationPercentage)}%` }} 
+                    />
+                  </div>
                 </Card>
 
                 <Card className="p-6 flex flex-col justify-center border-2 border-transparent hover:border-indigo-500/20 transition-all">
@@ -249,7 +237,7 @@ export default function ContextManagerPage() {
                   <Button 
                     size="sm" 
                     variant="ghost" 
-                    className="mt-4 font-bold border-indigo-100 dark:border-indigo-900"
+                    className="mt-4 font-bold border-indigo-100 dark:border-indigo-900 text-indigo-600"
                     onPress={() => {
                       const fullContent = activeWindow.documents.map(d => `--- ${d.title} ---\n${d.content}`).join("\n\n");
                       navigateTo("token-visualizer", fullContent);
@@ -264,15 +252,14 @@ export default function ContextManagerPage() {
                     <p className="text-[10px] font-bold text-muted-foreground uppercase">Packaging Engine</p>
                     <Checkbox 
                       isSelected={stripComments} 
-                      onValueChange={setStripComments}
-                      size="sm"
+                      onChange={() => setStripComments(!stripComments)}
                       className="mt-1"
                     >
                       <span className="text-[10px] font-black uppercase text-primary tracking-tighter">Strip Code Comments</span>
                     </Checkbox>
                   </div>
                   <Button 
-                    color="primary" 
+                    variant="primary" 
                     className="font-bold shadow-lg shadow-primary/20 h-12"
                     onPress={() => {
                       const content = exportForAI({ stripComments });
@@ -290,7 +277,7 @@ export default function ContextManagerPage() {
               {/* Hierarchy & Documents */}
               <div className="grid gap-6 lg:grid-cols-5">
                 {/* Visual Tree */}
-                <Card className="p-6 lg:col-span-2 bg-muted/10 border-divider">
+                <Card className="p-6 lg:col-span-2 bg-muted/10">
                   <h3 className="text-xs font-black uppercase text-muted-foreground mb-4 flex items-center gap-2 tracking-widest">
                     <FolderTree className="size-3 text-primary" /> Project Hierarchy
                   </h3>
@@ -314,11 +301,10 @@ export default function ContextManagerPage() {
                       Context Units
                     </h3>
                     <Button 
-                      color="primary" 
-                      variant="flat" 
+                      variant="ghost" 
                       size="sm" 
                       onPress={() => setShowAddDoc(true)}
-                      className="font-black text-[10px] uppercase h-7 px-3"
+                      className="font-black text-[10px] uppercase h-7 px-3 text-primary"
                     >
                       <Plus className="size-3 mr-1" /> Add Source
                     </Button>
@@ -336,7 +322,7 @@ export default function ContextManagerPage() {
               </div>
             </>
           ) : (
-            <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center">
+            <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center h-full">
               <div className="size-24 bg-muted rounded-full flex items-center justify-center mb-6">
                 <FolderPlus className="size-12 text-muted-foreground/30" />
               </div>
@@ -365,8 +351,8 @@ export default function ContextManagerPage() {
             
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
-                <Input label="Title" placeholder="e.g. user-service.ts" id="doc-title" variant="bordered" className="font-bold" />
-                <Input label="File Path" placeholder="src/services/user-service.ts" id="doc-path" variant="bordered" />
+                <Input placeholder="e.g. user-service.ts" id="doc-title" variant="primary" className="font-bold" />
+                <Input placeholder="src/services/user-service.ts" id="doc-path" variant="primary" />
               </div>
               
               <div className="grid grid-cols-2 gap-4">
@@ -399,7 +385,7 @@ export default function ContextManagerPage() {
               </div>
 
               <div className="flex gap-3 pt-2">
-                <Button className="flex-1 font-black h-12 text-md shadow-xl shadow-indigo-500/20" color="primary" onPress={() => {
+                <Button variant="primary" className="flex-1 font-black h-12 text-md shadow-xl shadow-indigo-500/20" onPress={() => {
                   const title = (document.getElementById("doc-title") as HTMLInputElement).value;
                   const content = (document.getElementById("doc-content") as HTMLTextAreaElement).value;
                   const filePath = (document.getElementById("doc-path") as HTMLInputElement).value;

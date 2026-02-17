@@ -1,37 +1,23 @@
 "use client";
 
-import { useState, useCallback, useMemo, useEffect } from "react";
-import {
-  Card,
-  Button,
-  Chip,
-  Progress,
-  Tooltip,
-} from "@heroui/react";
+import { useState, useEffect } from "react";
 import {
   Binary,
   RotateCcw,
-  Sparkles,
   LayoutGrid,
   List as ListIcon,
   ShieldAlert,
-  Zap,
-  Play,
-  ArrowRight,
   Database,
-  History,
-  X,
-  ChevronRight,
-  Eye,
-  Info,
   Timer,
   Fingerprint,
+  Info,
 } from "lucide-react";
 import { useTokenVisualizer } from "@/hooks/use-token-visualizer";
 import { useTranslation } from "@/hooks/use-translation";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { Card, Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import type { TokenizerProvider } from "@/types/token-visualizer";
 
@@ -44,7 +30,6 @@ export default function TokenVisualizerPage() {
     setProvider, 
     visualization, 
     allProviderResults, 
-    isAnalyzing,
     tokenize,
     reset 
   } = useTokenVisualizer();
@@ -97,8 +82,7 @@ export default function TokenVisualizerPage() {
                   <Button
                     isIconOnly
                     size="sm"
-                    variant={!isCompareMode ? "solid" : "light"}
-                    color={!isCompareMode ? "primary" : "default"}
+                    variant={!isCompareMode ? "primary" : "ghost"}
                     onPress={() => setIsCompareMode(false)}
                   >
                     <ListIcon className="size-3.5" />
@@ -106,8 +90,7 @@ export default function TokenVisualizerPage() {
                   <Button
                     isIconOnly
                     size="sm"
-                    variant={isCompareMode ? "solid" : "light"}
-                    color={isCompareMode ? "primary" : "default"}
+                    variant={isCompareMode ? "primary" : "ghost"}
                     onPress={() => setIsCompareMode(true)}
                   >
                     <LayoutGrid className="size-3.5" />
@@ -145,7 +128,7 @@ export default function TokenVisualizerPage() {
 
           {/* Efficiency Audit Card */}
           {visualization && (
-            <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl shadow-slate-500/20">
+            <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl shadow-slate-500/20 border-none">
               <h3 className="text-xs font-black uppercase opacity-60 mb-4 tracking-widest flex items-center gap-2">
                 <ShieldAlert className="size-3" /> Token Audit
               </h3>
@@ -157,7 +140,12 @@ export default function TokenVisualizerPage() {
                   </span>
                 </div>
                 <div className="space-y-1.5">
-                  <Progress value={visualization.efficiencyScore} size="sm" color="primary" className="h-1.5 bg-white/10" />
+                  <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-primary" 
+                      style={{ width: `${Math.min(100, visualization.efficiencyScore)}%` }} 
+                    />
+                  </div>
                 </div>
                 {visualization.wasteCount > 0 && (
                   <div className="p-3 bg-white/5 rounded-xl border border-white/10">
@@ -188,7 +176,12 @@ export default function TokenVisualizerPage() {
                           <span className={cn("text-[10px] font-black uppercase", info?.color)}>{info?.label}</span>
                           <StatusBadge variant={r.efficiencyScore > 80 ? "success" : "warning"}>{r.totalTokens} t</StatusBadge>
                         </div>
-                        <Progress value={r.efficiencyScore} size="xs" color="primary" className="h-1" />
+                        <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-primary" 
+                            style={{ width: `${Math.min(100, r.efficiencyScore)}%` }} 
+                          />
+                        </div>
                       </Card>
                     );
                   })}
@@ -197,7 +190,7 @@ export default function TokenVisualizerPage() {
 
               {/* Token Cloud */}
               <Card className="p-0 border-divider shadow-xl overflow-hidden h-[600px] flex flex-col">
-                <div className="p-4 border-b border-divider flex justify-between items-center bg-muted/20">
+                <div className="p-4 border-b border-divider bg-muted/20 flex justify-between items-center">
                   <div className="flex items-center gap-4">
                     <StatusBadge variant="info">
                       <Timer className="size-3 mr-1" /> {visualization.totalTokens} Tokens
@@ -209,14 +202,12 @@ export default function TokenVisualizerPage() {
                 <div className="p-6 overflow-auto flex-1 bg-background scrollbar-hide">
                   <div className="flex flex-wrap gap-1.5">
                     {visualization.segments.map((s, i) => (
-                      <Tooltip key={i} content={`Token #${s.tokenId}: "${s.text}"`}>
-                        <span className={cn(
-                          "px-1.5 py-0.5 rounded font-mono text-xs border transition-all hover:scale-110 cursor-default",
-                          s.isWaste ? "bg-red-500/20 border-red-500/40 text-red-600 font-bold" : s.color
-                        )}>
-                          {s.text.replace(/ /g, "␣")}
-                        </span>
-                      </Tooltip>
+                      <span key={i} title={`Token #${s.tokenId}: "${s.text}"`} className={cn(
+                        "px-1.5 py-0.5 rounded font-mono text-xs border transition-all hover:scale-110 cursor-default",
+                        s.isWaste ? "bg-red-500/20 border-red-500/40 text-red-600 font-bold" : s.color
+                      )}>
+                        {s.text.replace(/ /g, "␣")}
+                      </span>
                     ))}
                   </div>
                 </div>
@@ -229,11 +220,11 @@ export default function TokenVisualizerPage() {
               </Card>
             </>
           ) : (
-            <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center">
+            <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center h-full">
               <div className="size-24 bg-muted rounded-full flex items-center justify-center mb-6">
                 <Fingerprint className="size-12 text-muted-foreground/30" />
               </div>
-              <h3 className="text-2xl font-black mb-2 opacity-80">Token Laboratory</h3>
+              <h3 className="text-2xl font-black mb-2 opacity-80 text-foreground/50">Token Laboratory</h3>
               <p className="text-muted-foreground max-w-sm mx-auto font-medium">
                 Analyze how different AI models (GPT-4, Claude, Llama) see your text. Optimize your prompts by reducing wasted tokens.
               </p>

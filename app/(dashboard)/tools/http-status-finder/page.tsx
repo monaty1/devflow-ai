@@ -1,46 +1,30 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
-  Card,
-  Button,
-  Tabs,
-  Tab,
   Chip,
   Input,
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-  Tooltip,
 } from "@heroui/react";
 import {
   Globe,
   Search,
   RotateCcw,
-  Sparkles,
   ExternalLink,
   Terminal,
-  FileCode,
-  ShieldCheck,
-  Zap,
-  Play,
-  ArrowRight,
-  Database,
-  History,
   X,
   ChevronRight,
   HelpCircle,
   Activity,
-  AlertTriangle,
   Info,
   Server,
+  History,
+  Database,
 } from "lucide-react";
 import { useHttpStatusFinder } from "@/hooks/use-http-status-finder";
 import { useTranslation } from "@/hooks/use-translation";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
-import { DataTable, type ColumnConfig } from "@/components/ui";
+import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { getCategoryInfo } from "@/lib/application/http-status-finder";
 import { cn } from "@/lib/utils";
@@ -80,7 +64,8 @@ export default function HttpStatusFinderPage() {
   ];
 
   const renderStatusCell = useCallback((status: HttpStatusCode, columnKey: React.Key) => {
-    switch (columnKey) {
+    const key = columnKey.toString();
+    switch (key) {
       case "code":
         return (
           <span className={cn("font-mono font-black text-sm px-2 py-1 rounded-lg", CATEGORY_COLORS[status.category])}>
@@ -94,7 +79,7 @@ export default function HttpStatusFinderPage() {
       case "description":
         return <span className="text-xs text-muted-foreground line-clamp-1">{status.description}</span>;
       default:
-        return (status as any)[columnKey];
+        return (status as any)[key];
     }
   }, []);
 
@@ -102,7 +87,6 @@ export default function HttpStatusFinderPage() {
     setIsTesting(true);
     const start = Date.now();
     try {
-      // Using a proxy or direct fetch if CORS allows, httpstat.us usually allows it
       const res = await fetch(`https://httpstat.us/${code}`);
       const headers: Record<string, string> = {};
       res.headers.forEach((v, k) => { headers[k] = v; });
@@ -129,8 +113,8 @@ export default function HttpStatusFinderPage() {
         actions={
           <div className="flex gap-2">
             <div className="flex bg-muted p-1 rounded-xl">
-              <Button isIconOnly size="sm" variant={activeView === "grid" ? "solid" : "light"} color={activeView === "grid" ? "primary" : "default"} onPress={() => setActiveView("grid")}><History className="size-3.5" /></Button>
-              <Button isIconOnly size="sm" variant={activeView === "table" ? "solid" : "light"} color={activeView === "table" ? "primary" : "default"} onPress={() => setActiveView("table")}><Database className="size-3.5" /></Button>
+              <Button isIconOnly size="sm" variant={activeView === "grid" ? "primary" : "ghost"} onPress={() => setActiveView("grid")}><History className="size-3.5" /></Button>
+              <Button isIconOnly size="sm" variant={activeView === "table" ? "primary" : "ghost"} onPress={() => setActiveView("table")}><Database className="size-3.5" /></Button>
             </div>
             <Button variant="outline" size="sm" onPress={clearSearch} className="gap-2 font-bold">
               <RotateCcw className="size-4" /> Reset
@@ -142,19 +126,17 @@ export default function HttpStatusFinderPage() {
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Search & Selector Column */}
         <div className="lg:col-span-4 space-y-6">
-          <Card className="p-6 border-divider shadow-sm">
+          <Card className="p-6">
             <h3 className="font-bold flex items-center gap-2 mb-6 text-foreground/80 uppercase text-[10px] tracking-widest">
               <Search className="size-4 text-primary" />
               Smart Navigator
             </h3>
             <Input
-              isClearable
               placeholder="Code (404) or Keyword (not found)..."
               value={query}
-              onValueChange={setQuery}
-              onClear={clearSearch}
-              variant="bordered"
-              classNames={{ input: "font-bold text-sm" }}
+              onChange={(e) => setQuery(e.target.value)}
+              variant="primary"
+              className="font-bold text-sm"
             />
             <div className="grid grid-cols-3 gap-2 mt-6">
               {["1xx", "2xx", "3xx", "4xx", "5xx"].map((cat) => (
@@ -175,7 +157,7 @@ export default function HttpStatusFinderPage() {
           </Card>
 
           {/* Decision Wizard Card */}
-          <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-2xl">
+          <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-2xl border-none">
             <h3 className="text-xs font-black uppercase opacity-60 mb-6 flex items-center gap-2 tracking-widest">
               <HelpCircle className="size-3 text-cyan-400" /> Decision Pipeline
             </h3>
@@ -202,7 +184,7 @@ export default function HttpStatusFinderPage() {
           {selectedCode ? (
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
               {/* Header Card */}
-              <Card className="p-10 border-divider shadow-2xl relative overflow-hidden">
+              <Card className="p-10 relative overflow-hidden">
                 <div className={cn("absolute top-0 right-0 w-32 h-32 opacity-5 -mr-10 -mt-10 rounded-full", CATEGORY_COLORS[selectedCode.category].split(" ")[0])} />
                 <div className="flex flex-col sm:flex-row justify-between gap-8 relative z-10">
                   <div className="flex items-center gap-8">
@@ -220,7 +202,7 @@ export default function HttpStatusFinderPage() {
                       </div>
                     </div>
                   </div>
-                  <Button isIconOnly variant="flat" color="danger" radius="full" onPress={() => setSelectedCode(null)} className="shadow-lg"><X className="size-5" /></Button>
+                  <Button isIconOnly variant="ghost" onPress={() => setSelectedCode(null)} className="shadow-lg rounded-full h-10 w-10 min-w-0"><X className="size-5 text-danger" /></Button>
                 </div>
 
                 <div className="mt-12 grid gap-10 sm:grid-cols-2 border-t border-divider pt-10">
@@ -241,35 +223,35 @@ export default function HttpStatusFinderPage() {
 
               {/* Related Headers & Links Row */}
               <div className="grid gap-6 sm:grid-cols-2">
-                <Card className="p-6 border-divider">
+                <Card className="p-6">
                   <h3 className="text-xs font-black uppercase text-muted-foreground mb-4 tracking-widest flex items-center gap-2">
-                    <Layers className="size-4 text-primary" /> Associated Headers
+                    <History className="size-4 text-primary" /> Associated Headers
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {selectedCode.relatedHeaders?.length ? selectedCode.relatedHeaders.map(h => (
-                      <Chip key={h} variant="flat" color="primary" className="font-mono text-[10px] font-bold">{h}</Chip>
+                      <Chip key={h} variant="primary" color="default" className="font-mono text-[10px] font-bold">{h}</Chip>
                     )) : <p className="text-xs italic opacity-40">No specific required headers.</p>}
                   </div>
                   <div className="mt-8 pt-6 border-t border-divider flex gap-3">
                     {selectedCode.rfcLink && (
-                      <Button size="sm" variant="bordered" className="font-bold flex-1" onPress={() => window.open(selectedCode.rfcLink, "_blank")}>
+                      <Button size="sm" variant="outline" className="font-bold flex-1" onPress={() => window.open(selectedCode.rfcLink, "_blank")}>
                         <ExternalLink className="size-3.5 mr-2" /> RFC Docs
                       </Button>
                     )}
-                    <Button size="sm" variant="bordered" className="font-bold flex-1" onPress={() => window.open(`https://http.cat/${selectedCode.code}`, "_blank")}>
+                    <Button size="sm" variant="outline" className="font-bold flex-1" onPress={() => window.open(`https://http.cat/${selectedCode.code}`, "_blank")}>
                       🐱 HTTP Cat
                     </Button>
                   </div>
                 </Card>
 
-                <Card className="p-6 bg-slate-900 text-white shadow-xl overflow-hidden relative">
+                <Card className="p-6 bg-slate-900 text-white shadow-xl overflow-hidden relative border-none">
                   <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none"><Server className="size-20" /></div>
                   <div className="flex items-center justify-between mb-6 relative z-10">
                     <h3 className="text-xs font-black uppercase opacity-60 tracking-widest flex items-center gap-2">
-                      <Play className="size-4 text-emerald-400" />
+                      <Activity className="size-4 text-emerald-400" />
                       Live Error Simulation
                     </h3>
-                    <Button size="sm" color="success" className="font-black h-8 shadow-lg shadow-emerald-500/20" onPress={() => runMockTest(selectedCode.code)} isLoading={isTesting}>
+                    <Button size="sm" variant="primary" className="font-black h-8 bg-emerald-500 hover:bg-emerald-600 border-none shadow-lg shadow-emerald-500/20" onPress={() => runMockTest(selectedCode.code)} isLoading={isTesting}>
                       Trigger Response
                     </Button>
                   </div>
@@ -299,7 +281,7 @@ export default function HttpStatusFinderPage() {
               </div>
 
               {/* Implementation Snippets */}
-              <Card className="p-8 border-divider">
+              <Card className="p-8">
                 <h3 className="font-black text-lg mb-6 flex items-center gap-2">
                   <Terminal className="size-5 text-primary" />
                   Code Implementation
@@ -309,7 +291,7 @@ export default function HttpStatusFinderPage() {
                     <div key={lang} className="space-y-2 group">
                       <div className="flex justify-between items-center">
                         <span className="text-[10px] font-black uppercase text-muted-foreground tracking-tighter group-hover:text-primary transition-colors">{lang}</span>
-                        <CopyButton text={code} size="xs" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <CopyButton text={code} size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
                       <pre className="p-4 bg-muted/30 rounded-2xl font-mono text-[10px] border border-divider overflow-x-auto h-32 scrollbar-hide">
                         <code>{code}</code>

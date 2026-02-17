@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
-import { Card, Button, Chip, User, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react";
+import { useMemo, useCallback } from "react";
+import { Chip, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react";
 import {
   RotateCcw,
   TrendingDown,
@@ -12,10 +12,9 @@ import {
   ArrowRight,
   MoreVertical,
   ExternalLink,
+  Sparkles,
 } from "lucide-react";
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -28,7 +27,7 @@ import { useCostCalculator } from "@/hooks/use-cost-calculator";
 import { useTranslation } from "@/hooks/use-translation";
 import { formatCost } from "@/lib/application/cost-calculator";
 import { ToolHeader } from "@/components/shared/tool-header";
-import { DataTable, type ColumnConfig } from "@/components/ui";
+import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { PROVIDER_LABELS } from "@/config/ai-models";
 import { cn } from "@/lib/utils";
 import type { CostCalculation } from "@/types/cost-calculator";
@@ -69,31 +68,27 @@ export default function CostCalculatorPage() {
     const provider = PROVIDER_LABELS[result.model.provider];
     const isCheapest = result.model.id === cheapestId;
     const isBestValue = result.model.id === bestValueId;
+    const key = columnKey.toString();
 
-    switch (columnKey) {
+    switch (key) {
       case "model":
         return (
-          <User
-            name={result.model.displayName}
-            description={result.model.id}
-            avatarProps={{
-              radius: "lg",
-              src: `https://avatar.vercel.sh/${result.model.provider}`,
-              fallback: result.model.provider[0].toUpperCase()
-            }}
-          >
-            {result.model.displayName}
-          </User>
+          <div className="flex flex-col">
+            <span className="font-bold text-sm">{result.model.displayName}</span>
+            <span className="text-[10px] text-muted-foreground font-mono">{result.model.id}</span>
+          </div>
         );
       case "provider":
         return (
           <Chip
-            variant="flat"
+            variant="primary"
             size="sm"
-            className={cn("capitalize", provider?.color)}
-            startContent={<span>{provider?.emoji}</span>}
+            className={cn("capitalize font-bold h-6", provider?.color)}
           >
-            {provider?.label}
+            <div className="flex items-center gap-1">
+              <span>{provider?.emoji}</span>
+              {provider?.label}
+            </div>
           </Chip>
         );
       case "totalCost":
@@ -119,19 +114,29 @@ export default function CostCalculatorPage() {
           <div className="relative flex justify-center items-center gap-2">
             <Dropdown>
               <DropdownTrigger>
-                <Button isIconOnly size="sm" variant="light">
+                <Button isIconOnly size="sm" variant="ghost">
                   <MoreVertical className="text-default-300 size-4" />
                 </Button>
               </DropdownTrigger>
               <DropdownMenu aria-label="Action Menu">
-                <DropdownItem key="details" startContent={<ExternalLink className="size-3" />}>View Stats</DropdownItem>
-                <DropdownItem key="copy" startContent={<RotateCcw className="size-3" />}>Copy Config</DropdownItem>
+                <DropdownItem key="details">
+                  <div className="flex items-center gap-2">
+                    <ExternalLink className="size-3" />
+                    <span>View Stats</span>
+                  </div>
+                </DropdownItem>
+                <DropdownItem key="copy">
+                  <div className="flex items-center gap-2">
+                    <RotateCcw className="size-3" />
+                    <span>Copy Config</span>
+                  </div>
+                </DropdownItem>
               </DropdownMenu>
             </Dropdown>
           </div>
         );
       default:
-        return (result as any)[columnKey];
+        return (result as any)[key];
     }
   }, [cheapestId, bestValueId]);
 
@@ -171,12 +176,11 @@ export default function CostCalculatorPage() {
         actions={
           <div className="flex gap-2">
             <Button
-              variant="flat"
-              color="primary"
+              variant="ghost"
               size="sm"
               onPress={syncPrices}
               isLoading={isSyncing}
-              className="gap-2"
+              className="gap-2 text-primary"
             >
               <RefreshCw className={`size-4 ${isSyncing ? "animate-spin" : ""}`} />
               {isSyncing ? "Syncing..." : "Sync Prices"}
@@ -271,7 +275,7 @@ export default function CostCalculatorPage() {
           </Card>
 
           {/* Result Card */}
-          <Card className="p-6 bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+          <Card className="p-6 bg-primary text-white shadow-lg shadow-primary/20 border-none">
             <p className="text-sm opacity-80 uppercase tracking-wider font-semibold mb-1">
               {t("costCalc.estimatedMonthlyCost")}
             </p>
@@ -368,7 +372,7 @@ export default function CostCalculatorPage() {
                       key={name}
                       type="monotone"
                       dataKey={name}
-                      stroke={COLORS[i % COLORS.length]}
+                      stroke={COLORS[i % COLORS.length] as string}
                       fillOpacity={1}
                       fill={`url(#color${i})`}
                       strokeWidth={2}

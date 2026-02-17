@@ -6,7 +6,7 @@ import {
   compareAllModels,
   calculateMonthlyCost,
 } from "@/lib/application/cost-calculator";
-import type { CostComparison, AIModel } from "@/types/cost-calculator";
+import type { CostComparison } from "@/types/cost-calculator";
 import { AI_MODELS } from "@/config/ai-models";
 import { fetchLatestPrices, PRICING_CACHE_KEY } from "@/infrastructure/services/pricing-service";
 import { useSmartNavigation } from "@/hooks/use-smart-navigation";
@@ -17,7 +17,7 @@ export function useCostCalculator() {
   const [dailyRequests, setDailyRequests] = useState(100);
   const [selectedModelId, setSelectedModelId] = useState("gpt-4o");
   
-  const { data: latestModels, error, isValidating, mutate } = useSWR(
+  const { data: latestModels, error: _error, isValidating, mutate } = useSWR(
     PRICING_CACHE_KEY,
     fetchLatestPrices,
     {
