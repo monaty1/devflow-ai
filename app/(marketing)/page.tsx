@@ -1,38 +1,42 @@
-"use client";
-
 import Link from "next/link";
-import {
-  useStaggerIn,
-  useScrollReveal,
-} from "@/hooks/use-gsap";
-import { useTranslation } from "@/hooks/use-translation";
 import { Zap, Monitor, LockOpen, Star, Shield, TrendingUp } from "lucide-react";
-import { FeatureCard } from "@/components/ui/feature-card";
-import { TOOLS_DATA } from "@/config/tools-data";
-import { TOOL_ICON_MAP } from "@/config/tool-icon-map";
-import { GitHubStars } from "@/components/shared/github-stars";
+import { t } from "@/lib/i18n-server";
+import { GsapReveal } from "@/components/marketing/gsap-reveal";
+import { GitHubStarsServer } from "@/components/marketing/github-stars-server";
+import { FeaturesSection } from "@/components/marketing/features-section";
 
-export default function HomePage() {
-  const featuresRef = useStaggerIn("> *", 0.3);
-  const statsRef = useScrollReveal();
-  const ctaRef = useScrollReveal();
-  const { t } = useTranslation();
+async function getGitHubStars(): Promise<number | null> {
+  try {
+    const res = await fetch(
+      "https://api.github.com/repos/albertoguinda/devflow-ai",
+      { next: { revalidate: 3600 } },
+    );
+    if (!res.ok) return null;
+    const data: { stargazers_count?: number } = await res.json();
+    return typeof data.stargazers_count === "number"
+      ? data.stargazers_count
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+export default async function HomePage() {
+  const stars = await getGitHubStars();
 
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Hero Section */}
+      {/* Hero Section — fully server-rendered */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
 
         <div className="container mx-auto px-4 py-24 md:py-32">
           <div className="mx-auto max-w-4xl space-y-6 text-center">
-            {/* Badge */}
             <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-900 dark:bg-blue-900/30 dark:text-blue-200">
               <Zap className="size-4" />
               {t("home.badge")}
             </span>
 
-            {/* Title */}
             <h1 className="text-5xl font-bold leading-tight text-foreground md:text-7xl">
               {t("home.title1")}
               <span className="block text-foreground bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
@@ -40,12 +44,10 @@ export default function HomePage() {
               </span>
             </h1>
 
-            {/* Subtitle */}
             <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
               {t("home.subtitle")}
             </p>
 
-            {/* CTAs */}
             <div className="flex flex-col justify-center gap-4 pt-4 sm:flex-row">
               <Link
                 href="/tools"
@@ -64,8 +66,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section ref={statsRef} className="container mx-auto px-4 py-16">
+      {/* Stats Section — server-rendered with real stars */}
+      <GsapReveal className="container mx-auto px-4 py-16">
         <h2 className="sr-only">Project Stats</h2>
         <div className="mx-auto grid max-w-4xl grid-cols-2 gap-6 md:grid-cols-4">
           {[
@@ -84,45 +86,18 @@ export default function HomePage() {
                   {stat.value}
                 </span>
               ) : (
-                <GitHubStars />
+                <GitHubStarsServer stars={stars} />
               )}
               <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
             </div>
           ))}
         </div>
-      </section>
+      </GsapReveal>
 
-      {/* Features Section */}
-      <section className="border-t border-border bg-muted/30 py-20">
-        <div className="container mx-auto px-4">
-          <div className="mb-12 text-center">
-            <h2 className="mb-3 text-4xl font-bold">{t("home.powerfulTools")}</h2>
-            <p className="text-muted-foreground">
-              {t("home.powerfulToolsDesc")}
-            </p>
-          </div>
+      {/* Features Section — client island (GSAP stagger + icon mapping) */}
+      <FeaturesSection />
 
-          <div
-            ref={featuresRef}
-            className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3"
-          >
-            {TOOLS_DATA.map((tool) => {
-              const Icon = TOOL_ICON_MAP[tool.icon];
-              if (!Icon) return null;
-              return (
-                <FeatureCard
-                  key={tool.id}
-                  icon={Icon}
-                  title={tool.name}
-                  description={tool.description}
-                />
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Why DevFlow Section */}
+      {/* Why DevFlow Section — server-rendered */}
       <section className="py-20">
         <div className="container mx-auto max-w-5xl px-4">
           <div className="mb-12 text-center">
@@ -164,8 +139,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section ref={ctaRef} className="container mx-auto px-4 py-24">
+      {/* CTA Section — client island (GSAP scroll reveal) */}
+      <GsapReveal className="container mx-auto px-4 py-24">
         <div className="mx-auto max-w-3xl rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 p-12 text-center">
           <h2 className="mb-4 text-3xl font-bold text-white">
             {t("home.ctaTitle")}
@@ -190,12 +165,12 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
-      </section>
+      </GsapReveal>
 
-      {/* Footer — pushed to bottom by flex-1 in parent main */}
+      {/* Footer — server-rendered */}
       <footer className="mt-auto border-t py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © 2026 DevFlow AI ·{" "}
+          &copy; 2026 DevFlow AI &middot;{" "}
           <Link
             href="https://www.linkedin.com/in/albertoguindasevilla/"
             target="_blank"
@@ -204,7 +179,7 @@ export default function HomePage() {
           >
             Alberto Guinda
           </Link>
-          {" "}· {t("home.footerFreeOS")} ·{" "}
+          {" "}&middot; {t("home.footerFreeOS")} &middot;{" "}
           <Link
             href="https://github.com/albertoguinda/devflow-ai"
             target="_blank"

@@ -551,9 +551,16 @@ export function testRegex(patternInput: string, input: string): TestResult {
   try {
     const regex = new RegExp(pattern, flags);
     const allMatches: TestMatch[] = [];
+    const MAX_MATCHES = 500;
+    const TIMEOUT_MS = 2000;
+    const startTime = Date.now();
 
     let match;
     while ((match = regex.exec(input)) !== null) {
+      if (allMatches.length >= MAX_MATCHES || Date.now() - startTime > TIMEOUT_MS) {
+        break;
+      }
+
       const groups: Record<string, string> = {};
 
       // Named groups

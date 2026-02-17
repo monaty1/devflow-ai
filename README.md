@@ -15,7 +15,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Tailwind](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 
-**[English](#-what-is-this)** &middot; **[Castellano](#-para-que-sirve)**
+**[English](#-what-is-this)** &middot; **[Castellano](#-para-que-sirve)** &middot; **[TFM Slides (PDF)](./docs/TFM-Slides.pdf)**
 
 </div>
 
@@ -107,6 +107,65 @@ lib/application/<tool>.ts   → Pure logic (no React)
 hooks/use-<tool>.ts         → Hook with state & localStorage
 app/.../tools/<slug>/page   → UI page
 tests/.../<tool>.test.ts    → Unit tests
+```
+
+```mermaid
+---
+config:
+  theme: neo-dark
+---
+flowchart LR
+    classDef ui fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0f172a
+    classDef hook fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#0f172a
+    classDef lib fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#0f172a
+    classDef storage fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#0f172a
+    User((User))
+    subgraph Presentation ["Presentation Layer"]
+        direction TB
+        UI_Input[User Input]:::ui
+        UI_Button[Action Button]:::ui
+        UI_Render[Render Output]:::ui
+    end
+
+    subgraph AppLayer ["Application Layer"]
+        direction TB
+        Hook_State[React State Update]:::hook
+        Hook_Controller[Action Controller]:::hook
+        Hook_History[History Manager]:::hook
+    end
+
+    subgraph DomainLayer ["Domain/Logic Layer"]
+        direction TB
+        Logic_Validate[Validate Function]:::lib
+        Logic_Process[Process/Transform]:::lib
+        Logic_Stats[Calculate Stats]:::lib
+    end
+
+    subgraph Infra ["Infrastructure"]
+        LocalStorage[("Browser LocalStorage")]:::storage
+    end
+    User -->|Type/Paste| UI_Input
+    User -->|Click Process| UI_Button
+    UI_Render -->|Display| User
+
+    UI_Input -->|onChange| Hook_State
+    UI_Button -->|Call| Hook_Controller
+
+    Hook_State -->|Reactive| Logic_Validate
+    Logic_Validate -->|Return Status| Hook_State
+    Hook_State -->|Show Error/Valid| UI_Render
+
+    Hook_Controller -->|Invoke| Logic_Process
+    Logic_Process -->|Return Result| Hook_Controller
+    Hook_Controller -->|Update Result State| UI_Render
+
+    Logic_Process -->|Call| Logic_Stats
+    Logic_Stats -->|Return Data| Logic_Process
+
+    Hook_Controller -->|Save| Hook_History
+    Hook_History -->|Persist| LocalStorage
+    LocalStorage -.->|Load on Init| Hook_History
+    linkStyle default stroke:#64748b,stroke-width:1.5px
 ```
 
 ---
@@ -290,6 +349,65 @@ lib/application/<tool>.ts   → Logica pura (sin React)
 hooks/use-<tool>.ts         → Hook con estado y localStorage
 app/.../tools/<slug>/page   → Pagina UI
 tests/.../<tool>.test.ts    → Tests unitarios
+```
+
+```mermaid
+---
+config:
+  theme: neo-dark
+---
+flowchart LR
+    classDef ui fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0f172a
+    classDef hook fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#0f172a
+    classDef lib fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#0f172a
+    classDef storage fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#0f172a
+    User((User))
+    subgraph Presentation ["Presentation Layer"]
+        direction TB
+        UI_Input[User Input]:::ui
+        UI_Button[Action Button]:::ui
+        UI_Render[Render Output]:::ui
+    end
+
+    subgraph AppLayer ["Application Layer"]
+        direction TB
+        Hook_State[React State Update]:::hook
+        Hook_Controller[Action Controller]:::hook
+        Hook_History[History Manager]:::hook
+    end
+
+    subgraph DomainLayer ["Domain/Logic Layer"]
+        direction TB
+        Logic_Validate[Validate Function]:::lib
+        Logic_Process[Process/Transform]:::lib
+        Logic_Stats[Calculate Stats]:::lib
+    end
+
+    subgraph Infra ["Infrastructure"]
+        LocalStorage[("Browser LocalStorage")]:::storage
+    end
+    User -->|Type/Paste| UI_Input
+    User -->|Click Process| UI_Button
+    UI_Render -->|Display| User
+
+    UI_Input -->|onChange| Hook_State
+    UI_Button -->|Call| Hook_Controller
+
+    Hook_State -->|Reactive| Logic_Validate
+    Logic_Validate -->|Return Status| Hook_State
+    Hook_State -->|Show Error/Valid| UI_Render
+
+    Hook_Controller -->|Invoke| Logic_Process
+    Logic_Process -->|Return Result| Hook_Controller
+    Hook_Controller -->|Update Result State| UI_Render
+
+    Logic_Process -->|Call| Logic_Stats
+    Logic_Stats -->|Return Data| Logic_Process
+
+    Hook_Controller -->|Save| Hook_History
+    Hook_History -->|Persist| LocalStorage
+    LocalStorage -.->|Load on Init| Hook_History
+    linkStyle default stroke:#64748b,stroke-width:1.5px
 ```
 
 ---

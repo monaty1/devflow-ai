@@ -60,12 +60,11 @@ jobs:
 
       - name: npm audit (high + critical)
         run: npm audit --audit-level=high
-        continue-on-error: true
 
   build:
     name: Production Build
     runs-on: ubuntu-latest
-    needs: [quality]
+    needs: [quality, security]
     steps:
       - uses: actions/checkout@v4
 

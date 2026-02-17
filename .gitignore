@@ -46,26 +46,23 @@ next-env.d.ts
 
 # Claude Code context (competitive advantage)
 .claude/
-guidelines/
-agents/
+docs/guidelines/
+docs/agents/
+docs/settings.md
 .mcp.json
 
 # Personal notes
 MEJORAS.md
-settings.md
+docs/GEMINI.md
+docs/FIX_FINAL.md
 system_prompts_leaks-main/
-
-.vercel
-
-# Vercel
 
 # Vercel
 .vercel
 
 # Claude
-.claude
-.CLAUDE.md
 CLAUDE.md
+GEMINI.md
 
 # Internal planning
 TODO.md

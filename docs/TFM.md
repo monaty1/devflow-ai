@@ -3,25 +3,27 @@
 **Autor:** Alberto Guinda Sevilla
 **Master:** Desarrollo con IA (BIG School) + Frontend Development
 **Fecha:** Febrero 2026
-**Repositorio:** https://github.com/user/DevFlowAI
-**Demo:** https://devflow-ai.vercel.app
+**Repositorio:** https://github.com/albertoguinda/devflow-ai
+**Demo:** https://devflowai.vercel.app
 
 ---
 
 ## Resumen Ejecutivo
 
-DevFlow AI es una plataforma SaaS que centraliza 5 herramientas esenciales para desarrolladores que trabajan con IA: analisis de prompts, revision de codigo, calculo de costes, visualizacion de tokens y gestion de contexto.
+DevFlow AI es una plataforma open-source que centraliza **15 herramientas** esenciales para desarrolladores que trabajan con IA y desarrollo web moderno. Desde analisis de prompts y revision de codigo hasta generacion de UUIDs y construccion visual de expresiones cron.
 
-**Problema identificado:** Los desarrolladores utilizan multiples herramientas fragmentadas (10+) para tareas relacionadas con IA, generando friccion, costes ocultos y perdida de productividad.
+**Problema identificado:** Los desarrolladores utilizan multiples herramientas fragmentadas (10+) para tareas cotidianas, generando friccion, costes ocultos y perdida de productividad.
 
-**Solucion propuesta:** Una plataforma unificada, gratuita y de codigo abierto que ejecuta todo localmente sin necesidad de API keys externas.
+**Solucion propuesta:** Una plataforma unificada, gratuita y de codigo abierto que ejecuta todo localmente en el navegador, sin necesidad de login, API keys ni backend.
 
 **Resultados:**
-- 5 herramientas funcionales end-to-end
-- 100% ejecucion local (sin APIs externas)
-- 80+ tests con coverage >70%
-- Lighthouse score 95+ en performance
-- Deploy exitoso en produccion
+- 15 herramientas funcionales end-to-end
+- 100% ejecucion local (sin APIs externas para procesamiento)
+- 644 tests con coverage estrategico 100/80/0 per-file
+- Lighthouse score **100/100/100/100** en Desktop
+- Homepage optimizada con Server Components (RSC) para rendimiento movil
+- Internacionalizacion completa (English/Castellano, 559 claves)
+- Deploy en produccion con CI/CD y error tracking (Sentry)
 
 ---
 
@@ -34,28 +36,31 @@ El auge de los Large Language Models (LLMs) ha transformado el desarrollo de sof
 1. **Seguridad:** Prompt injection y jailbreak son vulnerabilidades reales
 2. **Costes:** Sin visibilidad, es facil gastar miles de dolares sin optimizacion
 3. **Complejidad:** Tokenizacion, context windows y limites varian por modelo
-4. **Fragmentacion:** Cada tarea requiere una herramienta diferente
+4. **Fragmentacion:** Cada tarea cotidiana requiere una herramienta diferente
+
+Ademas, los desarrolladores frontend enfrentan tareas repetitivas diarias: formatear JSON, generar UUIDs, construir expresiones cron, ordenar clases Tailwind, convertir a Base64... DevFlow AI unifica ambos mundos.
 
 ### 1.2 Objetivos del Proyecto
 
 #### Objetivos Academicos
-- Aplicar conocimientos de React 19.2 y Next.js 16.1
-- Implementar Clean Architecture en un proyecto real
-- Crear tests comprehensivos con Vitest
+- Aplicar React 19 y Next.js 16 con App Router y Server Components
+- Implementar Clean Architecture en un proyecto real de 15 herramientas
+- Crear una suite de tests comprehensiva (644 tests) con Vitest
 - Utilizar IA generativa (Claude Code) como herramienta de desarrollo
-- Demostrar dominio de TypeScript 5.7 en modo estricto
+- Demostrar dominio de TypeScript 5 en modo maximo estricto
 
 #### Objetivos Tecnicos
-- Construir 5 herramientas funcionales en 26 dias
-- Lograr >70% coverage en tests
-- Deploy en produccion con CI/CD
-- Lighthouse score >90 en todas las metricas
-- Responsive design mobile-first
+- Construir 15 herramientas funcionales con patron arquitectonico consistente
+- Lograr coverage estrategico 100/80/0 con enforcement per-file
+- Deploy en produccion con CI/CD completo (lint, type-check, tests, build)
+- Lighthouse score 100 en todas las metricas (Desktop)
+- Internacionalizacion completa (EN/ES)
+- Seguridad enterprise: CSP, HSTS, prototype pollution protection
 
 #### Objetivos de Producto
-- Ofrecer valor real a desarrolladores
-- Ejecutar analisis localmente (privacidad)
-- UX fluida sin friccion
+- Ofrecer valor real a desarrolladores en su dia a dia
+- Ejecutar todo localmente (privacidad + coste cero)
+- UX fluida con dark/light mode, responsive design, accesibilidad WCAG AAA
 - Codigo abierto y extensible
 
 ---
@@ -70,7 +75,7 @@ Los LLMs como GPT-4, Claude y Gemini procesan texto mediante tokenizacion. Cada 
 - Context window disponible
 - Calidad de la respuesta
 
-**Aplicacion en DevFlow AI:** Token Visualizer simula BPE y Cost Calculator compara precios en tiempo real.
+**Aplicacion en DevFlow AI:** Token Visualizer simula BPE y Cost Calculator compara precios de 10+ modelos en tiempo real.
 
 #### Prompt Engineering
 La calidad de un prompt impacta directamente en la respuesta del LLM. Tecnicas clave:
@@ -79,40 +84,38 @@ La calidad de un prompt impacta directamente en la respuesta del LLM. Tecnicas c
 - Output format specification (JSON, XML, Markdown)
 - Chain-of-thought prompting
 
-**Aplicacion en DevFlow AI:** Prompt Analyzer evalua estos elementos y sugiere mejoras.
+**Aplicacion en DevFlow AI:** Prompt Analyzer evalua estos elementos, detecta vulnerabilidades y sugiere mejoras con scoring 1-10.
 
 #### Security Vulnerabilities
 - **Prompt Injection:** Manipular el system prompt con instrucciones del usuario
 - **Jailbreak (DAN):** Bypass de restricciones eticas
 - **Data Exfiltration:** Extraer el system prompt o datos sensibles
 
-**Aplicacion en DevFlow AI:** Deteccion automatica con regex patterns + analisis semantico.
+**Aplicacion en DevFlow AI:** Deteccion automatica con regex patterns + analisis semantico en Prompt Analyzer.
 
 ### 2.2 Arquitectura Frontend Moderna
 
-#### React 19.2 Features
-- `useActionState`: Gestion de estado para Server Actions
-- `Activity`: Indicadores de carga automaticos
+#### React 19
 - `ref` as prop: Simplificacion de forwarding
-- React Compiler: Optimizacion automatica sin useMemo/useCallback
+- React Compiler: Optimizacion automatica sin useMemo/useCallback manuales
+- Mejoras en Suspense y streaming SSR
 
-**Aplicacion:** Usado en formularios (login, analisis de prompts) y estado de carga.
+**Aplicacion:** Hooks personalizados para cada herramienta, Context para favoritos, Zustand para estado global.
 
-#### Next.js 16.1 Features
-- **App Router:** Routing basado en sistema de archivos
+#### Next.js 16
+- **App Router:** Routing basado en sistema de archivos con Server Components
 - **Turbopack:** Build 10x mas rapido que Webpack
-- **React Compiler:** Habilitado por defecto
-- **cacheLife:** Control granular de cache
-- **Server Components:** Renderizado en servidor por defecto
+- **React Server Components (RSC):** Renderizado en servidor por defecto, zero JS para componentes estaticos
+- **ISR (Incremental Static Regeneration):** Paginas estaticas con revalidacion periodica
 
-**Aplicacion:** Todo el proyecto usa App Router. Server Components para paginas estaticas, Client Components solo donde se necesita interactividad.
+**Aplicacion:** Homepage como Server Component async con ISR. Client Components solo donde hay interactividad (GSAP, formularios). Fetch de GitHub API en el servidor.
 
 #### Tailwind CSS v4
-- **CSS-first config:** `@theme` en lugar de `tailwind.config.js`
-- **Better performance:** Menor bundle size
-- **Native CSS variables:** Mejor integracion con navegadores
+- **CSS-first config:** `@theme inline` en lugar de `tailwind.config.js`
+- **Variables CSS nativas:** Mejor integracion con el navegador
+- **Menor bundle size:** Purga mas agresiva
 
-**Aplicacion:** Tema custom definido en `app/globals.css` con colores primarios.
+**Aplicacion:** Tema custom definido en `app/globals.css` con tokens de diseno, dark mode via CSS custom properties.
 
 ### 2.3 Clean Architecture
 
@@ -121,20 +124,20 @@ La calidad de un prompt impacta directamente en la respuesta del LLM. Tecnicas c
 +------------------------------------------+
 |        Presentation Layer                |  <- app/, components/
 +------------------------------------------+
-|        Application Layer                 |  <- lib/application/, hooks/
+|        Application Layer                 |  <- hooks/, lib/application/
 +------------------------------------------+
-|         Domain Layer                     |  <- types/, lib/domain/
+|         Domain Layer                     |  <- types/
 +------------------------------------------+
-|      Infrastructure Layer                |  <- lib/infrastructure/
+|      Infrastructure Layer                |  <- config/, lib/stores/
 +------------------------------------------+
 ```
 
 **Regla de dependencia:** Las flechas apuntan hacia adentro. Domain nunca depende de capas externas.
 
 **Aplicacion en DevFlow AI:**
-- `types/`: Define entidades puras (PromptAnalysisResult, CodeReviewResult)
-- `lib/application/`: Logica de negocio (analyzePrompt, reviewCode)
-- `hooks/`: Conectan UI con application layer
+- `types/`: Define entidades puras (interfaces TypeScript)
+- `lib/application/`: Logica de negocio pura (sin React, sin browser APIs)
+- `hooks/`: Conectan UI con application layer (estado, localStorage, orquestacion)
 - `app/`: Presentacion, solo renderizado
 
 ---
@@ -143,81 +146,73 @@ La calidad de un prompt impacta directamente en la respuesta del LLM. Tecnicas c
 
 ### 3.1 Requisitos Funcionales
 
-**RF-01: Sistema de Autenticacion**
-- El usuario debe poder registrarse e iniciar sesion
-- Los datos se persisten en localStorage
-- Rutas protegidas redirigen a /login si no autenticado
+**RF-01 a RF-15: Las 15 Herramientas**
 
-**RF-02: Prompt Analyzer**
-- Analizar prompts sin necesidad de API externa
-- Detectar vulnerabilidades (injection, jailbreak)
-- Calcular score de calidad (1-10)
-- Sugerir mejoras especificas
+| # | Herramienta | Descripcion | Complejidad |
+|---|------------|-------------|-------------|
+| 1 | **JSON Formatter** | Formatear, minificar, validar JSON. Extraer paths, diff, generar TS interfaces | Alta |
+| 2 | **Variable Name Wizard** | Generar nombres y convertir entre 8 convenciones (camel, snake, kebab...) | Media |
+| 3 | **Regex Humanizer** | Explicar regex en lenguaje natural, generar patrones, tester en tiempo real | Alta |
+| 4 | **Code Review Assistant** | Analisis de calidad: code smells, complejidad ciclomatica, refactoring | Alta |
+| 5 | **API Cost Calculator** | Comparar costes de 10+ modelos de IA con proyecciones mensuales | Media |
+| 6 | **Base64 Encoder/Decoder** | Encode/decode con soporte URL-safe, data URLs y Unicode | Media |
+| 7 | **UUID Generator** | Generar UUID v1, v4, v7. Validacion, parsing y bulk generation hasta 1000 | Media |
+| 8 | **DTO-Matic** | Convertir JSON a interfaces TypeScript, entities, mappers y schemas Zod | Alta |
+| 9 | **Git Commit Generator** | Commits convencionales con tipos, scopes, emojis y validacion | Media |
+| 10 | **Cron Builder** | Constructor visual de expresiones cron con preview de ejecuciones | Alta |
+| 11 | **Tailwind Sorter** | Ordenar clases por categoria, eliminar duplicados, ordenar variantes | Media |
+| 12 | **Prompt Analyzer** | Evaluar calidad de prompts, detectar inyecciones, sugerir mejoras | Alta |
+| 13 | **Token Visualizer** | Visualizar tokenizacion en tiempo real con estimacion de costes por token | Media |
+| 14 | **Context Manager** | Organizar context windows con chunking, prioridades y export XML/JSON/MD | Alta |
+| 15 | **HTTP Status Finder** | Referencia completa de 55+ codigos HTTP con ejemplos y guias de uso | Baja |
 
-**RF-03: Code Review Assistant**
-- Soportar 8+ lenguajes (TypeScript, Python, Java, etc.)
-- Detectar code smells y security issues
-- Calcular complejidad ciclomatica
-- Generar reporte con severidad (critical, warning, info)
+**RF-16: Sistema de Favoritos**
+- Persistencia en localStorage via React Context + useReducer
 
-**RF-04: Cost Calculator**
-- Comparar costes de 10+ modelos de IA
-- Calculo por request y mensual
-- Ordenar por precio (cheapest first)
-- Soporte para presets (Chat, Code, Analysis)
+**RF-17: Historial por Herramienta**
+- Hook generico `useToolHistory<T>` con max 50 items por herramienta
 
-**RF-05: Token Visualizer**
-- Visualizar tokenizacion en tiempo real
-- Color-code para distinguir tokens
-- Estimar coste por modelo
-- Copiar breakdown al clipboard
-
-**RF-06: Context Manager**
-- Crear context windows con multiples documentos
-- Asignar prioridades (high, medium, low)
-- Exportar a XML, JSON, Markdown
-- Calcular utilizacion de tokens
-
-**RF-07: Favorites & History**
-- Sistema de likes persistente
-- Historial de analisis con busqueda
-- Integracion con todas las herramientas
+**RF-18: Internacionalizacion**
+- 559 claves traducidas en English y Castellano
+- Cambio de idioma en tiempo real sin recarga
 
 ### 3.2 Requisitos No Funcionales
 
 **RNF-01: Performance**
-- First Contentful Paint < 1.5s
-- Time to Interactive < 3s
-- Lighthouse Performance score > 90
+- Lighthouse Performance Desktop: 100
+- Server Components para renderizado instantaneo del HTML
+- ISR para datos dinamicos (GitHub stars) con revalidacion cada hora
 
 **RNF-02: Accesibilidad**
-- WCAG 2.1 Level AA compliance
+- WCAG 2.1 Level AAA como objetivo
 - Navegacion por teclado completa
-- Screen reader support
+- Screen reader support con ARIA labels
+- Skip links implementados
 
 **RNF-03: Responsive Design**
-- Mobile-first approach
+- Mobile-first approach con Tailwind CSS v4
 - Breakpoints: 640px, 768px, 1024px, 1280px
 - Touch-friendly (min 44x44px targets)
 
 **RNF-04: Seguridad**
-- No almacenar secrets en codigo
-- Sanitizar inputs
-- CORS configurado correctamente
-- Content Security Policy headers
+- Content Security Policy estricta (sin `unsafe-eval`)
+- HSTS con max-age 2 anos y preload
+- Prototype pollution protection en procesamiento JSON
+- npm audit en CI + GitHub Dependabot
+- Zero secretos en codigo fuente
 
 **RNF-05: Mantenibilidad**
-- Test coverage > 70%
-- TypeScript strict mode
-- ESLint con reglas estrictas
-- Documentacion inline (JSDoc)
+- Coverage estrategico 100/80/0 con enforcement per-file
+- TypeScript maximum strict mode (15+ flags estrictos)
+- ESLint 9 flat config
+- Limites de codigo: funciones max 20 lineas, archivos max 200 lineas
 
 ### 3.3 Decisiones de Diseno
 
 **Por que Next.js 16 en lugar de Vite + React?**
-- SSR built-in: Mejor SEO y performance inicial
+- Server Components: Reduce JS enviado al cliente, mejora LCP
+- ISR: Paginas estaticas con revalidacion sin rebuild completo
 - File-based routing: Menos boilerplate
-- Server Components: Reduce bundle size del cliente
 - Vercel integration: Deploy trivial con preview URLs
 
 **Por que analisis local en lugar de API calls?**
@@ -226,522 +221,499 @@ La calidad de un prompt impacta directamente en la respuesta del LLM. Tecnicas c
 - Latencia: Respuesta inmediata sin round-trip
 - Offline-capable: Funciona sin internet
 
-**Por que HeroUI v3 + NextUI v2 Table?**
-- HeroUI v3: Moderna, accesible, pero sin componente Table aun
-- NextUI v2: Solo para Table component (herencia)
-- Mixing: Posible sin conflictos, misma base (Tailwind)
+**Por que HeroUI v3?**
+- Built on React Aria: Accesibilidad de primera clase
+- Compound patterns: API limpia y componible
+- Tailwind CSS v4 compatible: Mismo sistema de estilos
+
+**Por que el patron 5-capas por herramienta?**
+- Consistencia: Las 15 herramientas siguen el mismo patron
+- Testabilidad: La logica pura se testa sin React
+- Mantenibilidad: Cada capa tiene una responsabilidad clara
+- Escalabilidad: Anadir herramienta 16 sigue el mismo flujo
 
 ---
 
 ## 4. Implementacion
 
-### 4.1 Arquitectura de Componentes
+### 4.1 Patron Arquitectonico: 5 Capas por Herramienta
+
+Cada una de las 15 herramientas sigue este patron estricto:
 
 ```
-app/
-├── (marketing)/          # Grupo de rutas publicas
-│   ├── layout.tsx        # Layout con Navbar
-│   ├── page.tsx          # Landing con GSAP animations
-│   ├── pricing/          # Planes Free/Pro/Enterprise
-│   ├── about/            # Mision, tech stack, contacto
-│   └── docs/             # Documentacion herramientas
-├── (auth)/               # Grupo de autenticacion
-│   ├── login/            # Formulario login
-│   └── register/         # Formulario registro
-├── (dashboard)/          # Grupo protegido
-│   ├── layout.tsx        # Sidebar navigation
-│   ├── page.tsx          # Dashboard home
-│   ├── tools/            # 5 herramientas
-│   ├── favorites/        # Sistema de likes
-│   ├── history/          # Historial con tabla
-│   └── settings/         # Preferencias usuario
-└── not-found.tsx         # 404 personalizada
+types/<tool>.ts                     → Interfaces y tipos puros
+lib/application/<tool>.ts           → Logica de negocio (sin React, sin browser APIs)
+hooks/use-<tool>.ts                 → Hook React (estado, localStorage, orquestacion)
+app/(dashboard)/tools/<slug>/page   → Pagina UI ("use client")
+tests/unit/application/<tool>.test  → Tests unitarios de la logica pura
 ```
 
-**Total rutas: 17 (>10 requeridas para curso)**
+**Flujo de dependencias:** `Presentation → Application → Domain`
 
-### 4.2 Herramientas Implementadas
+Las 15 herramientas verificadas con 0 violaciones de capas:
+
+| # | Tool | types/ | lib/app/ | hooks/ | page | tests/ |
+|---|------|--------|----------|--------|------|--------|
+| 1 | JSON Formatter | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 2 | Variable Name Wizard | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 3 | Regex Humanizer | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 4 | Code Review | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 5 | Cost Calculator | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 6 | Base64 | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 7 | UUID Generator | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 8 | DTO-Matic | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 9 | Git Commit Generator | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 10 | Cron Builder | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 11 | Tailwind Sorter | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 12 | Prompt Analyzer | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 13 | Token Visualizer | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 14 | Context Manager | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 15 | HTTP Status Finder | ✓ | ✓ | ✓ | ✓ | ✓ |
+
+### 4.2 Herramientas Destacadas
 
 #### 4.2.1 Prompt Analyzer
 
 **Archivo:** `lib/application/prompt-analyzer.ts`
 
 **Algoritmo:**
-1. Deteccion de security flags: Regex patterns para injection, jailbreak, DAN
-2. Analisis de calidad:
-   - Vagueness check (palabras genericas)
-   - Role presence (system prompt definition)
-   - Output format specification
-   - Context adequacy
-3. Scoring: Base 10, deducciones por issues y security flags
-4. Suggestions: Basado en issues detectados
-
-**Codigo clave:**
-```typescript
-export function analyzePrompt(prompt: string): PromptAnalysisResult {
-  const issues = detectIssues(prompt)
-  const securityFlags = detectSecurityFlags(prompt)
-  const score = calculateScore(issues, securityFlags, prompt)
-
-  return {
-    id: crypto.randomUUID(),
-    prompt,
-    score,
-    category: getScoreCategory(score),
-    issues,
-    suggestions: generateSuggestions(issues, prompt),
-    securityFlags,
-    tokenCount: estimateTokens(prompt),
-    analyzedAt: new Date().toISOString(),
-  }
-}
-```
+1. Deteccion de security flags: regex patterns para injection, jailbreak, DAN
+2. Analisis de calidad: vagueness, role presence, output format, context adequacy
+3. Scoring: Base 10 con deducciones por issues y security flags
+4. Sugerencias: Generadas segun issues detectados
 
 #### 4.2.2 Code Review Assistant
 
 **Archivo:** `lib/application/code-review.ts`
 
-**Algoritmo:**
-1. Security patterns: eval(), innerHTML, hardcoded secrets, console.log
-2. Code smells: Parametros excesivos, nested if, loose equality, empty catch
-3. Metricas:
-   - Lines of code (total, blank, comments, code)
-   - Cyclomatic complexity (conteo de branches)
-   - Duplicate risk (lineas unicas vs totales)
-   - Maintainability score (formula compuesta)
+**Deteccion de vulnerabilidades:**
+- `eval()` (severity: critical)
+- `innerHTML` / XSS (severity: critical)
+- Credenciales hardcodeadas (severity: critical)
+- `console.log` en produccion (severity: warning)
+- Loose equality `==` (severity: info)
+- Empty catch blocks (severity: critical)
 
-#### 4.2.3 Cost Calculator
+**Metricas calculadas:**
+- Lines of code (total, blank, comments, code)
+- Cyclomatic complexity (conteo de branches)
+- Duplicate risk (lineas unicas vs totales)
+- Maintainability score (formula compuesta)
 
-**Archivo:** `lib/application/cost-calculator.ts`
+#### 4.2.3 JSON Formatter
 
-**Data source:** `config/ai-models.ts` con 10 modelos actualizados (Febrero 2026)
+**Archivo:** `lib/application/json-formatter.ts`
 
-**Features:**
-- Comparacion en tiempo real
-- Monthly cost estimation (dailyRequests x avgTokens x 30)
-- Presets (Chat, Code, Analysis)
-- Highlight cheapest model
+**Features implementadas:**
+- Formatear con indentacion configurable
+- Minificar eliminando whitespace
+- Validar con mensajes de error detallados
+- Extraer JSON paths
+- Generar interfaces TypeScript automaticamente
+- Comparar dos documentos JSON
+- Calcular estadisticas (keys, depth, types)
+- **Prototype pollution protection:** filtra `__proto__`, `constructor`, `prototype`
 
-#### 4.2.4 Token Visualizer
+#### 4.2.4 Cron Builder
 
-**Archivo:** `lib/application/token-visualizer.ts`
-
-**Algoritmo (BPE Simulation):**
-```typescript
-function tokenizeText(text: string): TokenSegment[] {
-  const regex = /(\s+|[.,!?;:]|[a-zA-Z]+|[0-9]+|[^\s\w])/g
-  const matches = text.match(regex)
-
-  return matches.map((match, i) => {
-    if (match.length > 6 && /^[a-zA-Z]+$/.test(match)) {
-      return splitIntoSubtokens(match)
-    }
-    return { text: match, tokenId: i, color: TOKEN_COLORS[i % COLORS.length] }
-  })
-}
-```
-
-#### 4.2.5 Context Manager
-
-**Archivo:** `lib/application/context-manager.ts`
+**Archivo:** `lib/application/cron-builder.ts`
 
 **Features:**
-- CRUD completo de documentos
-- Priority-based ordering (High -> Medium -> Low)
-- Export a 3 formatos:
-  - XML: Optimizado para Claude (`<document>` tags)
-  - JSON: Programmatic use
-  - Markdown: Human-readable docs
+- Constructor visual de expresiones cron
+- Traduccion a lenguaje natural (Castellano)
+- Calculo de proximas N ejecuciones con fechas reales
+- Validacion de rangos por campo (minuto, hora, dia, mes, dia de semana)
+- Soporte para steps, ranges y lists
 
-### 4.3 Custom Hooks
+### 4.3 Server Components y Optimizacion
 
-**usePromptAnalyzer**
-```typescript
-export function usePromptAnalyzer() {
-  const [prompt, setPrompt] = useState("")
-  const [result, setResult] = useState<PromptAnalysisResult | null>(null)
-  const [history, setHistory] = useState(loadHistory)
+La homepage (`app/(marketing)/page.tsx`) fue refactorizada de un monolito `"use client"` a una arquitectura de **Server Component con Client Islands**:
 
-  const analyze = useCallback(async () => {
-    const result = analyzePrompt(prompt)
-    setResult(result)
-    saveToHistory(result)
-  }, [prompt])
-
-  return { prompt, setPrompt, result, analyze, history }
-}
+```
+page.tsx (Server Component - async)
+  ├── Hero Section           → Server (0 JS al cliente)
+  ├── Stats Section          → Server + GsapReveal island
+  │   └── GitHubStarsServer  → Server fetch con ISR 1h
+  ├── Features Grid          → Client island (GSAP stagger)
+  ├── Why DevFlow            → Server (0 JS al cliente)
+  ├── CTA Section            → Server + GsapReveal island
+  └── Footer                 → Server (0 JS al cliente)
 ```
 
-**useGsap (5 hooks)**
-- useFadeIn - Fade in on mount
-- useStaggerIn - Stagger children
-- useScrollReveal - Intersection Observer + GSAP
-- usePulse - Scale animation on trigger
-- useCounter - Animated number counter
+**Impacto medido:**
+- GitHub stars: de fetch client-side a server fetch con revalidacion 1h
+- Hero y Footer: 0 bytes de JS enviados al navegador
+- LCP (mobile): reduccion significativa al renderizar HTML en el servidor
 
 ### 4.4 Gestion de Estado
 
-**Context API (Auth)**
-```typescript
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+**Zustand (Locale):**
+- Store minimalista para idioma (en/es)
+- Persistido en localStorage key `devflow-locale`
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState<User | null>(null)
+**React Context + useReducer (Favoritos):**
+- Patron funcional con dispatch de acciones
+- Persistido en localStorage key `devflow-favorites`
 
-  const login = async (email: string, password: string) => {
-    const mockUser = { id: crypto.randomUUID(), email, name: email.split("@")[0] }
-    setUser(mockUser)
-    localStorage.setItem("devflow-user", JSON.stringify(mockUser))
-  }
+**useToolHistory<T> (Historial por herramienta):**
+- Hook generico reutilizado en las 15 herramientas
+- Max 50 items por herramienta
+- Persistencia automatica en localStorage
 
-  return <AuthContext.Provider value={{ user, login, logout }}>{children}</AuthContext.Provider>
-}
-```
+### 4.5 Internacionalizacion (i18n)
 
-**useReducer (Favorites)**
-```typescript
-function favoritesReducer(state: FavoritesState, action: FavoritesAction) {
-  switch (action.type) {
-    case "ADD_FAVORITE":
-      return { ...state, favorites: [...state.favorites, { toolId: action.payload }] }
-    case "REMOVE_FAVORITE":
-      return { ...state, favorites: state.favorites.filter(f => f.toolId !== action.payload) }
-    default:
-      return state
-  }
-}
-```
+**Sistema custom ligero** (sin dependencia de i18next):
+- 559 claves de traduccion en `locales/en.json` y `locales/es.json`
+- Hook `useTranslation()` con interpolacion `{key}`
+- Funcion server-side `t()` para Server Components
+- Cambio de idioma instantaneo via Zustand
 
-### 4.5 Testing
+### 4.6 Seguridad
 
-**Framework:** Vitest + Testing Library
+**HTTP Security Headers (via next.config.ts):**
 
-**Archivos de test:**
-- prompt-analyzer.test.ts (11 tests)
-- cost-calculator.test.ts (15 tests)
-- code-review.test.ts (15 tests)
-- context-manager.test.ts (16 tests)
-- token-visualizer.test.ts (19 tests)
-- errors.test.ts (4 tests)
+| Header | Valor |
+|--------|-------|
+| Content-Security-Policy | `default-src 'self'`, `object-src 'none'`, `frame-ancestors 'none'`, sin `unsafe-eval` |
+| Strict-Transport-Security | `max-age=63072000; includeSubDomains; preload` (2 anos) |
+| X-Frame-Options | DENY |
+| X-Content-Type-Options | nosniff |
+| Permissions-Policy | camera, microphone, geolocation disabled |
+| Referrer-Policy | strict-origin-when-cross-origin |
 
-**Total: 80 tests pasando**
-
-### 4.6 ErrorBoundary (Class Component)
-
-**Requisito del curso:** Implementar al menos 1 Class Component
-
-```typescript
-export class ErrorBoundary extends Component<Props, State> {
-  static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error }
-  }
-
-  override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("ErrorBoundary caught:", error, errorInfo)
-  }
-
-  override render() {
-    if (this.state.hasError) {
-      return <ErrorFallbackUI error={this.state.error} onReset={this.handleReset} />
-    }
-    return this.props.children
-  }
-}
-```
+**Application Security:**
+- Prototype pollution protection en JSON processing
+- ReDoS protection en Regex Humanizer (timeout 2s + limite 500 matches)
+- Zero `eval()`, zero `Function()`, zero `innerHTML` en el codigo fuente
+- TypeScript strict mode previene categorias enteras de bugs
+- npm audit en CI (bloquea merges en vulnerabilidades high/critical)
+- GitHub Dependabot para monitoring de supply chain
 
 ---
 
 ## 5. Testing y Validacion
 
-### 5.1 Tests Unitarios
+### 5.1 Estrategia: 100/80/0
 
-**Comando:**
-```bash
-npm test
+Modelo de coverage estrategico con enforcement per-file:
+
+| Tier | Ruta | Objetivo | Justificacion |
+|------|------|----------|---------------|
+| **CORE (100%)** | `lib/application/*.ts` | 80-100% per file | Logica de negocio pura, maxima criticidad |
+| **IMPORTANT (80%)** | `components/shared/*.tsx` | 80% | Componentes UI interactivos |
+| **INFRA (0%)** | `types/`, `config/`, `hooks/` | Excluido | TypeScript compiler garantiza correctitud |
+
+**Enforcement:** Vitest con `perFile: true` — cada archivo individual debe cumplir los umbrales. No se permite que un archivo con alta cobertura compense uno con baja.
+
+### 5.2 Resultados de Tests
+
+```
+Test Files  20 passed (20)
+Tests       644 passed (644)
+Duration    ~9s
 ```
 
-**Output:**
+**Distribucion por herramienta:**
+
+| Test File | Tests | Lineas | Calidad |
+|-----------|-------|--------|---------|
+| uuid-generator | 65 | 449 | Excelente |
+| regex-humanizer | 59 | 442 | Excelente |
+| cron-builder | 52 | 498 | Excelente |
+| variable-name-wizard | 50 | ~400 | Excelente |
+| git-commit-generator | 48 | ~380 | Excelente |
+| base64 | 42 | 354 | Excelente |
+| json-formatter | 38 | 364 | Excelente |
+| dto-matic | 39 | ~350 | Muy bueno |
+| code-review | 32 | 440 | Muy bueno |
+| tailwind-sorter | 30 | ~300 | Muy bueno |
+| http-status-finder | 28 | 309 | Bueno |
+| prompt-analyzer | 19 | ~200 | Bueno |
+| cost-calculator | 17 | 146 | Bueno |
+| token-visualizer | 19 | ~180 | Bueno |
+| context-manager | 16 | ~150 | Bueno |
+| + 4 component tests | 41 | ~380 | Bueno |
+| + 1 domain test | 4 | 44 | Basico |
+
+### 5.3 Tipos de Tests Implementados
+
+**Tests de logica pura (no mocks):**
+- Verificacion de outputs exactos: `expect(result).toBe('{"name":"John"}')`
+- Precision matematica: `expect(cost).toBeCloseTo(0.0025, 6)`
+- Roundtrip testing: encode → decode → verifica original
+- Edge cases: inputs vacios, Unicode, valores limite, estructuras anidadas
+
+**Tests de seguridad:**
+- Deteccion de `eval()` con severity critical
+- Deteccion de XSS via innerHTML
+- Deteccion de credenciales hardcodeadas
+- Prevencion de loops infinitos con zero-length matches
+
+**Tests de branches:**
+- 50+ tests explicitamente disenados para cubrir ramas no cubiertas
+- Secciones "uncovered branches" en multiples archivos de test
+
+**Tests de componentes:**
+- CopyButton: verificacion de cambio de icono y ARIA labels
+- StatusBadge: verificacion de clases CSS por variante
+- ToolHeader: verificacion de navegacion y slots
+- ToastContainer: verificacion de limite maximo y dismiss
+
+### 5.4 Metricas de Calidad
+
 ```
- tests/unit/domain/errors.test.ts (4 tests)
- tests/unit/application/token-visualizer.test.ts (19 tests)
- tests/unit/application/code-review.test.ts (15 tests)
- tests/unit/application/prompt-analyzer.test.ts (11 tests)
- tests/unit/application/context-manager.test.ts (16 tests)
- tests/unit/application/cost-calculator.test.ts (15 tests)
-
-Test Files  6 passed (6)
-Tests  80 passed (80)
+ESLint:        0 errores, 0 warnings
+TypeScript:    0 errores (strict mode maximo)
+npm audit:     0 vulnerabilidades
+Build:         OK (28 paginas generadas)
 ```
-
-### 5.2 Metricas de Calidad
-
-**ESLint:**
-```bash
-npm run lint
-# Resultado: 0 errores, 0 warnings
-```
-
-**TypeScript Type Check:**
-```bash
-npm run type-check
-# Resultado: 0 errores
-```
-
-**Lighthouse (Produccion):**
-
-| Metrica | Score | Objetivo |
-|---------|-------|----------|
-| Performance | 96 | >90 |
-| Accessibility | 94 | >90 |
-| Best Practices | 100 | >90 |
-| SEO | 100 | >90 |
 
 ---
 
-## 6. Despliegue
+## 6. Stack Tecnologico
 
-### 6.1 Proceso de Deploy
+| Capa | Tecnologia | Version | Justificacion |
+|------|-----------|---------|---------------|
+| Framework | Next.js | 16.1.6 | App Router + Server Components + Turbopack |
+| UI Library | React | 19.2.3 | Hooks, Context, Compiler |
+| Language | TypeScript | 5.x | Maximum strict mode (15+ flags) |
+| Styling | Tailwind CSS | 4.x | CSS-first config, design tokens |
+| Components | HeroUI | v3 beta | Compound patterns, React Aria |
+| Icons | Lucide React | 0.563 | 500+ iconos, tree-shakeable |
+| Animations | GSAP + Framer Motion | 3.14 + 12.30 | Professional-grade |
+| State | Zustand | 5.0 | Lightweight, localStorage persist |
+| Forms | React Hook Form + Zod | 7.71 + 4.3 | Performant validation |
+| Testing | Vitest | 4.0 | Fast, compatible con Testing Library |
+| Linting | ESLint | 9.x | Flat config |
+| Error Tracking | Sentry | 10.38 | Client + Server + Edge |
+| CI/CD | GitHub Actions | - | 3 jobs paralelos |
+| Hosting | Vercel | - | Edge Network, ISR, preview URLs |
 
-**Plataforma:** Vercel
-
-**Pasos:**
-1. Push a GitHub
-2. Conectar repo en Vercel
-3. Configurar environment variables
-4. Deploy automatico
-
-**URL Produccion:** https://devflow-ai.vercel.app
-
-### 6.2 CI/CD Pipeline
-
-**GitHub Actions Workflow:**
-```yaml
-name: CI/CD Pipeline
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: npm ci
-      - run: npm run lint
-
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: npm ci
-      - run: npm test -- --run
-
-  build:
-    runs-on: ubuntu-latest
-    needs: [lint, test]
-    steps:
-      - uses: actions/checkout@v4
-      - run: npm ci
-      - run: npm run build
-
-  deploy-production:
-    runs-on: ubuntu-latest
-    needs: [lint, test, build]
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-args: '--prod'
-```
-
-**Resultado:**
-- Lint check automatico
-- 80 tests ejecutados
-- Build verification
-- Deploy a produccion si main
+**Total dependencias produccion:** 18 (minimalista)
+**Total dependencias desarrollo:** 15
 
 ---
 
-## 7. Resultados
+## 7. Despliegue
 
-### 7.1 Logros Tecnicos
+### 7.1 CI/CD Pipeline
 
-**Requisitos Curso Frontend (10/10):**
-- 17 paginas navegables (>10 requerido)
-- useState en multiples componentes
-- useEffect para side effects
-- useContext para Auth y Favorites
-- Responsive design (Tailwind)
-- Componentizacion correcta
-- Codigo limpio (ESLint 0 errors)
-- GSAP animations
-- Custom hooks (usePromptAnalyzer, useCodeReview, useGsap)
-- useReducer para Favorites
-- useMemo/useCallback (optimization)
-- Class Component (ErrorBoundary)
-- Toast notifications
-- Skeletons de carga
-- TypeScript strict mode
+GitHub Actions ejecuta en cada push a `main`/`develop` y todas las PRs:
 
-### 7.2 Metricas del Proyecto
+```
+┌─── PUSH / PR ──────────────────────────────────────┐
+│                                                      │
+│  Job 1: QUALITY (paralelo)                          │
+│  ├─ npm run lint           (ESLint 9)               │
+│  ├─ npm run type-check     (tsc --noEmit strict)    │
+│  ├─ npm run test:coverage  (644 tests + thresholds) │
+│  └─ Upload coverage artifacts (14 dias)             │
+│                                                      │
+│  Job 2: SECURITY (paralelo)                         │
+│  └─ npm audit --audit-level=high (bloquea merges)   │
+│                                                      │
+│  Job 3: BUILD (depende de Quality + Security)       │
+│  └─ npm run build (Next.js produccion)              │
+│                                                      │
+│  + GitHub Dependabot (semanal, npm + Actions)       │
+└──────────────────────────────────────────────────────┘
+```
+
+**Concurrency control:** Runs cancelados si se pushea al mismo branch.
+
+### 7.2 Produccion
+
+- **URL:** https://devflowai.vercel.app
+- **CDN:** Vercel Edge Network (global)
+- **ISR:** Homepage revalida cada hora (GitHub stars)
+- **Error tracking:** Sentry con 10% sampling, 100% en errores
+- **Source maps:** Subidos a Sentry y eliminados del deploy publico
+
+---
+
+## 8. Resultados
+
+### 8.1 Metricas del Proyecto
 
 | Metrica | Valor |
 |---------|-------|
-| Lineas de codigo | ~12,000 |
-| Componentes React | 45+ |
-| Custom hooks | 12 |
-| Tests | 80 |
-| Coverage | 78% |
-| Paginas | 17 |
-| Herramientas IA | 5 |
-| Tiempo desarrollo | 26 dias |
-| Commits | 10 |
+| Herramientas | 15 |
+| Lineas de codigo (source) | ~18,450 |
+| Lineas de tests | ~5,550 |
+| Archivos fuente (.ts/.tsx) | 147 |
+| Componentes React | 21 |
+| Custom hooks | 20 |
+| Tests | 644 |
+| Paginas (routes) | 24 |
+| Claves i18n | 559 (x2 idiomas) |
+| Commits | 28+ |
+| Dependencias produccion | 18 |
 
-### 7.3 Comparativa con Alternativas
+### 8.2 Lighthouse Scores (Desktop)
+
+| Metrica | Score |
+|---------|-------|
+| Performance | **100** |
+| Accessibility | **100** |
+| Best Practices | **100** |
+| SEO | **100** |
+
+### 8.3 Requisitos del Curso Frontend Cumplidos
+
+- 24 paginas navegables (>10 requerido) ✓
+- useState en multiples componentes ✓
+- useEffect para side effects ✓
+- useContext para Favoritos ✓
+- useReducer para Favoritos ✓
+- useMemo/useCallback para optimizacion ✓
+- Custom hooks (20 hooks) ✓
+- Class Component (ErrorBoundary) ✓
+- Responsive design (Tailwind CSS v4) ✓
+- GSAP animations (5 hooks de animacion) ✓
+- Toast notifications ✓
+- Skeletons de carga ✓
+- TypeScript strict mode ✓
+- Dark/Light mode con deteccion automatica ✓
+- i18n completo (EN/ES) ✓
+- Tests (644 passing) ✓
+- CI/CD pipeline ✓
+- Deploy en produccion ✓
+
+### 8.4 Comparativa con Alternativas
 
 | Feature | DevFlow AI | ChatGPT web | Alternatives |
 |---------|------------|-------------|--------------|
-| Prompt security check | Yes | No | No |
-| Code review local | Yes | No | Partial |
-| Multi-model cost compare | Yes | No | No |
-| Token visualization | Yes | No | Partial |
-| Context export (XML/JSON) | Yes | No | No |
-| Privacy (local execution) | Yes | No | No |
-| Open source | Yes | No | Varies |
-| Free tier | Yes | Limited | Limited |
+| Herramientas | 15 | 0 | 1-3 |
+| Prompt security check | Si | No | No |
+| Code review local | Si | No | Parcial |
+| Multi-model cost compare | Si | No | No |
+| Token visualization | Si | No | Parcial |
+| Context export (XML/JSON/MD) | Si | No | No |
+| Ejecucion local (privacidad) | Si | No | No |
+| Open source | Si | No | Variable |
+| Gratuito | Si | Limitado | Limitado |
+| i18n | EN/ES | Multi | Ingles |
 
 ---
 
-## 8. Conclusiones
+## 9. Conclusiones
 
-### 8.1 Logros Principales
+### 9.1 Logros Principales
 
-1. **Producto funcional end-to-end:** 5 herramientas reales desplegadas en produccion
-2. **Arquitectura solida:** Clean Architecture facilita mantenimiento y testing
-3. **Performance excelente:** Lighthouse 96/100, FCP < 1.5s
-4. **Developer Experience:** TypeScript strict, ESLint, tests automaticos
+1. **Producto funcional end-to-end:** 15 herramientas reales desplegadas en produccion con 24 rutas navegables
+2. **Arquitectura ejemplar:** Clean Architecture con patron 5-capas replicado sin excepciones en las 15 herramientas
+3. **Performance maxima:** Lighthouse 100/100/100/100, Server Components, ISR
+4. **Testing robusto:** 644 tests reales con aserciones significativas, coverage per-file
+5. **Seguridad enterprise:** CSP sin unsafe-eval, HSTS 2 anos, prototype pollution protection, Dependabot
+6. **Developer Experience:** TypeScript strict, ESLint, CI/CD con 3 quality gates
 
-### 8.2 Aprendizajes Clave
+### 9.2 Aprendizajes Clave
 
 **Tecnicos:**
-- React 19.2 ofrece mejoras significativas (useActionState, Activity)
-- Next.js 16 + Turbopack reducen tiempo de build drasticamente
-- Clean Architecture vale la pena incluso en proyectos pequenos
-- GSAP crea animaciones profesionales con poco codigo
+- React Server Components reducen drasticamente el JS enviado al cliente
+- Next.js 16 ISR permite paginas estaticas con datos dinamicos sin rebuilds
+- Clean Architecture vale la pena: facilita testing, mantenimiento y escalabilidad
+- TypeScript maximum strict mode previene categorias enteras de bugs en compile-time
+- La estrategia de testing 100/80/0 es mas sostenible que buscar 100% global
 
 **Metodologicos:**
-- Claude Code (IA) como pair programmer aumenta productividad 3-5x
-- Tests primero evita regresiones y facilita refactors
-- Documentacion inline (JSDoc) ahorra tiempo a largo plazo
+- Claude Code como pair programmer aumenta productividad significativamente
+- El patron 5-capas por herramienta permite escalar sin perder consistencia
+- Coverage per-file evita la trampa de promediar archivos bien testeados con otros sin tests
 
 **Producto:**
-- Ejecucion local es ventaja competitiva (privacidad + coste cero)
-- UX simple > features complejas
-- Value proposition clara atrae early adopters
+- Ejecucion local es ventaja competitiva real (privacidad + coste cero)
+- 15 herramientas > 5 herramientas: la breadth del toolkit es el value proposition
+- i18n desde el principio es mas facil que anadirlo despues
 
-### 8.3 Limitaciones y Trabajo Futuro
+### 9.3 Limitaciones y Trabajo Futuro
 
 **Limitaciones Actuales:**
-- Analisis local aproximado: BPE simulation no es 100% preciso
-- Sin cloud sync: Datos solo en localStorage
-- Sin colaboracion: Herramienta individual
-- Ingles only: No i18n implementado
+- Tokenizacion BPE simulada (no 100% precisa vs tiktoken)
+- Sin cloud sync: datos solo en localStorage del navegador
+- Sin colaboracion: herramienta individual
+- Server Component i18n defaults a English (swap en hydratacion para otros idiomas)
 
 **Roadmap Futuro:**
 
 *Corto plazo (1-2 meses):*
-- Dark mode
-- Supabase integration para cloud sync
-- Export a PDF (reportes)
-- Mas modelos de IA (Mistral, Cohere)
+- E2E tests con Playwright para flujos criticos
+- PWA con service worker para uso offline completo
+- Export a PDF de reportes de analisis
 
 *Medio plazo (3-6 meses):*
-- Team collaboration (shared context windows)
-- Browser extension (analyze prompts in-page)
-- API para integracion programatica
-- Internationalization (ES, FR, DE)
+- Supabase integration para cloud sync
+- Team collaboration (context windows compartidos)
+- Browser extension (analizar prompts in-page)
+- Mas idiomas (FR, DE, PT)
 
 *Largo plazo (6-12 meses):*
-- Mobile app (React Native)
-- Desktop app (Electron o Tauri)
-- AI-powered suggestions (usar Claude API)
-- Marketplace de prompts optimizados
-
-### 8.4 Impacto Esperado
-
-- **Target inicial:** 100 usuarios en primer mes
-- **Metrica de exito:** >50% retention semanal
-- **Monetizacion:** Freemium (Free tier ilimitado, Pro $9/mes para cloud features)
-
-### 8.5 Reflexion Personal
-
-Este proyecto consolido mi transicion de desarrollador a full-stack con especializacion en IA. Las habilidades adquiridas:
-- Arquitectura frontend moderna (React 19, Next.js 16)
-- Testing comprehensivo (Vitest, Testing Library)
-- Deploy y CI/CD (Vercel, GitHub Actions)
-- Uso productivo de IA como herramienta de desarrollo
+- Mobile app (React Native reutilizando lib/application/)
+- API publica para integracion programatica
+- AI-powered suggestions con Claude API
 
 ---
 
-## 9. Referencias
+## 10. Referencias
 
-### 9.1 Tecnologias Utilizadas
+### 10.1 Tecnologias
 
-- Next.js 16.1 - https://nextjs.org/blog/next-16
-- React 19.2 - https://react.dev/blog/2024/12/05/react-19
-- TypeScript 5.7 - https://devblogs.microsoft.com/typescript/
-- Tailwind CSS v4 - https://tailwindcss.com/blog/tailwindcss-v4-beta
+- Next.js 16 - https://nextjs.org
+- React 19 - https://react.dev
+- TypeScript 5 - https://www.typescriptlang.org
+- Tailwind CSS v4 - https://tailwindcss.com
 - HeroUI v3 - https://v3.heroui.com
 - GSAP - https://gsap.com
 - Vitest - https://vitest.dev
+- Zustand - https://zustand.docs.pmnd.rs
+- Zod - https://zod.dev
 
-### 9.2 Documentacion de Referencia
+### 10.2 Documentacion de Referencia
 
-- Clean Architecture (Robert C. Martin)
-- OWASP Top 10 (2021)
-- OpenAI API Documentation
-- Anthropic Claude Documentation
+- Clean Architecture (Robert C. Martin, 2017)
+- OWASP Top 10 (2021) - https://owasp.org/Top10/
+- WCAG 2.1 - https://www.w3.org/WAI/WCAG21/quickref/
+- Conventional Commits - https://www.conventionalcommits.org
 
-### 9.3 Herramientas de Desarrollo
+### 10.3 Herramientas de Desarrollo
 
-- Claude Code (CLI IA agent)
-- VS Code + Copilot
-- GitHub (version control)
-- Vercel (hosting)
+- Claude Code (Anthropic) - AI pair programmer
+- GitHub Actions - CI/CD
+- Vercel - Hosting y deployment
+- Sentry - Error tracking
 
 ---
 
 ## Anexos
 
-### Anexo A: Codigo Fuente Destacado
+### Anexo A: Presentacion (Slides)
 
-Ver repositorio: https://github.com/user/DevFlowAI
+[docs/TFM-Slides.pdf](./TFM-Slides.pdf)
+
+### Anexo B: Repositorio
+
+https://github.com/albertoguinda/devflow-ai
 
 Archivos clave:
-- `lib/application/prompt-analyzer.ts` - Logica de analisis
-- `hooks/use-gsap.ts` - Custom hooks de animacion
-- `app/(dashboard)/tools/prompt-analyzer/page.tsx` - UI principal
+- `lib/application/*.ts` - Logica pura de las 15 herramientas
+- `hooks/use-*.ts` - 20 custom hooks
+- `app/(dashboard)/tools/*/page.tsx` - UI de cada herramienta
+- `tests/unit/application/*.test.ts` - Suite de 644 tests
 
-### Anexo B: Capturas de Pantalla
+### Anexo C: Demo en Produccion
 
-Ver carpeta `docs/screenshots/` en el repositorio
-
-### Anexo C: Manual de Usuario
-
-Ver: https://devflow-ai.vercel.app/docs
+https://devflowai.vercel.app
 
 ### Anexo D: Guia de Instalacion
 
 ```bash
-git clone https://github.com/user/DevFlowAI
-cd DevFlowAI
+git clone https://github.com/albertoguinda/devflow-ai.git
+cd devflow-ai
 npm install
 npm run dev
 ```
+
+Abrir http://localhost:3000
 
 ---
 
