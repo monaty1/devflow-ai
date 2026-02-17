@@ -1,251 +1,246 @@
 "use client";
 
-import { Card, Button, Chip } from "@heroui/react";
-import { RotateCcw, Sparkles, LayoutGrid, List as ListIcon } from "lucide-react";
+import { useState, useCallback, useMemo, useEffect } from "react";
+import {
+  Card,
+  Button,
+  Chip,
+  Progress,
+  Tooltip,
+} from "@heroui/react";
+import {
+  Binary,
+  RotateCcw,
+  Sparkles,
+  LayoutGrid,
+  List as ListIcon,
+  ShieldAlert,
+  Zap,
+  Play,
+  ArrowRight,
+  Database,
+  History,
+  X,
+  ChevronRight,
+  Eye,
+  Info,
+  Timer,
+  Fingerprint,
+} from "lucide-react";
 import { useTokenVisualizer } from "@/hooks/use-token-visualizer";
 import { useTranslation } from "@/hooks/use-translation";
-import { CopyButton } from "@/components/shared/copy-button";
 import { ToolHeader } from "@/components/shared/tool-header";
-import { formatCost } from "@/lib/application/cost-calculator";
+import { CopyButton } from "@/components/shared/copy-button";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { cn } from "@/lib/utils";
+import type { TokenizerProvider } from "@/types/token-visualizer";
 
 export default function TokenVisualizerPage() {
   const { t } = useTranslation();
-  const { input, setInput, provider, setProvider, visualization, allProviderResults, reset } = useTokenVisualizer();
+  const { 
+    input, 
+    setInput, 
+    provider, 
+    setProvider, 
+    visualization, 
+    allProviderResults, 
+    isAnalyzing,
+    tokenize,
+    reset 
+  } = useTokenVisualizer();
+
   const [isCompareMode, setIsCompareMode] = useState(false);
 
   const PROVIDERS = [
-    { id: "openai", label: t("tokenViz.modelOpenAI") },
-    { id: "anthropic", label: t("tokenViz.modelAnthropic") },
-    { id: "llama", label: t("tokenViz.modelLlama") },
+    { id: "openai", label: t("tokenViz.modelOpenAI"), color: "text-emerald-500" },
+    { id: "anthropic", label: t("tokenViz.modelAnthropic"), color: "text-orange-500" },
+    { id: "llama", label: t("tokenViz.modelLlama"), color: "text-blue-500" },
   ] as const;
 
+  // Auto-tokenize when input or provider changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (input.trim()) {
+        tokenize(input, provider, isCompareMode);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [input, provider, isCompareMode, tokenize]);
+
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      {/* Header */}
+    <div className="mx-auto max-w-6xl space-y-6">
       <ToolHeader
+        icon={Binary}
+        gradient="from-emerald-500 to-teal-600"
         title={t("tokenViz.title")}
         description={t("tokenViz.description")}
         breadcrumb
         actions={
-          <div className="flex gap-2">
-            {visualization && (
-              <CopyButton
-                getText={() =>
-                  `Tokens (${visualization.provider}): ${visualization.totalTokens}\nEfficiency: ${visualization.efficiencyScore}%\nInput: ${visualization.input}`
-                }
-                label={t("common.copy")}
-                variant="outline"
-              />
-            )}
-            <Button variant="outline" size="sm" onPress={reset} className="gap-2">
-              <RotateCcw className="size-4" />
-              {t("common.reset")}
-            </Button>
-          </div>
+          <Button variant="outline" size="sm" onPress={reset} className="gap-2">
+            <RotateCcw className="size-4" />
+            {t("common.reset")}
+          </Button>
         }
       />
 
-      {/* View Toggle & Model Selector */}
-      <div className="flex flex-col items-center gap-4">
-        <div className="inline-flex rounded-lg border border-border bg-muted p-1">
-          <button
-            onClick={() => setIsCompareMode(false)}
-            className={`flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-medium transition-all ${
-              !isCompareMode
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <ListIcon className="size-4" /> Single
-          </button>
-          <button
-            onClick={() => setIsCompareMode(true)}
-            className={`flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-medium transition-all ${
-              isCompareMode
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <LayoutGrid className="size-4" /> Compare All
-          </button>
-        </div>
-
-        {!isCompareMode && (
-          <div className="inline-flex rounded-lg border border-border bg-muted p-1">
-            {PROVIDERS.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => setProvider(p.id as any)}
-                className={`rounded-md px-4 py-1.5 text-sm font-medium transition-all ${
-                  provider === p.id
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Input */}
-      <Card className="p-6">
-        <Card.Header className="mb-4 p-0">
-          <Card.Title>{t("tokenViz.inputText")}</Card.Title>
-        </Card.Header>
-        <Card.Content className="p-0">
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={t("tokenViz.placeholder")}
-            className="h-40 w-full resize-none rounded-lg border border-border bg-background p-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-          />
-        </Card.Content>
-      </Card>
-
-      {/* Stats Bar (Single Mode) */}
-      {visualization && !isCompareMode && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <Card className="p-4 border-primary/20 bg-primary/5">
-            <Card.Content className="p-0 text-center">
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">{t("tokenViz.totalTokens")}</p>
-              <p className="text-3xl font-bold text-primary mt-1">
-                {visualization.totalTokens}
-              </p>
-            </Card.Content>
-          </Card>
-          <Card className="p-4">
-            <Card.Content className="p-0 text-center">
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">{t("tokenViz.efficiencyScore")}</p>
-              <p className={`text-3xl font-bold mt-1 ${
-                visualization.efficiencyScore > 80 ? "text-emerald-600" : visualization.efficiencyScore > 50 ? "text-amber-600" : "text-red-600"
-              }`}>
-                {visualization.efficiencyScore}%
-              </p>
-            </Card.Content>
-          </Card>
-          <Card className="p-4">
-            <Card.Content className="p-0 text-center">
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">{t("tokenViz.wasteTokens")}</p>
-              <p className={`text-3xl font-bold mt-1 ${visualization.wasteCount > 0 ? "text-amber-600" : "text-emerald-600"}`}>
-                {visualization.wasteCount}
-              </p>
-            </Card.Content>
-          </Card>
-          <Card className="p-4">
-            <Card.Content className="p-0 text-center">
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">{t("tokenViz.characters")}</p>
-              <p className="text-3xl font-bold text-foreground mt-1">
-                {visualization.input.length}
-              </p>
-            </Card.Content>
-          </Card>
-        </div>
-      )}
-
-      {/* Stats Bar (Compare Mode) */}
-      {isCompareMode && allProviderResults.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-3">
-          {allProviderResults.map(({ provider: p, result: r }) => (
-            <Card key={p} className="p-6 border-2 border-transparent hover:border-primary/20 transition-all">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-lg">{p.toUpperCase()}</h3>
-                <StatusBadge variant={r.efficiencyScore > 80 ? "success" : "warning"}>
-                  {r.efficiencyScore}%
-                </StatusBadge>
+      <div className="grid gap-6 lg:grid-cols-12">
+        {/* Input Column */}
+        <div className="lg:col-span-5 space-y-6">
+          <Card className="p-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold flex items-center gap-2">
+                  <Database className="size-4 text-primary" />
+                  Source Text
+                </h3>
+                <div className="flex bg-muted p-1 rounded-xl">
+                  <Button
+                    isIconOnly
+                    size="sm"
+                    variant={!isCompareMode ? "solid" : "light"}
+                    color={!isCompareMode ? "primary" : "default"}
+                    onPress={() => setIsCompareMode(false)}
+                  >
+                    <ListIcon className="size-3.5" />
+                  </Button>
+                  <Button
+                    isIconOnly
+                    size="sm"
+                    variant={isCompareMode ? "solid" : "light"}
+                    color={isCompareMode ? "primary" : "default"}
+                    onPress={() => setIsCompareMode(true)}
+                  >
+                    <LayoutGrid className="size-3.5" />
+                  </Button>
+                </div>
               </div>
+
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Type or paste text to visualize tokenization..."
+                className="h-64 w-full resize-none rounded-xl border border-divider bg-background p-4 font-mono text-sm focus:ring-2 focus:ring-primary/20 shadow-inner"
+              />
+
+              {!isCompareMode && (
+                <div className="grid grid-cols-3 gap-2">
+                  {PROVIDERS.map((p) => (
+                    <button
+                      key={p.id}
+                      onClick={() => setProvider(p.id as TokenizerProvider)}
+                      className={cn(
+                        "px-2 py-2 rounded-lg border text-[10px] font-black uppercase transition-all",
+                        provider === p.id 
+                          ? "bg-primary border-primary text-white shadow-md" 
+                          : "bg-muted/30 border-transparent hover:bg-muted text-muted-foreground"
+                      )}
+                    >
+                      {p.label.split(" ")[0]}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </Card>
+
+          {/* Efficiency Audit Card */}
+          {visualization && (
+            <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl shadow-slate-500/20">
+              <h3 className="text-xs font-black uppercase opacity-60 mb-4 tracking-widest flex items-center gap-2">
+                <ShieldAlert className="size-3" /> Token Audit
+              </h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-end">
-                  <span className="text-sm text-muted-foreground">Total Tokens</span>
-                  <span className="text-2xl font-bold text-primary">{r.totalTokens}</span>
+                  <span className="text-[10px] font-bold uppercase opacity-60">Optimization</span>
+                  <span className={cn("text-xl font-black", visualization.efficiencyScore > 80 ? "text-emerald-400" : "text-amber-400")}>
+                    {visualization.efficiencyScore}%
+                  </span>
                 </div>
-                <div className="flex justify-between items-end">
-                  <span className="text-sm text-muted-foreground">Wasted</span>
-                  <span className={`text-lg font-semibold ${r.wasteCount > 0 ? "text-amber-600" : "text-emerald-600"}`}>{r.wasteCount}</span>
+                <div className="space-y-1.5">
+                  <Progress value={visualization.efficiencyScore} size="sm" color="primary" className="h-1.5 bg-white/10" />
                 </div>
-                <Button 
-                  size="sm" 
-                  variant="flat" 
-                  className="w-full"
-                  onPress={() => {
-                    setProvider(p);
-                    setIsCompareMode(false);
-                  }}
-                >
-                  View Details
-                </Button>
+                {visualization.wasteCount > 0 && (
+                  <div className="p-3 bg-white/5 rounded-xl border border-white/10">
+                    <p className="text-[10px] text-amber-300 font-bold mb-1 uppercase tracking-tighter">Wasted Tokens Detected</p>
+                    <p className="text-xs opacity-70 italic">Found {visualization.wasteCount} redundant spaces or invisible characters.</p>
+                  </div>
+                )}
               </div>
             </Card>
-          ))}
+          )}
         </div>
-      )}
 
-      {/* Token Visualization (Single Mode Only) */}
-      {visualization && !isCompareMode && (
-        <Card className="p-6">
-          <Card.Header className="mb-4 p-0">
-            <div className="flex items-center justify-between">
-              <div>
-                <Card.Title>{t("tokenViz.tokenBreakdown")}</Card.Title>
-                <Card.Description>
-                  {t("tokenViz.tokenDescription")}
-                </Card.Description>
-              </div>
-              {visualization.wasteCount > 0 && (
-                <Chip size="sm" color="warning" variant="flat" className="gap-1">
-                  <span className="font-bold">{visualization.wasteCount}</span> {t("tokenViz.wasteTokens")}
-                </Chip>
-              )}
-            </div>
-          </Card.Header>
-          <Card.Content className="p-0">
-            <div className="flex flex-wrap gap-1.5 rounded-xl border border-border bg-muted/30 p-4 min-h-[100px]">
-              {visualization.segments.map((segment, i) => (
-                <span
-                  key={i}
-                  className={`inline-flex cursor-default items-center rounded border px-2 py-1 font-mono text-xs transition-all duration-200 hover:scale-110 shadow-sm ${
-                    segment.isWaste 
-                      ? "bg-red-100 text-red-800 border-red-300 dark:bg-red-900/40 dark:text-red-200 dark:border-red-800" 
-                      : segment.color
-                  }`}
-                  title={segment.isWaste ? "Inefficient token (waste)" : `Token #${segment.tokenId}`}
-                >
-                  {segment.text.replace(/ /g, "␣")}
-                  <span className="ml-1.5 text-[9px] opacity-40">
-                    {segment.tokenId}
-                  </span>
-                </span>
-              ))}
-            </div>
-
-            {/* Legend & Advice */}
-            <div className="mt-6 space-y-3 border-t border-border pt-4">
-              <p className="text-xs text-muted-foreground italic">
-                {t("tokenViz.legend")}
-              </p>
-              {visualization.wasteCount > 0 && (
-                <div className="flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-amber-800 dark:bg-amber-950/20 dark:text-amber-200">
-                  <div className="mt-0.5 size-1.5 rounded-full bg-amber-500" />
-                  <p className="text-xs">{t("tokenViz.wasteDesc")}</p>
+        {/* Results Column */}
+        <div className="lg:col-span-7 space-y-6">
+          {visualization ? (
+            <>
+              {/* Leaderboard (Compare Mode) */}
+              {isCompareMode && allProviderResults.length > 0 && (
+                <div className="grid gap-4 sm:grid-cols-3">
+                  {allProviderResults.map(({ provider: p, result: r }) => {
+                    const info = PROVIDERS.find(op => op.id === p);
+                    return (
+                      <Card key={p} className="p-4 border-2 border-transparent hover:border-primary/20 transition-all cursor-pointer" onClick={() => {
+                        setProvider(p);
+                        setIsCompareMode(false);
+                      }}>
+                        <div className="flex justify-between items-start mb-3">
+                          <span className={cn("text-[10px] font-black uppercase", info?.color)}>{info?.label}</span>
+                          <StatusBadge variant={r.efficiencyScore > 80 ? "success" : "warning"}>{r.totalTokens} t</StatusBadge>
+                        </div>
+                        <Progress value={r.efficiencyScore} size="xs" color="primary" className="h-1" />
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
-            </div>
-          </Card.Content>
-        </Card>
-      )}
 
-      {/* Empty State */}
-      {!visualization && (
-        <Card className="p-16">
-          <Card.Content className="p-0 text-center">
-            <Sparkles className="mx-auto mb-4 size-12 text-muted-foreground" />
-            <p className="text-muted-foreground">
-              {t("tokenViz.emptyState")}
-            </p>
-          </Card.Content>
-        </Card>
-      )}
+              {/* Token Cloud */}
+              <Card className="p-0 border-divider shadow-xl overflow-hidden h-[600px] flex flex-col">
+                <div className="p-4 border-b border-divider flex justify-between items-center bg-muted/20">
+                  <div className="flex items-center gap-4">
+                    <StatusBadge variant="info">
+                      <Timer className="size-3 mr-1" /> {visualization.totalTokens} Tokens
+                    </StatusBadge>
+                    <span className="text-[10px] font-black opacity-40 uppercase">{visualization.input.length} Characters</span>
+                  </div>
+                  <CopyButton text={visualization.input} />
+                </div>
+                <div className="p-6 overflow-auto flex-1 bg-background scrollbar-hide">
+                  <div className="flex flex-wrap gap-1.5">
+                    {visualization.segments.map((s, i) => (
+                      <Tooltip key={i} content={`Token #${s.tokenId}: "${s.text}"`}>
+                        <span className={cn(
+                          "px-1.5 py-0.5 rounded font-mono text-xs border transition-all hover:scale-110 cursor-default",
+                          s.isWaste ? "bg-red-500/20 border-red-500/40 text-red-600 font-bold" : s.color
+                        )}>
+                          {s.text.replace(/ /g, "␣")}
+                        </span>
+                      </Tooltip>
+                    ))}
+                  </div>
+                </div>
+                <div className="p-4 border-t border-divider bg-muted/10">
+                  <p className="text-[10px] text-muted-foreground italic flex items-center gap-2">
+                    <Info className="size-3" />
+                    Each box represents a token. Red highlights indicate "waste" (extra spaces/redundancy).
+                  </p>
+                </div>
+              </Card>
+            </>
+          ) : (
+            <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center">
+              <div className="size-24 bg-muted rounded-full flex items-center justify-center mb-6">
+                <Fingerprint className="size-12 text-muted-foreground/30" />
+              </div>
+              <h3 className="text-2xl font-black mb-2 opacity-80">Token Laboratory</h3>
+              <p className="text-muted-foreground max-w-sm mx-auto font-medium">
+                Analyze how different AI models (GPT-4, Claude, Llama) see your text. Optimize your prompts by reducing wasted tokens.
+              </p>
+            </Card>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
