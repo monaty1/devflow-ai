@@ -30,6 +30,8 @@ import {
   Tv,
   Eye,
   Search,
+  Zap,
+  Activity,
 } from "lucide-react";
 import { useTailwindSorter } from "@/hooks/use-tailwind-sorter";
 import { useTranslation } from "@/hooks/use-translation";
@@ -46,6 +48,7 @@ export default function TailwindSorterPage() {
     input,
     config,
     result,
+    isSorting,
     setInput,
     updateConfig,
     sort,
@@ -66,14 +69,7 @@ export default function TailwindSorterPage() {
       case "class":
         return <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-bold text-primary">{item.class}</code>;
       case "reason":
-        return (
-          <div className="flex flex-col gap-0.5">
-            <span className="text-sm font-medium">{item.reason}</span>
-            {item.suggestion && (
-              <span className="text-xs text-success font-medium">Suggestion: {item.suggestion}</span>
-            )}
-          </div>
-        );
+        return <span className="text-sm font-medium">{item.reason}</span>;
       case "severity":
         return (
           <Chip size="sm" variant="flat" color={item.severity === "medium" ? "warning" : "primary"} className="capitalize font-black text-[10px]">
@@ -123,9 +119,12 @@ export default function TailwindSorterPage() {
             />
             
             <div className="mt-6 space-y-4">
-              <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Sorting Options</p>
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Sorting Options</p>
+                {isSorting && <div className="flex items-center gap-1 text-primary animate-pulse"><Activity className="size-3" /><span className="text-[10px] font-black uppercase">Optimizing...</span></div>}
+              </div>
               <div className="grid grid-cols-2 gap-3">
-                <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-muted transition-colors">
+                <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-muted transition-colors border border-divider/50">
                   <input 
                     type="checkbox" 
                     checked={config.removeDuplicates} 
@@ -134,39 +133,34 @@ export default function TailwindSorterPage() {
                   />
                   <span className="text-xs font-bold">Unique Only</span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-muted transition-colors">
+                <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-muted transition-colors border border-divider/50">
                   <input 
                     type="checkbox" 
                     checked={config.sortWithinGroups} 
                     onChange={(e) => updateConfig("sortWithinGroups", e.target.checked)}
                     className="size-4 rounded accent-sky-600"
                   />
-                  <span className="text-xs font-bold">Sort Logic</span>
+                  <span className="text-xs font-bold">Smart Sort</span>
                 </label>
               </div>
             </div>
-
-            <Button 
-              onPress={sort} 
-              color="primary"
-              className="w-full mt-6 h-12 font-bold shadow-lg shadow-sky-500/20"
-            >
-              <Sparkles className="size-4 mr-2" /> Optimize Classes
-            </Button>
           </Card>
 
           {/* Live Preview Card */}
-          <Card className="p-6 overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 text-white">
-            <h3 className="text-xs font-black uppercase opacity-60 mb-6 flex items-center gap-2 tracking-widest">
+          <Card className="p-6 overflow-hidden bg-slate-900 text-white relative">
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+              <Zap className="size-20" />
+            </div>
+            <h3 className="text-xs font-black uppercase opacity-60 mb-6 flex items-center gap-2 tracking-widest relative z-10">
               <Eye className="size-3" /> 
-              Instant Visual Preview
+              Instant Visual Sandbox
             </h3>
-            <div className="flex items-center justify-center p-8 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm min-h-[150px]">
+            <div className="flex items-center justify-center p-8 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm min-h-[150px] relative z-10">
               <div className={cn("transition-all duration-500", result?.output || "p-4 bg-sky-500 rounded text-white")}>
                 {result?.output ? "Applying Optimized Styles..." : "Sample Element"}
               </div>
             </div>
-            <p className="text-[10px] text-center mt-4 opacity-40 italic">Note: Classes are applied to this element in real-time</p>
+            <p className="text-[10px] text-center mt-4 opacity-40 italic relative z-10">Note: Classes are applied to this element in real-time from the Web Worker.</p>
           </Card>
         </div>
 
@@ -177,7 +171,7 @@ export default function TailwindSorterPage() {
               {/* Quick Stats */}
               <div className="grid grid-cols-3 gap-4">
                 <Card className="p-4 text-center border-b-4 border-b-sky-500">
-                  <p className="text-[10px] font-black text-muted-foreground uppercase">Unique</p>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase">Classes</p>
                   <p className="text-2xl font-black">{result.stats.uniqueClasses}</p>
                 </Card>
                 <Card className="p-4 text-center border-b-4 border-b-amber-500">
@@ -185,7 +179,7 @@ export default function TailwindSorterPage() {
                   <p className="text-2xl font-black text-amber-600">{result.conflicts.length}</p>
                 </Card>
                 <Card className="p-4 text-center border-b-4 border-b-emerald-500">
-                  <p className="text-[10px] font-black text-muted-foreground uppercase">Optimization</p>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase">Efficiency</p>
                   <p className="text-2xl font-black text-emerald-600">
                     {Math.round((result.stats.duplicatesRemoved / (result.stats.totalClasses || 1)) * 100)}%
                   </p>
@@ -199,16 +193,16 @@ export default function TailwindSorterPage() {
                   onSelectionChange={(k) => setActiveTab(k as any)}
                   classNames={{
                     tabList: "w-full rounded-none bg-muted/30 border-b border-divider p-0 h-14",
-                    tab: "h-full",
+                    tab: "h-full px-6",
                     cursor: "bg-sky-500",
                   }}
                 >
                   <Tab 
                     key="result" 
                     title={
-                      <div className="flex items-center gap-2 font-bold px-4">
+                      <div className="flex items-center gap-2 font-bold">
                         <CheckCircle2 className="size-4 text-emerald-500" />
-                        Sorted Result
+                        Sorted List
                       </div>
                     }
                   >
@@ -217,7 +211,7 @@ export default function TailwindSorterPage() {
                         <span className="text-xs font-bold text-sky-700">Production-Ready Output</span>
                         <CopyButton text={result.output} />
                       </div>
-                      <div className="p-4 bg-muted/30 rounded-xl font-mono text-sm leading-relaxed border border-divider break-all">
+                      <div className="p-4 bg-muted/30 rounded-xl font-mono text-sm leading-relaxed border border-divider break-all min-h-[100px]">
                         {result.output}
                       </div>
                     </div>
@@ -226,19 +220,19 @@ export default function TailwindSorterPage() {
                   <Tab 
                     key="audit" 
                     title={
-                      <div className="flex items-center gap-2 font-bold px-4">
+                      <div className="flex items-center gap-2 font-bold">
                         <AlertTriangle className="size-4 text-amber-500" />
-                        Audit & Conflicts
+                        Issues ({result.audit.length + result.conflicts.length})
                       </div>
                     }
                   >
                     <div className="p-0">
                       {result.conflicts.length > 0 && (
                         <div className="p-4 bg-red-50 dark:bg-red-950/20 border-b border-red-100 dark:border-red-900/30">
-                          <p className="text-xs font-black text-red-700 uppercase mb-2">Critical Property Conflicts</p>
+                          <p className="text-xs font-black text-red-700 uppercase mb-3">Critical Logic Conflicts</p>
                           <div className="flex flex-wrap gap-2">
                             {result.conflicts.map((c, i) => (
-                              <Chip key={i} size="sm" color="danger" variant="flat" className="font-bold">
+                              <Chip key={i} size="sm" color="danger" variant="flat" className="font-bold border border-danger/20">
                                 {c.classes.join(" vs ")}
                               </Chip>
                             ))}
@@ -250,7 +244,8 @@ export default function TailwindSorterPage() {
                         data={result.audit.map((a, id) => ({ ...a, id }))}
                         filterField="class"
                         renderCell={renderAuditCell}
-                        emptyContent="Clean classes! No redundancies or conflicts found."
+                        initialVisibleColumns={["class", "reason", "severity"]}
+                        emptyContent="No redundancies detected."
                       />
                     </div>
                   </Tab>
@@ -258,9 +253,9 @@ export default function TailwindSorterPage() {
                   <Tab 
                     key="breakpoints" 
                     title={
-                      <div className="flex items-center gap-2 font-bold px-4">
+                      <div className="flex items-center gap-2 font-bold">
                         <Monitor className="size-4 text-blue-500" />
-                        Responsive Map
+                        Responsive
                       </div>
                     }
                   >
@@ -268,17 +263,18 @@ export default function TailwindSorterPage() {
                       {Object.entries(result.breakpoints).map(([bp, classes]) => (
                         <div key={bp} className="space-y-2">
                           <div className="flex items-center gap-2">
-                            {bp === "base" ? <Smartphone className="size-3 opacity-50" /> : bp === "sm" ? <Tablet className="size-3 opacity-50" /> : <Monitor className="size-3 opacity-50" />}
-                            <span className="text-[10px] font-black uppercase tracking-widest">{bp}</span>
-                            <Progress value={classes.length > 0 ? 100 : 0} size="sm" color={classes.length > 0 ? "primary" : "default"} className="h-1 flex-1" />
-                          </div>
-                          {classes.length > 0 ? (
-                            <div className="flex flex-wrap gap-1.5 pl-5">
-                              {classes.map((c, i) => <Chip key={i} size="sm" variant="dot" className="h-6 text-[10px]">{c}</Chip>)}
+                            <span className="text-[10px] font-black uppercase tracking-widest w-8 text-primary">{bp}</span>
+                            <div className="h-1.5 flex-1 bg-muted rounded-full overflow-hidden">
+                              <div className={cn("h-full bg-primary transition-all", classes.length > 0 ? "w-full" : "w-0")} />
                             </div>
-                          ) : (
-                            <p className="pl-5 text-[10px] text-muted-foreground italic">No classes for this breakpoint</p>
-                          )}
+                          </div>
+                          <div className="flex flex-wrap gap-1.5 pl-10">
+                            {classes.length > 0 ? (
+                              classes.map((c, i) => <Chip key={i} size="sm" variant="flat" className="h-6 text-[10px] font-bold">{c}</Chip>)
+                            ) : (
+                              <span className="text-[10px] text-muted-foreground italic">No overrides for this size</span>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -287,13 +283,13 @@ export default function TailwindSorterPage() {
               </Card>
             </>
           ) : (
-            <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center">
+            <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center h-full">
               <div className="size-24 bg-muted rounded-full flex items-center justify-center mb-6">
-                <Layers className="size-12 text-muted-foreground/30" />
+                <Palette className="size-12 text-muted-foreground/30" />
               </div>
-              <h3 className="text-2xl font-black mb-2 opacity-80">Design Analysis Ready</h3>
+              <h3 className="text-2xl font-black mb-2 opacity-80 text-foreground/50">Tailwind Auditor</h3>
               <p className="text-muted-foreground max-w-sm mx-auto font-medium">
-                Paste your class strings to detect conflicts, remove duplicates and visualize your responsive design distribution.
+                Analyze, sort and optimize your utility classes. Detection of property conflicts and responsive mapping built-in.
               </p>
             </Card>
           )}

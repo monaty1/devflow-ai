@@ -1,122 +1,110 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
-import type {
-  SortResult,
-  SorterConfig,
-  OutputFormat,
-} from "@/types/tailwind-sorter";
-import { DEFAULT_SORTER_CONFIG } from "@/types/tailwind-sorter";
-import {
-  sortClasses,
-  isValidInput,
-  countClasses,
-  findDuplicates,
-  EXAMPLE_INPUT,
-  MESSY_EXAMPLE,
-} from "@/lib/application/tailwind-sorter";
-import { useToolHistory } from "@/hooks/use-tool-history";
+import { useState, useCallback, useEffect, useRef } from "react";
+import type { SortResult, SorterConfig } from "@/types/tailwind-sorter";
+import { TAILWIND_SORTER_WORKER_SOURCE } from "@/lib/application/tailwind-sorter/worker-source";
 
-interface HistoryItem {
-  id: string;
+interface UseTailwindSorterReturn {
   input: string;
-  classCount: number;
-  timestamp: string;
+  setInput: (input: string) => void;
+  config: SorterConfig;
+  result: SortResult | null;
+  isSorting: boolean;
+  updateConfig: <K extends keyof SorterConfig>(key: K, value: SorterConfig[K]) => void;
+  sort: () => Promise<void>;
+  reset: () => void;
+  loadExample: (type: "clean" | "messy") => void;
 }
 
-export function useTailwindSorter() {
+export function useTailwindSorter(): UseTailwindSorterReturn {
   const [input, setInput] = useState("");
-  const [config, setConfig] = useState<SorterConfig>(DEFAULT_SORTER_CONFIG);
+  const [config, setConfig] = useState<SorterConfig>({
+    removeDuplicates: true,
+    sortWithinGroups: true,
+    groupByCategory: true,
+    outputFormat: "single-line",
+  });
   const [result, setResult] = useState<SortResult | null>(null);
-  const { history, addToHistory: addItemToHistory, clearHistory } =
-    useToolHistory<HistoryItem>("devflow-tailwind-sorter-history", 10);
+  const [isSorting, setIsSorting] = useState(false);
+  const workerRef = useRef<Worker | null>(null);
 
-  // Computed values
-  const inputStats = useMemo(() => {
-    if (!input.trim()) {
-      return { classCount: 0, duplicates: [], isValid: false };
-    }
-    return {
-      classCount: countClasses(input),
-      duplicates: findDuplicates(input),
-      isValid: isValidInput(input),
+  useEffect(() => {
+    const blob = new Blob([TAILWIND_SORTER_WORKER_SOURCE], { type: "application/javascript" });
+    const worker = new Worker(URL.createObjectURL(blob));
+    workerRef.current = worker;
+
+    return () => {
+      worker.terminate();
     };
-  }, [input]);
-
-  const addToHistory = useCallback((inputValue: string) => {
-    const newItem: HistoryItem = {
-      id: crypto.randomUUID(),
-      input: inputValue.slice(0, 100) + (inputValue.length > 100 ? "..." : ""),
-      classCount: countClasses(inputValue),
-      timestamp: new Date().toISOString(),
-    };
-    addItemToHistory(newItem);
-  }, [addItemToHistory]);
-
-  const sort = useCallback(() => {
-    if (!isValidInput(input)) return;
-
-    const sortResult = sortClasses(input, config);
-    setResult(sortResult);
-    addToHistory(input);
-  }, [input, config, addToHistory]);
-
-  const updateConfig = useCallback(
-    <K extends keyof SorterConfig>(key: K, value: SorterConfig[K]) => {
-      setConfig((prev) => ({ ...prev, [key]: value }));
-      // Re-sort if we have a result
-      setResult(null);
-    },
-    []
-  );
-
-  const setOutputFormat = useCallback((format: OutputFormat) => {
-    updateConfig("outputFormat", format);
-  }, [updateConfig]);
-
-  const loadExample = useCallback((type: "clean" | "messy" = "clean") => {
-    setInput(type === "messy" ? MESSY_EXAMPLE : EXAMPLE_INPUT);
-    setResult(null);
   }, []);
 
-  const reset = useCallback(() => {
+  const sort = useCallback(async () => {
+    if (!input.trim()) return;
+    setIsSorting(true);
+
+    return new Promise<void>((resolve, reject) => {
+      if (!workerRef.current) {
+        setIsSorting(false);
+        reject(new Error("Worker not initialized"));
+        return;
+      }
+
+      const worker = workerRef.current;
+
+      const handleMessage = (e: MessageEvent) => {
+        if (e.data.type === "success") {
+          setResult(e.data.result);
+          setIsSorting(false);
+          worker.removeEventListener("message", handleMessage);
+          resolve();
+        } else {
+          setIsSorting(false);
+          worker.removeEventListener("message", handleMessage);
+          reject(new Error(e.data.error || "Sorting failed"));
+        }
+      };
+
+      worker.addEventListener("message", handleMessage);
+      worker.postMessage({ input, config });
+    });
+  }, [input, config]);
+
+  // Auto-sort with debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (input.trim()) {
+        sort();
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [input, config, sort]);
+
+  const updateConfig = <K extends keyof SorterConfig>(key: K, value: SorterConfig[K]) => {
+    setConfig((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const reset = () => {
     setInput("");
     setResult(null);
-  }, []);
+  };
 
-  const loadFromHistory = useCallback((item: HistoryItem) => {
-    // History stores truncated input, so this is limited
-    // In a real app, you'd store the full input
-    setInput(item.input.replace("...", ""));
-    setResult(null);
-  }, []);
-
-  const applyToInput = useCallback(() => {
-    if (result) {
-      setInput(result.output);
-      setResult(null);
-    }
-  }, [result]);
+  const loadExample = (type: "clean" | "messy") => {
+    const examples = {
+      clean: "flex items-center justify-between p-4 bg-white rounded-lg shadow-md",
+      messy: "hover:bg-blue-500 flex p-4 text-white bg-blue-600 items-center flex rounded-lg hover:bg-blue-500 shadow-md p-4"
+    };
+    setInput(examples[type]);
+  };
 
   return {
-    // State
     input,
+    setInput,
     config,
     result,
-    history,
-    inputStats,
-
-    // Setters
-    setInput,
+    isSorting,
     updateConfig,
-    setOutputFormat,
-
-    // Actions
     sort,
-    loadExample,
     reset,
-    clearHistory,
-    loadFromHistory,
-    applyToInput,
+    loadExample,
   };
 }
