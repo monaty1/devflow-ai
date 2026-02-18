@@ -214,25 +214,30 @@ export default function DtoMaticPage() {
               <div className="space-y-1.5 pt-2 border-t border-divider">
                 <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Output Mode</label>
                 <div className="flex gap-2">
-                  <Chip 
-                    size="sm" 
-                    variant={config.mode === "clean-arch" ? "primary" : "soft"} 
+                  <Chip
+                    size="sm"
+                    variant={config.mode === "clean-arch" ? "primary" : "soft"}
                     className="cursor-pointer font-bold h-8"
                     onClick={() => setMode("clean-arch")}
                   >Clean Arch</Chip>
-                  <Chip 
-                    size="sm" 
-                    variant={config.mode === "zod" ? "primary" : "soft"} 
+                  <Chip
+                    size="sm"
+                    variant={config.mode === "zod" ? "primary" : "soft"}
                     className="cursor-pointer font-bold h-8"
                     onClick={() => setMode("zod")}
                   >Zod Schema</Chip>
-                  <Chip 
-                    size="sm" 
-                    variant={config.mode === "quick" ? "primary" : "soft"} 
+                  <Chip
+                    size="sm"
+                    variant={config.mode === "quick" ? "primary" : "soft"}
                     className="cursor-pointer font-bold h-8"
                     onClick={() => setMode("quick")}
                   >DTO Only</Chip>
                 </div>
+                <p className="text-[10px] text-muted-foreground/70 ml-1 mt-1">
+                  {config.mode === "clean-arch" && "Generates Entity + Mapper + DTO — 3-layer Clean Architecture pattern"}
+                  {config.mode === "zod" && "Generates TypeScript interfaces + Zod schemas for runtime validation"}
+                  {config.mode === "quick" && "Quick DTO class only — fastest output, no mappers or extra layers"}
+                </p>
               </div>
             </div>
           </Card>

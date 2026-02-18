@@ -268,7 +268,7 @@ export default function CodeReviewPage() {
                 <Card className="p-6 col-span-2">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase">{t("codeReview.complexity")}</p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase cursor-help" title="Cyclomatic complexity: number of independent code paths. Optimal: ≤ 10. High values make code harder to test.">{t("codeReview.complexity")} ⓘ</p>
                       <p className="text-xl font-bold flex items-center gap-2">
                         {result.metrics.complexity}
                         <StatusBadge variant={result.metrics.complexity > 10 ? "warning" : "success"}>
@@ -277,7 +277,7 @@ export default function CodeReviewPage() {
                       </p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase">{t("codeReview.maintainability")}</p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase cursor-help" title="Maintainability Index (0–100): composite score based on complexity, lines of code, and documentation coverage. Higher is better.">{t("codeReview.maintainability")} ⓘ</p>
                       <p className="text-xl font-bold text-emerald-500">{result.metrics.maintainabilityIndex}%</p>
                     </div>
                   </div>

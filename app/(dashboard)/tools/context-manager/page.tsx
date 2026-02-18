@@ -21,7 +21,7 @@ import {
   FolderTree,
 } from "lucide-react";
 import { useContextManager } from "@/hooks/use-context-manager";
-
+import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
 import { useSmartNavigation } from "@/hooks/use-smart-navigation";
 import { ToolHeader } from "@/components/shared/tool-header";
@@ -35,6 +35,7 @@ import type { ContextDocument as Document, Priority, DocumentType } from "@/type
 
 export default function ContextManagerPage() {
   const { t } = useTranslation();
+  const { addToast } = useToast();
   const { navigateTo } = useSmartNavigation();
   const {
     windows,
@@ -394,6 +395,7 @@ export default function ContextManagerPage() {
                       e.preventDefault();
                       if (docTitle && docContent) {
                         addDocument(docTitle, docContent, docType, docPriority, [], docPath);
+                        addToast(`"${docTitle}" added to context`, "success");
                         resetDocForm();
                         setShowAddDoc(false);
                       }
@@ -411,6 +413,7 @@ export default function ContextManagerPage() {
                   isDisabled={!docTitle.trim() || !docContent.trim()}
                   onPress={() => {
                     addDocument(docTitle, docContent, docType, docPriority, [], docPath);
+                    addToast(`"${docTitle}" added to context`, "success");
                     resetDocForm();
                     setShowAddDoc(false);
                   }}
