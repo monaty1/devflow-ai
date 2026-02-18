@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Tabs,
   Tab,
@@ -51,6 +51,12 @@ export default function UuidGeneratorPage() {
   const [analyzeInput, setAnalyzeInput] = useState("");
   const [exportFormat, setExportFormat] = useState<"text" | "json" | "csv" | "sql">("text");
 
+  const uuids = result?.uuids;
+  const exportedContent = useMemo(() => {
+    if (!uuids?.length) return "";
+    return exportBulk(uuids, exportFormat);
+  }, [uuids, exportFormat, exportBulk]);
+
   const VERSIONS: { id: UuidVersion; label: string; desc: string }[] = [
     { id: "v4", label: "Version 4 (Random)", desc: "Standard random UUID" },
     { id: "v7", label: "Version 7 (Time-sortable)", desc: "Unix epoch based" },
@@ -69,7 +75,7 @@ export default function UuidGeneratorPage() {
 
   const handleExport = () => {
     if (!result?.uuids.length) return;
-    const content = exportBulk(result.uuids, exportFormat);
+    const content = exportedContent;
     const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -134,11 +140,14 @@ export default function UuidGeneratorPage() {
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Custom Prefix (Hex)</label>
-                  <Input 
+                  <Input
                     variant="primary"
-                    placeholder="e.g. deadbeef" 
+                    placeholder="e.g. deadbeef"
                     value={config.prefix}
-                    onChange={(e) => updateConfig("prefix", e.target.value)}
+                    onChange={(e) => {
+                      const filtered = e.target.value.replace(/[^0-9a-fA-F]/g, "");
+                      updateConfig("prefix", filtered);
+                    }}
                   />
                 </div>
 
@@ -182,6 +191,12 @@ export default function UuidGeneratorPage() {
                     value={analyzeInput}
                     onChange={(e) => setAnalyzeInput(e.target.value)}
                     placeholder="Paste UUID here..."
+                    onKeyDown={(e) => {
+                      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                        e.preventDefault();
+                        if (analyzeInput.trim()) analyze(analyzeInput);
+                      }
+                    }}
                     className="h-32 w-full resize-none rounded-xl border-2 border-divider bg-background p-4 font-mono text-sm focus:border-primary outline-none transition-all shadow-inner"
                   />
                 </div>
@@ -255,7 +270,7 @@ export default function UuidGeneratorPage() {
               <Card className="p-0 border-divider shadow-xl overflow-hidden h-[600px] flex flex-col bg-background relative">
                 <div className="absolute top-0 left-0 w-1 bg-primary h-full opacity-50" />
                 <pre className="p-8 font-mono text-sm leading-relaxed overflow-auto flex-1 text-foreground/80 scrollbar-hide">
-                  {exportBulk(result.uuids, exportFormat)}
+                  {exportedContent}
                 </pre>
               </Card>
             </>

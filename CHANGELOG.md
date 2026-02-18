@@ -5,6 +5,27 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-02-18
+
+### Added
+- **`CodeReviewSkeleton` component** — Dedicated loading skeleton for Code Review results panel (score ring, metrics grid, issues table)
+- **TFM documentation** — Added `docs/Documentacion-TFM.pdf` (assignment specification) and finalized `docs/TFM.md` (full project documentation)
+
+### Improved
+- **Smart navigation covers all 15 tools** — `useSmartNavigation` `ToolRoute` type now includes all 15 tool routes (was only 6). Cross-tool "Send to..." flows work across the entire platform
+- **Regex Humanizer upgraded** — Full visual overhaul: syntax-highlighted token breakdown, named-group support, interactive match highlighting, and improved pattern generation UX
+- **Context Manager upgraded** — Redesigned three-panel layout with drag-to-reorder chunks, priority badges, token budget bar, and improved XML/JSON/MD export
+- **Code Review upgraded** — Enhanced results panel with donut score ring, severity breakdown chips, and per-issue expand/collapse detail
+- **Cost Calculator upgraded** — Sticky comparison table header, live currency toggle (USD/EUR), and improved model filter chips
+- **Cron Builder upgraded** — Human-readable schedule description updates in real-time as fields change; next-run list shows relative time ("in 3 hours")
+- **DTO-Matic upgraded** — Added optional Zod schema preview tab alongside TypeScript interfaces; improved nested-object flattening
+- **Prompt Analyzer upgraded** — Score breakdown now shows per-dimension bars (Clarity, Role, Format, Security, Context)
+- **Tailwind Sorter upgraded** — Variant grouping toggle; shows diff view (before/after) side by side
+- **Token Visualizer upgraded** — Color-coded token legend; per-segment cost tooltip on hover
+
+### Fixed
+- **TFM.md master title** — Removed duplicate "Frontend Development" from master name field
+
 ## [2.3.0] - 2026-02-13
 
 ### Performance
@@ -191,6 +212,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[2.4.0]: https://github.com/albertoguinda/devflow-ai/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/albertoguinda/devflow-ai/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/albertoguinda/devflow-ai/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/albertoguinda/devflow-ai/compare/v2.0.0...v2.1.0

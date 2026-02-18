@@ -119,6 +119,12 @@ export default function JsonFormatterPage() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder='Paste JSON here...'
+                onKeyDown={(e) => {
+                  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                    e.preventDefault();
+                    process();
+                  }
+                }}
                 className={cn(
                   "h-80 w-full resize-none rounded-2xl border p-4 font-mono text-xs focus:ring-2 transition-all shadow-inner leading-relaxed",
                   input && !inputValidation.isValid ? "border-danger ring-danger/10 bg-danger/5" : "border-divider focus:ring-primary/20 bg-background"
@@ -240,9 +246,16 @@ export default function JsonFormatterPage() {
                   <CopyButton text={result?.output || ""} />
                 </div>
                 <div className="flex-1 overflow-auto bg-background relative group">
-                  <pre className="p-8 font-mono text-[11px] leading-relaxed">
-                    <code>{result?.output}</code>
-                  </pre>
+                  {result?.output ? (
+                    <pre className="p-8 font-mono text-[11px] leading-relaxed">
+                      <code>{result.output}</code>
+                    </pre>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-center p-8 opacity-40">
+                      <Braces className="size-12 mb-3" />
+                      <p className="text-sm font-bold">Format or minify JSON to see output</p>
+                    </div>
+                  )}
                   {result && (
                     <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                        <StatusBadge variant="info">PRETTY-PRINTED</StatusBadge>
@@ -275,8 +288,8 @@ export default function JsonFormatterPage() {
                   <span className="text-[10px] font-black text-primary uppercase tracking-widest ml-2">TypeScript Definition</span>
                   <CopyButton text={tsOutput} />
                 </div>
-                <div className="flex-1 bg-[#1e1e1e] p-8 overflow-auto">
-                  <pre className="font-mono text-xs leading-relaxed text-blue-400">
+                <div className="flex-1 bg-muted/30 dark:bg-zinc-900 p-8 overflow-auto">
+                  <pre className="font-mono text-xs leading-relaxed text-primary">
                     <code>{tsOutput}</code>
                   </pre>
                 </div>

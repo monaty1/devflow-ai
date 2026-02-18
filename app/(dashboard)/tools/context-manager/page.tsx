@@ -14,18 +14,18 @@ import {
   Plus,
   Trash2,
   FolderPlus,
-  FileText,
   BookOpen,
   Coins,
   FileCode,
-  Share2,
+  FileText,
   FolderTree,
 } from "lucide-react";
 import { useContextManager } from "@/hooks/use-context-manager";
-import { useToast } from "@/hooks/use-toast";
+
 import { useTranslation } from "@/hooks/use-translation";
 import { useSmartNavigation } from "@/hooks/use-smart-navigation";
 import { ToolHeader } from "@/components/shared/tool-header";
+import { CopyButton } from "@/components/shared/copy-button";
 import { formatCost } from "@/lib/application/cost-calculator";
 import { AI_MODELS } from "@/config/ai-models";
 import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
@@ -35,7 +35,6 @@ import type { ContextDocument as Document, Priority, DocumentType } from "@/type
 
 export default function ContextManagerPage() {
   const { t } = useTranslation();
-  const { addToast } = useToast();
   const { navigateTo } = useSmartNavigation();
   const {
     windows,
@@ -53,6 +52,21 @@ export default function ContextManagerPage() {
   const [showAddDoc, setShowAddDoc] = useState(false);
   const [newWindowName, setNewWindowName] = useState("");
   const [stripComments, setStripComments] = useState(true);
+
+  // Controlled modal form state
+  const [docTitle, setDocTitle] = useState("");
+  const [docPath, setDocPath] = useState("");
+  const [docType, setDocType] = useState<DocumentType>("code");
+  const [docPriority, setDocPriority] = useState<Priority>("medium");
+  const [docContent, setDocContent] = useState("");
+
+  const resetDocForm = () => {
+    setDocTitle("");
+    setDocPath("");
+    setDocType("code");
+    setDocPriority("medium");
+    setDocContent("");
+  };
 
   const docColumns: ColumnConfig[] = [
     { name: "DOCUMENT", uid: "title", sortable: true },
@@ -148,6 +162,7 @@ export default function ContextManagerPage() {
               onChange={(e) => setNewWindowName(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && newWindowName) {
+                  e.preventDefault();
                   createWindow(newWindowName);
                   setNewWindowName("");
                 }
@@ -258,19 +273,11 @@ export default function ContextManagerPage() {
                       <span className="text-[10px] font-black uppercase text-primary tracking-tighter">Strip Code Comments</span>
                     </Checkbox>
                   </div>
-                  <Button 
-                    variant="primary" 
-                    className="font-bold shadow-lg shadow-primary/20 h-12"
-                    onPress={() => {
-                      const content = exportForAI({ stripComments });
-                      if (content) {
-                        navigator.clipboard.writeText(content);
-                        addToast(`AI-Ready Context (XML) copied to clipboard!`, "success");
-                      }
-                    }}
-                  >
-                    <Share2 className="size-4 mr-2" /> Copy AI-Ready Context
-                  </Button>
+                  <CopyButton
+                    getText={() => exportForAI({ stripComments }) || ""}
+                    label="Copy AI-Ready Context"
+                    className="font-bold shadow-lg shadow-primary/20 h-12 w-full"
+                  />
                 </Card>
               </div>
 
@@ -282,12 +289,14 @@ export default function ContextManagerPage() {
                     <FolderTree className="size-3 text-primary" /> Project Hierarchy
                   </h3>
                   {activeWindow.documents.length > 0 ? (
-                    <pre className="text-[10px] font-mono leading-tight overflow-auto max-h-[400px] text-primary/80">
-                      <code>{
-                        // Dynamic Tree logic (internal to component for LUX view)
-                        activeWindow.documents.map(d => d.filePath || d.title).sort().map(p => `📄 ${p}`).join('\n')
-                      }</code>
-                    </pre>
+                    <div className="text-[10px] font-mono leading-tight overflow-auto max-h-[400px] text-primary/80 space-y-1">
+                      {activeWindow.documents.map(d => d.filePath || d.title).sort().map((p, i) => (
+                        <div key={i} className="flex items-center gap-1.5">
+                          <FileText className="size-3 shrink-0 opacity-60" />
+                          <span>{p}</span>
+                        </div>
+                      ))}
+                    </div>
                   ) : (
                     <p className="text-[10px] text-muted-foreground italic text-center py-10">Add files to see the project map.</p>
                   )}
@@ -348,17 +357,17 @@ export default function ContextManagerPage() {
                 <p className="text-xs text-muted-foreground font-medium">Paste code, documentation or prompt instructions.</p>
               </div>
             </div>
-            
+
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
-                <Input placeholder="e.g. user-service.ts" id="doc-title" variant="primary" className="font-bold" />
-                <Input placeholder="src/services/user-service.ts" id="doc-path" variant="primary" />
+                <Input placeholder="e.g. user-service.ts" value={docTitle} onChange={(e) => setDocTitle(e.target.value)} variant="primary" className="font-bold" />
+                <Input placeholder="src/services/user-service.ts" value={docPath} onChange={(e) => setDocPath(e.target.value)} variant="primary" />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Document Type</label>
-                  <select id="doc-type" className="w-full h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm focus:border-indigo-500 outline-none transition-all">
+                  <select value={docType} onChange={(e) => setDocType(e.target.value as DocumentType)} className="w-full h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm focus:border-indigo-500 outline-none transition-all">
                     <option value="code">Source Code</option>
                     <option value="documentation">Technical Docs</option>
                     <option value="api">API Specification</option>
@@ -367,7 +376,7 @@ export default function ContextManagerPage() {
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Priority</label>
-                  <select id="doc-priority" className="w-full h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm focus:border-indigo-500 outline-none transition-all">
+                  <select value={docPriority} onChange={(e) => setDocPriority(e.target.value as Priority)} className="w-full h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm focus:border-indigo-500 outline-none transition-all">
                     <option value="high">High (Crucial Logic)</option>
                     <option value="medium">Medium (Standard)</option>
                     <option value="low">Low (Reference)</option>
@@ -378,27 +387,37 @@ export default function ContextManagerPage() {
               <div className="space-y-1">
                 <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Content</label>
                 <textarea
-                  id="doc-content"
+                  value={docContent}
+                  onChange={(e) => setDocContent(e.target.value)}
+                  onKeyDown={(e) => {
+                    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                      e.preventDefault();
+                      if (docTitle && docContent) {
+                        addDocument(docTitle, docContent, docType, docPriority, [], docPath);
+                        resetDocForm();
+                        setShowAddDoc(false);
+                      }
+                    }
+                  }}
                   placeholder="Paste context content here..."
                   className="h-48 w-full resize-none rounded-2xl border-2 border-divider bg-background p-4 font-mono text-sm focus:border-indigo-500 outline-none transition-all shadow-inner"
                 />
               </div>
 
               <div className="flex gap-3 pt-2">
-                <Button variant="primary" className="flex-1 font-black h-12 text-md shadow-xl shadow-indigo-500/20" onPress={() => {
-                  const title = (document.getElementById("doc-title") as HTMLInputElement).value;
-                  const content = (document.getElementById("doc-content") as HTMLTextAreaElement).value;
-                  const filePath = (document.getElementById("doc-path") as HTMLInputElement).value;
-                  const type = (document.getElementById("doc-type") as HTMLSelectElement).value as DocumentType;
-                  const priority = (document.getElementById("doc-priority") as HTMLSelectElement).value as Priority;
-                  if (title && content) {
-                    addDocument(title, content, type, priority, [], filePath);
+                <Button
+                  variant="primary"
+                  className="flex-1 font-black h-12 text-md shadow-xl shadow-indigo-500/20"
+                  isDisabled={!docTitle.trim() || !docContent.trim()}
+                  onPress={() => {
+                    addDocument(docTitle, docContent, docType, docPriority, [], docPath);
+                    resetDocForm();
                     setShowAddDoc(false);
-                  }
-                }}>
+                  }}
+                >
                   Ingest to Context
                 </Button>
-                <Button variant="ghost" className="font-black h-12" onPress={() => setShowAddDoc(false)}>Cancel</Button>
+                <Button variant="ghost" className="font-black h-12" onPress={() => { resetDocForm(); setShowAddDoc(false); }}>Cancel</Button>
               </div>
             </div>
           </Card>

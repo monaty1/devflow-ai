@@ -45,6 +45,8 @@ export default function GitCommitGeneratorPage() {
     message,
     validation,
     history,
+    diffInput,
+    setDiffInput,
     updateConfig,
     generate,
     analyze,
@@ -53,7 +55,6 @@ export default function GitCommitGeneratorPage() {
   } = useGitCommitGenerator();
 
   const [activeTab, setActiveTab] = useState<"composer" | "changelog" | "history" | string>("composer");
-  const [diffInput, setDiffInput] = useState("");
 
   const historyColumns: ColumnConfig[] = [
     { name: "MESSAGE", uid: "message", sortable: true },
@@ -175,11 +176,17 @@ export default function GitCommitGeneratorPage() {
 
               <div className="space-y-1">
                 <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Summary</label>
-                <Input 
+                <Input
                   variant="primary"
-                  placeholder="What changed?" 
-                  value={config.description} 
+                  placeholder="What changed?"
+                  value={config.description}
                   onChange={(e) => updateConfig("description", e.target.value)}
+                  onKeyDown={(e) => {
+                    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                      e.preventDefault();
+                      if (validation.isValid) generate();
+                    }
+                  }}
                   className="font-medium"
                 />
               </div>
@@ -262,6 +269,12 @@ export default function GitCommitGeneratorPage() {
               className="h-32 w-full resize-none rounded-xl border border-divider bg-background p-3 font-mono text-[10px] mb-3 focus:ring-2 focus:ring-indigo-500/20 shadow-inner"
               onChange={(e) => setDiffInput(e.target.value)}
               value={diffInput}
+              onKeyDown={(e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                  e.preventDefault();
+                  if (diffInput.trim()) handleDiffAnalysis();
+                }
+              }}
             />
             <Button size="sm" variant="ghost" className="w-full font-black text-secondary" onPress={handleDiffAnalysis} isDisabled={!diffInput.trim()}>
               Analyze & Prefill
@@ -319,7 +332,7 @@ export default function GitCommitGeneratorPage() {
                   )}
                 </div>
                 <div className="p-4 border-t border-divider bg-muted/5 flex gap-2">
-                   <CopyButton text={`git commit -m "${message || ""}"`} label="Copy CLI Command" className="flex-1 h-10 font-bold" />
+                   <CopyButton text={`git commit -m "${(message || "").replace(/"/g, '\\"')}"`} label="Copy CLI Command" className="flex-1 h-10 font-bold" />
                 </div>
               </Card>
 
@@ -331,7 +344,9 @@ export default function GitCommitGeneratorPage() {
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-xs">
                     <span>Conventional Commits 1.0.0</span>
-                    <StatusBadge variant="success">PASSED</StatusBadge>
+                    <StatusBadge variant={validation.isValid ? "success" : "error"}>
+                      {validation.isValid ? "PASSED" : "FAILED"}
+                    </StatusBadge>
                   </div>
                   <div className="flex justify-between items-center text-xs">
                     <span>Header length (&lt; 72 chars)</span>

@@ -1,7 +1,7 @@
 # Trabajo Final de Master: DevFlow AI
 
 **Autor:** Alberto Guinda Sevilla
-**Master:** Desarrollo con IA (BIG School) + Frontend Development
+**Master:** Desarrollo con IA (BIG School)
 **Fecha:** Febrero 2026
 **Repositorio:** https://github.com/albertoguinda/devflow-ai
 **Demo:** https://devflowai.vercel.app

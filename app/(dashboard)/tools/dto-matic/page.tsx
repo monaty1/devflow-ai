@@ -18,7 +18,6 @@ import {
   Database,
   Braces,
   Binary,
-  Layers,
   Box,
   FileCode,
 } from "lucide-react";
@@ -53,6 +52,7 @@ export default function DtoMaticPage() {
   } = useDtoMatic();
 
   const [view, setView] = useState<"code" | "schema" | "mock" | string>("code");
+  const [mockCount, setMockCount] = useState(5);
 
   const fileColumns: ColumnConfig[] = [
     { name: "FILE NAME", uid: "name", sortable: true },
@@ -143,6 +143,12 @@ export default function DtoMaticPage() {
                   !isValidJson(jsonInput) && jsonInput ? "border-danger ring-danger/10" : "border-divider focus:ring-primary/20"
                 )}
                 spellCheck={false}
+                onKeyDown={(e) => {
+                  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                    e.preventDefault();
+                    if (jsonInput.trim()) generate();
+                  }
+                }}
               />
               {!isValidJson(jsonInput) && jsonInput && (
                 <div className="absolute bottom-4 right-4 flex items-center gap-2 text-danger text-xs font-bold bg-background/80 backdrop-blur px-2 py-1 rounded-lg border border-danger/20">
@@ -156,7 +162,7 @@ export default function DtoMaticPage() {
               isLoading={isGenerating}
               variant="primary"
               className="w-full mt-4 font-bold h-12 shadow-lg shadow-primary/20 text-md"
-              isDisabled={!jsonInput.trim()}
+              isDisabled={!jsonInput.trim() || !config.rootName.trim()}
             >
               <Sparkles className="size-4 mr-2" /> Generate Architecture
             </Button>
@@ -270,12 +276,6 @@ export default function DtoMaticPage() {
                         <span>Generated Code</span>
                       </div>
                     </Tab>
-                    <Tab key="schema">
-                      <div className="flex items-center gap-2">
-                        <FolderTree className="size-4" />
-                        <span>Schema Tree</span>
-                      </div>
-                    </Tab>
                     <Tab key="mock">
                       <div className="flex items-center gap-2">
                         <Database className="size-4" />
@@ -285,9 +285,18 @@ export default function DtoMaticPage() {
                   </Tabs>
                   
                   {view === "mock" && (
-                    <Button size="sm" variant="ghost" onPress={() => generateMock(5)} className="font-bold text-secondary">
-                      <Wand2 className="size-3 mr-1" /> Re-roll Data
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={mockCount}
+                        onChange={(e) => setMockCount(parseInt(e.target.value))}
+                        className="h-8 rounded-lg border border-divider bg-background px-2 text-xs font-bold"
+                      >
+                        {[1, 3, 5, 10, 25, 50].map(n => <option key={n} value={n}>{n} items</option>)}
+                      </select>
+                      <Button size="sm" variant="ghost" onPress={() => generateMock(mockCount)} className="font-bold text-secondary">
+                        <Wand2 className="size-3 mr-1" /> Re-roll Data
+                      </Button>
+                    </div>
                   )}
                 </div>
 
@@ -307,12 +316,12 @@ export default function DtoMaticPage() {
                     </div>
                     
                     <div className="lg:col-span-3 h-full">
-                      <Card className="h-full p-0 border-primary/20 shadow-lg overflow-hidden bg-[#1e1e1e] text-white flex flex-col border-none">
-                        <div className="p-3 bg-white/5 border-b border-white/10 flex justify-between items-center">
+                      <Card className="h-full p-0 border-primary/20 shadow-lg overflow-hidden bg-muted/30 dark:bg-zinc-900 flex flex-col border-none">
+                        <div className="p-3 bg-muted/50 dark:bg-white/5 border-b border-divider dark:border-white/10 flex justify-between items-center">
                           <span className="text-xs font-mono font-bold text-primary ml-2">{selectedFile?.name}</span>
-                          <CopyButton text={selectedFile?.content || ""} variant="ghost" size="sm" className="text-white hover:bg-white/10" />
+                          <CopyButton text={selectedFile?.content || ""} variant="ghost" size="sm" />
                         </div>
-                        <pre className="p-6 font-mono text-xs leading-relaxed overflow-auto flex-1 scrollbar-hide text-gray-300">
+                        <pre className="p-6 font-mono text-xs leading-relaxed overflow-auto flex-1 scrollbar-hide text-foreground/80">
                           <code>{selectedFile?.content}</code>
                         </pre>
                       </Card>
@@ -320,21 +329,12 @@ export default function DtoMaticPage() {
                   </div>
                 )}
 
-                {view === "schema" && (
-                  <Card className="p-8 border-dashed border-2 bg-muted/10 h-[600px] flex items-center justify-center">
-                    <div className="text-center opacity-50">
-                      <Layers className="size-16 mx-auto mb-4" />
-                      <h3 className="text-xl font-bold">Interactive Schema Tree</h3>
-                      <p className="text-sm">Visual hierarchy explorer coming in next update.</p>
-                    </div>
-                  </Card>
-                )}
 
                 {view === "mock" && (
                   <Card className="p-0 overflow-hidden h-[600px] flex flex-col border-none">
                     <div className="p-4 border-b border-divider flex justify-between items-center bg-muted/20">
                       <span className="text-xs font-bold text-secondary flex items-center gap-2 uppercase tracking-wider">
-                        <Box className="size-4" /> Generated JSON Response (5 items)
+                        <Box className="size-4" /> Generated JSON Response
                       </span>
                       <CopyButton text={mockData || ""} />
                     </div>

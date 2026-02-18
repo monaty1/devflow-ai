@@ -128,6 +128,12 @@ export default function Base64Page() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={mode === "encode" ? "Enter text or JSON to encode..." : "Paste Base64 string here..."}
+              onKeyDown={(e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                  e.preventDefault();
+                  if (input.trim()) process();
+                }
+              }}
               className="h-48 w-full resize-none rounded-xl border border-divider bg-background p-4 font-mono text-xs focus:ring-2 focus:ring-primary/20 shadow-inner"
             />
 
@@ -232,11 +238,11 @@ export default function Base64Page() {
 
                 {result?.detectedType === "image" && (
                   <Card className="p-12 flex flex-col items-center justify-center bg-muted/10 border-dashed border-2">
-                    <img src={mode === "decode" ? `data:image/png;base64,${result.input}` : `data:image/png;base64,${result.output}`} alt="Preview" className="max-w-full max-h-[350px] rounded-2xl shadow-2xl border-4 border-white dark:border-slate-800" />
+                    <img src={mode === "decode" ? `data:image/*;base64,${result.input}` : `data:image/*;base64,${result.output}`} alt="Preview" className="max-w-full max-h-[350px] rounded-2xl shadow-2xl border-4 border-white dark:border-slate-800" />
                     <Button size="md" variant="primary" className="mt-8 font-black shadow-lg" onPress={() => {
                       const a = document.createElement("a");
-                      a.href = mode === "decode" ? `data:image/png;base64,${result.input}` : `data:image/png;base64,${result.output}`;
-                      a.download = "devflow-decoded.png"; a.click();
+                      a.href = mode === "decode" ? `data:image/*;base64,${result.input}` : `data:image/*;base64,${result.output}`;
+                      a.download = "devflow-decoded"; a.click();
                     }}>
                       <Download className="size-4 mr-2" /> Download Resource
                     </Button>
@@ -260,11 +266,13 @@ export default function Base64Page() {
                 )}
 
                 {result?.detectedType && !["jwt", "image", "json"].includes(result.detectedType) && (
-                  <div className="flex flex-col items-center justify-center h-full text-center p-20 opacity-30">
-                    <Search className="size-16 mb-4" />
-                    <p className="font-black text-xl">NO SMART PREVIEW</p>
-                    <p className="text-sm">Content identified as raw string or unknown binary stream.</p>
-                  </div>
+                  <Card className="p-20 border-dashed border-2 bg-muted/10 flex flex-col items-center justify-center h-full text-center">
+                    <div className="size-20 bg-muted rounded-full flex items-center justify-center mb-6">
+                      <Search className="size-10 text-muted-foreground/40" />
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">No Smart Preview Available</h3>
+                    <p className="text-muted-foreground max-w-xs">Content identified as raw string or unknown binary. Use the Text View or Byte Inspector for analysis.</p>
+                  </Card>
                 )}
               </div>
             )}

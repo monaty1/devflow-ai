@@ -99,6 +99,12 @@ export default function TailwindSorterPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Paste your messy tailwind classes here..."
+              onKeyDown={(e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                  e.preventDefault();
+                  if (input.trim()) setInput(input); // trigger auto-sort via reactive effect
+                }
+              }}
               className="h-48 w-full resize-none rounded-xl border border-divider bg-background p-4 font-mono text-sm focus:ring-2 focus:ring-sky-500/20 shadow-inner"
             />
             
@@ -140,8 +146,11 @@ export default function TailwindSorterPage() {
               Instant Visual Sandbox
             </h3>
             <div className="flex items-center justify-center p-8 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm min-h-[150px] relative z-10">
-              <div className={cn("transition-all duration-500", result?.output || "p-4 bg-sky-500 rounded text-white")}>
-                {result?.output ? "Applying Optimized Styles..." : "Sample Element"}
+              <div className={cn("transition-all duration-500 p-4 rounded", result?.output || "bg-sky-500 text-white")}>
+                <span className="text-sm font-bold">{result?.output ? "Styled Element" : "Sample Element"}</span>
+                {result?.output && (
+                  <p className="text-[9px] mt-2 opacity-60 font-mono break-all">{result.output}</p>
+                )}
               </div>
             </div>
             <p className="text-[10px] text-center mt-4 opacity-40 italic relative z-10">Note: Classes are applied to this element in real-time from the Web Worker.</p>

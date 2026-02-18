@@ -17,7 +17,6 @@ import {
   ShieldAlert,
   MoreVertical,
   Wand2,
-  ExternalLink,
   FileCode,
   Sparkles,
 } from "lucide-react";
@@ -30,6 +29,7 @@ import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { useSmartNavigation } from "@/hooks/use-smart-navigation";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { CodeReviewSkeleton } from "@/components/shared/skeletons";
 import type { SupportedLanguage, CodeIssue } from "@/types/code-review";
 import type { ToolRoute } from "@/hooks/use-smart-navigation";
 
@@ -76,6 +76,7 @@ export default function CodeReviewPage() {
 
   const handleReset = () => {
     setCode("");
+    setLanguage("typescript");
     reset();
   };
 
@@ -140,14 +141,6 @@ export default function CodeReviewPage() {
                 <div className="flex items-center gap-2">
                   <Wand2 className="size-3" />
                   <span>Improve Names</span>
-                </div>
-              </DropdownItem>
-              <DropdownItem 
-                key="docs" 
-              >
-                <div className="flex items-center gap-2">
-                  <ExternalLink className="size-3" />
-                  <span>View Best Practices</span>
                 </div>
               </DropdownItem>
             </DropdownMenu>
@@ -215,6 +208,12 @@ export default function CodeReviewPage() {
               placeholder={t("codeReview.placeholder")}
               className="h-[400px] w-full resize-none rounded-xl border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-inner transition-all"
               spellCheck={false}
+              onKeyDown={(e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                  e.preventDefault();
+                  if (code.trim()) handleReview();
+                }
+              }}
             />
 
             <Button
@@ -232,7 +231,9 @@ export default function CodeReviewPage() {
 
         {/* Results Panel */}
         <div className="lg:col-span-3 space-y-6">
-          {result ? (
+          {isReviewing ? (
+            <CodeReviewSkeleton />
+          ) : result ? (
             <>
               {/* Score & Metrics Dashboard */}
               <div className="grid gap-4 sm:grid-cols-3">

@@ -148,6 +148,12 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder={t("promptAnalyzer.placeholder")}
+            onKeyDown={(e) => {
+              if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                e.preventDefault();
+                if (prompt.trim()) handleAnalyze();
+              }
+            }}
             className="min-h-[160px] w-full resize-y rounded-lg border border-border bg-background p-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
 

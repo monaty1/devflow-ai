@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Chip,
   Input,
@@ -52,7 +52,16 @@ export default function HttpStatusFinderPage() {
     clearSearch,
   } = useHttpStatusFinder();
 
+  const [searchInput, setSearchInput] = useState(query);
   const [activeView, setActiveView] = useState<"grid" | "table">("grid");
+
+  // Debounce search by 300ms
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setQuery(searchInput);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput, setQuery]);
   const [testResponse, setTestResult] = useState<{ headers: Record<string, string>; time: number; ok: boolean } | null>(null);
   const [isTesting, setIsTesting] = useState(false);
 
@@ -92,7 +101,7 @@ export default function HttpStatusFinderPage() {
       res.headers.forEach((v, k) => { headers[k] = v; });
       setTestResult({ headers, time: Date.now() - start, ok: res.ok });
     } catch {
-      setTestResult({ headers: { error: "CORS or Network Error. Check console." }, time: Date.now() - start, ok: false });
+      setTestResult({ headers: { error: "CORS or network error — external API may block browser requests. Try testing from a server-side context." }, time: Date.now() - start, ok: false });
     } finally {
       setIsTesting(false);
     }
@@ -133,8 +142,8 @@ export default function HttpStatusFinderPage() {
             </h3>
             <Input
               placeholder="Code (404) or Keyword (not found)..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               variant="primary"
               className="font-bold text-sm"
             />
@@ -169,11 +178,18 @@ export default function HttpStatusFinderPage() {
                 { q: "Body too large?", a: "413 Payload Too Large" },
                 { q: "External API down?", a: "502 Bad Gateway" },
               ].map((item, i) => (
-                <div key={i} className="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5 group hover:bg-white/10 transition-colors cursor-default">
+                <button
+                  key={i}
+                  onClick={() => {
+                    const code = parseInt(item.a.split(" ")[0] ?? "");
+                    if (!isNaN(code)) setSearchInput(code.toString());
+                  }}
+                  className="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5 group hover:bg-white/10 transition-colors cursor-pointer w-full"
+                >
                   <span className="text-[10px] font-bold opacity-80">{item.q}</span>
                   <ChevronRight className="size-3 opacity-20 group-hover:translate-x-1 transition-transform" />
                   <span className="text-[10px] font-black uppercase text-cyan-400">{item.a.split(" ")[0]}</span>
-                </div>
+                </button>
               ))}
             </div>
           </Card>

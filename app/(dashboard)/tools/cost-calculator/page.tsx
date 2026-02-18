@@ -125,7 +125,10 @@ export default function CostCalculatorPage() {
                     <span>View Stats</span>
                   </div>
                 </DropdownItem>
-                <DropdownItem key="copy">
+                <DropdownItem key="copy" onPress={() => {
+                  const configStr = JSON.stringify({ model: result.model.id, provider: result.model.provider, inputTokens, outputTokens, dailyRequests, totalCost: result.totalCost }, null, 2);
+                  navigator.clipboard.writeText(configStr);
+                }}>
                   <div className="flex items-center gap-2">
                     <RotateCcw className="size-3" />
                     <span>Copy Config</span>
@@ -138,7 +141,7 @@ export default function CostCalculatorPage() {
       default:
         return String(result[key as keyof typeof result] ?? "");
     }
-  }, [cheapestId, bestValueId]);
+  }, [cheapestId, bestValueId, inputTokens, outputTokens, dailyRequests]);
 
   const chartData = useMemo(() => {
     if (!comparison || comparison.results.length === 0) return [];
@@ -214,7 +217,7 @@ export default function CostCalculatorPage() {
                     max="100000"
                     step="1000"
                     value={inputTokens}
-                    onChange={(e) => setInputTokens(parseInt(e.target.value))}
+                    onChange={(e) => setInputTokens(Number.isNaN(parseInt(e.target.value)) ? 0 : parseInt(e.target.value))}
                     className="flex-1 accent-primary"
                   />
                   <input
@@ -237,7 +240,7 @@ export default function CostCalculatorPage() {
                     max="50000"
                     step="500"
                     value={outputTokens}
-                    onChange={(e) => setOutputTokens(parseInt(e.target.value))}
+                    onChange={(e) => setOutputTokens(Number.isNaN(parseInt(e.target.value)) ? 0 : parseInt(e.target.value))}
                     className="flex-1 accent-primary"
                   />
                   <input
@@ -260,7 +263,7 @@ export default function CostCalculatorPage() {
                     max="10000"
                     step="100"
                     value={dailyRequests}
-                    onChange={(e) => setDailyRequests(parseInt(e.target.value))}
+                    onChange={(e) => setDailyRequests(Number.isNaN(parseInt(e.target.value)) ? 1 : parseInt(e.target.value))}
                     className="flex-1 accent-primary"
                   />
                   <input
@@ -363,8 +366,8 @@ export default function CostCalculatorPage() {
                     tick={{fontSize: 10, fill: 'gray'}}
                     tickFormatter={(val) => `$${val}`}
                   />
-                  <RechartsTooltip 
-                    contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', fontSize: '12px', color: 'white' }}
+                  <RechartsTooltip
+                    contentStyle={{ backgroundColor: 'var(--color-background)', border: '1px solid var(--color-border)', borderRadius: '8px', fontSize: '12px', color: 'var(--color-foreground)' }}
                     itemStyle={{ padding: '2px 0' }}
                   />
                   {topModelNames.map((name, i) => (

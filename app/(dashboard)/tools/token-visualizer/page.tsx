@@ -13,6 +13,7 @@ import {
   Info,
 } from "lucide-react";
 import { useTokenVisualizer } from "@/hooks/use-token-visualizer";
+import { useSmartNavigation } from "@/hooks/use-smart-navigation";
 import { useTranslation } from "@/hooks/use-translation";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
@@ -34,6 +35,7 @@ export default function TokenVisualizerPage() {
     reset 
   } = useTokenVisualizer();
 
+  const { navigateTo } = useSmartNavigation();
   const [isCompareMode, setIsCompareMode] = useState(false);
 
   const PROVIDERS = [
@@ -102,6 +104,12 @@ export default function TokenVisualizerPage() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Type or paste text to visualize tokenization..."
+                onKeyDown={(e) => {
+                  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                    e.preventDefault();
+                    if (input.trim()) tokenize(input, provider, isCompareMode);
+                  }
+                }}
                 className="h-64 w-full resize-none rounded-xl border border-divider bg-background p-4 font-mono text-sm focus:ring-2 focus:ring-primary/20 shadow-inner"
               />
 
@@ -125,6 +133,28 @@ export default function TokenVisualizerPage() {
               )}
             </div>
           </Card>
+
+          {/* Cross-Tool Links */}
+          {visualization && (
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                size="sm"
+                variant="outline"
+                className="font-bold text-xs"
+                onPress={() => navigateTo("prompt-analyzer", input)}
+              >
+                Analyze Prompt
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="font-bold text-xs"
+                onPress={() => navigateTo("cost-calculator", visualization.totalTokens.toString())}
+              >
+                Estimate Cost
+              </Button>
+            </div>
+          )}
 
           {/* Efficiency Audit Card */}
           {visualization && (

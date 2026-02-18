@@ -3,13 +3,22 @@
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 
-export type ToolRoute = 
+export type ToolRoute =
   | "json-formatter"
   | "dto-matic"
   | "token-visualizer"
   | "cost-calculator"
   | "base64"
-  | "prompt-analyzer";
+  | "prompt-analyzer"
+  | "code-review"
+  | "regex-humanizer"
+  | "variable-name-wizard"
+  | "cron-builder"
+  | "git-commit-generator"
+  | "uuid-generator"
+  | "tailwind-sorter"
+  | "context-manager"
+  | "http-status-finder";
 
 const SHARED_DATA_KEY = "devflow-shared-data";
 

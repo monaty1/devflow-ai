@@ -141,10 +141,16 @@ export default function CronBuilderPage() {
                         variant="primary"
                         value={expression[f.field as keyof typeof expression]}
                         onChange={(e) => setField(f.field as keyof typeof expression, e.target.value)}
+                        onKeyDown={(e: React.KeyboardEvent) => {
+                          if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                            e.preventDefault();
+                            setExpression({ ...expression });
+                          }
+                        }}
                         className="flex-1 font-mono font-bold"
                         placeholder="*"
                       />
-                      <span className="text-[10px] opacity-30 font-mono w-10">{f.range}</span>
+                      <span className="text-[10px] opacity-30 font-mono w-10" title={`Valid range: ${f.range}`}>{f.range}</span>
                     </div>
                   ))}
                 </div>

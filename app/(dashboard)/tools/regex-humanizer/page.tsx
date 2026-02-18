@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   Tabs,
   Tab,
@@ -40,6 +40,19 @@ export default function RegexHumanizerPage() {
 
   const [testText, setTestText] = useState("john.doe@example.com, test@devflow.ai, invalid-email");
   const [activeTab, setActiveTab] = useState<"explain" | "generate" | string>("explain");
+  const [resultTab, setResultTab] = useState<"explanation" | "groups" | "test" | string>("explanation");
+  const [generateDesc, setGenerateDesc] = useState("");
+
+  const isValidRegex = useMemo(() => {
+    if (!pattern.trim()) return true;
+    try {
+      const cleaned = pattern.replace(/^\//, "").replace(/\/[gimsuy]*$/, "");
+      new RegExp(cleaned);
+      return true;
+    } catch {
+      return false;
+    }
+  }, [pattern]);
 
   const handleTest = useCallback(() => {
     test(pattern, testText);
@@ -116,13 +129,25 @@ export default function RegexHumanizerPage() {
                 <textarea
                   value={pattern}
                   onChange={(e) => setPattern(e.target.value)}
+                  onKeyDown={(e) => {
+                    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                      e.preventDefault();
+                      if (isValidRegex && pattern.trim()) explain(pattern);
+                    }
+                  }}
                   placeholder="/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi"
                   className="h-32 w-full resize-none rounded-xl border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-inner transition-all"
                 />
+                {!isValidRegex && pattern.trim() && (
+                  <p className="text-xs text-danger font-bold flex items-center gap-1">
+                    <AlertTriangle className="size-3" /> Invalid regex syntax
+                  </p>
+                )}
               </div>
-              <Button 
-                onPress={() => explain(pattern)} 
+              <Button
+                onPress={() => explain(pattern)}
                 isLoading={isExplaining}
+                isDisabled={!pattern.trim() || !isValidRegex}
                 variant="primary"
                 className="w-full h-12 font-bold shadow-lg shadow-primary/20"
               >
@@ -136,17 +161,26 @@ export default function RegexHumanizerPage() {
                   Natural Language Description
                 </label>
                 <textarea
+                  value={generateDesc}
+                  onChange={(e) => setGenerateDesc(e.target.value)}
                   placeholder="E.g.: A valid email address with optional plus signs"
                   className="h-32 w-full resize-none rounded-xl border border-border bg-background p-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-inner transition-all"
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
+                    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
                       e.preventDefault();
-                      generate(e.currentTarget.value);
+                      if (generateDesc.trim()) generate(generateDesc);
                     }
                   }}
                 />
               </div>
-              <p className="text-[10px] text-muted-foreground italic">Press Enter to generate instantly</p>
+              <Button
+                onPress={() => generate(generateDesc)}
+                isDisabled={!generateDesc.trim()}
+                variant="primary"
+                className="w-full h-12 font-bold shadow-lg shadow-primary/20"
+              >
+                <Wand2 className="size-4 mr-2" /> Generate Pattern
+              </Button>
             </div>
           )}
 
@@ -159,10 +193,17 @@ export default function RegexHumanizerPage() {
                 { s: "\\s", d: "Space" }, { s: ".", d: "Any" },
                 { s: "^", d: "Start" }, { s: "$", d: "End" }
               ].map(ref => (
-                <div key={ref.s} className="flex justify-between items-center px-2 py-1 bg-muted/30 rounded text-[10px] font-mono">
+                <button
+                  key={ref.s}
+                  onClick={() => {
+                    setPattern(pattern + ref.s);
+                    setActiveTab("explain");
+                  }}
+                  className="flex justify-between items-center px-2 py-1 bg-muted/30 rounded text-[10px] font-mono hover:bg-primary/10 transition-colors cursor-pointer"
+                >
                   <span className="text-primary font-bold">{ref.s}</span>
                   <span className="opacity-60">{ref.d}</span>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -230,86 +271,91 @@ export default function RegexHumanizerPage() {
 
               {/* Dynamic Tabs for Analysis/Test */}
               <Card className="p-0 overflow-hidden">
-                <Tabs 
+                <Tabs
                   aria-label="Result Tabs"
                   variant="primary"
+                  selectedKey={resultTab}
+                  onSelectionChange={(k) => setResultTab(k as string)}
                 >
-                  <Tab key="explanation">
-                    <div className="flex items-center gap-2">Explanation</div>
-                    <div className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-bold">Human Readable Logic</h3>
-                        <CopyButton text={explanation.explanation} />
-                      </div>
-                      <pre className="text-sm font-mono leading-relaxed bg-muted/30 p-4 rounded-xl whitespace-pre-wrap">
-                        {explanation.explanation}
-                      </pre>
+                  <Tab key="explanation">Explanation</Tab>
+                  <Tab key="groups">Groups ({explanation.groups.length})</Tab>
+                  <Tab key="test">Interactive Test</Tab>
+                </Tabs>
+
+                {resultTab === "explanation" && (
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-bold">Human Readable Logic</h3>
+                      <CopyButton text={explanation.explanation} />
                     </div>
-                  </Tab>
-                  <Tab key="groups">
-                    <div className="flex items-center gap-2">Groups</div>
-                    <div className="p-0">
-                      <DataTable
-                        columns={groupColumns}
-                        data={explanation.groups.map(g => ({ ...g, id: g.index }))}
-                        filterField="description"
-                        renderCell={renderGroupCell}
-                        emptyContent="No capture groups found in this pattern."
+                    <pre className="text-sm font-mono leading-relaxed bg-muted/30 p-4 rounded-xl whitespace-pre-wrap">
+                      {explanation.explanation}
+                    </pre>
+                  </div>
+                )}
+
+                {resultTab === "groups" && (
+                  <div className="p-0">
+                    <DataTable
+                      columns={groupColumns}
+                      data={explanation.groups.map(g => ({ ...g, id: g.index }))}
+                      filterField="description"
+                      renderCell={renderGroupCell}
+                      emptyContent="No capture groups found in this pattern."
+                    />
+                  </div>
+                )}
+
+                {resultTab === "test" && (
+                  <div className="p-6 space-y-4">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[10px] font-bold text-muted-foreground uppercase">Sample Text to Test</label>
+                      <textarea
+                        value={testText}
+                        onChange={(e) => setTestText(e.target.value)}
+                        className="h-32 w-full resize-none rounded-xl border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
-                  </Tab>
-                  <Tab key="test">
-                    <div className="flex items-center gap-2">Interactive Test</div>
-                    <div className="p-6 space-y-4">
-                      <div className="flex flex-col gap-2">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase">Sample Text to Test</label>
-                        <textarea
-                          value={testText}
-                          onChange={(e) => setTestText(e.target.value)}
-                          className="h-32 w-full resize-none rounded-xl border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                        />
-                      </div>
-                      <Button onPress={handleTest} variant="ghost" className="w-full text-primary">
-                        <Play className="size-4 mr-2" /> Run Test Matches
-                      </Button>
+                    <Button onPress={handleTest} variant="ghost" className="w-full text-primary">
+                      <Play className="size-4 mr-2" /> Run Test Matches
+                    </Button>
 
-                      {testResult && (
-                        <div className="mt-4 space-y-4">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-bold">Matches Found: {testResult.allMatches.length}</span>
-                            <StatusBadge variant={testResult.matches ? "success" : "warning"}>
-                              {testResult.matches ? "Matching" : "No Matches"}
-                            </StatusBadge>
-                          </div>
-                          
-                          {testResult.allMatches.length > 0 && (
-                            <div className="max-h-48 overflow-y-auto border border-divider rounded-xl divide-y divide-divider bg-muted/10">
-                              {testResult.allMatches.map((m, i) => (
-                                <div key={i} className="p-3 text-xs flex flex-col gap-2">
-                                  <div className="flex justify-between">
-                                    <span className="font-mono bg-primary/10 text-primary px-1.5 rounded">Match {i + 1}</span>
-                                    <span className="text-muted-foreground italic">Index: {m.index}</span>
-                                  </div>
-                                  <p className="font-mono break-all font-bold">&quot;{m.match}&quot;</p>
-                                  {Object.keys(m.groups).length > 0 && (
-                                    <div className="flex flex-wrap gap-2 mt-1">
-                                      {Object.entries(m.groups).map(([key, val]) => (
-                                        <div key={key} className="flex items-center gap-1.5 bg-muted px-2 py-0.5 rounded border border-border/50">
-                                          <span className="font-bold opacity-50">{key}:</span>
-                                          <span className="font-mono text-primary">{val}</span>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                    {testResult && (
+                      <div className="mt-4 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-bold">Matches Found: {testResult.allMatches.length}</span>
+                          <StatusBadge variant={testResult.matches ? "success" : "warning"}>
+                            {testResult.matches ? "Matching" : "No Matches"}
+                          </StatusBadge>
                         </div>
-                      )}
-                    </div>
-                  </Tab>
-                </Tabs>
+
+                        {testResult.allMatches.length > 0 && (
+                          <div className="max-h-48 overflow-y-auto border border-divider rounded-xl divide-y divide-divider bg-muted/10">
+                            {testResult.allMatches.map((m, i) => (
+                              <div key={i} className="p-3 text-xs flex flex-col gap-2">
+                                <div className="flex justify-between">
+                                  <span className="font-mono bg-primary/10 text-primary px-1.5 rounded">Match {i + 1}</span>
+                                  <span className="text-muted-foreground italic">Index: {m.index}</span>
+                                </div>
+                                <p className="font-mono break-all font-bold">&quot;{m.match}&quot;</p>
+                                {Object.keys(m.groups).length > 0 && (
+                                  <div className="flex flex-wrap gap-2 mt-1">
+                                    {Object.entries(m.groups).map(([key, val]) => (
+                                      <div key={key} className="flex items-center gap-1.5 bg-muted px-2 py-0.5 rounded border border-border/50">
+                                        <span className="font-bold opacity-50">{key}:</span>
+                                        <span className="font-mono text-primary">{val}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </Card>
             </>
           ) : (

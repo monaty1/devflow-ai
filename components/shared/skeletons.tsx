@@ -33,6 +33,40 @@ export function SkeletonCard() {
   );
 }
 
+export function CodeReviewSkeleton() {
+  return (
+    <div className="space-y-6">
+      {/* Score + Metrics */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="col-span-1 flex flex-col items-center justify-center rounded-lg border border-border p-6">
+          <Skeleton className="size-24 rounded-full" />
+        </div>
+        <div className="col-span-2 rounded-lg border border-border p-6 space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <SkeletonText className="w-1/2" />
+              <Skeleton className="h-8 w-full" />
+            </div>
+            <div className="space-y-2">
+              <SkeletonText className="w-1/2" />
+              <Skeleton className="h-8 w-full" />
+            </div>
+          </div>
+          <Skeleton className="h-1.5 w-full rounded-full" />
+        </div>
+      </div>
+
+      {/* Issues Table */}
+      <div className="rounded-lg border border-border p-6 space-y-4">
+        <SkeletonText className="w-1/4" />
+        {[1, 2, 3].map((i) => (
+          <Skeleton key={i} className="h-16 w-full rounded-lg" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function PromptAnalyzerSkeleton() {
   return (
     <div className="space-y-6">

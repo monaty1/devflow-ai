@@ -90,14 +90,15 @@ export default function VariableNameWizardPage() {
         const audit = suggestion.audit;
         const Icon = audit?.status === "good" ? ShieldCheck : audit?.status === "warning" ? AlertTriangle : ShieldAlert;
         return (
-          <span title={audit?.findings?.length ? audit.findings.join(". ") : "Perfect naming logic applied."}>
-            <div className="flex items-center cursor-help">
-              <Icon className={cn(
-                "size-4",
-                audit?.status === "good" ? "text-emerald-500" : audit?.status === "warning" ? "text-amber-500" : "text-danger"
-              )} />
-            </div>
-          </span>
+          <div className="flex items-center gap-2">
+            <Icon className={cn(
+              "size-4",
+              audit?.status === "good" ? "text-emerald-500" : audit?.status === "warning" ? "text-amber-500" : "text-danger"
+            )} />
+            {audit?.findings?.length ? (
+              <span className="text-[9px] text-muted-foreground max-w-[120px] truncate">{audit.findings[0]}</span>
+            ) : null}
+          </div>
         );
       case "actions":
         return <CopyButton text={suggestion.name} size="sm" variant="ghost" />;
@@ -158,6 +159,12 @@ export default function VariableNameWizardPage() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="e.g. get the active user session token"
+                  onKeyDown={(e) => {
+                    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                      e.preventDefault();
+                      if (input.trim()) (activeTab === "generate" ? generate : convert)();
+                    }
+                  }}
                   className="h-24 w-full resize-none rounded-xl border border-divider bg-background p-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 shadow-inner"
                 />
               </div>
@@ -199,8 +206,9 @@ export default function VariableNameWizardPage() {
                 variant="primary"
                 className="w-full h-12 font-black shadow-xl shadow-primary/20 text-md"
                 isLoading={isProcessing}
+                isDisabled={!input.trim()}
               >
-                <Sparkles className="size-4 mr-2" /> 
+                <Sparkles className="size-4 mr-2" />
                 Cast Naming Spell
               </Button>
             </div>
@@ -216,12 +224,16 @@ export default function VariableNameWizardPage() {
                 <div className="flex justify-around items-center">
                   <div className="text-center">
                     <p className="text-[10px] font-bold uppercase opacity-40 mb-1">Clarity</p>
-                    <p className="text-xl font-black text-emerald-400">High</p>
+                    <p className={cn("text-xl font-black", (generationResult.suggestions[0]?.score ?? 0) >= 80 ? "text-emerald-400" : (generationResult.suggestions[0]?.score ?? 0) >= 50 ? "text-amber-400" : "text-red-400")}>
+                      {(generationResult.suggestions[0]?.score ?? 0) >= 80 ? "High" : (generationResult.suggestions[0]?.score ?? 0) >= 50 ? "Medium" : "Low"}
+                    </p>
                   </div>
                   <div className="size-px h-8 bg-white/10" />
                   <div className="text-center">
-                    <p className="text-[10px] font-bold uppercase opacity-40 mb-1">Concision</p>
-                    <p className="text-xl font-black text-blue-400">92%</p>
+                    <p className="text-[10px] font-bold uppercase opacity-40 mb-1">Avg Score</p>
+                    <p className="text-xl font-black text-blue-400">
+                      {Math.round(generationResult.suggestions.reduce((sum, s) => sum + s.score, 0) / generationResult.suggestions.length)}%
+                    </p>
                   </div>
                 </div>
                 <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
@@ -260,7 +272,6 @@ export default function VariableNameWizardPage() {
                   </div>
                   <div className="mt-4 flex gap-2">
                     <CopyButton text={generationResult.suggestions[0]?.name || ""} size="sm" />
-                    <Button size="sm" variant="ghost" className="font-bold text-success">Usage Guide</Button>
                   </div>
                 </Card>
                 
