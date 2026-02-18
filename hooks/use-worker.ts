@@ -17,6 +17,11 @@ export function useWorker<T, R>(options: WorkerOptions<T, R>) {
   const [result, setResult] = useState<R | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const workerRef = useRef<Worker | null>(null);
+  const optionsRef = useRef(options);
+
+  useEffect(() => {
+    optionsRef.current = options;
+  });
 
   useEffect(() => {
     return () => {
@@ -32,11 +37,13 @@ export function useWorker<T, R>(options: WorkerOptions<T, R>) {
       workerRef.current.terminate();
     }
 
+    const { fn } = optionsRef.current;
+
     // Create a blob worker from the function code
     const code = `
       self.onmessage = function(e) {
         try {
-          const fn = ${options.fn.toString()};
+          const fn = ${fn.toString()};
           const result = fn(e.data);
           self.postMessage({ type: 'success', result });
         } catch (err) {
@@ -52,12 +59,12 @@ export function useWorker<T, R>(options: WorkerOptions<T, R>) {
       if (e.data.type === "success") {
         setResult(e.data.result);
         setStatus("success");
-        options.onSuccess?.(e.data.result);
+        optionsRef.current.onSuccess?.(e.data.result);
       } else {
         const err = new Error(e.data.error);
         setError(err);
         setStatus("error");
-        options.onError?.(err);
+        optionsRef.current.onError?.(err);
       }
       workerRef.current?.terminate();
       workerRef.current = null;
@@ -67,13 +74,13 @@ export function useWorker<T, R>(options: WorkerOptions<T, R>) {
       const err = new Error(e.message);
       setError(err);
       setStatus("error");
-      options.onError?.(err);
+      optionsRef.current.onError?.(err);
       workerRef.current?.terminate();
       workerRef.current = null;
     };
 
     workerRef.current.postMessage(data);
-  }, [options]); // Dependency on options
+  }, []);
 
   return { run, status, result, error };
 }

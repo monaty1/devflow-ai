@@ -27,22 +27,31 @@ export function useSmartNavigation() {
 
   const navigateTo = useCallback((tool: ToolRoute, data?: string) => {
     if (data) {
-      localStorage.setItem(SHARED_DATA_KEY, data);
+      try {
+        localStorage.setItem(SHARED_DATA_KEY, data);
+      } catch {
+        // Storage quota exceeded or unavailable — navigate anyway
+      }
     }
     router.push(`/tools/${tool}`);
   }, [router]);
 
   const getSharedData = useCallback(() => {
     if (typeof window === "undefined") return null;
-    const data = localStorage.getItem(SHARED_DATA_KEY);
-    // Optional: Clear data after reading to avoid stale state? 
-    // Better to keep it for "Magic Input" consistency, but maybe clear on explicit reset.
-    return data;
+    try {
+      return localStorage.getItem(SHARED_DATA_KEY);
+    } catch {
+      return null;
+    }
   }, []);
 
   const clearSharedData = useCallback(() => {
     if (typeof window === "undefined") return;
-    localStorage.removeItem(SHARED_DATA_KEY);
+    try {
+      localStorage.removeItem(SHARED_DATA_KEY);
+    } catch {
+      // Ignore removal errors
+    }
   }, []);
 
   return { navigateTo, getSharedData, clearSharedData };

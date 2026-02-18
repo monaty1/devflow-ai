@@ -441,7 +441,7 @@ layout: two-cols
 | Estilos | **Tailwind CSS 4** (CSS-first) |
 | Componentes | **HeroUI v3** (React Aria) |
 | Estado | **Zustand** (locale + persist) |
-| Testing | **Vitest 4** (644 tests) |
+| Testing | **Vitest 4** (831 tests) |
 | Animaciones | **GSAP + Framer Motion** |
 
 </div>
@@ -456,7 +456,7 @@ layout: two-cols
 
 - **Next.js 16** sobre Vite: Server Components + ISR
 - **HeroUI v3** sobre shadcn: accesibilidad WCAG AAA de primera clase
-- **Sin i18next:** sistema custom de 50 líneas para 559 claves
+- **Sin i18next:** sistema custom de 50 líneas para 696 claves
 - **Sin backend:** cero superficie de ataque servidor
 
 </v-clicks>
@@ -544,11 +544,11 @@ image: /screenshots/lighthouse-100.png
 
 <div class="mt-8 grid grid-cols-3 gap-4 text-center">
   <div>
-    <div class="text-3xl font-bold text-green-400">644</div>
+    <div class="text-3xl font-bold text-green-400">831</div>
     <div class="text-sm opacity-60">tests pasando</div>
   </div>
   <div>
-    <div class="text-3xl font-bold text-blue-400">20</div>
+    <div class="text-3xl font-bold text-blue-400">21</div>
     <div class="text-sm opacity-60">archivos de test</div>
   </div>
   <div>
@@ -562,7 +562,7 @@ image: /screenshots/lighthouse-100.png
 - Ejecuta: npm run test:coverage
 - Captura la tabla de coverage mostrando los archivos con sus porcentajes
 - Especialmente lib/application/*.ts en verde (>80%)
-- O captura el terminal con "644 tests passed" en verde
+- O captura el terminal con "831 tests passed" en verde
 -->
 
 ---
@@ -622,7 +622,7 @@ image: /screenshots/lighthouse-100.png
 │  Job 1: QUALITY (paralelo)                            │
 │  ├─ npm run lint          ESLint 9 — 0 errores        │
 │  ├─ npm run type-check    tsc --noEmit strict          │
-│  ├─ npm run test:coverage  644 tests + thresholds     │
+│  ├─ npm run test:coverage  831 tests + thresholds     │
 │  └─ Upload coverage artifacts (14 días)               │
 │                                                        │
 │  Job 2: SECURITY (paralelo)                           │
@@ -700,7 +700,7 @@ const t = serverTranslation(locale);
 // → funciona en RSC sin hidratación
 ```
 
-**559 claves** en `locales/en.json` + `locales/es.json`
+**696 claves** en `locales/en.json` + `locales/es.json`
 
 </div>
 
@@ -742,7 +742,7 @@ class: text-center
     <div class="text-sm opacity-70 mt-2">herramientas funcionales</div>
   </div>
   <div class="bg-blue-900/30 rounded-xl p-6">
-    <div class="text-5xl font-bold text-blue-400">644</div>
+    <div class="text-5xl font-bold text-blue-400">831</div>
     <div class="text-sm opacity-70 mt-2">tests pasando</div>
   </div>
   <div class="bg-purple-900/30 rounded-xl p-6">
@@ -761,7 +761,7 @@ class: text-center
     <div class="text-xs opacity-60">rutas navegables</div>
   </div>
   <div class="bg-slate-800 rounded-xl p-4">
-    <div class="text-3xl font-bold">559</div>
+    <div class="text-3xl font-bold">696</div>
     <div class="text-xs opacity-60">claves i18n (×2)</div>
   </div>
   <div class="bg-slate-800 rounded-xl p-4">
@@ -845,7 +845,7 @@ class: text-center
 </div>
 
 <div class="mt-4">
-  <img src="https://img.shields.io/badge/tests-644_passing-brightgreen?style=flat-square" class="inline mx-1" />
+  <img src="https://img.shields.io/badge/tests-831_passing-brightgreen?style=flat-square" class="inline mx-1" />
   <img src="https://img.shields.io/badge/Lighthouse-100%2F100%2F100%2F100-brightgreen?style=flat-square" class="inline mx-1" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" class="inline mx-1" />
 </div>

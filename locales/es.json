@@ -428,6 +428,7 @@
   "jsonFmt.modeXml": "JSON a XML",
   "jsonFmt.modeCsv": "JSON a CSV",
   "jsonFmt.inputJson": "JSON de entrada",
+  "jsonFmt.clearInput": "Limpiar entrada",
   "jsonFmt.simple": "Simple",
   "jsonFmt.complex": "Complejo",
   "jsonFmt.indentSize": "Tamaño de indentación",

@@ -13,8 +13,12 @@ import { fetchLatestPrices, PRICING_CACHE_KEY } from "@/infrastructure/services/
 
 function getInitialInputTokens(): number {
   if (typeof window === "undefined") return 1000;
-  const shared = localStorage.getItem("devflow-shared-data");
-  if (shared) return Math.ceil(shared.length / 4);
+  try {
+    const shared = localStorage.getItem("devflow-shared-data");
+    if (shared) return Math.ceil(shared.length / 4);
+  } catch {
+    // Storage unavailable
+  }
   return 1000;
 }
 

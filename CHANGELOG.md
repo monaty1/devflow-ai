@@ -5,6 +5,22 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-02-18
+
+### Internationalized
+- **71 hardcoded strings replaced with `t()` calls** across 4 tool pages: cost-calculator (9), tailwind-sorter (18), git-commit-generator (22), json-formatter (22)
+- **~100 new locale keys** added to `en.json` for cost-calc, tailwind, git-commit, and json-formatter tools
+
+### Fixed
+- **HeroUI v3 Checkbox API** — Replaced deprecated `onValueChange` with `onChange`, removed unsupported `size` and `color` props (tailwind-sorter, git-commit-generator)
+- **React Compiler compliance** — Fixed `useCallback` missing `t` dependency in cost-calculator `renderCell`
+- **React refs rule** — Moved `optionsRef.current` assignment into `useEffect` in `useWorker` hook to comply with `react-hooks/refs`
+- **Unused variables** — Removed destructured `onSuccess`/`onError` in `useWorker` that were only accessed via ref
+- **CI pipeline restored** — All 3 jobs (quality, security, build) now pass: 0 lint errors, 0 TS errors, 831 tests green
+
+### Changed
+- **TFM slides** — Updated stats and content in `docs/slides.md`
+
 ## [2.4.0] - 2026-02-18
 
 ### Added
@@ -212,6 +228,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[2.5.0]: https://github.com/albertoguinda/devflow-ai/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/albertoguinda/devflow-ai/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/albertoguinda/devflow-ai/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/albertoguinda/devflow-ai/compare/v2.1.0...v2.2.0

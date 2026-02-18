@@ -97,7 +97,7 @@ export default function CostCalculatorPage() {
             <span className={cn("font-bold", isCheapest ? "text-success" : "text-foreground")}>
               {formatCost(result.totalCost)}
             </span>
-            {isCheapest && <span className="text-[10px] text-success font-bold uppercase tracking-tighter">Cheapest</span>}
+            {isCheapest && <span className="text-[10px] text-success font-bold uppercase tracking-tighter">{t("costCalc.cheapestLabel")}</span>}
           </div>
         );
       case "value":
@@ -106,7 +106,7 @@ export default function CostCalculatorPage() {
             <span className={cn("font-medium", isBestValue ? "text-secondary" : "text-foreground")}>
               {result.valueScore ? (result.valueScore / 1000000).toFixed(2) : "N/A"}
             </span>
-            {isBestValue && <span className="text-[10px] text-secondary font-bold uppercase tracking-tighter">Best Value</span>}
+            {isBestValue && <span className="text-[10px] text-secondary font-bold uppercase tracking-tighter">{t("costCalc.bestValueLabel")}</span>}
           </div>
         );
       case "actions":
@@ -122,7 +122,7 @@ export default function CostCalculatorPage() {
                 <DropdownItem key="details">
                   <div className="flex items-center gap-2">
                     <ExternalLink className="size-3" />
-                    <span>View Stats</span>
+                    <span>{t("costCalc.viewStats")}</span>
                   </div>
                 </DropdownItem>
                 <DropdownItem key="copy" onPress={() => {
@@ -131,7 +131,7 @@ export default function CostCalculatorPage() {
                 }}>
                   <div className="flex items-center gap-2">
                     <RotateCcw className="size-3" />
-                    <span>Copy Config</span>
+                    <span>{t("costCalc.copyConfig")}</span>
                   </div>
                 </DropdownItem>
               </DropdownMenu>
@@ -141,7 +141,7 @@ export default function CostCalculatorPage() {
       default:
         return String(result[key as keyof typeof result] ?? "");
     }
-  }, [cheapestId, bestValueId, inputTokens, outputTokens, dailyRequests]);
+  }, [cheapestId, bestValueId, inputTokens, outputTokens, dailyRequests, t]);
 
   const chartData = useMemo(() => {
     if (!comparison || comparison.results.length === 0) return [];
@@ -186,7 +186,7 @@ export default function CostCalculatorPage() {
               className="gap-2 text-primary"
             >
               <RefreshCw className={`size-4 ${isSyncing ? "animate-spin" : ""}`} />
-              {isSyncing ? "Syncing..." : "Sync Prices"}
+              {isSyncing ? t("costCalc.syncing") : t("costCalc.syncPrices")}
             </Button>
             <Button variant="outline" size="sm" onPress={reset} className="gap-2">
               <RotateCcw className="size-4" />
@@ -294,9 +294,9 @@ export default function CostCalculatorPage() {
           <div className="flex items-center justify-between px-2 text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
             <div className="flex items-center gap-1">
               {lastSync ? <Cloud className="size-3 text-emerald-500" /> : <CloudOff className="size-3 text-amber-500" />}
-              <span>Pricing Service: {lastSync ? "Online" : "Static Data"}</span>
+              <span>{t("costCalc.pricingService")} {lastSync ? t("costCalc.pricingOnline") : t("costCalc.pricingStatic")}</span>
             </div>
-            {lastSync && <span>Last Sync: {new Date(lastSync).toLocaleDateString()}</span>}
+            {lastSync && <span>{t("costCalc.lastSyncLabel")} {new Date(lastSync).toLocaleDateString()}</span>}
           </div>
         </div>
 
@@ -339,7 +339,7 @@ export default function CostCalculatorPage() {
           <Card className="p-6 mt-6">
             <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
               <Sparkles className="size-5 text-warning" />
-              30-Day Cumulative Cost Projection (Top 5 Models)
+              {t("costCalc.projectionTitle")}
             </h3>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -352,7 +352,7 @@ export default function CostCalculatorPage() {
                       </linearGradient>
                     ))}
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
                   <XAxis 
                     dataKey="day" 
                     axisLine={false} 
@@ -385,7 +385,7 @@ export default function CostCalculatorPage() {
               </ResponsiveContainer>
             </div>
             <p className="text-[10px] text-muted-foreground mt-4 italic text-center">
-              * Projection assumes constant daily requests and token counts. Prices may vary by provider.
+              {t("costCalc.projectionNote")}
             </p>
           </Card>
         </div>
