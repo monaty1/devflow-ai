@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 
@@ -12,6 +13,7 @@ interface ErrorPageProps {
 export default function RootError({ error, reset }: ErrorPageProps) {
   useEffect(() => {
     console.error("Root error boundary caught:", error);
+    Sentry.captureException(error);
   }, [error]);
 
   return (
