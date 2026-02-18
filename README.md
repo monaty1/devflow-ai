@@ -7,7 +7,7 @@
 ### 15 herramientas para developers &middot; 0 deps externas &middot; 100% local &middot; Open Source
 
 [![Build](https://img.shields.io/github/actions/workflow/status/albertoguinda/devflow-ai/ci.yml?branch=main&style=flat-square&logo=github&label=CI)](https://github.com/albertoguinda/devflow-ai/actions)
-[![Tests](https://img.shields.io/badge/tests-644_passing-brightgreen?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
+[![Tests](https://img.shields.io/badge/tests-838_passing-brightgreen?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
 [![Coverage](https://img.shields.io/badge/coverage-strategic_(100%2F80%2F0)-blue?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
 [![Lighthouse](https://img.shields.io/badge/Lighthouse-100%2F100%2F100%2F100-brightgreen?style=flat-square&logo=lighthouse&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
@@ -245,6 +245,30 @@ All responses include strict security headers via `next.config.ts`:
 
 ---
 
+## Observability (Sentry)
+
+Sentry is **optional** — the app runs perfectly without it. To enable error tracking and performance monitoring:
+
+1. Create a free project at [sentry.io](https://sentry.io)
+2. Copy your DSN from **Project Settings → Client Keys**
+3. Add it to `.env.local`:
+
+```env
+NEXT_PUBLIC_SENTRY_DSN=https://xxxxx@oXXXXX.ingest.sentry.io/XXXXXX
+```
+
+4. Restart the dev server — Sentry activates automatically
+
+**What you get:**
+- React error boundary captures (with component stack trace)
+- Client-side performance traces (10% sample in production)
+- Session Replay on error (100% capture)
+- Edge function tracing
+
+> The `instrumentation.ts` file at the root handles server/edge initialization per [Next.js docs](https://nextjs.org/docs/app/building-your-application/optimizing/instrumentation).
+
+---
+
 ## CI/CD Pipeline
 
 GitHub Actions runs on every push to `main` and all pull requests:
@@ -445,6 +469,28 @@ Todas las respuestas incluyen cabeceras de seguridad estrictas via `next.config.
 - **CSP reforzado** &mdash; bloquea XSS, clickjacking e inyeccion de datos
 - **Proteccion contra prototype pollution** &mdash; claves peligrosas (`__proto__`, `constructor`, `prototype`) filtradas
 - **Auditoria de dependencias** &mdash; `npm audit` se ejecuta en CI en cada push
+
+---
+
+## Observabilidad (Sentry)
+
+Sentry es **opcional** — la app funciona perfectamente sin el. Para activar el seguimiento de errores:
+
+1. Crea un proyecto gratuito en [sentry.io](https://sentry.io)
+2. Copia tu DSN desde **Project Settings → Client Keys**
+3. Añadelo en `.env.local`:
+
+```env
+NEXT_PUBLIC_SENTRY_DSN=https://xxxxx@oXXXXX.ingest.sentry.io/XXXXXX
+```
+
+4. Reinicia el servidor de desarrollo — Sentry se activa automaticamente
+
+**Que obtienes:**
+- Capturas del error boundary de React (con stack trace del componente)
+- Trazas de rendimiento del lado cliente (10% en produccion)
+- Session Replay en errores (100% de captura)
+- Trazado de Edge functions
 
 ---
 
