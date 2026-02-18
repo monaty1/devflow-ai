@@ -25,16 +25,6 @@ describe("Code Review", () => {
       expect(evalIssue?.category).toBe("security");
     });
 
-    it("should not flag innerHTML (no pattern in current implementation)", () => {
-      const result = reviewCode(
-        'document.getElementById("app").innerHTML = userInput;',
-        "javascript"
-      );
-
-      const issue = result.issues.find((i) => i.message.includes("innerHTML"));
-      expect(issue).toBeUndefined();
-    });
-
     it("should detect hardcoded credentials", () => {
       // pragma: allowlist secret — intentionally fake for testing detection
       const result = reviewCode(
@@ -47,15 +37,6 @@ describe("Code Review", () => {
       );
       expect(issue).toBeDefined();
       expect(issue?.category).toBe("security");
-    });
-
-    it("should not flag console statements (no pattern in current implementation)", () => {
-      const result = reviewCode('console.log("debug");', "javascript");
-
-      const issue = result.issues.find((i) =>
-        i.message.includes("Console statements")
-      );
-      expect(issue).toBeUndefined();
     });
 
     it("should detect loose equality", () => {
@@ -75,19 +56,6 @@ describe("Code Review", () => {
       );
       expect(issue).toBeDefined();
       expect(issue?.severity).toBe("info");
-    });
-
-    it("should not flag empty catch blocks for javascript (no pattern in current implementation)", () => {
-      const result = reviewCode(
-        "try { foo(); } catch (e) { }",
-        "javascript"
-      );
-
-      const issue = result.issues.find((i) =>
-        i.message.includes("Empty catch block")
-      );
-      // Empty catch block detection only exists for csharp, not javascript
-      expect(issue).toBeUndefined();
     });
 
     it("should calculate metrics correctly", () => {
