@@ -34,7 +34,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self'",
-      "connect-src 'self' https://api.github.com https://*.ingest.sentry.io",
+      "connect-src 'self' https://api.github.com https://*.ingest.sentry.io https://raw.githubusercontent.com",
       "frame-src https://giscus.app",
       "frame-ancestors 'none'",
       "base-uri 'self'",

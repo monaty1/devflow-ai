@@ -5,6 +5,16 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.2] - 2026-02-18
+
+### Fixed
+- **CSP blob Worker crash** — 6 tools silently broken in production (infinite loading, no error). Blob Workers blocked by `script-src 'self' 'unsafe-inline'` CSP. Rewrote all 6 hooks to call `lib/application/*.ts` functions directly: code-review, tailwind-sorter, regex-humanizer, variable-name-wizard, prompt-analyzer, token-visualizer
+- **CSP connect-src for cost calculator** — Added `https://raw.githubusercontent.com` to CSP `connect-src` directive so live pricing data from LiteLLM can load
+
+### Removed
+- **6 worker-source.ts files** — Deleted ~1,400 lines of duplicated logic (string-serialized copies of lib functions for blob Workers)
+- **`hooks/use-worker.ts`** — Unused generic blob Worker hook (dead code)
+
 ## [2.5.1] - 2026-02-18
 
 ### Fixed

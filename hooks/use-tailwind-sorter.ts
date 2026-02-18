@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { SortResult, SorterConfig } from "@/types/tailwind-sorter";
-import { TAILWIND_SORTER_WORKER_SOURCE } from "@/lib/application/tailwind-sorter/worker-source";
+import { sortClasses } from "@/lib/application/tailwind-sorter";
 
 interface UseTailwindSorterReturn {
   input: string;
@@ -11,7 +11,7 @@ interface UseTailwindSorterReturn {
   result: SortResult | null;
   isSorting: boolean;
   updateConfig: <K extends keyof SorterConfig>(key: K, value: SorterConfig[K]) => void;
-  sort: () => Promise<void>;
+  sort: () => void;
   reset: () => void;
   loadExample: (type: "clean" | "messy") => void;
 }
@@ -27,47 +27,16 @@ export function useTailwindSorter(): UseTailwindSorterReturn {
   });
   const [result, setResult] = useState<SortResult | null>(null);
   const [isSorting, setIsSorting] = useState(false);
-  const workerRef = useRef<Worker | null>(null);
 
-  useEffect(() => {
-    const blob = new Blob([TAILWIND_SORTER_WORKER_SOURCE], { type: "application/javascript" });
-    const worker = new Worker(URL.createObjectURL(blob));
-    workerRef.current = worker;
-
-    return () => {
-      worker.terminate();
-    };
-  }, []);
-
-  const sort = useCallback(async () => {
+  const sort = useCallback(() => {
     if (!input.trim()) return;
     setIsSorting(true);
-
-    return new Promise<void>((resolve, reject) => {
-      if (!workerRef.current) {
-        setIsSorting(false);
-        reject(new Error("Worker not initialized"));
-        return;
-      }
-
-      const worker = workerRef.current;
-
-      const handleMessage = (e: MessageEvent) => {
-        if (e.data.type === "success") {
-          setResult(e.data.result);
-          setIsSorting(false);
-          worker.removeEventListener("message", handleMessage);
-          resolve();
-        } else {
-          setIsSorting(false);
-          worker.removeEventListener("message", handleMessage);
-          reject(new Error(e.data.error || "Sorting failed"));
-        }
-      };
-
-      worker.addEventListener("message", handleMessage);
-      worker.postMessage({ input, config });
-    });
+    try {
+      const sortResult = sortClasses(input, config);
+      setResult(sortResult);
+    } finally {
+      setIsSorting(false);
+    }
   }, [input, config]);
 
   // Auto-sort with debounce

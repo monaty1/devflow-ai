@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback } from "react";
 import type { CodeReviewResult, SupportedLanguage } from "@/types/code-review";
-import { CODE_REVIEW_WORKER_SOURCE } from "@/lib/application/code-review/worker-source";
+import { reviewCode } from "@/lib/application/code-review";
 
 interface UseCodeReviewReturn {
   result: CodeReviewResult | null;
@@ -21,18 +21,6 @@ export function useCodeReview(): UseCodeReviewReturn {
   const [isReviewing, setIsReviewing] = useState(false);
   const [code, setCode] = useState("");
   const [language, setLanguage] = useState<SupportedLanguage>("typescript");
-  const workerRef = useRef<Worker | null>(null);
-
-  useEffect(() => {
-    // Initialize worker
-    const blob = new Blob([CODE_REVIEW_WORKER_SOURCE], { type: "application/javascript" });
-    const worker = new Worker(URL.createObjectURL(blob));
-    workerRef.current = worker;
-
-    return () => {
-      worker.terminate();
-    };
-  }, []);
 
   const review = useCallback(
     async (
@@ -40,41 +28,13 @@ export function useCodeReview(): UseCodeReviewReturn {
       lang: SupportedLanguage
     ): Promise<CodeReviewResult> => {
       setIsReviewing(true);
-
-      return new Promise<CodeReviewResult>((resolve, reject) => {
-        if (!workerRef.current) {
-          setIsReviewing(false);
-          reject(new Error("Worker not initialized"));
-          return;
-        }
-
-        const worker = workerRef.current;
-
-        const handleMessage = (e: MessageEvent) => {
-          if (e.data.type === "success") {
-            const reviewResult = e.data.result;
-            setResult(reviewResult);
-            setIsReviewing(false);
-            worker.removeEventListener("message", handleMessage);
-            resolve(reviewResult);
-          } else {
-            setIsReviewing(false);
-            worker.removeEventListener("message", handleMessage);
-            reject(new Error(e.data.error || "Review failed"));
-          }
-        };
-
-        const handleError = (e: ErrorEvent) => {
-          setIsReviewing(false);
-          worker.removeEventListener("error", handleError);
-          reject(new Error(e.message));
-        };
-
-        worker.addEventListener("message", handleMessage);
-        worker.addEventListener("error", handleError);
-
-        worker.postMessage({ code: codeToReview, language: lang });
-      });
+      try {
+        const reviewResult = reviewCode(codeToReview, lang);
+        setResult(reviewResult);
+        return reviewResult;
+      } finally {
+        setIsReviewing(false);
+      }
     },
     []
   );
