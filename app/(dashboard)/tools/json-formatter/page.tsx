@@ -3,7 +3,6 @@
 import { useState, useCallback, useMemo } from "react";
 import {
   Tabs,
-  Tab,
   Chip,
 } from "@heroui/react";
 import {
@@ -204,31 +203,34 @@ export default function JsonFormatterPage() {
 
         {/* Results View */}
         <div className="lg:col-span-8 space-y-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <Tabs 
-              selectedKey={activeTab as string} 
-              onSelectionChange={(k) => setActiveTab(k as string)}
-              variant="primary"
-            >
-              <Tab key="output">{t("jsonFmt.outputTab")}</Tab>
-              <Tab key="paths">{t("jsonFmt.pathExplorer")}</Tab>
-              <Tab key="typescript">{t("jsonFmt.schemaTab")}</Tab>
-              <Tab key="compare">{t("jsonFmt.diffAnalysis")}</Tab>
-            </Tabs>
-            
-            <div className="flex gap-2 w-full sm:w-auto">
-              <Button size="sm" variant="ghost" className="font-bold flex-1 sm:flex-none" onPress={() => navigateTo("dto-matic", input)}>
-                <Code2 className="size-3.5 mr-1.5 text-secondary" /> {t("jsonFmt.architectLayer")}
-              </Button>
-              <Button size="sm" variant="ghost" className="font-bold flex-1 sm:flex-none" onPress={applyOutput} isDisabled={!result?.output}>
-                <ArrowRightLeft className="size-3.5 mr-1.5 text-primary" /> {t("jsonFmt.setAsInput")}
-              </Button>
-            </div>
-          </div>
+          <Tabs
+            selectedKey={activeTab as string}
+            onSelectionChange={(k) => setActiveTab(k as string)}
+            variant="primary"
+          >
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <Tabs.ListContainer>
+                <Tabs.List aria-label="JSON views">
+                  <Tabs.Tab id="output">{t("jsonFmt.outputTab")}</Tabs.Tab>
+                  <Tabs.Tab id="paths">{t("jsonFmt.pathExplorer")}</Tabs.Tab>
+                  <Tabs.Tab id="typescript">{t("jsonFmt.schemaTab")}</Tabs.Tab>
+                  <Tabs.Tab id="compare">{t("jsonFmt.diffAnalysis")}</Tabs.Tab>
+                </Tabs.List>
+              </Tabs.ListContainer>
 
-          <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-            {activeTab === "output" && (
-              <Card className="p-0 border-divider shadow-xl overflow-hidden h-[650px] flex flex-col">
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Button size="sm" variant="ghost" className="font-bold flex-1 sm:flex-none" onPress={() => navigateTo("dto-matic", input)}>
+                  <Code2 className="size-3.5 mr-1.5 text-secondary" /> {t("jsonFmt.architectLayer")}
+                </Button>
+                <Button size="sm" variant="ghost" className="font-bold flex-1 sm:flex-none" onPress={applyOutput} isDisabled={!result?.output}>
+                  <ArrowRightLeft className="size-3.5 mr-1.5 text-primary" /> {t("jsonFmt.setAsInput")}
+                </Button>
+              </div>
+            </div>
+
+            <div className="animate-in fade-in slide-in-from-right-4 duration-500">
+              <Tabs.Panel id="output">
+                <Card className="p-0 border-divider shadow-xl overflow-hidden h-[650px] flex flex-col">
                 <div className="p-4 border-b border-divider flex justify-between items-center bg-muted/20">
                   <div className="flex gap-1">
                     {["format", "minify", "to-yaml", "to-xml", "to-csv"].map((m) => (
@@ -263,9 +265,9 @@ export default function JsonFormatterPage() {
                   )}
                 </div>
               </Card>
-            )}
+              </Tabs.Panel>
 
-            {activeTab === "paths" && (
+              <Tabs.Panel id="paths">
               <Card className="p-0 overflow-hidden shadow-xl border-divider min-h-[650px]">
                 <div className="p-4 border-b border-divider bg-muted/20 flex items-center gap-2">
                   <Search className="size-4 text-primary" />
@@ -280,9 +282,9 @@ export default function JsonFormatterPage() {
                   emptyContent={t("jsonFmt.enterValidPaths")}
                 />
               </Card>
-            )}
+              </Tabs.Panel>
 
-            {activeTab === "typescript" && (
+              <Tabs.Panel id="typescript">
               <Card className="p-0 border-divider shadow-xl overflow-hidden h-[650px] flex flex-col border-none">
                 <div className="p-4 border-b border-divider flex justify-between items-center bg-muted/20">
                   <span className="text-[10px] font-black text-primary uppercase tracking-widest ml-2">{t("jsonFmt.tsDefinition")}</span>
@@ -294,9 +296,9 @@ export default function JsonFormatterPage() {
                   </pre>
                 </div>
               </Card>
-            )}
+              </Tabs.Panel>
 
-            {activeTab === "compare" && (
+              <Tabs.Panel id="compare">
               <div className="grid gap-6">
                 <Card className="p-6 border-divider shadow-md">
                   <h3 className="font-bold mb-4 flex items-center gap-2 text-primary">
@@ -336,8 +338,9 @@ export default function JsonFormatterPage() {
                   </Card>
                 )}
               </div>
-            )}
-          </div>
+              </Tabs.Panel>
+            </div>
+          </Tabs>
         </div>
       </div>
     </div>

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import {
   Tabs,
-  Tab,
   Chip,
   Checkbox,
 } from "@heroui/react";
@@ -178,18 +177,35 @@ export default function TailwindSorterPage() {
 
               {/* Analysis Tabs */}
               <Card className="p-0 overflow-hidden shadow-xl">
-                <Tabs 
-                  selectedKey={activeView as string} 
+                <Tabs
+                  selectedKey={activeView as string}
                   onSelectionChange={(k) => setActiveTab(k as string)}
                   variant="primary"
                 >
-                  <Tab 
-                    key="result" 
-                  >
-                    <div className="flex items-center gap-2 font-bold">
-                      <CheckCircle2 className="size-4 text-emerald-500" />
-                      {t("tailwind.sortedList")}
-                    </div>
+                  <Tabs.ListContainer>
+                    <Tabs.List aria-label="Analysis tabs">
+                      <Tabs.Tab id="result">
+                        <div className="flex items-center gap-2 font-bold">
+                          <CheckCircle2 className="size-4 text-emerald-500" />
+                          {t("tailwind.sortedList")}
+                        </div>
+                      </Tabs.Tab>
+                      <Tabs.Tab id="audit">
+                        <div className="flex items-center gap-2 font-bold">
+                          <AlertTriangle className="size-4 text-amber-500" />
+                          {t("tailwind.issuesTab", { count: String(result.audit.length + result.conflicts.length) })}
+                        </div>
+                      </Tabs.Tab>
+                      <Tabs.Tab id="breakpoints">
+                        <div className="flex items-center gap-2 font-bold">
+                          <Monitor className="size-4 text-blue-500" />
+                          {t("tailwind.responsive")}
+                        </div>
+                      </Tabs.Tab>
+                    </Tabs.List>
+                  </Tabs.ListContainer>
+
+                  <Tabs.Panel id="result">
                     <div className="p-6 space-y-4">
                       <div className="flex justify-between items-center bg-sky-50 dark:bg-sky-950/20 p-3 rounded-xl border border-sky-100 dark:border-sky-900/30">
                         <span className="text-xs font-bold text-sky-700">{t("tailwind.productionReady")}</span>
@@ -199,15 +215,9 @@ export default function TailwindSorterPage() {
                         {result.output}
                       </div>
                     </div>
-                  </Tab>
+                  </Tabs.Panel>
 
-                  <Tab 
-                    key="audit" 
-                  >
-                    <div className="flex items-center gap-2 font-bold">
-                      <AlertTriangle className="size-4 text-amber-500" />
-                      {t("tailwind.issuesTab", { count: String(result.audit.length + result.conflicts.length) })}
-                    </div>
+                  <Tabs.Panel id="audit">
                     <div className="p-0">
                       {result.conflicts.length > 0 && (
                         <div className="p-4 bg-red-50 dark:bg-red-950/20 border-b border-red-100 dark:border-red-900/30">
@@ -230,15 +240,9 @@ export default function TailwindSorterPage() {
                         emptyContent={t("tailwind.noRedundancies")}
                       />
                     </div>
-                  </Tab>
+                  </Tabs.Panel>
 
-                  <Tab 
-                    key="breakpoints" 
-                  >
-                    <div className="flex items-center gap-2 font-bold">
-                      <Monitor className="size-4 text-blue-500" />
-                      {t("tailwind.responsive")}
-                    </div>
+                  <Tabs.Panel id="breakpoints">
                     <div className="p-6 space-y-6">
                       {Object.entries(result.breakpoints).map(([bp, classes]) => (
                         <div key={bp} className="space-y-2">
@@ -258,7 +262,7 @@ export default function TailwindSorterPage() {
                         </div>
                       ))}
                     </div>
-                  </Tab>
+                  </Tabs.Panel>
                 </Tabs>
               </Card>
             </>

@@ -3,7 +3,6 @@
 import { useState, useMemo, useCallback } from "react";
 import {
   Tabs,
-  Tab,
   Chip,
   Dropdown,
   DropdownTrigger,
@@ -281,116 +280,120 @@ export default function GitCommitGeneratorPage() {
 
         {/* Results Column */}
         <div className="lg:col-span-7 space-y-6">
-          <Tabs 
-            selectedKey={activeTab as string} 
+          <Tabs
+            selectedKey={activeTab as string}
             onSelectionChange={(k) => setActiveTab(k as string)}
             variant="primary"
           >
-            <Tab key="composer">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="size-4" /> <span>{t("gitCommit.resultTab")}</span>
+            <Tabs.ListContainer>
+              <Tabs.List aria-label="Output view">
+                <Tabs.Tab id="composer">
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="size-4" /> <span>{t("gitCommit.resultTab")}</span>
+                  </div>
+                </Tabs.Tab>
+                <Tabs.Tab id="changelog">
+                  <div className="flex items-center gap-2">
+                    <LayoutList className="size-4" /> <span>{t("gitCommit.sessionChangelog")}</span>
+                  </div>
+                </Tabs.Tab>
+                <Tabs.Tab id="history">
+                  <div className="flex items-center gap-2">
+                    <History className="size-4" /> <span>{t("gitCommit.registryTab")}</span>
+                  </div>
+                </Tabs.Tab>
+              </Tabs.List>
+            </Tabs.ListContainer>
+
+            <Tabs.Panel id="composer">
+              <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+                <Card className="p-0 border-divider shadow-xl overflow-hidden bg-background">
+                  <div className="p-4 border-b border-divider bg-muted/20 flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                      <div className="size-8 bg-zinc-900 rounded-full flex items-center justify-center border border-white/10 shadow-lg">
+                        <Github className="size-4 text-white" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold">git-preview</span>
+                        <span className="text-[9px] opacity-40 font-mono">main · a1b2c3d</span>
+                      </div>
+                    </div>
+                    <CopyButton text={message || ""} />
+                  </div>
+                  <div className="p-8 font-mono text-sm leading-relaxed whitespace-pre-wrap min-h-[200px]">
+                    {message ? (
+                      <div className="space-y-2">
+                        <p className="font-black text-primary underline decoration-primary/20 underline-offset-4">{message.split("\n")[0]}</p>
+                        <p className="text-muted-foreground">{message.split("\n").slice(1).join("\n")}</p>
+                      </div>
+                    ) : (
+                      <span className="opacity-20 italic">{t("gitCommit.forgingMessage")}</span>
+                    )}
+                  </div>
+                  <div className="p-4 border-t border-divider bg-muted/5 flex gap-2">
+                     <CopyButton text={`git commit -m "${(message || "").replace(/"/g, '\\"')}"`} label={t("gitCommit.copyCli")} className="flex-1 h-10 font-bold" />
+                  </div>
+                </Card>
+
+                {/* Validation Audit */}
+                <Card className="p-6">
+                  <h3 className="text-[10px] font-black uppercase text-muted-foreground mb-4 tracking-widest flex items-center gap-2">
+                    <ShieldCheck className="size-3 text-emerald-500" /> {t("gitCommit.compliance")}
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center text-xs">
+                      <span>{t("gitCommit.conventionalCommits")}</span>
+                      <StatusBadge variant={validation.isValid ? "success" : "error"}>
+                        {validation.isValid ? t("gitCommit.passed") : t("gitCommit.failed")}
+                      </StatusBadge>
+                    </div>
+                    <div className="flex justify-between items-center text-xs">
+                      <span>{t("gitCommit.headerLength")}</span>
+                      <StatusBadge variant={config.description.length <= 72 ? "success" : "error"}>
+                        {config.description.length} chars
+                      </StatusBadge>
+                    </div>
+                    <div className="flex justify-between items-center text-xs">
+                      <span>{t("gitCommit.bodySeparation")}</span>
+                      <StatusBadge variant={config.body ? "success" : "info"}>{config.body ? "YES" : "N/A"}</StatusBadge>
+                    </div>
+                  </div>
+                </Card>
               </div>
-            </Tab>
-            <Tab key="changelog">
-              <div className="flex items-center gap-2">
-                <LayoutList className="size-4" /> <span>{t("gitCommit.sessionChangelog")}</span>
-              </div>
-            </Tab>
-            <Tab key="history">
-              <div className="flex items-center gap-2">
-                <History className="size-4" /> <span>{t("gitCommit.registryTab")}</span>
-              </div>
-            </Tab>
+            </Tabs.Panel>
+
+            <Tabs.Panel id="changelog">
+              <Card className="p-0 border-divider shadow-xl overflow-hidden h-[600px] flex flex-col animate-in fade-in slide-in-from-right-4 duration-500 border-none">
+                <div className="p-4 border-b border-divider flex justify-between items-center bg-muted/20">
+                  <div className="flex items-center gap-2">
+                    <Terminal className="size-4 text-primary" />
+                    <span className="text-xs font-black uppercase tracking-widest">{t("gitCommit.autoChangelog")}</span>
+                  </div>
+                  <CopyButton text={changelog} />
+                </div>
+                <pre className="p-8 font-mono text-xs leading-relaxed overflow-auto flex-1 bg-background text-foreground/80">
+                  <code>{changelog || t("gitCommit.noChangelog")}</code>
+                </pre>
+              </Card>
+            </Tabs.Panel>
+
+            <Tabs.Panel id="history">
+              <Card className="p-0 overflow-hidden shadow-xl border-divider h-[600px] animate-in fade-in slide-in-from-right-4 duration-500 border-none">
+                <div className="p-4 border-b border-divider bg-muted/20 flex items-center justify-between">
+                  <span className="text-xs font-black uppercase tracking-widest">{t("gitCommit.commitRegistry")}</span>
+                  <Button size="sm" variant="ghost" onPress={clearHistory} className="font-black text-[9px] text-danger">{t("gitCommit.wipeCache")}</Button>
+                </div>
+                <DataTable
+                  columns={historyColumns}
+                  data={history}
+                  filterField="message"
+                  renderCell={renderHistoryCell}
+                  initialVisibleColumns={["message", "type", "actions"]}
+                  emptyContent={t("gitCommit.registryEmpty")}
+                />
+              </Card>
+            </Tabs.Panel>
           </Tabs>
-
-          {activeTab === "composer" && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
-              <Card className="p-0 border-divider shadow-xl overflow-hidden bg-background">
-                <div className="p-4 border-b border-divider bg-muted/20 flex justify-between items-center">
-                  <div className="flex items-center gap-3">
-                    <div className="size-8 bg-zinc-900 rounded-full flex items-center justify-center border border-white/10 shadow-lg">
-                      <Github className="size-4 text-white" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-xs font-bold">git-preview</span>
-                      <span className="text-[9px] opacity-40 font-mono">main · a1b2c3d</span>
-                    </div>
-                  </div>
-                  <CopyButton text={message || ""} />
-                </div>
-                <div className="p-8 font-mono text-sm leading-relaxed whitespace-pre-wrap min-h-[200px]">
-                  {message ? (
-                    <div className="space-y-2">
-                      <p className="font-black text-primary underline decoration-primary/20 underline-offset-4">{message.split("\n")[0]}</p>
-                      <p className="text-muted-foreground">{message.split("\n").slice(1).join("\n")}</p>
-                    </div>
-                  ) : (
-                    <span className="opacity-20 italic">{t("gitCommit.forgingMessage")}</span>
-                  )}
-                </div>
-                <div className="p-4 border-t border-divider bg-muted/5 flex gap-2">
-                   <CopyButton text={`git commit -m "${(message || "").replace(/"/g, '\\"')}"`} label={t("gitCommit.copyCli")} className="flex-1 h-10 font-bold" />
-                </div>
-              </Card>
-
-              {/* Validation Audit */}
-              <Card className="p-6">
-                <h3 className="text-[10px] font-black uppercase text-muted-foreground mb-4 tracking-widest flex items-center gap-2">
-                  <ShieldCheck className="size-3 text-emerald-500" /> {t("gitCommit.compliance")}
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center text-xs">
-                    <span>{t("gitCommit.conventionalCommits")}</span>
-                    <StatusBadge variant={validation.isValid ? "success" : "error"}>
-                      {validation.isValid ? t("gitCommit.passed") : t("gitCommit.failed")}
-                    </StatusBadge>
-                  </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <span>{t("gitCommit.headerLength")}</span>
-                    <StatusBadge variant={config.description.length <= 72 ? "success" : "error"}>
-                      {config.description.length} chars
-                    </StatusBadge>
-                  </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <span>{t("gitCommit.bodySeparation")}</span>
-                    <StatusBadge variant={config.body ? "success" : "info"}>{config.body ? "YES" : "N/A"}</StatusBadge>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          )}
-
-          {activeTab === "changelog" && (
-            <Card className="p-0 border-divider shadow-xl overflow-hidden h-[600px] flex flex-col animate-in fade-in slide-in-from-right-4 duration-500 border-none">
-              <div className="p-4 border-b border-divider flex justify-between items-center bg-muted/20">
-                <div className="flex items-center gap-2">
-                  <Terminal className="size-4 text-primary" />
-                  <span className="text-xs font-black uppercase tracking-widest">{t("gitCommit.autoChangelog")}</span>
-                </div>
-                <CopyButton text={changelog} />
-              </div>
-              <pre className="p-8 font-mono text-xs leading-relaxed overflow-auto flex-1 bg-background text-foreground/80">
-                <code>{changelog || t("gitCommit.noChangelog")}</code>
-              </pre>
-            </Card>
-          )}
-
-          {activeTab === "history" && (
-            <Card className="p-0 overflow-hidden shadow-xl border-divider h-[600px] animate-in fade-in slide-in-from-right-4 duration-500 border-none">
-              <div className="p-4 border-b border-divider bg-muted/20 flex items-center justify-between">
-                <span className="text-xs font-black uppercase tracking-widest">{t("gitCommit.commitRegistry")}</span>
-                <Button size="sm" variant="ghost" onPress={clearHistory} className="font-black text-[9px] text-danger">{t("gitCommit.wipeCache")}</Button>
-              </div>
-              <DataTable
-                columns={historyColumns}
-                data={history}
-                filterField="message"
-                renderCell={renderHistoryCell}
-                initialVisibleColumns={["message", "type", "actions"]}
-                emptyContent={t("gitCommit.registryEmpty")}
-              />
-            </Card>
-          )}
         </div>
       </div>
     </div>

@@ -3,7 +3,6 @@
 import { useState, useCallback, useMemo } from "react";
 import {
   Tabs,
-  Tab,
 } from "@heroui/react";
 import {
   Regex,
@@ -97,92 +96,94 @@ export default function RegexHumanizerPage() {
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Pattern Input & Generation */}
         <Card className="p-6 lg:col-span-2 flex flex-col gap-6">
-          <Tabs 
-            selectedKey={activeTab as string} 
+          <Tabs
+            selectedKey={activeTab as string}
             onSelectionChange={(key) => setActiveTab(key as string)}
             variant="primary"
           >
-            <Tab 
-              key="explain" 
-            >
-              <div className="flex items-center gap-2">
-                <Search className="size-4" />
-                <span>Explain</span>
-              </div>
-            </Tab>
-            <Tab 
-              key="generate" 
-            >
-              <div className="flex items-center gap-2">
-                <Wand2 className="size-4" />
-                <span>Generate</span>
-              </div>
-            </Tab>
-          </Tabs>
+            <Tabs.ListContainer>
+              <Tabs.List aria-label="Input mode">
+                <Tabs.Tab id="explain">
+                  <div className="flex items-center gap-2">
+                    <Search className="size-4" />
+                    <span>Explain</span>
+                  </div>
+                </Tabs.Tab>
+                <Tabs.Tab id="generate">
+                  <div className="flex items-center gap-2">
+                    <Wand2 className="size-4" />
+                    <span>Generate</span>
+                  </div>
+                </Tabs.Tab>
+              </Tabs.List>
+            </Tabs.ListContainer>
 
-          {activeTab === "explain" ? (
-            <div className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                  Regex Pattern
-                </label>
-                <textarea
-                  value={pattern}
-                  onChange={(e) => setPattern(e.target.value)}
-                  onKeyDown={(e) => {
-                    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-                      e.preventDefault();
-                      if (isValidRegex && pattern.trim()) explain(pattern);
-                    }
-                  }}
-                  placeholder="/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi"
-                  className="h-32 w-full resize-none rounded-xl border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-inner transition-all"
-                />
-                {!isValidRegex && pattern.trim() && (
-                  <p className="text-xs text-danger font-bold flex items-center gap-1">
-                    <AlertTriangle className="size-3" /> Invalid regex syntax
-                  </p>
-                )}
+            <Tabs.Panel id="explain">
+              <div className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                    Regex Pattern
+                  </label>
+                  <textarea
+                    value={pattern}
+                    onChange={(e) => setPattern(e.target.value)}
+                    onKeyDown={(e) => {
+                      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                        e.preventDefault();
+                        if (isValidRegex && pattern.trim()) explain(pattern);
+                      }
+                    }}
+                    placeholder="/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi"
+                    className="h-32 w-full resize-none rounded-xl border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-inner transition-all"
+                  />
+                  {!isValidRegex && pattern.trim() && (
+                    <p className="text-xs text-danger font-bold flex items-center gap-1">
+                      <AlertTriangle className="size-3" /> Invalid regex syntax
+                    </p>
+                  )}
+                </div>
+                <Button
+                  onPress={() => explain(pattern)}
+                  isLoading={isExplaining}
+                  isDisabled={!pattern.trim() || !isValidRegex}
+                  variant="primary"
+                  className="w-full h-12 font-bold shadow-lg shadow-primary/20"
+                >
+                  Analyze Pattern
+                </Button>
               </div>
-              <Button
-                onPress={() => explain(pattern)}
-                isLoading={isExplaining}
-                isDisabled={!pattern.trim() || !isValidRegex}
-                variant="primary"
-                className="w-full h-12 font-bold shadow-lg shadow-primary/20"
-              >
-                Analyze Pattern
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                  Natural Language Description
-                </label>
-                <textarea
-                  value={generateDesc}
-                  onChange={(e) => setGenerateDesc(e.target.value)}
-                  placeholder="E.g.: A valid email address with optional plus signs"
-                  className="h-32 w-full resize-none rounded-xl border border-border bg-background p-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-inner transition-all"
-                  onKeyDown={(e) => {
-                    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-                      e.preventDefault();
-                      if (generateDesc.trim()) generate(generateDesc);
-                    }
-                  }}
-                />
+            </Tabs.Panel>
+
+            <Tabs.Panel id="generate">
+              <div className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                    Natural Language Description
+                  </label>
+                  <textarea
+                    value={generateDesc}
+                    onChange={(e) => setGenerateDesc(e.target.value)}
+                    placeholder="E.g.: A valid email address with optional plus signs"
+                    className="h-32 w-full resize-none rounded-xl border border-border bg-background p-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-inner transition-all"
+                    onKeyDown={(e) => {
+                      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                        e.preventDefault();
+                        if (generateDesc.trim()) generate(generateDesc);
+                      }
+                    }}
+                  />
+                </div>
+                <Button
+                  onPress={() => generate(generateDesc)}
+                  isDisabled={!generateDesc.trim()}
+                  variant="primary"
+                  className="w-full h-12 font-bold shadow-lg shadow-primary/20"
+                >
+                  <Wand2 className="size-4 mr-2" /> Generate Pattern
+                </Button>
               </div>
-              <Button
-                onPress={() => generate(generateDesc)}
-                isDisabled={!generateDesc.trim()}
-                variant="primary"
-                className="w-full h-12 font-bold shadow-lg shadow-primary/20"
-              >
-                <Wand2 className="size-4 mr-2" /> Generate Pattern
-              </Button>
-            </div>
-          )}
+            </Tabs.Panel>
+          </Tabs>
 
           {/* Quick Cheat Sheet */}
           <div className="mt-auto border-t border-divider pt-4">
@@ -277,85 +278,89 @@ export default function RegexHumanizerPage() {
                   selectedKey={resultTab}
                   onSelectionChange={(k) => setResultTab(k as string)}
                 >
-                  <Tab key="explanation">Explanation</Tab>
-                  <Tab key="groups">Groups ({explanation.groups.length})</Tab>
-                  <Tab key="test">Interactive Test</Tab>
-                </Tabs>
+                  <Tabs.ListContainer>
+                    <Tabs.List aria-label="Result analysis">
+                      <Tabs.Tab id="explanation">Explanation</Tabs.Tab>
+                      <Tabs.Tab id="groups">Groups ({explanation.groups.length})</Tabs.Tab>
+                      <Tabs.Tab id="test">Interactive Test</Tabs.Tab>
+                    </Tabs.List>
+                  </Tabs.ListContainer>
 
-                {resultTab === "explanation" && (
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-bold">Human Readable Logic</h3>
-                      <CopyButton text={explanation.explanation} />
+                  <Tabs.Panel id="explanation">
+                    <div className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-bold">Human Readable Logic</h3>
+                        <CopyButton text={explanation.explanation} />
+                      </div>
+                      <pre className="text-sm font-mono leading-relaxed bg-muted/30 p-4 rounded-xl whitespace-pre-wrap">
+                        {explanation.explanation}
+                      </pre>
                     </div>
-                    <pre className="text-sm font-mono leading-relaxed bg-muted/30 p-4 rounded-xl whitespace-pre-wrap">
-                      {explanation.explanation}
-                    </pre>
-                  </div>
-                )}
+                  </Tabs.Panel>
 
-                {resultTab === "groups" && (
-                  <div className="p-0">
-                    <DataTable
-                      columns={groupColumns}
-                      data={explanation.groups.map(g => ({ ...g, id: g.index }))}
-                      filterField="description"
-                      renderCell={renderGroupCell}
-                      emptyContent="No capture groups found in this pattern."
-                    />
-                  </div>
-                )}
-
-                {resultTab === "test" && (
-                  <div className="p-6 space-y-4">
-                    <div className="flex flex-col gap-2">
-                      <label className="text-[10px] font-bold text-muted-foreground uppercase">Sample Text to Test</label>
-                      <textarea
-                        value={testText}
-                        onChange={(e) => setTestText(e.target.value)}
-                        className="h-32 w-full resize-none rounded-xl border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  <Tabs.Panel id="groups">
+                    <div className="p-0">
+                      <DataTable
+                        columns={groupColumns}
+                        data={explanation.groups.map(g => ({ ...g, id: g.index }))}
+                        filterField="description"
+                        renderCell={renderGroupCell}
+                        emptyContent="No capture groups found in this pattern."
                       />
                     </div>
-                    <Button onPress={handleTest} variant="ghost" className="w-full text-primary">
-                      <Play className="size-4 mr-2" /> Run Test Matches
-                    </Button>
+                  </Tabs.Panel>
 
-                    {testResult && (
-                      <div className="mt-4 space-y-4">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-bold">Matches Found: {testResult.allMatches.length}</span>
-                          <StatusBadge variant={testResult.matches ? "success" : "warning"}>
-                            {testResult.matches ? "Matching" : "No Matches"}
-                          </StatusBadge>
-                        </div>
-
-                        {testResult.allMatches.length > 0 && (
-                          <div className="max-h-48 overflow-y-auto border border-divider rounded-xl divide-y divide-divider bg-muted/10">
-                            {testResult.allMatches.map((m, i) => (
-                              <div key={i} className="p-3 text-xs flex flex-col gap-2">
-                                <div className="flex justify-between">
-                                  <span className="font-mono bg-primary/10 text-primary px-1.5 rounded">Match {i + 1}</span>
-                                  <span className="text-muted-foreground italic">Index: {m.index}</span>
-                                </div>
-                                <p className="font-mono break-all font-bold">&quot;{m.match}&quot;</p>
-                                {Object.keys(m.groups).length > 0 && (
-                                  <div className="flex flex-wrap gap-2 mt-1">
-                                    {Object.entries(m.groups).map(([key, val]) => (
-                                      <div key={key} className="flex items-center gap-1.5 bg-muted px-2 py-0.5 rounded border border-border/50">
-                                        <span className="font-bold opacity-50">{key}:</span>
-                                        <span className="font-mono text-primary">{val}</span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                  <Tabs.Panel id="test">
+                    <div className="p-6 space-y-4">
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase">Sample Text to Test</label>
+                        <textarea
+                          value={testText}
+                          onChange={(e) => setTestText(e.target.value)}
+                          className="h-32 w-full resize-none rounded-xl border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
                       </div>
-                    )}
-                  </div>
-                )}
+                      <Button onPress={handleTest} variant="ghost" className="w-full text-primary">
+                        <Play className="size-4 mr-2" /> Run Test Matches
+                      </Button>
+
+                      {testResult && (
+                        <div className="mt-4 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-bold">Matches Found: {testResult.allMatches.length}</span>
+                            <StatusBadge variant={testResult.matches ? "success" : "warning"}>
+                              {testResult.matches ? "Matching" : "No Matches"}
+                            </StatusBadge>
+                          </div>
+
+                          {testResult.allMatches.length > 0 && (
+                            <div className="max-h-48 overflow-y-auto border border-divider rounded-xl divide-y divide-divider bg-muted/10">
+                              {testResult.allMatches.map((m, i) => (
+                                <div key={i} className="p-3 text-xs flex flex-col gap-2">
+                                  <div className="flex justify-between">
+                                    <span className="font-mono bg-primary/10 text-primary px-1.5 rounded">Match {i + 1}</span>
+                                    <span className="text-muted-foreground italic">Index: {m.index}</span>
+                                  </div>
+                                  <p className="font-mono break-all font-bold">&quot;{m.match}&quot;</p>
+                                  {Object.keys(m.groups).length > 0 && (
+                                    <div className="flex flex-wrap gap-2 mt-1">
+                                      {Object.entries(m.groups).map(([key, val]) => (
+                                        <div key={key} className="flex items-center gap-1.5 bg-muted px-2 py-0.5 rounded border border-border/50">
+                                          <span className="font-bold opacity-50">{key}:</span>
+                                          <span className="font-mono text-primary">{val}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </Tabs.Panel>
+                </Tabs>
               </Card>
             </>
           ) : (

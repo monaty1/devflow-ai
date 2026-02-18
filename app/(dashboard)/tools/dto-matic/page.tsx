@@ -3,7 +3,6 @@
 import { useState, useCallback } from "react";
 import {
   Tabs,
-  Tab,
   Chip,
   Input,
 } from "@heroui/react";
@@ -268,27 +267,29 @@ export default function DtoMaticPage() {
               </div>
 
               {/* Main Content Tabs */}
-              <div className="flex flex-col gap-4">
+              <Tabs
+                selectedKey={view as string}
+                onSelectionChange={(k) => setView(k as string)}
+                variant="primary"
+              >
                 <div className="flex justify-between items-end">
-                  <Tabs 
-                    selectedKey={view as string} 
-                    onSelectionChange={(k) => setView(k as string)}
-                    variant="primary"
-                  >
-                    <Tab key="code">
-                      <div className="flex items-center gap-2">
-                        <Code2 className="size-4" />
-                        <span>Generated Code</span>
-                      </div>
-                    </Tab>
-                    <Tab key="mock">
-                      <div className="flex items-center gap-2">
-                        <Database className="size-4" />
-                        <span>Mock Data</span>
-                      </div>
-                    </Tab>
-                  </Tabs>
-                  
+                  <Tabs.ListContainer>
+                    <Tabs.List aria-label="Output view">
+                      <Tabs.Tab id="code">
+                        <div className="flex items-center gap-2">
+                          <Code2 className="size-4" />
+                          <span>Generated Code</span>
+                        </div>
+                      </Tabs.Tab>
+                      <Tabs.Tab id="mock">
+                        <div className="flex items-center gap-2">
+                          <Database className="size-4" />
+                          <span>Mock Data</span>
+                        </div>
+                      </Tabs.Tab>
+                    </Tabs.List>
+                  </Tabs.ListContainer>
+
                   {view === "mock" && (
                     <div className="flex items-center gap-2">
                       <select
@@ -305,7 +306,7 @@ export default function DtoMaticPage() {
                   )}
                 </div>
 
-                {view === "code" && (
+                <Tabs.Panel id="code">
                   <div className="grid gap-6 lg:grid-cols-5 h-[600px]">
                     <div className="lg:col-span-2 flex flex-col gap-4 h-full">
                       <Card className="flex-1 p-0 overflow-hidden border-divider">
@@ -319,7 +320,7 @@ export default function DtoMaticPage() {
                         />
                       </Card>
                     </div>
-                    
+
                     <div className="lg:col-span-3 h-full">
                       <Card className="h-full p-0 border-primary/20 shadow-lg overflow-hidden bg-muted/30 dark:bg-zinc-900 flex flex-col border-none">
                         <div className="p-3 bg-muted/50 dark:bg-white/5 border-b border-divider dark:border-white/10 flex justify-between items-center">
@@ -332,10 +333,9 @@ export default function DtoMaticPage() {
                       </Card>
                     </div>
                   </div>
-                )}
+                </Tabs.Panel>
 
-
-                {view === "mock" && (
+                <Tabs.Panel id="mock">
                   <Card className="p-0 overflow-hidden h-[600px] flex flex-col border-none">
                     <div className="p-4 border-b border-divider flex justify-between items-center bg-muted/20">
                       <span className="text-xs font-bold text-secondary flex items-center gap-2 uppercase tracking-wider">
@@ -347,8 +347,8 @@ export default function DtoMaticPage() {
                       <code>{mockData}</code>
                     </pre>
                   </Card>
-                )}
-              </div>
+                </Tabs.Panel>
+              </Tabs>
             </div>
           ) : (
             <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center h-full">

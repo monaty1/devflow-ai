@@ -3,7 +3,6 @@
 import { useState, useMemo } from "react";
 import {
   Tabs,
-  Tab,
   Input,
   Dropdown,
   DropdownTrigger,
@@ -106,110 +105,116 @@ export default function UuidGeneratorPage() {
         {/* Config Column */}
         <div className="lg:col-span-4 space-y-6">
           <Card className="p-6">
-            <Tabs 
-              selectedKey={activeTab as string} 
+            <Tabs
+              selectedKey={activeTab as string}
               onSelectionChange={(k) => setActiveTab(k as string)}
               variant="primary"
             >
-              <Tab key="generate">Generator</Tab>
-              <Tab key="analyze">Analyzer</Tab>
-            </Tabs>
+              <Tabs.ListContainer>
+                <Tabs.List aria-label="UUID mode">
+                  <Tabs.Tab id="generate">Generator</Tabs.Tab>
+                  <Tabs.Tab id="analyze">Analyzer</Tabs.Tab>
+                </Tabs.List>
+              </Tabs.ListContainer>
 
-            {activeTab === "generate" ? (
-              <div className="space-y-6 mt-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Version</label>
-                  <div className="grid gap-2">
-                    {VERSIONS.map((v) => (
-                      <button
-                        key={v.id}
-                        onClick={() => updateConfig("version", v.id)}
-                        className={cn(
-                          "flex flex-col items-start p-3 rounded-xl border transition-all text-left",
-                          config.version === v.id 
-                            ? "bg-primary/10 border-primary/20 text-primary shadow-sm" 
-                            : "bg-muted/30 border-transparent hover:bg-muted/50"
-                        )}
-                      >
-                        <span className="text-xs font-bold">{v.label}</span>
-                        <span className="text-[10px] opacity-60">{v.desc}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Custom Prefix (Hex)</label>
-                  <Input
-                    variant="primary"
-                    placeholder="e.g. deadbeef"
-                    value={config.prefix}
-                    onChange={(e) => {
-                      const filtered = e.target.value.replace(/[^0-9a-fA-F]/g, "");
-                      updateConfig("prefix", filtered);
-                    }}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+              <Tabs.Panel id="generate">
+                <div className="space-y-6 mt-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Quantity</label>
-                    <Input 
-                      type="number" 
-                      min={1} 
-                      max={1000} 
-                      value={config.quantity.toString()} 
-                      onChange={(e) => updateConfig("quantity", parseInt(e.target.value) || 1)}
+                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Version</label>
+                    <div className="grid gap-2">
+                      {VERSIONS.map((v) => (
+                        <button
+                          key={v.id}
+                          onClick={() => updateConfig("version", v.id)}
+                          className={cn(
+                            "flex flex-col items-start p-3 rounded-xl border transition-all text-left",
+                            config.version === v.id
+                              ? "bg-primary/10 border-primary/20 text-primary shadow-sm"
+                              : "bg-muted/30 border-transparent hover:bg-muted/50"
+                          )}
+                        >
+                          <span className="text-xs font-bold">{v.label}</span>
+                          <span className="text-[10px] opacity-60">{v.desc}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Custom Prefix (Hex)</label>
+                    <Input
                       variant="primary"
+                      placeholder="e.g. deadbeef"
+                      value={config.prefix}
+                      onChange={(e) => {
+                        const filtered = e.target.value.replace(/[^0-9a-fA-F]/g, "");
+                        updateConfig("prefix", filtered);
+                      }}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Format</label>
-                    <select
-                      className="w-full h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm focus:border-primary outline-none"
-                      value={config.format}
-                      onChange={(e) => updateConfig("format", e.target.value as UuidFormat)}
-                    >
-                      {FORMATS.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
-                    </select>
-                  </div>
-                </div>
 
-                <Button 
-                  onPress={generate} 
-                  variant="primary"
-                  className="w-full h-12 font-black shadow-lg shadow-primary/20 text-md"
-                >
-                  <Sparkles className="size-4 mr-2" /> Generate Sequence
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-6 mt-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">UUID to Inspect</label>
-                  <textarea
-                    value={analyzeInput}
-                    onChange={(e) => setAnalyzeInput(e.target.value)}
-                    placeholder="Paste UUID here..."
-                    onKeyDown={(e) => {
-                      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-                        e.preventDefault();
-                        if (analyzeInput.trim()) analyze(analyzeInput);
-                      }
-                    }}
-                    className="h-32 w-full resize-none rounded-xl border-2 border-divider bg-background p-4 font-mono text-sm focus:border-primary outline-none transition-all shadow-inner"
-                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Quantity</label>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={1000}
+                        value={config.quantity.toString()}
+                        onChange={(e) => updateConfig("quantity", parseInt(e.target.value) || 1)}
+                        variant="primary"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Format</label>
+                      <select
+                        className="w-full h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm focus:border-primary outline-none"
+                        value={config.format}
+                        onChange={(e) => updateConfig("format", e.target.value as UuidFormat)}
+                      >
+                        {FORMATS.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
+                      </select>
+                    </div>
+                  </div>
+
+                  <Button
+                    onPress={generate}
+                    variant="primary"
+                    className="w-full h-12 font-black shadow-lg shadow-primary/20 text-md"
+                  >
+                    <Sparkles className="size-4 mr-2" /> Generate Sequence
+                  </Button>
                 </div>
-                <Button 
-                  onPress={() => analyze(analyzeInput)} 
-                  variant="primary"
-                  className="w-full h-12 font-black shadow-lg shadow-primary/20 bg-secondary"
-                  isDisabled={!analyzeInput.trim()}
-                >
-                  <Search className="size-4 mr-2" /> Deep Audit
-                </Button>
-              </div>
-            )}
+              </Tabs.Panel>
+
+              <Tabs.Panel id="analyze">
+                <div className="space-y-6 mt-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">UUID to Inspect</label>
+                    <textarea
+                      value={analyzeInput}
+                      onChange={(e) => setAnalyzeInput(e.target.value)}
+                      placeholder="Paste UUID here..."
+                      onKeyDown={(e) => {
+                        if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                          e.preventDefault();
+                          if (analyzeInput.trim()) analyze(analyzeInput);
+                        }
+                      }}
+                      className="h-32 w-full resize-none rounded-xl border-2 border-divider bg-background p-4 font-mono text-sm focus:border-primary outline-none transition-all shadow-inner"
+                    />
+                  </div>
+                  <Button
+                    onPress={() => analyze(analyzeInput)}
+                    variant="primary"
+                    className="w-full h-12 font-black shadow-lg shadow-primary/20 bg-secondary"
+                    isDisabled={!analyzeInput.trim()}
+                  >
+                    <Search className="size-4 mr-2" /> Deep Audit
+                  </Button>
+                </div>
+              </Tabs.Panel>
+            </Tabs>
           </Card>
 
           {activeTab === "generate" && result && (

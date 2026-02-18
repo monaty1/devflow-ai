@@ -4,7 +4,6 @@ import { useState } from "react";
 import {
   Input,
   Tabs,
-  Tab,
   Chip,
 } from "@heroui/react";
 import {
@@ -103,119 +102,123 @@ export default function CronBuilderPage() {
         {/* Builder Column */}
         <div className="lg:col-span-5 space-y-6">
           <Card className="p-6">
-            <Tabs 
-              selectedKey={activeTab as string} 
+            <Tabs
+              selectedKey={activeTab as string}
               onSelectionChange={(k) => setActiveTab(k as string)}
               variant="primary"
             >
-              <Tab key="builder">Expression Builder</Tab>
-              <Tab key="infra">Infrastructure</Tab>
-            </Tabs>
+              <Tabs.ListContainer>
+                <Tabs.List aria-label="Builder mode">
+                  <Tabs.Tab id="builder">Expression Builder</Tabs.Tab>
+                  <Tabs.Tab id="infra">Infrastructure</Tabs.Tab>
+                </Tabs.List>
+              </Tabs.ListContainer>
 
-            {activeTab === "builder" && (
-              <div className="space-y-6 mt-6">
-                <div className="bg-muted/50 p-6 rounded-2xl border border-divider text-center shadow-inner relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                  <p className="text-4xl font-black tracking-widest text-primary font-mono select-all">
-                    {Object.values(expression).join(" ")}
-                  </p>
-                  <div className="flex justify-center gap-4 mt-2 text-[10px] uppercase font-black text-muted-foreground tracking-tighter">
-                    <span>min</span><span>hour</span><span>day</span><span>month</span><span>week</span>
-                  </div>
-                  <div className="absolute top-2 right-2">
-                    <CopyButton text={Object.values(expression).join(" ")} variant="ghost" size="sm" />
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  {[
-                    { field: "minute", label: "Minute", range: "0-59" },
-                    { field: "hour", label: "Hour", range: "0-23" },
-                    { field: "dayOfMonth", label: "Day", range: "1-31" },
-                    { field: "month", label: "Month", range: "1-12" },
-                    { field: "dayOfWeek", label: "Weekday", range: "0-6" },
-                  ].map((f) => (
-                    <div key={f.field} className="flex items-center gap-4">
-                      <label className="w-16 text-xs font-bold uppercase tracking-widest text-muted-foreground text-right">{f.label}</label>
-                      <Input
-                        variant="primary"
-                        value={expression[f.field as keyof typeof expression]}
-                        onChange={(e) => setField(f.field as keyof typeof expression, e.target.value)}
-                        onKeyDown={(e: React.KeyboardEvent) => {
-                          if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-                            e.preventDefault();
-                            setExpression({ ...expression });
-                          }
-                        }}
-                        className="flex-1 font-mono font-bold"
-                        placeholder="*"
-                      />
-                      <span className="text-[10px] opacity-30 font-mono w-10" title={`Valid range: ${f.range}`}>{f.range}</span>
+              <Tabs.Panel id="builder">
+                <div className="space-y-6 mt-6">
+                  <div className="bg-muted/50 p-6 rounded-2xl border border-divider text-center shadow-inner relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                    <p className="text-4xl font-black tracking-widest text-primary font-mono select-all">
+                      {Object.values(expression).join(" ")}
+                    </p>
+                    <div className="flex justify-center gap-4 mt-2 text-[10px] uppercase font-black text-muted-foreground tracking-tighter">
+                      <span>min</span><span>hour</span><span>day</span><span>month</span><span>week</span>
                     </div>
-                  ))}
-                </div>
+                    <div className="absolute top-2 right-2">
+                      <CopyButton text={Object.values(expression).join(" ")} variant="ghost" size="sm" />
+                    </div>
+                  </div>
 
-                <div className="pt-4 border-t border-divider">
-                  <p className="text-[10px] font-black uppercase text-muted-foreground mb-3 tracking-widest">Common Presets</p>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="space-y-4">
                     {[
-                      { name: "Every 1m", exp: { minute: "*", hour: "*", dayOfMonth: "*", month: "*", dayOfWeek: "*" } },
-                      { name: "Hourly", exp: { minute: "0", hour: "*", dayOfMonth: "*", month: "*", dayOfWeek: "*" } },
-                      { name: "Daily", exp: { minute: "0", hour: "0", dayOfMonth: "*", month: "*", dayOfWeek: "*" } },
-                      { name: "Weekly", exp: { minute: "0", hour: "0", dayOfMonth: "*", month: "*", dayOfWeek: "1" } },
-                      { name: "Monthly", exp: { minute: "0", hour: "0", dayOfMonth: "1", month: "*", dayOfWeek: "*" } },
-                      { name: "Weekdays", exp: { minute: "0", hour: "9", dayOfMonth: "*", month: "*", dayOfWeek: "1-5" } },
-                    ].map((p) => (
-                      <Button
-                        key={p.name}
-                        size="sm"
-                        variant="ghost"
-                        onPress={() => setExpression(p.exp)}
-                        className="font-bold text-[10px] h-8"
-                      >
-                        {p.name}
-                      </Button>
+                      { field: "minute", label: "Minute", range: "0-59" },
+                      { field: "hour", label: "Hour", range: "0-23" },
+                      { field: "dayOfMonth", label: "Day", range: "1-31" },
+                      { field: "month", label: "Month", range: "1-12" },
+                      { field: "dayOfWeek", label: "Weekday", range: "0-6" },
+                    ].map((f) => (
+                      <div key={f.field} className="flex items-center gap-4">
+                        <label className="w-16 text-xs font-bold uppercase tracking-widest text-muted-foreground text-right">{f.label}</label>
+                        <Input
+                          variant="primary"
+                          value={expression[f.field as keyof typeof expression]}
+                          onChange={(e) => setField(f.field as keyof typeof expression, e.target.value)}
+                          onKeyDown={(e: React.KeyboardEvent) => {
+                            if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                              e.preventDefault();
+                              setExpression({ ...expression });
+                            }
+                          }}
+                          className="flex-1 font-mono font-bold"
+                          placeholder="*"
+                        />
+                        <span className="text-[10px] opacity-30 font-mono w-10" title={`Valid range: ${f.range}`}>{f.range}</span>
+                      </div>
                     ))}
                   </div>
-                </div>
-              </div>
-            )}
 
-            {activeTab === "infra" && (
-              <div className="space-y-6 mt-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {INFRA_FORMATS.map((f) => (
-                    <button
-                      key={f.id}
-                      onClick={() => {
-                        setConfigFormat(f.id);
-                      }}
-                      className={cn(
-                        "flex flex-col items-center justify-center p-3 rounded-xl border transition-all gap-2",
-                        configFormat === f.id 
-                          ? "bg-primary/10 border-primary/30 text-primary shadow-sm" 
-                          : "bg-muted/30 border-transparent hover:bg-muted/50"
-                      )}
-                    >
-                      <f.icon className="size-5" />
-                      <span className="text-[10px] font-bold uppercase text-center">{f.label.split(" ")[0]}</span>
-                    </button>
-                  ))}
-                </div>
-
-                {config && (
-                  <Card className="p-0 overflow-hidden shadow-sm">
-                    <div className="p-3 bg-muted/30 border-b border-divider flex justify-between items-center">
-                      <span className="text-xs font-bold text-muted-foreground">{config.label}</span>
-                      <CopyButton text={config.code} size="sm" />
+                  <div className="pt-4 border-t border-divider">
+                    <p className="text-[10px] font-black uppercase text-muted-foreground mb-3 tracking-widest">Common Presets</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { name: "Every 1m", exp: { minute: "*", hour: "*", dayOfMonth: "*", month: "*", dayOfWeek: "*" } },
+                        { name: "Hourly", exp: { minute: "0", hour: "*", dayOfMonth: "*", month: "*", dayOfWeek: "*" } },
+                        { name: "Daily", exp: { minute: "0", hour: "0", dayOfMonth: "*", month: "*", dayOfWeek: "*" } },
+                        { name: "Weekly", exp: { minute: "0", hour: "0", dayOfMonth: "*", month: "*", dayOfWeek: "1" } },
+                        { name: "Monthly", exp: { minute: "0", hour: "0", dayOfMonth: "1", month: "*", dayOfWeek: "*" } },
+                        { name: "Weekdays", exp: { minute: "0", hour: "9", dayOfMonth: "*", month: "*", dayOfWeek: "1-5" } },
+                      ].map((p) => (
+                        <Button
+                          key={p.name}
+                          size="sm"
+                          variant="ghost"
+                          onPress={() => setExpression(p.exp)}
+                          className="font-bold text-[10px] h-8"
+                        >
+                          {p.name}
+                        </Button>
+                      ))}
                     </div>
-                    <pre className="p-4 font-mono text-xs leading-relaxed overflow-auto max-h-[300px] bg-background">
-                      <code>{config.code}</code>
-                    </pre>
-                  </Card>
-                )}
-              </div>
-            )}
+                  </div>
+                </div>
+              </Tabs.Panel>
+
+              <Tabs.Panel id="infra">
+                <div className="space-y-6 mt-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {INFRA_FORMATS.map((f) => (
+                      <button
+                        key={f.id}
+                        onClick={() => {
+                          setConfigFormat(f.id);
+                        }}
+                        className={cn(
+                          "flex flex-col items-center justify-center p-3 rounded-xl border transition-all gap-2",
+                          configFormat === f.id
+                            ? "bg-primary/10 border-primary/30 text-primary shadow-sm"
+                            : "bg-muted/30 border-transparent hover:bg-muted/50"
+                        )}
+                      >
+                        <f.icon className="size-5" />
+                        <span className="text-[10px] font-bold uppercase text-center">{f.label.split(" ")[0]}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {config && (
+                    <Card className="p-0 overflow-hidden shadow-sm">
+                      <div className="p-3 bg-muted/30 border-b border-divider flex justify-between items-center">
+                        <span className="text-xs font-bold text-muted-foreground">{config.label}</span>
+                        <CopyButton text={config.code} size="sm" />
+                      </div>
+                      <pre className="p-4 font-mono text-xs leading-relaxed overflow-auto max-h-[300px] bg-background">
+                        <code>{config.code}</code>
+                      </pre>
+                    </Card>
+                  )}
+                </div>
+              </Tabs.Panel>
+            </Tabs>
           </Card>
         </div>
 

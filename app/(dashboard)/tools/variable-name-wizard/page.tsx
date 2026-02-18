@@ -3,7 +3,6 @@
 import { useState } from "react";
 import {
   Tabs,
-  Tab,
 } from "@heroui/react";
 import {
   Wand2,
@@ -249,95 +248,115 @@ export default function VariableNameWizardPage() {
 
         {/* Results Column */}
         <div className="lg:col-span-8 space-y-6">
-          <Tabs 
-            selectedKey={activeTab as string} 
+          <Tabs
+            selectedKey={activeTab as string}
             onSelectionChange={(k) => setActiveTab(k as string)}
             variant="primary"
           >
-            <Tab key="generate">Smart Suggestions</Tab>
-            <Tab key="convert">Case Transformer</Tab>
-          </Tabs>
+            <Tabs.ListContainer>
+              <Tabs.List aria-label="Wizard mode">
+                <Tabs.Tab id="generate">Smart Suggestions</Tabs.Tab>
+                <Tabs.Tab id="convert">Case Transformer</Tabs.Tab>
+              </Tabs.List>
+            </Tabs.ListContainer>
 
-          {activeTab === "generate" && generationResult ? (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              {/* Leaderboard Card */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Card className="p-6 border-emerald-500/20 bg-emerald-500/5">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="text-[10px] font-black text-emerald-600 uppercase mb-1">Recommended Choice</p>
-                      <h4 className="text-xl font-black font-mono">{generationResult.suggestions[0]?.name}</h4>
+            <Tabs.Panel id="generate">
+              {generationResult ? (
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  {/* Leaderboard Card */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Card className="p-6 border-emerald-500/20 bg-emerald-500/5">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="text-[10px] font-black text-emerald-600 uppercase mb-1">Recommended Choice</p>
+                          <h4 className="text-xl font-black font-mono">{generationResult.suggestions[0]?.name}</h4>
+                        </div>
+                        <StatusBadge variant="success">BEST MATCH</StatusBadge>
+                      </div>
+                      <div className="mt-4 flex gap-2">
+                        <CopyButton text={generationResult.suggestions[0]?.name || ""} size="sm" />
+                      </div>
+                    </Card>
+
+                    <Card className="p-6 border-blue-500/20 bg-blue-500/5">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="text-[10px] font-black text-blue-600 uppercase mb-1">Naming Score</p>
+                          <h4 className="text-2xl font-black">{generationResult.suggestions[0]?.score}/100</h4>
+                        </div>
+                        <div className="p-2 bg-blue-500/20 rounded-full text-blue-600"><Star className="size-5 fill-current" /></div>
+                      </div>
+                      <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden mt-4">
+                        <div
+                          className="h-full bg-primary"
+                          style={{ width: `${generationResult.suggestions[0]?.score}%` }}
+                        />
+                      </div>
+                    </Card>
+                  </div>
+
+                  {/* Suggestions Table */}
+                  <Card className="p-0 overflow-hidden shadow-xl border-divider">
+                    <div className="p-4 border-b border-divider flex items-center justify-between bg-muted/20">
+                      <h3 className="font-bold flex items-center gap-2 text-sm">
+                        <Sparkles className="size-4 text-primary" />
+                        Technically Sound Alternatives
+                      </h3>
                     </div>
-                    <StatusBadge variant="success">BEST MATCH</StatusBadge>
-                  </div>
-                  <div className="mt-4 flex gap-2">
-                    <CopyButton text={generationResult.suggestions[0]?.name || ""} size="sm" />
-                  </div>
-                </Card>
-                
-                <Card className="p-6 border-blue-500/20 bg-blue-500/5">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="text-[10px] font-black text-blue-600 uppercase mb-1">Naming Score</p>
-                      <h4 className="text-2xl font-black">{generationResult.suggestions[0]?.score}/100</h4>
-                    </div>
-                    <div className="p-2 bg-blue-500/20 rounded-full text-blue-600"><Star className="size-5 fill-current" /></div>
-                  </div>
-                  <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden mt-4">
-                    <div 
-                      className="h-full bg-primary" 
-                      style={{ width: `${generationResult.suggestions[0]?.score}%` }} 
+                    <DataTable
+                      columns={suggestionColumns}
+                      data={generationResult.suggestions}
+                      filterField="name"
+                      renderCell={renderSuggestionCell}
+                      initialVisibleColumns={["name", "score", "audit", "actions"]}
+                      emptyContent="No suggestions available."
                     />
-                  </div>
-                </Card>
-              </div>
-
-              {/* Suggestions Table */}
-              <Card className="p-0 overflow-hidden shadow-xl border-divider">
-                <div className="p-4 border-b border-divider flex items-center justify-between bg-muted/20">
-                  <h3 className="font-bold flex items-center gap-2 text-sm">
-                    <Sparkles className="size-4 text-primary" />
-                    Technically Sound Alternatives
-                  </h3>
+                  </Card>
                 </div>
-                <DataTable
-                  columns={suggestionColumns}
-                  data={generationResult.suggestions}
-                  filterField="name"
-                  renderCell={renderSuggestionCell}
-                  initialVisibleColumns={["name", "score", "audit", "actions"]}
-                  emptyContent="No suggestions available."
-                />
-              </Card>
-            </div>
-          ) : activeTab === "convert" && conversionResult ? (
-            <div className="grid gap-4 sm:grid-cols-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              {Object.entries(conversionResult.conversions).map(([convention, value]) => (
-                <Card key={convention} className="p-5 group hover:border-primary/30 transition-all border-2 border-transparent relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-2 opacity-5 pointer-events-none">
-                    <Fingerprint className="size-16" />
+              ) : (
+                <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center h-[500px]">
+                  <div className="size-24 bg-muted rounded-full flex items-center justify-center mb-6">
+                    <Wand2 className="size-12 text-muted-foreground/30" />
                   </div>
-                  <div className="flex justify-between items-start mb-3">
-                    <span className="text-[10px] font-black uppercase text-muted-foreground tracking-tighter">
-                      {convention}
-                    </span>
-                    <CopyButton text={value as string} size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                  <p className="font-mono text-sm font-black text-primary break-all">{value as string}</p>
+                  <h3 className="text-2xl font-black mb-2 opacity-80 text-foreground/50">Ready to Magic Name</h3>
+                  <p className="text-muted-foreground max-w-sm mx-auto font-medium">
+                    Describe the purpose of your variable or paste a name to transform it into professional naming conventions for any language.
+                  </p>
                 </Card>
-              ))}
-            </div>
-          ) : (
-            <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center h-[500px]">
-              <div className="size-24 bg-muted rounded-full flex items-center justify-center mb-6">
-                <Wand2 className="size-12 text-muted-foreground/30" />
-              </div>
-              <h3 className="text-2xl font-black mb-2 opacity-80 text-foreground/50">Ready to Magic Name</h3>
-              <p className="text-muted-foreground max-w-sm mx-auto font-medium">
-                Describe the purpose of your variable or paste a name to transform it into professional naming conventions for any language.
-              </p>
-            </Card>
-          )}
+              )}
+            </Tabs.Panel>
+
+            <Tabs.Panel id="convert">
+              {conversionResult ? (
+                <div className="grid gap-4 sm:grid-cols-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  {Object.entries(conversionResult.conversions).map(([convention, value]) => (
+                    <Card key={convention} className="p-5 group hover:border-primary/30 transition-all border-2 border-transparent relative overflow-hidden">
+                      <div className="absolute top-0 right-0 p-2 opacity-5 pointer-events-none">
+                        <Fingerprint className="size-16" />
+                      </div>
+                      <div className="flex justify-between items-start mb-3">
+                        <span className="text-[10px] font-black uppercase text-muted-foreground tracking-tighter">
+                          {convention}
+                        </span>
+                        <CopyButton text={value as string} size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <p className="font-mono text-sm font-black text-primary break-all">{value as string}</p>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center h-[500px]">
+                  <div className="size-24 bg-muted rounded-full flex items-center justify-center mb-6">
+                    <Wand2 className="size-12 text-muted-foreground/30" />
+                  </div>
+                  <h3 className="text-2xl font-black mb-2 opacity-80 text-foreground/50">Ready to Magic Name</h3>
+                  <p className="text-muted-foreground max-w-sm mx-auto font-medium">
+                    Describe the purpose of your variable or paste a name to transform it into professional naming conventions for any language.
+                  </p>
+                </Card>
+              )}
+            </Tabs.Panel>
+          </Tabs>
         </div>
       </div>
     </div>

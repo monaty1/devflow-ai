@@ -5,6 +5,12 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.1] - 2026-02-18
+
+### Fixed
+- **HeroUI v3 Tabs compound API migration** — Migrated all 9 tool pages from deprecated flat `<Tab key>` pattern to v3 compound `<Tabs.Tab id>` + `<Tabs.ListContainer>` + `<Tabs.List>` + `<Tabs.Panel>` pattern. Fixes `next build` prerender crash: `"<Tab> cannot be rendered outside a collection"`
+- **Pages fixed:** base64, cron-builder, dto-matic, git-commit-generator, json-formatter, regex-humanizer, tailwind-sorter, uuid-generator, variable-name-wizard
+
 ## [2.5.0] - 2026-02-18
 
 ### Internationalized
@@ -228,6 +234,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[2.5.1]: https://github.com/albertoguinda/devflow-ai/compare/v2.5.0...v2.5.1
 [2.5.0]: https://github.com/albertoguinda/devflow-ai/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/albertoguinda/devflow-ai/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/albertoguinda/devflow-ai/compare/v2.2.0...v2.3.0
