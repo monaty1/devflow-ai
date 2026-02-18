@@ -155,6 +155,8 @@ export default function CodeReviewPage() {
     <div className="mx-auto max-w-6xl space-y-6">
       {/* Header */}
       <ToolHeader
+        icon={FileCode}
+        gradient="from-red-500 to-rose-600"
         title={t("codeReview.title")}
         description={t("codeReview.description")}
         breadcrumb

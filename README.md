@@ -119,7 +119,7 @@ flowchart LR
     classDef hook fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#0f172a
     classDef lib fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#0f172a
     classDef storage fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#0f172a
-    classDef worker fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#0f172a
+    classDef types fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#0f172a
     User((User))
     subgraph Presentation ["Presentation Layer"]
         direction TB
@@ -145,7 +145,7 @@ flowchart LR
 
     subgraph Infra ["Infrastructure"]
         LocalStorage[("Browser LocalStorage")]:::storage
-        Worker[("Web Worker\nheavy ops")]:::worker
+        Types[("TypeScript Types\nDomain contracts")]:::types
     end
     User -->|Type/Paste| UI_Input
     User -->|Click Process| UI_Button
@@ -167,8 +167,8 @@ flowchart LR
     Logic_Process -->|Call| Logic_Stats
     Logic_Stats -->|Return Data| Logic_Process
 
-    Hook_Controller -.->|Offload heavy ops| Worker
-    Worker -.->|Async result| Hook_Controller
+    Logic_Validate -.->|Enforce| Types
+    Logic_Process -.->|Enforce| Types
 
     Hook_Controller -->|Save| Hook_History
     Hook_History -->|Persist| LocalStorage
@@ -393,7 +393,7 @@ flowchart LR
     classDef hook fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#0f172a
     classDef lib fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#0f172a
     classDef storage fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#0f172a
-    classDef worker fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#0f172a
+    classDef types fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#0f172a
     User((User))
     subgraph Presentation ["Presentation Layer"]
         direction TB
@@ -419,7 +419,7 @@ flowchart LR
 
     subgraph Infra ["Infrastructure"]
         LocalStorage[("Browser LocalStorage")]:::storage
-        Worker[("Web Worker\nheavy ops")]:::worker
+        Types[("TypeScript Types\nDomain contracts")]:::types
     end
     User -->|Type/Paste| UI_Input
     User -->|Click Process| UI_Button
@@ -441,8 +441,8 @@ flowchart LR
     Logic_Process -->|Call| Logic_Stats
     Logic_Stats -->|Return Data| Logic_Process
 
-    Hook_Controller -.->|Offload heavy ops| Worker
-    Worker -.->|Async result| Hook_Controller
+    Logic_Validate -.->|Enforce| Types
+    Logic_Process -.->|Enforce| Types
 
     Hook_Controller -->|Save| Hook_History
     Hook_History -->|Persist| LocalStorage

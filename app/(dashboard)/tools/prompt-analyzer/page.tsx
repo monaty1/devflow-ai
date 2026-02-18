@@ -118,6 +118,8 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
     <div className="mx-auto max-w-4xl space-y-6">
       {/* Header */}
       <ToolHeader
+        icon={ScanSearch}
+        gradient="from-yellow-500 to-orange-600"
         title={t("promptAnalyzer.title")}
         description={t("promptAnalyzer.description")}
         breadcrumb
