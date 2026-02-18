@@ -173,6 +173,8 @@ export default function CostCalculatorPage() {
     <div className="mx-auto max-w-6xl space-y-6">
       {/* Header */}
       <ToolHeader
+        icon={Coins}
+        gradient="from-emerald-500 to-teal-600"
         title={t("costCalc.title")}
         description={t("costCalc.description")}
         breadcrumb
