@@ -86,6 +86,7 @@ export default function TokenVisualizerPage() {
                     size="sm"
                     variant={!isCompareMode ? "primary" : "ghost"}
                     onPress={() => setIsCompareMode(false)}
+                    aria-label="Single provider view"
                   >
                     <ListIcon className="size-3.5" />
                   </Button>
@@ -94,6 +95,7 @@ export default function TokenVisualizerPage() {
                     size="sm"
                     variant={isCompareMode ? "primary" : "ghost"}
                     onPress={() => setIsCompareMode(true)}
+                    aria-label="Compare providers"
                   >
                     <LayoutGrid className="size-3.5" />
                   </Button>

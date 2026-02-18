@@ -134,7 +134,7 @@ export default function ContextManagerPage() {
         );
       case "actions":
         return (
-          <Button isIconOnly size="sm" variant="ghost" onPress={() => removeDocument(doc.id)}>
+          <Button isIconOnly size="sm" variant="ghost" onPress={() => removeDocument(doc.id)} aria-label="Remove document">
             <Trash2 className="size-4 text-danger" />
           </Button>
         );
@@ -207,6 +207,7 @@ export default function ContextManagerPage() {
                   size="sm"
                   variant="ghost"
                   className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  aria-label="Delete workspace"
                   onPress={() => {
                     deleteWindow(w.id);
                   }}
@@ -347,14 +348,14 @@ export default function ContextManagerPage() {
 
       {/* Add Document Modal (Luxury Design) */}
       {showAddDoc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-md">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="add-doc-title">
           <Card className="w-full max-w-2xl p-8 shadow-2xl border-indigo-500/20">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-3 bg-indigo-500 rounded-2xl text-white shadow-lg shadow-indigo-500/30">
                 <FileCode className="size-6" />
               </div>
               <div>
-                <h3 className="text-2xl font-black">Add Context Source</h3>
+                <h3 id="add-doc-title" className="text-2xl font-black">Add Context Source</h3>
                 <p className="text-xs text-muted-foreground font-medium">Paste code, documentation or prompt instructions.</p>
               </div>
             </div>

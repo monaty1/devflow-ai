@@ -128,8 +128,8 @@ export default function DtoMaticPage() {
                 Payload Source
               </h3>
               <div className="flex gap-1">
-                <Button isIconOnly size="sm" variant="ghost" onPress={loadExample}><Wand2 className="size-3.5" /></Button>
-                <Button isIconOnly size="sm" variant="ghost" onPress={formatInput}><Braces className="size-3.5" /></Button>
+                <Button isIconOnly size="sm" variant="ghost" onPress={loadExample} aria-label="Load example"><Wand2 className="size-3.5" /></Button>
+                <Button isIconOnly size="sm" variant="ghost" onPress={formatInput} aria-label="Format JSON"><Braces className="size-3.5" /></Button>
               </div>
             </div>
             
@@ -248,7 +248,7 @@ export default function DtoMaticPage() {
           {result ? (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
               {/* Quick Stats */}
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <Card className="p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/20 text-center">
                   <p className="text-[10px] font-black uppercase text-green-600 mb-1">Total Types</p>
                   <p className="text-2xl font-black text-green-700 dark:text-green-400">{result.stats.totalTypes}</p>

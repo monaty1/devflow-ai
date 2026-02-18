@@ -183,7 +183,7 @@ export default function CronBuilderPage() {
 
             {activeTab === "infra" && (
               <div className="space-y-6 mt-6">
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {INFRA_FORMATS.map((f) => (
                     <button
                       key={f.id}

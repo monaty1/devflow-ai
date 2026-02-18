@@ -205,15 +205,7 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
                 >
                   <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
                     <span
-                      className="text-sm font-bold"
-                      style={{
-                        color:
-                          item.score >= 7
-                            ? "#22c55e"
-                            : item.score >= 5
-                              ? "#eab308"
-                              : "#ef4444",
-                      }}
+                      className={`text-sm font-bold ${item.score >= 7 ? "text-emerald-500" : item.score >= 5 ? "text-amber-500" : "text-red-500"}`}
                     >
                       {item.score}
                     </span>

@@ -92,7 +92,7 @@ export default function TailwindSorterPage() {
               </h3>
               <div className="flex gap-1">
                 <Button size="sm" variant="ghost" onPress={() => loadExample("messy")}>Example</Button>
-                <Button size="sm" variant="ghost" onPress={() => setInput("")} isIconOnly><Trash2 className="size-3 text-danger" /></Button>
+                <Button size="sm" variant="ghost" onPress={() => setInput("")} isIconOnly aria-label="Clear input"><Trash2 className="size-3 text-danger" /></Button>
               </div>
             </div>
             <textarea

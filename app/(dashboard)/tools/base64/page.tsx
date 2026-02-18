@@ -120,7 +120,7 @@ export default function Base64Page() {
               </div>
               <div className="flex gap-1">
                 <Button size="sm" variant="ghost" onPress={() => loadExample("json")}>Example</Button>
-                <Button size="sm" variant="ghost" onPress={() => setInput("")} isIconOnly><Trash2 className="size-3.5 text-danger" /></Button>
+                <Button size="sm" variant="ghost" onPress={() => setInput("")} isIconOnly aria-label="Clear input"><Trash2 className="size-3.5 text-danger" /></Button>
               </div>
             </div>
 
