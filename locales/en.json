@@ -3,6 +3,7 @@
   "nav.docs": "Docs",
   "nav.github": "GitHub",
   "nav.openDashboard": "Open dashboard",
+  "nav.toggleMenu": "Toggle navigation menu",
 
   "sidebar.dashboard": "Dashboard",
   "sidebar.tools": "Tools",
@@ -154,6 +155,11 @@
   "common.delete": "Delete",
   "common.options": "Options",
   "common.result": "Result",
+  "common.copyToClipboard": "Copy to clipboard",
+
+  "theme.lightMode": "Light mode",
+  "theme.darkMode": "Dark mode",
+  "theme.systemTheme": "System theme",
 
   "cron.title": "Cron Builder",
   "cron.description": "Build cron expressions visually, no syntax memorization needed",

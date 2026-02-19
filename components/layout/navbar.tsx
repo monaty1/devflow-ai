@@ -75,7 +75,7 @@ export function Navbar() {
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           aria-expanded={isMenuOpen}
           aria-controls="mobile-menu"
-          aria-label="Toggle navigation menu"
+          aria-label={t("nav.toggleMenu")}
         >
           {isMenuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
         </button>

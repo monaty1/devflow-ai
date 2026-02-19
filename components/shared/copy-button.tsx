@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef } from "react";
 import { Button } from "@heroui/react";
 import { Copy, Check } from "lucide-react";
+import { useTranslation } from "@/hooks/use-translation";
 import { cn } from "@/lib/utils";
 
 interface CopyButtonProps {
@@ -20,7 +21,7 @@ interface CopyButtonProps {
   isDisabled?: boolean;
   /** Extra class names */
   className?: string;
-  /** Accessible label (defaults to "Copy to clipboard") */
+  /** Accessible label (defaults to translated "Copy to clipboard") */
   ariaLabel?: string;
 }
 
@@ -32,8 +33,10 @@ export function CopyButton({
   size = "sm",
   isDisabled = false,
   className,
-  ariaLabel = "Copy to clipboard",
+  ariaLabel,
 }: CopyButtonProps) {
+  const { t } = useTranslation();
+  const resolvedAriaLabel = ariaLabel ?? t("common.copyToClipboard");
   const [copied, setCopied] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
@@ -66,7 +69,7 @@ export function CopyButton({
       isDisabled={isDisabled}
       onPress={handleCopy}
       className={cn(label ? undefined : "min-w-0 px-2", className)}
-      {...(label ? {} : { "aria-label": ariaLabel })}
+      {...(label ? {} : { "aria-label": resolvedAriaLabel })}
     >
       {copied ? (
         <Check className={cn("size-4 text-green-500", label && "mr-1")} />

@@ -3,6 +3,7 @@
 import { useSyncExternalStore } from "react";
 import { Sun, Moon, Monitor } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useTranslation } from "@/hooks/use-translation";
 import { cn } from "@/lib/utils";
 
 const subscribeNoop = () => () => {};
@@ -15,6 +16,7 @@ interface ThemeToggleProps {
 
 export function ThemeToggle({ variant = "compact" }: ThemeToggleProps) {
   const { theme, setTheme } = useTheme();
+  const { t } = useTranslation();
   const mounted = useSyncExternalStore(subscribeNoop, getTrue, getFalse);
 
   if (!mounted) {
@@ -23,7 +25,7 @@ export function ThemeToggle({ variant = "compact" }: ThemeToggleProps) {
 
   const nextTheme = theme === "light" ? "dark" : theme === "dark" ? "system" : "light";
   const Icon = theme === "light" ? Sun : theme === "dark" ? Moon : Monitor;
-  const label = theme === "light" ? "Light mode" : theme === "dark" ? "Dark mode" : "System theme";
+  const label = theme === "light" ? t("theme.lightMode") : theme === "dark" ? t("theme.darkMode") : t("theme.systemTheme");
 
   return (
     <button

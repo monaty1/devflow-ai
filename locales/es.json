@@ -3,6 +3,7 @@
   "nav.docs": "Docs",
   "nav.github": "GitHub",
   "nav.openDashboard": "Abrir panel",
+  "nav.toggleMenu": "Abrir menu de navegacion",
 
   "sidebar.dashboard": "Panel",
   "sidebar.tools": "Herramientas",
@@ -137,6 +138,11 @@
   "common.launch": "Abrir {name}",
   "common.all": "Todas",
   "common.configuration": "Configuración",
+  "common.copyToClipboard": "Copiar al portapapeles",
+
+  "theme.lightMode": "Modo claro",
+  "theme.darkMode": "Modo oscuro",
+  "theme.systemTheme": "Tema del sistema",
 
   "cron.title": "Cron Builder",
   "cron.description": "Construye expresiones cron visualmente, sin memorizar sintaxis",

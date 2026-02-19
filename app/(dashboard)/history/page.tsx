@@ -9,27 +9,27 @@ import { useTranslation } from "@/hooks/use-translation";
 interface HistoryItem {
   id: string;
   toolKey: string;
-  toolLabel: string;
+  toolSlug: string;
   summary: string;
   createdAt: string;
 }
 
-const TOOL_STORAGE_KEYS: { key: string; label: string; summaryField: string }[] = [
-  { key: "devflow-analysis-history", label: "Prompt Analyzer", summaryField: "prompt" },
-  { key: "devflow-code-review-history", label: "Code Review", summaryField: "code" },
-  { key: "devflow-cost-calculator-history", label: "Cost Calculator", summaryField: "model" },
-  { key: "devflow-token-visualizer-history", label: "Token Visualizer", summaryField: "text" },
-  { key: "devflow-context-manager-history", label: "Context Manager", summaryField: "name" },
-  { key: "devflow-regex-humanizer-history", label: "Regex Humanizer", summaryField: "input" },
-  { key: "devflow-dto-matic-history", label: "DTO-Matic", summaryField: "input" },
-  { key: "devflow-cron-builder-history", label: "Cron Builder", summaryField: "expression" },
-  { key: "devflow-tailwind-sorter-history", label: "Tailwind Sorter", summaryField: "input" },
-  { key: "devflow-variable-name-wizard-history", label: "Variable Name Wizard", summaryField: "input" },
-  { key: "devflow-json-formatter-history", label: "JSON Formatter", summaryField: "input" },
-  { key: "devflow-base64-history", label: "Base64", summaryField: "input" },
-  { key: "devflow-uuid-generator-history", label: "UUID Generator", summaryField: "version" },
-  { key: "devflow-git-commit-generator-history", label: "Git Commit Generator", summaryField: "message" },
-  { key: "devflow-http-status-finder-history", label: "HTTP Status Finder", summaryField: "query" },
+const TOOL_STORAGE_KEYS: { key: string; slug: string; summaryField: string }[] = [
+  { key: "devflow-analysis-history", slug: "prompt-analyzer", summaryField: "prompt" },
+  { key: "devflow-code-review-history", slug: "code-review", summaryField: "code" },
+  { key: "devflow-cost-calculator-history", slug: "cost-calculator", summaryField: "model" },
+  { key: "devflow-token-visualizer-history", slug: "token-visualizer", summaryField: "text" },
+  { key: "devflow-context-manager-history", slug: "context-manager", summaryField: "name" },
+  { key: "devflow-regex-humanizer-history", slug: "regex-humanizer", summaryField: "input" },
+  { key: "devflow-dto-matic-history", slug: "dto-matic", summaryField: "input" },
+  { key: "devflow-cron-builder-history", slug: "cron-builder", summaryField: "expression" },
+  { key: "devflow-tailwind-sorter-history", slug: "tailwind-sorter", summaryField: "input" },
+  { key: "devflow-variable-name-wizard-history", slug: "variable-name-wizard", summaryField: "input" },
+  { key: "devflow-json-formatter-history", slug: "json-formatter", summaryField: "input" },
+  { key: "devflow-base64-history", slug: "base64", summaryField: "input" },
+  { key: "devflow-uuid-generator-history", slug: "uuid-generator", summaryField: "version" },
+  { key: "devflow-git-commit-generator-history", slug: "git-commit-generator", summaryField: "message" },
+  { key: "devflow-http-status-finder-history", slug: "http-status-finder", summaryField: "query" },
 ];
 
 function getInitialHistory(): HistoryItem[] {
@@ -54,7 +54,7 @@ function getInitialHistory(): HistoryItem[] {
         items.push({
           id,
           toolKey: tool.key,
-          toolLabel: tool.label,
+          toolSlug: tool.slug,
           summary: summaryValue.slice(0, 120),
           createdAt: timestamp,
         });
@@ -70,21 +70,21 @@ function getInitialHistory(): HistoryItem[] {
 }
 
 const TOOL_COLORS: Record<string, string> = {
-  "Prompt Analyzer": "bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200",
-  "Code Review": "bg-emerald-100 text-emerald-900 dark:bg-emerald-900/30 dark:text-emerald-200",
-  "Cost Calculator": "bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-200",
-  "Token Visualizer": "bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-200",
-  "Context Manager": "bg-rose-100 text-rose-900 dark:bg-rose-900/30 dark:text-rose-200",
-  "Regex Humanizer": "bg-cyan-100 text-cyan-900 dark:bg-cyan-900/30 dark:text-cyan-200",
-  "DTO-Matic": "bg-green-50 text-green-800 dark:bg-green-950 dark:text-green-300",
-  "Cron Builder": "bg-violet-100 text-violet-900 dark:bg-violet-900/30 dark:text-violet-200",
-  "Tailwind Sorter": "bg-sky-100 text-sky-900 dark:bg-sky-900/30 dark:text-sky-200",
-  "Variable Name Wizard": "bg-fuchsia-100 text-fuchsia-900 dark:bg-fuchsia-900/30 dark:text-fuchsia-200",
-  "JSON Formatter": "bg-yellow-100 text-yellow-900 dark:bg-yellow-900/30 dark:text-yellow-200",
-  "Base64": "bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200",
-  "UUID Generator": "bg-teal-100 text-teal-900 dark:bg-teal-900/30 dark:text-teal-200",
-  "Git Commit Generator": "bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200",
-  "HTTP Status Finder": "bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200",
+  "prompt-analyzer": "bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200",
+  "code-review": "bg-emerald-100 text-emerald-900 dark:bg-emerald-900/30 dark:text-emerald-200",
+  "cost-calculator": "bg-amber-100 text-amber-900 dark:bg-amber-900/30 dark:text-amber-200",
+  "token-visualizer": "bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-200",
+  "context-manager": "bg-rose-100 text-rose-900 dark:bg-rose-900/30 dark:text-rose-200",
+  "regex-humanizer": "bg-cyan-100 text-cyan-900 dark:bg-cyan-900/30 dark:text-cyan-200",
+  "dto-matic": "bg-green-50 text-green-800 dark:bg-green-950 dark:text-green-300",
+  "cron-builder": "bg-violet-100 text-violet-900 dark:bg-violet-900/30 dark:text-violet-200",
+  "tailwind-sorter": "bg-sky-100 text-sky-900 dark:bg-sky-900/30 dark:text-sky-200",
+  "variable-name-wizard": "bg-fuchsia-100 text-fuchsia-900 dark:bg-fuchsia-900/30 dark:text-fuchsia-200",
+  "json-formatter": "bg-yellow-100 text-yellow-900 dark:bg-yellow-900/30 dark:text-yellow-200",
+  "base64": "bg-indigo-100 text-indigo-900 dark:bg-indigo-900/30 dark:text-indigo-200",
+  "uuid-generator": "bg-teal-100 text-teal-900 dark:bg-teal-900/30 dark:text-teal-200",
+  "git-commit-generator": "bg-orange-100 text-orange-900 dark:bg-orange-900/30 dark:text-orange-200",
+  "http-status-finder": "bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-200",
 };
 
 const DEFAULT_COLOR = "bg-gray-100 text-gray-900 dark:bg-gray-900/30 dark:text-gray-200";
@@ -96,26 +96,28 @@ export default function HistoryPage() {
   const { addToast } = useToast();
   const { t } = useTranslation();
 
-  const toolLabels = useMemo(() => {
-    const labels = new Set(history.map((item) => item.toolLabel));
-    return Array.from(labels).sort();
-  }, [history]);
+  const toolSlugs = useMemo(() => {
+    const slugs = new Set(history.map((item) => item.toolSlug));
+    return Array.from(slugs).sort((a, b) =>
+      t(`tool.${a}.name`).localeCompare(t(`tool.${b}.name`))
+    );
+  }, [history, t]);
 
   const filtered = useMemo(() => {
     let items = history;
     if (toolFilter) {
-      items = items.filter((item) => item.toolLabel === toolFilter);
+      items = items.filter((item) => item.toolSlug === toolFilter);
     }
     if (search) {
       const lower = search.toLowerCase();
       items = items.filter(
         (item) =>
           item.summary.toLowerCase().includes(lower) ||
-          item.toolLabel.toLowerCase().includes(lower)
+          t(`tool.${item.toolSlug}.name`).toLowerCase().includes(lower)
       );
     }
     return items;
-  }, [history, search, toolFilter]);
+  }, [history, search, toolFilter, t]);
 
   const clearAll = () => {
     for (const tool of TOOL_STORAGE_KEYS) {
@@ -160,7 +162,7 @@ export default function HistoryPage() {
             className="w-full rounded-lg border border-border bg-background py-2 pl-10 pr-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
-        {toolLabels.length > 1 && (
+        {toolSlugs.length > 1 && (
           <div className="flex flex-wrap gap-1">
             <button
               type="button"
@@ -173,18 +175,18 @@ export default function HistoryPage() {
             >
               {t("history.filterAll")}
             </button>
-            {toolLabels.map((label) => (
+            {toolSlugs.map((slug) => (
               <button
-                key={label}
+                key={slug}
                 type="button"
-                onClick={() => setToolFilter(toolFilter === label ? null : label)}
+                onClick={() => setToolFilter(toolFilter === slug ? null : slug)}
                 className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-all ${
-                  toolFilter === label
+                  toolFilter === slug
                     ? "border-primary bg-primary/10"
                     : "border-border hover:border-primary/50"
                 }`}
               >
-                {label}
+                {t(`tool.${slug}.name`)}
               </button>
             ))}
           </div>
@@ -195,12 +197,12 @@ export default function HistoryPage() {
       {filtered.length > 0 ? (
         <div className="space-y-2">
           {filtered.map((item) => {
-            const colorClass = TOOL_COLORS[item.toolLabel] ?? DEFAULT_COLOR;
+            const colorClass = TOOL_COLORS[item.toolSlug] ?? DEFAULT_COLOR;
             return (
               <Card key={item.id} className="p-4">
                 <div className="flex items-center gap-3">
                   <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${colorClass}`}>
-                    {item.toolLabel}
+                    {t(`tool.${item.toolSlug}.name`)}
                   </span>
                   <p className="min-w-0 flex-1 truncate text-sm text-foreground">
                     {item.summary || "—"}
