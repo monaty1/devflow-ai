@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import NextLink from "next/link";
-import { linkVariants } from "@heroui/react";
+import { usePathname } from "next/navigation";
 import { Menu, X, Sparkles, Github, Wrench, BookOpen } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useTranslation } from "@/hooks/use-translation";
@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const linkStyles = linkVariants();
+  const pathname = usePathname();
   const { t } = useTranslation();
 
   const navLinks: { href: string; label: string; icon: LucideIcon }[] = [
@@ -40,21 +40,28 @@ export function Navbar() {
           <span>DevFlow AI</span>
         </NextLink>
 
-        {/* Desktop Navigation — centered with icons */}
+        {/* Desktop Navigation — centered with animated underline */}
         <div className="hidden flex-1 items-center justify-center gap-1 md:flex">
-          {navLinks.map((link) => (
-            <NextLink
-              key={link.href}
-              href={link.href}
-              className={cn(
-                linkStyles.base(),
-                "inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-              )}
-            >
-              <link.icon className="size-4" />
-              {link.label}
-            </NextLink>
-          ))}
+          {navLinks.map((link) => {
+            const isActive = pathname.startsWith(link.href);
+            return (
+              <NextLink
+                key={link.href}
+                href={link.href}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  "relative inline-flex cursor-pointer items-center gap-2 px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-md",
+                  "after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:h-0.5 after:rounded-full after:bg-primary after:transition-all after:duration-300",
+                  isActive
+                    ? "text-foreground after:w-3/4"
+                    : "text-muted-foreground hover:text-foreground after:w-0 hover:after:w-1/2"
+                )}
+              >
+                <link.icon className="size-4" />
+                {link.label}
+              </NextLink>
+            );
+          })}
         </div>
 
         {/* Desktop CTA + Toggles */}
@@ -72,7 +79,7 @@ export function Navbar() {
           </NextLink>
           <NextLink
             href="/tools"
-            className="ml-2 inline-flex h-9 cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            className="ml-2 inline-flex h-9 min-w-[170px] cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             <Wrench className="size-4" />
             {t("nav.openDashboard")}
@@ -96,17 +103,26 @@ export function Navbar() {
       {isMenuOpen && (
         <div id="mobile-menu" className="border-t border-border bg-background md:hidden">
           <div className="container mx-auto space-y-1 px-4 py-4">
-            {navLinks.map((link) => (
-              <NextLink
-                key={link.href}
-                href={link.href}
-                className="flex cursor-pointer items-center gap-3 rounded-lg px-4 py-3 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <link.icon className="size-5" />
-                {link.label}
-              </NextLink>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = pathname.startsWith(link.href);
+              return (
+                <NextLink
+                  key={link.href}
+                  href={link.href}
+                  aria-current={isActive ? "page" : undefined}
+                  className={cn(
+                    "flex cursor-pointer items-center gap-3 rounded-lg px-4 py-3 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                    isActive
+                      ? "border-l-3 border-primary bg-primary/10 text-foreground font-medium"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <link.icon className="size-5" />
+                  {link.label}
+                </NextLink>
+              );
+            })}
             <div className="flex items-center gap-2 border-t border-border pt-4">
               <LocaleToggle />
               <ThemeToggle />
@@ -124,7 +140,7 @@ export function Navbar() {
               <NextLink
                 href="/tools"
                 onClick={() => setIsMenuOpen(false)}
-                className="flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                className="flex h-11 w-full min-w-[170px] cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               >
                 <Wrench className="size-4" />
                 {t("nav.openDashboard")}

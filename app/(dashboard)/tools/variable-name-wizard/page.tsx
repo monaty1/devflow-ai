@@ -74,10 +74,10 @@ export default function VariableNameWizardPage() {
   }, [batchInput]);
 
   const suggestionColumns: ColumnConfig[] = [
-    { name: "NAME", uid: "name", sortable: true },
-    { name: "QUALITY", uid: "score", sortable: true },
-    { name: "AUDIT", uid: "audit" },
-    { name: "ACTIONS", uid: "actions" },
+    { name: t("table.colName"), uid: "name", sortable: true },
+    { name: t("table.colQuality"), uid: "score", sortable: true },
+    { name: t("table.colAudit"), uid: "audit" },
+    { name: t("table.colActions"), uid: "actions" },
   ];
 
   const renderSuggestionCell = (suggestion: NameSuggestion, columnKey: React.Key) => {
@@ -137,12 +137,12 @@ export default function VariableNameWizardPage() {
   ];
 
   const TYPE_OPTIONS: { id: VariableType; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-    { id: "variable", label: "Variable", icon: Code2 },
-    { id: "function", label: "Function", icon: Wand2 },
-    { id: "constant", label: "Constant", icon: ListIcon },
-    { id: "class", label: "Class/Type", icon: BookOpen },
-    { id: "hook", label: "React Hook", icon: Sparkles },
-    { id: "component", label: "Component", icon: LayoutGrid },
+    { id: "variable", label: t("varName.typeVariable"), icon: Code2 },
+    { id: "function", label: t("varName.typeFunction"), icon: Wand2 },
+    { id: "constant", label: t("varName.typeConstant"), icon: ListIcon },
+    { id: "class", label: t("varName.typeClass"), icon: BookOpen },
+    { id: "hook", label: t("varName.typeHook"), icon: Sparkles },
+    { id: "component", label: t("varName.typeComponent"), icon: LayoutGrid },
   ];
 
   return (

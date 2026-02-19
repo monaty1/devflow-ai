@@ -29,6 +29,7 @@ import { cn } from "@/lib/utils";
 import type { ConfigFormat, NextExecution } from "@/types/cron-builder";
 
 function MiniCalendar({ executions }: { executions: NextExecution[] }) {
+  const { t } = useTranslation();
   const activeDays = useMemo(() => {
     const days = new Set<number>();
     for (const e of executions) {
@@ -42,7 +43,7 @@ function MiniCalendar({ executions }: { executions: NextExecution[] }) {
   const month = now.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOfWeek = new Date(year, month, 1).getDay();
-  const dayLabels = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+  const dayLabels = [t("cron.daySu"), t("cron.dayMo"), t("cron.dayTu"), t("cron.dayWe"), t("cron.dayTh"), t("cron.dayFr"), t("cron.daySa")];
 
   return (
     <div className="grid grid-cols-7 gap-1">
@@ -89,9 +90,9 @@ export default function CronBuilderPage() {
   const [configFormat, setConfigFormat] = useState<ConfigFormat>("kubernetes");
 
   const executionColumns: ColumnConfig[] = [
-    { name: "LOCAL TIME", uid: "formatted", sortable: true },
-    { name: "UTC TIME", uid: "utc" },
-    { name: "RELATIVE", uid: "relative", sortable: true },
+    { name: t("table.colLocalTime"), uid: "formatted", sortable: true },
+    { name: t("table.colUtcTime"), uid: "utc" },
+    { name: t("table.colRelative"), uid: "relative", sortable: true },
   ];
 
   const renderExecutionCell = (exec: NextExecution, columnKey: React.Key) => {
@@ -170,7 +171,7 @@ export default function CronBuilderPage() {
                       {Object.values(expression).join(" ")}
                     </p>
                     <div className="flex justify-center gap-4 mt-2 text-[10px] uppercase font-black text-muted-foreground tracking-tighter">
-                      <span>min</span><span>hour</span><span>day</span><span>month</span><span>week</span>
+                      <span>{t("cron.fieldMin")}</span><span>{t("cron.fieldHr")}</span><span>{t("cron.fieldDy")}</span><span>{t("cron.fieldMo")}</span><span>{t("cron.fieldWk")}</span>
                     </div>
                     <div className="absolute top-2 right-2">
                       <CopyButton text={Object.values(expression).join(" ")} variant="ghost" size="sm" />

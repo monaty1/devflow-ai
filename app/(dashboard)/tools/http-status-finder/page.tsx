@@ -67,10 +67,10 @@ export default function HttpStatusFinderPage() {
   const [isTesting, setIsTesting] = useState(false);
 
   const statusColumns: ColumnConfig[] = [
-    { name: "CODE", uid: "code", sortable: true },
-    { name: "NAME", uid: "name", sortable: true },
-    { name: "CATEGORY", uid: "category", sortable: true },
-    { name: "DESCRIPTION", uid: "description" },
+    { name: t("table.colCode"), uid: "code", sortable: true },
+    { name: t("table.colName"), uid: "name", sortable: true },
+    { name: t("table.colCategory"), uid: "category", sortable: true },
+    { name: t("table.colDescription"), uid: "description" },
   ];
 
   const renderStatusCell = useCallback((status: HttpStatusCode, columnKey: React.Key) => {

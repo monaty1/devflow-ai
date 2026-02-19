@@ -117,10 +117,10 @@ export default function CodeReviewPage() {
   };
 
   const issueColumns: ColumnConfig[] = [
-    { name: "LINE", uid: "line", sortable: true },
-    { name: "ISSUE", uid: "message", sortable: true },
-    { name: "SEVERITY", uid: "severity", sortable: true },
-    { name: "ACTIONS", uid: "actions" },
+    { name: t("table.colLine"), uid: "line", sortable: true },
+    { name: t("table.colIssue"), uid: "message", sortable: true },
+    { name: t("table.colSeverity"), uid: "severity", sortable: true },
+    { name: t("table.colActions"), uid: "actions" },
   ];
 
   const renderIssueCell = useCallback((issue: CodeIssue, columnKey: React.Key) => {

@@ -67,9 +67,9 @@ export default function JsonFormatterPage() {
   }, []);
 
   const pathColumns: ColumnConfig[] = [
-    { name: "PATH", uid: "path", sortable: true },
-    { name: "TYPE", uid: "type", sortable: true },
-    { name: "VALUE", uid: "value" },
+    { name: t("table.colPath"), uid: "path", sortable: true },
+    { name: t("table.colType"), uid: "type", sortable: true },
+    { name: t("table.colValue"), uid: "value" },
   ];
 
   const renderPathCell = useCallback((item: JsonPathResult, columnKey: React.Key) => {

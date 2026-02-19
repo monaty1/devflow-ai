@@ -78,11 +78,11 @@ export default function ContextManagerPage() {
   };
 
   const docColumns: ColumnConfig[] = [
-    { name: "DOCUMENT", uid: "title", sortable: true },
-    { name: "TYPE", uid: "type", sortable: true },
-    { name: "TOKENS", uid: "tokens", sortable: true },
-    { name: "PRIORITY", uid: "priority", sortable: true },
-    { name: "ACTIONS", uid: "actions" },
+    { name: t("table.colDocument"), uid: "title", sortable: true },
+    { name: t("table.colType"), uid: "type", sortable: true },
+    { name: t("table.colTokens"), uid: "tokens", sortable: true },
+    { name: t("table.colPriority"), uid: "priority", sortable: true },
+    { name: t("table.colActions"), uid: "actions" },
   ];
 
   const renderDocCell = useCallback((doc: Document, columnKey: React.Key) => {
@@ -134,9 +134,9 @@ export default function ContextManagerPage() {
               </Button>
             </DropdownTrigger>
             <DropdownMenu onAction={(key) => changePriority(doc.id, key as Priority)}>
-              <DropdownItem key="high">High</DropdownItem>
-              <DropdownItem key="medium">Medium</DropdownItem>
-              <DropdownItem key="low">Low</DropdownItem>
+              <DropdownItem key="high">{t("ctxMgr.priorityHigh")}</DropdownItem>
+              <DropdownItem key="medium">{t("ctxMgr.priorityMedium")}</DropdownItem>
+              <DropdownItem key="low">{t("ctxMgr.priorityLow")}</DropdownItem>
             </DropdownMenu>
           </Dropdown>
         );

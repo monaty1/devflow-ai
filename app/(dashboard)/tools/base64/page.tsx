@@ -50,10 +50,10 @@ export default function Base64Page() {
   const [activeView, setActiveView] = useState<"text" | "preview" | "inspector">("text");
 
   const byteColumns: ColumnConfig[] = [
-    { name: "OFFSET", uid: "offset" },
-    { name: "HEX", uid: "hex" },
-    { name: "BINARY", uid: "binary" },
-    { name: "DEC", uid: "decimal" },
+    { name: t("table.colOffset"), uid: "offset" },
+    { name: t("table.colHex"), uid: "hex" },
+    { name: t("table.colBinary"), uid: "binary" },
+    { name: t("table.colDecimal"), uid: "decimal" },
   ];
 
   const byteData = useMemo(() => {

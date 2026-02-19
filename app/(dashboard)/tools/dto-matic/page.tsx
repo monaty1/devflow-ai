@@ -59,10 +59,10 @@ export default function DtoMaticPage() {
   const [mockCount, setMockCount] = useState(5);
 
   const fileColumns: ColumnConfig[] = [
-    { name: "FILE NAME", uid: "name", sortable: true },
-    { name: "TYPE", uid: "type", sortable: true },
-    { name: "LANG", uid: "language" },
-    { name: "ACTIONS", uid: "actions" },
+    { name: t("table.colFileName"), uid: "name", sortable: true },
+    { name: t("table.colType"), uid: "type", sortable: true },
+    { name: t("table.colLang"), uid: "language" },
+    { name: t("table.colActions"), uid: "actions" },
   ];
 
   const renderFileCell = useCallback((file: GeneratedFile, columnKey: React.Key) => {

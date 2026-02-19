@@ -62,6 +62,11 @@ export default function CostCalculatorPage() {
 
   const [detailModel, setDetailModel] = useState<CostCalculation | null>(null);
 
+  const providerOptions = useMemo(() =>
+    Object.entries(PROVIDER_LABELS).map(([uid, p]) => ({ uid, name: `${p.emoji} ${p.label}` })),
+    []
+  );
+
   const cheapestId = comparison?.results[0]?.model.id;
   const bestValueId = useMemo(() => {
     if (!comparison) return null;
@@ -379,6 +384,9 @@ export default function CostCalculatorPage() {
                 columns={columns}
                 data={comparison.results}
                 filterField="model.displayName"
+                statusOptions={providerOptions}
+                statusFilterField="model.provider"
+                statusLabel={t("costCalc.colProvider")}
                 initialVisibleColumns={["model", "provider", "totalCost", "value", "actions"]}
                 renderCell={renderCell}
                 placeholder={t("costCalc.search")}

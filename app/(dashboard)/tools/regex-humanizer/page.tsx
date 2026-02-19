@@ -68,9 +68,9 @@ export default function RegexHumanizerPage() {
   }, [pattern, testText, test]);
 
   const groupColumns: ColumnConfig[] = [
-    { name: "INDEX", uid: "index", sortable: true },
-    { name: "PATTERN", uid: "pattern" },
-    { name: "EXPLANATION", uid: "description" },
+    { name: t("table.colIndex"), uid: "index", sortable: true },
+    { name: t("table.colPattern"), uid: "pattern" },
+    { name: t("table.colExplanation"), uid: "description" },
   ];
 
   const renderGroupCell = (group: RegexGroup, columnKey: React.Key) => {

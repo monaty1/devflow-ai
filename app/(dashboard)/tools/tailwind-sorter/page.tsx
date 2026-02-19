@@ -55,9 +55,9 @@ export default function TailwindSorterPage() {
   }, [input, result]);
 
   const auditColumns: ColumnConfig[] = [
-    { name: "CLASS", uid: "class" },
-    { name: "ISSUE", uid: "reason" },
-    { name: "SEVERITY", uid: "severity", sortable: true },
+    { name: t("table.colClass"), uid: "class" },
+    { name: t("table.colIssue"), uid: "reason" },
+    { name: t("table.colSeverity"), uid: "severity", sortable: true },
   ];
 
   const renderAuditCell = (item: TailwindAuditItem, columnKey: React.Key) => {

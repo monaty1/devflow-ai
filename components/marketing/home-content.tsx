@@ -47,7 +47,7 @@ export function HomeContent({ stars }: HomeContentProps) {
             <div className="pt-2">
               <Link
                 href="/tools"
-                className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg bg-primary px-8 text-base font-semibold text-primary-foreground transition-colors hover:opacity-90"
+                className="inline-flex h-12 min-w-[200px] cursor-pointer items-center justify-center rounded-lg bg-primary px-8 text-base font-semibold text-primary-foreground transition-colors hover:opacity-90"
               >
                 {t("home.getStarted")}
               </Link>

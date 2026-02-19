@@ -38,6 +38,8 @@ interface DataTableProps<T> {
   data: T[];
   filterField: string;
   statusOptions?: { name: string; uid: string }[];
+  statusFilterField?: string;
+  statusLabel?: string;
   initialVisibleColumns?: string[];
   renderCell: (item: T, columnKey: React.Key) => React.ReactNode;
   onAdd?: () => void;
@@ -51,6 +53,8 @@ export function DataTable<T extends { id: string | number }>({
   data,
   filterField,
   statusOptions,
+  statusFilterField = "status",
+  statusLabel,
   initialVisibleColumns,
   renderCell,
   onAdd,
@@ -91,13 +95,14 @@ export function DataTable<T extends { id: string | number }>({
     }
     if (statusOptions && statusFilter !== "all" && (statusFilter as Set<string>).size !== statusOptions.length) {
       const filterSet = statusFilter as Set<string>;
-      filteredData = filteredData.filter((item) =>
-        filterSet.has(((item as unknown as Record<string, string>)["status"]) ?? "")
-      );
+      filteredData = filteredData.filter((item) => {
+        const val = statusFilterField.split('.').reduce((obj: Record<string, unknown>, key: string) => (obj?.[key] ?? {}) as Record<string, unknown>, item as unknown as Record<string, unknown>);
+        return filterSet.has(String(val ?? ""));
+      });
     }
 
     return filteredData;
-  }, [data, filterValue, statusFilter, filterField, statusOptions, hasSearchFilter]);
+  }, [data, filterValue, statusFilter, filterField, statusFilterField, statusOptions, hasSearchFilter]);
 
   const pages = Math.ceil(filteredItems.length / rowsPerPage) || 1;
 
@@ -143,13 +148,13 @@ export function DataTable<T extends { id: string | number }>({
               <Dropdown>
                 <DropdownTrigger className="hidden sm:flex">
                   <Button variant="ghost" className="gap-2">
-                    {t("table.status")}
+                    {statusLabel ?? t("table.status")}
                     <ChevronDown className="text-small" aria-hidden="true" />
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu
                   disallowEmptySelection
-                  aria-label={t("table.status")}
+                  aria-label={statusLabel ?? t("table.status")}
                   selectedKeys={statusFilter}
                   selectionMode="multiple"
                   onSelectionChange={setStatusFilter}
@@ -208,7 +213,7 @@ export function DataTable<T extends { id: string | number }>({
         </div>
       </div>
     );
-  }, [filterValue, statusFilter, visibleColumns, data.length, onSearchChange, statusOptions, columns, onAdd, rowsPerPage, placeholder, t]);
+  }, [filterValue, statusFilter, visibleColumns, data.length, onSearchChange, statusOptions, statusLabel, columns, onAdd, rowsPerPage, placeholder, t]);
 
   const bottomContent = useMemo(() => {
     return (

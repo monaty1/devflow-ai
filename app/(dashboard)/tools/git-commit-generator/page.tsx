@@ -76,10 +76,10 @@ export default function GitCommitGeneratorPage() {
   }, [batchInput, config.type, config.scope, config.useEmojis]);
 
   const historyColumns: ColumnConfig[] = [
-    { name: "MESSAGE", uid: "message", sortable: true },
-    { name: "TYPE", uid: "type", sortable: true },
-    { name: "SCOPE", uid: "scope" },
-    { name: "ACTIONS", uid: "actions" },
+    { name: t("table.colMessage"), uid: "message", sortable: true },
+    { name: t("table.colType"), uid: "type", sortable: true },
+    { name: t("table.colScope"), uid: "scope" },
+    { name: t("table.colActions"), uid: "actions" },
   ];
 
   const renderHistoryCell = useCallback((item: CommitResult, columnKey: React.Key) => {
