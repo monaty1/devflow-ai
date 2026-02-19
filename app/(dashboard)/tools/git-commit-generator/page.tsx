@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import { generateCommitMessage } from "@/lib/application/git-commit-generator";
 import {
   Tabs,
   Chip,
@@ -56,6 +57,23 @@ export default function GitCommitGeneratorPage() {
   } = useGitCommitGenerator();
 
   const [activeTab, setActiveTab] = useState<"composer" | "changelog" | "history" | string>("composer");
+  const [batchInput, setBatchInput] = useState("");
+  const batchMessages = useMemo(() => {
+    if (!batchInput.trim()) return [];
+    return batchInput.split("\n").filter(l => l.trim()).map(line => {
+      const result = generateCommitMessage({
+        type: config.type,
+        scope: config.scope,
+        description: line.trim(),
+        body: "",
+        breakingChange: "",
+        issueRef: "",
+        useEmojis: config.useEmojis,
+        requireIssue: false,
+      });
+      return result.message.split("\n")[0] ?? "";
+    });
+  }, [batchInput, config.type, config.scope, config.useEmojis]);
 
   const historyColumns: ColumnConfig[] = [
     { name: "MESSAGE", uid: "message", sortable: true },
@@ -369,18 +387,49 @@ export default function GitCommitGeneratorPage() {
             </Tabs.Panel>
 
             <Tabs.Panel id="changelog">
-              <Card className="p-0 border-divider shadow-xl overflow-hidden h-[600px] flex flex-col animate-in fade-in slide-in-from-right-4 duration-500 border-none">
-                <div className="p-4 border-b border-divider flex justify-between items-center bg-muted/20">
-                  <div className="flex items-center gap-2">
-                    <Terminal className="size-4 text-primary" />
-                    <span className="text-xs font-black uppercase tracking-widest">{t("gitCommit.autoChangelog")}</span>
+              <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+                <Card className="p-0 border-divider shadow-xl overflow-hidden h-[300px] flex flex-col border-none">
+                  <div className="p-4 border-b border-divider flex justify-between items-center bg-muted/20">
+                    <div className="flex items-center gap-2">
+                      <Terminal className="size-4 text-primary" />
+                      <span className="text-xs font-black uppercase tracking-widest">{t("gitCommit.autoChangelog")}</span>
+                    </div>
+                    <CopyButton text={changelog} />
                   </div>
-                  <CopyButton text={changelog} />
-                </div>
-                <pre className="p-8 font-mono text-xs leading-relaxed overflow-auto flex-1 bg-background text-foreground/80">
-                  <code>{changelog || t("gitCommit.noChangelog")}</code>
-                </pre>
-              </Card>
+                  <pre className="p-8 font-mono text-xs leading-relaxed overflow-auto flex-1 bg-background text-foreground/80">
+                    <code>{changelog || t("gitCommit.noChangelog")}</code>
+                  </pre>
+                </Card>
+
+                {/* Batch Generation */}
+                <Card className="p-6 border-indigo-500/20 bg-indigo-500/5">
+                  <h3 className="text-xs font-black uppercase text-indigo-600 mb-4 flex items-center gap-2 tracking-widest">
+                    <ListPlus className="size-3" /> {t("gitCommit.batchGenerate")}
+                  </h3>
+                  <TextArea
+                    value={batchInput}
+                    onChange={(e) => setBatchInput(e.target.value)}
+                    placeholder={t("gitCommit.batchPlaceholder")}
+                    className="h-24 w-full resize-none rounded-xl border border-divider bg-background p-3 font-mono text-xs focus:ring-2 focus:ring-indigo-500/20 shadow-inner mb-3"
+                    aria-label={t("gitCommit.batchGenerate")}
+                  />
+                  {batchMessages.length > 0 && (
+                    <div className="space-y-2">
+                      {batchMessages.map((msg, i) => (
+                        <div key={i} className="flex items-center justify-between p-2 bg-background/50 rounded-lg border border-indigo-500/10">
+                          <span className="font-mono text-xs text-primary truncate mr-2">{msg}</span>
+                          <CopyButton text={msg} size="sm" variant="ghost" />
+                        </div>
+                      ))}
+                      <CopyButton
+                        text={batchMessages.join("\n")}
+                        label={t("gitCommit.copyAllMessages")}
+                        className="w-full mt-2 font-bold"
+                      />
+                    </div>
+                  )}
+                </Card>
+              </div>
             </Tabs.Panel>
 
             <Tabs.Panel id="history">

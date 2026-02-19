@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Tabs,
   Chip,
@@ -18,6 +18,7 @@ import {
   Eye,
   Zap,
   Activity,
+  GitCompareArrows,
 } from "lucide-react";
 import { useTailwindSorter } from "@/hooks/use-tailwind-sorter";
 import { useTranslation } from "@/hooks/use-translation";
@@ -41,7 +42,17 @@ export default function TailwindSorterPage() {
     loadExample,
   } = useTailwindSorter();
 
-  const [activeView, setActiveTab] = useState<"result" | "audit" | "breakpoints" | string>("result");
+  const [activeView, setActiveTab] = useState<"result" | "audit" | "diff" | "breakpoints" | string>("result");
+
+  const diffClasses = useMemo(() => {
+    if (!result || !input.trim()) return { removed: [] as string[], added: [] as string[], kept: [] as string[] };
+    const inputSet = new Set(input.trim().split(/\s+/));
+    const outputSet = new Set(result.output.trim().split(/\s+/));
+    const removed = [...inputSet].filter(c => !outputSet.has(c));
+    const added = [...outputSet].filter(c => !inputSet.has(c));
+    const kept = [...outputSet].filter(c => inputSet.has(c));
+    return { removed, added, kept };
+  }, [input, result]);
 
   const auditColumns: ColumnConfig[] = [
     { name: "CLASS", uid: "class" },
@@ -201,6 +212,12 @@ export default function TailwindSorterPage() {
                           {t("tailwind.issuesTab", { count: String(result.audit.length + result.conflicts.length) })}
                         </div>
                       </Tabs.Tab>
+                      <Tabs.Tab id="diff">
+                        <div className="flex items-center gap-2 font-bold">
+                          <GitCompareArrows className="size-4 text-purple-500" />
+                          {t("tailwind.beforeAfter")}
+                        </div>
+                      </Tabs.Tab>
                       <Tabs.Tab id="breakpoints">
                         <div className="flex items-center gap-2 font-bold">
                           <Monitor className="size-4 text-blue-500" />
@@ -244,6 +261,47 @@ export default function TailwindSorterPage() {
                         initialVisibleColumns={["class", "reason", "severity"]}
                         emptyContent={t("tailwind.noRedundancies")}
                       />
+                    </div>
+                  </Tabs.Panel>
+
+                  <Tabs.Panel id="diff">
+                    <div className="p-6 space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-[10px] font-black uppercase text-muted-foreground mb-2 tracking-widest">{t("tailwind.beforeLabel")}</p>
+                          <div className="p-3 bg-muted/30 rounded-xl border border-divider min-h-[100px]">
+                            <div className="flex flex-wrap gap-1">
+                              {input.trim().split(/\s+/).filter(Boolean).map((cls, i) => {
+                                const isRemoved = diffClasses.removed.includes(cls);
+                                return (
+                                  <span key={i} className={cn(
+                                    "px-1.5 py-0.5 rounded font-mono text-[10px] border",
+                                    isRemoved ? "bg-red-500/20 border-red-500/40 text-red-600 line-through" : "bg-muted border-divider text-foreground/70"
+                                  )}>
+                                    {cls}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-black uppercase text-muted-foreground mb-2 tracking-widest">{t("tailwind.afterLabel")}</p>
+                          <div className="p-3 bg-muted/30 rounded-xl border border-divider min-h-[100px]">
+                            <div className="flex flex-wrap gap-1">
+                              {result?.output.trim().split(/\s+/).filter(Boolean).map((cls, i) => (
+                                <span key={i} className="px-1.5 py-0.5 rounded font-mono text-[10px] border bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400">
+                                  {cls}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex gap-4 text-[10px] font-bold">
+                        <span className="text-red-600">{diffClasses.removed.length} {t("tailwind.removedLabel")}</span>
+                        <span className="text-emerald-600">{diffClasses.kept.length} {t("tailwind.keptLabel")}</span>
+                      </div>
                     </div>
                   </Tabs.Panel>
 

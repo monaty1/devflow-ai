@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Tabs,
   TextArea,
@@ -40,7 +40,8 @@ import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { cn } from "@/lib/utils";
-import type { NameSuggestion, VariableType, WizardConfig } from "@/types/variable-name-wizard";
+import { convertToAll } from "@/lib/application/variable-name-wizard";
+import type { NameSuggestion, VariableType, WizardConfig, NamingConvention } from "@/types/variable-name-wizard";
 
 export default function VariableNameWizardPage() {
   const { t } = useTranslation();
@@ -62,6 +63,15 @@ export default function VariableNameWizardPage() {
   const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
   const { addToast } = useToast();
   const [activeTab, setActiveTab] = useState<"generate" | "convert" | string>("generate");
+  const [batchInput, setBatchInput] = useState("");
+  const [batchTarget, setBatchTarget] = useState<NamingConvention>("camelCase");
+  const batchResults = useMemo(() => {
+    if (!batchInput.trim()) return [];
+    return batchInput.split("\n").filter(l => l.trim()).map(name => {
+      const result = convertToAll(name.trim());
+      return { original: name.trim(), conversions: result.conversions };
+    });
+  }, [batchInput]);
 
   const suggestionColumns: ColumnConfig[] = [
     { name: "NAME", uid: "name", sortable: true },
@@ -399,34 +409,86 @@ export default function VariableNameWizardPage() {
             </Tabs.Panel>
 
             <Tabs.Panel id="convert">
-              {conversionResult ? (
-                <div className="grid gap-4 sm:grid-cols-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  {Object.entries(conversionResult.conversions).map(([convention, value]) => (
-                    <Card key={convention} className="p-5 group hover:border-primary/30 transition-all border-2 border-transparent relative overflow-hidden">
-                      <div className="absolute top-0 right-0 p-2 opacity-5 pointer-events-none">
-                        <Fingerprint className="size-16" />
-                      </div>
-                      <div className="flex justify-between items-start mb-3">
-                        <span className="text-[10px] font-black uppercase text-muted-foreground tracking-tighter">
-                          {convention}
-                        </span>
-                        <CopyButton text={value as string} size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </div>
-                      <p className="font-mono text-sm font-black text-primary break-all">{value as string}</p>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center h-[500px]">
-                  <div className="size-24 bg-muted rounded-full flex items-center justify-center mb-6">
-                    <Wand2 className="size-12 text-muted-foreground/30" />
+              <div className="space-y-6">
+                {conversionResult ? (
+                  <div className="grid gap-4 sm:grid-cols-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    {Object.entries(conversionResult.conversions).map(([convention, value]) => (
+                      <Card key={convention} className="p-5 group hover:border-primary/30 transition-all border-2 border-transparent relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-2 opacity-5 pointer-events-none">
+                          <Fingerprint className="size-16" />
+                        </div>
+                        <div className="flex justify-between items-start mb-3">
+                          <span className="text-[10px] font-black uppercase text-muted-foreground tracking-tighter">
+                            {convention}
+                          </span>
+                          <CopyButton text={value as string} size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                        <p className="font-mono text-sm font-black text-primary break-all">{value as string}</p>
+                      </Card>
+                    ))}
                   </div>
-                  <h3 className="text-2xl font-black mb-2 opacity-80 text-foreground/50">{t("varName.readyToMagic")}</h3>
-                  <p className="text-muted-foreground max-w-sm mx-auto font-medium">
-                    {t("varName.readyToMagicDesc")}
-                  </p>
+                ) : (
+                  <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center h-[300px]">
+                    <div className="size-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                      <Wand2 className="size-8 text-muted-foreground/30" />
+                    </div>
+                    <h3 className="text-lg font-black mb-1 opacity-80 text-foreground/50">{t("varName.readyToMagic")}</h3>
+                    <p className="text-muted-foreground text-sm max-w-sm mx-auto font-medium">
+                      {t("varName.readyToMagicDesc")}
+                    </p>
+                  </Card>
+                )}
+
+                {/* Batch Rename */}
+                <Card className="p-6 border-violet-500/20 bg-violet-500/5">
+                  <h3 className="text-xs font-black uppercase text-violet-600 mb-4 flex items-center gap-2 tracking-widest">
+                    <Layers className="size-3" /> {t("varName.batchRename")}
+                  </h3>
+                  <TextArea
+                    value={batchInput}
+                    onChange={(e) => setBatchInput(e.target.value)}
+                    placeholder={t("varName.batchPlaceholder")}
+                    className="h-24 w-full resize-none rounded-xl border border-divider bg-background p-3 font-mono text-xs focus:ring-2 focus:ring-violet-500/20 shadow-inner mb-3"
+                    aria-label={t("varName.batchRename")}
+                  />
+                  <div className="flex gap-2 mb-4" role="radiogroup" aria-label={t("varName.batchTarget")}>
+                    {(["camelCase", "snake_case", "PascalCase", "kebab-case", "SCREAMING_SNAKE"] as NamingConvention[]).map(c => (
+                      <button
+                        key={c}
+                        role="radio"
+                        aria-checked={batchTarget === c}
+                        onClick={() => setBatchTarget(c)}
+                        className={cn(
+                          "px-2 py-1 rounded-lg text-[10px] font-bold transition-all border",
+                          batchTarget === c ? "bg-violet-500 text-white border-violet-500" : "bg-muted/30 border-transparent text-muted-foreground hover:bg-muted"
+                        )}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                  {batchResults.length > 0 && (
+                    <div className="space-y-2">
+                      {batchResults.map((r, i) => (
+                        <div key={i} className="flex items-center justify-between p-2 bg-background/50 rounded-lg border border-violet-500/10">
+                          <span className="font-mono text-xs text-muted-foreground">{r.original}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-xs font-bold text-violet-600 dark:text-violet-400">
+                              {String(r.conversions[batchTarget] ?? r.original)}
+                            </span>
+                            <CopyButton text={String(r.conversions[batchTarget] ?? r.original)} size="sm" variant="ghost" />
+                          </div>
+                        </div>
+                      ))}
+                      <CopyButton
+                        text={batchResults.map(r => String(r.conversions[batchTarget] ?? r.original)).join("\n")}
+                        label={t("varName.copyAll")}
+                        className="w-full mt-2 font-bold"
+                      />
+                    </div>
+                  )}
                 </Card>
-              )}
+              </div>
             </Tabs.Panel>
           </Tabs>
         </div>

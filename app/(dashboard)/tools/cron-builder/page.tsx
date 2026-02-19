@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Input,
   Tabs,
@@ -27,6 +27,51 @@ import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { cn } from "@/lib/utils";
 import type { ConfigFormat, NextExecution } from "@/types/cron-builder";
+
+function MiniCalendar({ executions }: { executions: NextExecution[] }) {
+  const activeDays = useMemo(() => {
+    const days = new Set<number>();
+    for (const e of executions) {
+      days.add(e.date.getDate());
+    }
+    return days;
+  }, [executions]);
+
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDayOfWeek = new Date(year, month, 1).getDay();
+  const dayLabels = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+
+  return (
+    <div className="grid grid-cols-7 gap-1">
+      {dayLabels.map(d => (
+        <div key={d} className="text-[9px] font-bold text-center text-muted-foreground uppercase">{d}</div>
+      ))}
+      {Array.from({ length: firstDayOfWeek }, (_, i) => (
+        <div key={`e-${i}`} />
+      ))}
+      {Array.from({ length: daysInMonth }, (_, i) => {
+        const day = i + 1;
+        const isActive = activeDays.has(day);
+        const isToday = day === now.getDate();
+        return (
+          <div
+            key={day}
+            className={cn(
+              "text-center text-[10px] font-bold py-1 rounded-md transition-colors",
+              isActive ? "bg-orange-500 text-white" : "text-muted-foreground",
+              isToday && !isActive && "ring-1 ring-primary"
+            )}
+          >
+            {day}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function CronBuilderPage() {
   const { t } = useTranslation();
@@ -243,6 +288,17 @@ export default function CronBuilderPage() {
                   </Chip>
                 ))}
               </div>
+            </Card>
+          )}
+
+          {/* Mini Calendar */}
+          {nextExecutions.length > 0 && (
+            <Card className="p-6">
+              <h3 className="font-bold flex items-center gap-2 text-orange-600 mb-4">
+                <Calendar className="size-4" />
+                {t("cron.executionCalendar")}
+              </h3>
+              <MiniCalendar executions={nextExecutions} />
             </Card>
           )}
 
