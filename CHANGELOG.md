@@ -39,7 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `token-visualizer`: `role="radiogroup"` on provider buttons, keyboard support on leaderboard Cards
   - `variable-name-wizard`: `role="radiogroup"` on language selector
   - `git-commit-generator`: `type="button"` + `aria-hidden` on "Add point"
-- **911 tests passing** (up from 906) — 5 new tests from tool iterations
+- **942 tests passing** (up from 906) — 31 new coverage tests for cost-calculator, cron-builder, uuid-generator + 5 from tool iterations
 
 ## [3.0.0] - 2026-02-19
 
