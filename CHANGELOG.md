@@ -5,6 +5,26 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-02-19
+
+### Added
+- **Pollinations + OpenRouter free AI providers** — AI is now always available without configuration. Provider priority: BYOK → Gemini → Groq → OpenRouter → Pollinations (free, no API key needed)
+- **Tool Recommendation Engine** — Context-aware cross-tool suggestions with 10 data type detectors, 15 tool rules, deduplication, and smart data passing (22 tests)
+- **CodeQL SAST CI workflow** — JavaScript/TypeScript security analysis on push, PRs, and weekly schedule
+- **Dependency review action** — Blocks PRs that introduce moderate+ vulnerability dependencies
+- **Health check endpoint** — `GET /api/health` returns `{ status, version, timestamp }` for post-deploy verification
+- **Sentry setup guide** — `docs/SENTRY.md` with full setup, Vercel deployment, and architecture reference
+
+### Changed
+- **HeroUI v3 form migration** — 27 raw HTML form elements replaced with HeroUI v3 components (TextArea, Select, NumberField, Slider, SearchField, Switch) across 14 tool pages
+- **i18n completion** — 343 missing Spanish translations added (1083 → 1132 keys in both locales), zero English text in Spanish UI
+- **Micro-copy polish** — 49 new i18n keys for error boundaries, DataTable, favorites, magic input, cron builder, 404 page, tool card
+- **WCAG AAA compliance** — `role="alert" aria-live="assertive"` on error boundaries, 44px touch targets on all `isIconOnly` buttons, `aria-hidden` on decorative icons, `role="group"` on cron presets
+- **Performance** — Dynamic import for Recharts (code-split), AVIF/WebP image formats, CSP updated for AI provider domains, `optimizePackageImports` for recharts
+- **Sentry configs** — Added `release` and `environment` tags to all 3 configs (client, server, edge)
+- **CI hardened** — npm audit tightened to `--audit-level=moderate`, added dependency review for PRs
+- **906 tests passing** (up from 884) — 22 new recommendation engine tests
+
 ## [2.6.0] - 2026-02-19
 
 ### Added
