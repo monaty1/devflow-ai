@@ -69,9 +69,17 @@ export default function DtoMaticPage() {
     switch (key) {
       case "name":
         return (
-          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setSelectedFileId(file.id)}>
+          <div
+            role="button"
+            tabIndex={0}
+            className="flex items-center gap-3 cursor-pointer group"
+            onClick={() => setSelectedFileId(file.id)}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedFileId(file.id); } }}
+            aria-label={file.name}
+            aria-pressed={selectedFileId === file.id}
+          >
             <div className={cn("p-1.5 rounded-lg transition-colors group-hover:bg-primary/10", selectedFileId === file.id ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground")}>
-              <FileCode className="size-4" />
+              <FileCode className="size-4" aria-hidden="true" />
             </div>
             <span className={cn("text-sm font-medium transition-colors", selectedFileId === file.id ? "text-primary font-bold" : "group-hover:text-foreground")}>
               {file.name}
@@ -193,7 +201,7 @@ export default function DtoMaticPage() {
               
               <div className="space-y-1.5">
                 <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("dtoMatic.targetStack")}</label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={t("dtoMatic.targetStack")}>
                   {[
                     { val: "typescript", label: "TypeScript" },
                     { val: "java", label: "Java" },
@@ -204,10 +212,13 @@ export default function DtoMaticPage() {
                     <button
                       key={opt.val}
                       onClick={() => updateConfig("targetLanguage", opt.val as TargetLanguage)}
+                      role="radio"
+                      aria-checked={config.targetLanguage === opt.val}
+                      aria-label={opt.label}
                       className={cn(
                         "px-3 py-2 rounded-xl text-xs font-bold transition-all border text-left",
-                        config.targetLanguage === opt.val 
-                          ? "bg-primary text-white border-primary shadow-md" 
+                        config.targetLanguage === opt.val
+                          ? "bg-primary text-white border-primary shadow-md"
                           : "bg-muted/30 border-transparent hover:bg-muted text-muted-foreground hover:text-foreground"
                       )}
                     >
@@ -219,24 +230,30 @@ export default function DtoMaticPage() {
 
               <div className="space-y-1.5 pt-2 border-t border-divider">
                 <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("dtoMatic.outputModeLabel")}</label>
-                <div className="flex gap-2">
+                <div className="flex gap-2" role="radiogroup" aria-label={t("dtoMatic.outputModeLabel")}>
                   <Chip
                     size="sm"
                     variant={config.mode === "clean-arch" ? "primary" : "soft"}
                     className="cursor-pointer font-bold h-8"
                     onClick={() => setMode("clean-arch")}
+                    role="radio"
+                    aria-checked={config.mode === "clean-arch"}
                   >{t("dtoMatic.cleanArch")}</Chip>
                   <Chip
                     size="sm"
                     variant={config.mode === "zod" ? "primary" : "soft"}
                     className="cursor-pointer font-bold h-8"
                     onClick={() => setMode("zod")}
+                    role="radio"
+                    aria-checked={config.mode === "zod"}
                   >{t("dtoMatic.zodSchemaLabel")}</Chip>
                   <Chip
                     size="sm"
                     variant={config.mode === "quick" ? "primary" : "soft"}
                     className="cursor-pointer font-bold h-8"
                     onClick={() => setMode("quick")}
+                    role="radio"
+                    aria-checked={config.mode === "quick"}
                   >{t("dtoMatic.dtoOnlyLabel")}</Chip>
                 </div>
                 <p className="text-[10px] text-muted-foreground/70 ml-1 mt-1">

@@ -324,6 +324,7 @@
   "common.recentHistory": "Historial reciente",
   "common.noHistory": "Sin historial",
   "common.clearAll": "Borrar todo",
+  "common.delete": "Eliminar",
   "common.options": "Opciones",
   "common.result": "Resultado",
 
@@ -392,6 +393,7 @@
   "promptAnalyzer.qualityIssues": "Problemas de Calidad",
   "promptAnalyzer.readyToAnalyze": "Listo para analizar",
   "promptAnalyzer.emptyStateHint": "Ingresa un prompt arriba y haz clic en Analizar para comenzar",
+  "promptAnalyzer.exportReport": "Exportar informe de análisis",
   "promptAnalyzer.toastEnterPrompt": "Ingresa un prompt para analizar",
   "promptAnalyzer.toastSecurity": "Problemas de seguridad detectados: {count}",
   "promptAnalyzer.toastExcellent": "Excelente calidad de prompt!",
@@ -887,6 +889,7 @@
   "tokenViz.wastedFound": "Se encontraron {count} espacios redundantes o caracteres invisibles.",
   "tokenViz.laboratory": "Laboratorio de Tokens",
   "tokenViz.laboratoryDesc": "Analiza cómo diferentes modelos de IA (GPT-4, Claude, Llama) ven tu texto. Optimiza tus prompts reduciendo tokens desperdiciados.",
+  "tokenViz.providerSelection": "Seleccionar proveedor de tokenización",
   "tokenViz.tokenInfo": "Cada caja representa un token. Los resaltados en rojo indican desperdicio (espacios extra/redundancia).",
 
   "ctxMgr.newWindowPlaceholder": "Nombre de nueva ventana...",
@@ -964,6 +967,7 @@
   "codeReview.refactorDesc": "Versión optimizada aplicando código limpio y patrones de diseño.",
   "codeReview.applyChanges": "Aplicar Cambios",
   "codeReview.improveNames": "Mejorar Nombres",
+  "codeReview.issueActions": "Acciones del problema",
 
   "promptAnalyzer.checkTokens": "Verificar Tokens",
   "promptAnalyzer.estimateCost": "Estimar Costo",

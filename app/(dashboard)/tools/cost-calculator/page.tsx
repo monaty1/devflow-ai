@@ -112,7 +112,7 @@ export default function CostCalculatorPage() {
           <div className="relative flex justify-center items-center gap-2">
             <Dropdown>
               <DropdownTrigger>
-                <Button isIconOnly size="sm" variant="ghost">
+                <Button isIconOnly size="sm" variant="ghost" aria-label={t("costCalc.viewStats")}>
                   <MoreVertical className="text-default-300 size-4" />
                 </Button>
               </DropdownTrigger>
@@ -220,12 +220,14 @@ export default function CostCalculatorPage() {
                     value={inputTokens}
                     onChange={(e) => setInputTokens(Number.isNaN(parseInt(e.target.value)) ? 0 : parseInt(e.target.value))}
                     className="flex-1 accent-primary"
+                    aria-label={t("costCalc.inputTokens")}
                   />
                   <input
                     type="number"
                     value={inputTokens}
                     onChange={(e) => setInputTokens(parseInt(e.target.value) || 0)}
                     className="w-24 rounded-lg border border-border bg-background px-3 py-1 text-sm text-right font-mono"
+                    aria-label={t("costCalc.inputTokens")}
                   />
                 </div>
               </div>
@@ -243,12 +245,14 @@ export default function CostCalculatorPage() {
                     value={outputTokens}
                     onChange={(e) => setOutputTokens(Number.isNaN(parseInt(e.target.value)) ? 0 : parseInt(e.target.value))}
                     className="flex-1 accent-primary"
+                    aria-label={t("costCalc.outputTokens")}
                   />
                   <input
                     type="number"
                     value={outputTokens}
                     onChange={(e) => setOutputTokens(parseInt(e.target.value) || 0)}
                     className="w-24 rounded-lg border border-border bg-background px-3 py-1 text-sm text-right font-mono"
+                    aria-label={t("costCalc.outputTokens")}
                   />
                 </div>
               </div>
@@ -266,12 +270,14 @@ export default function CostCalculatorPage() {
                     value={dailyRequests}
                     onChange={(e) => setDailyRequests(Number.isNaN(parseInt(e.target.value)) ? 1 : parseInt(e.target.value))}
                     className="flex-1 accent-primary"
+                    aria-label={t("costCalc.dailyRequests")}
                   />
                   <input
                     type="number"
                     value={dailyRequests}
                     onChange={(e) => setDailyRequests(parseInt(e.target.value) || 0)}
                     className="w-24 rounded-lg border border-border bg-background px-3 py-1 text-sm text-right font-mono"
+                    aria-label={t("costCalc.dailyRequests")}
                   />
                 </div>
               </div>

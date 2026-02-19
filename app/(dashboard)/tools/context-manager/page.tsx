@@ -197,13 +197,18 @@ export default function ContextManagerPage() {
             {windows.map((w) => (
               <div
                 key={w.id}
+                role="button"
+                tabIndex={0}
                 onClick={() => setActiveWindowId(w.id)}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActiveWindowId(w.id); } }}
                 className={cn(
                   "group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all border border-transparent",
-                  activeWindowId === w.id 
-                    ? "bg-primary/10 border-primary/20 text-primary shadow-sm" 
+                  activeWindowId === w.id
+                    ? "bg-primary/10 border-primary/20 text-primary shadow-sm"
                     : "hover:bg-muted text-muted-foreground"
                 )}
+                aria-label={w.name}
+                aria-pressed={activeWindowId === w.id}
               >
                 <div className="flex flex-col min-w-0">
                   <span className="text-sm font-bold truncate">{w.name}</span>
@@ -455,7 +460,7 @@ export default function ContextManagerPage() {
                 >
                   {t("ctxMgr.ingestToContext")}
                 </Button>
-                <Button variant="ghost" className="font-black h-12" onPress={() => { resetDocForm(); setShowAddDoc(false); }}>Cancel</Button>
+                <Button variant="ghost" className="font-black h-12" onPress={() => { resetDocForm(); setShowAddDoc(false); }}>{t("common.cancel")}</Button>
               </div>
             </div>
           </Card>

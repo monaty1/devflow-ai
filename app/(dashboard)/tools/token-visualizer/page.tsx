@@ -128,15 +128,18 @@ export default function TokenVisualizerPage() {
               />
 
               {!isCompareMode && (
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label={t("tokenViz.providerSelection")}>
                   {PROVIDERS.map((p) => (
                     <button
                       key={p.id}
                       onClick={() => setProvider(p.id as TokenizerProvider)}
+                      role="radio"
+                      aria-checked={provider === p.id}
+                      aria-label={p.label}
                       className={cn(
                         "px-2 py-2 rounded-lg border text-[10px] font-black uppercase transition-all",
-                        provider === p.id 
-                          ? "bg-primary border-primary text-white shadow-md" 
+                        provider === p.id
+                          ? "bg-primary border-primary text-white shadow-md"
                           : "bg-muted/30 border-transparent hover:bg-muted text-muted-foreground"
                       )}
                     >
@@ -254,10 +257,15 @@ export default function TokenVisualizerPage() {
                   {allProviderResults.map(({ provider: p, result: r }) => {
                     const info = PROVIDERS.find(op => op.id === p);
                     return (
-                      <Card key={p} className="p-4 border-2 border-transparent hover:border-primary/20 transition-all cursor-pointer" onClick={() => {
-                        setProvider(p);
-                        setIsCompareMode(false);
-                      }}>
+                      <Card
+                        key={p}
+                        role="button"
+                        tabIndex={0}
+                        className="p-4 border-2 border-transparent hover:border-primary/20 transition-all cursor-pointer"
+                        onClick={() => { setProvider(p); setIsCompareMode(false); }}
+                        onKeyDown={(e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setProvider(p); setIsCompareMode(false); } }}
+                        aria-label={`${info?.label}: ${r.totalTokens} tokens`}
+                      >
                         <div className="flex justify-between items-start mb-3">
                           <span className={cn("text-[10px] font-black uppercase", info?.color)}>{info?.label}</span>
                           <StatusBadge variant={r.efficiencyScore > 80 ? "success" : "warning"}>{r.totalTokens} t</StatusBadge>

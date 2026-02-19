@@ -185,19 +185,22 @@ export default function VariableNameWizardPage() {
 
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("varName.targetLang")}</label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={t("varName.targetLang")}>
                   {LANGUAGES.map(lang => (
                     <button
                       key={lang.id}
                       onClick={() => updateConfig("language", lang.id as WizardConfig["language"])}
+                      role="radio"
+                      aria-checked={config.language === lang.id}
+                      aria-label={lang.label}
                       className={cn(
                         "flex items-center gap-2 p-2 rounded-lg border transition-all text-left",
-                        config.language === lang.id 
-                          ? "bg-primary text-white border-primary shadow-md" 
+                        config.language === lang.id
+                          ? "bg-primary text-white border-primary shadow-md"
                           : "bg-muted/30 border-transparent hover:bg-muted text-muted-foreground hover:text-foreground"
                       )}
                     >
-                      <lang.icon className="size-3" />
+                      <lang.icon className="size-3" aria-hidden="true" />
                       <span className="text-[10px] font-bold uppercase">{lang.label.split(" ")[0]}</span>
                     </button>
                   ))}

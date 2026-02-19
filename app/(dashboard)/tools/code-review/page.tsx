@@ -147,7 +147,7 @@ export default function CodeReviewPage() {
         return (
           <Dropdown>
             <DropdownTrigger>
-              <Button isIconOnly size="sm" variant="ghost">
+              <Button isIconOnly size="sm" variant="ghost" aria-label={t("codeReview.issueActions")}>
                 <MoreVertical className="size-4 text-default-300" />
               </Button>
             </DropdownTrigger>
@@ -274,8 +274,8 @@ export default function CodeReviewPage() {
                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">
                     {t("codeReview.overallScore")}
                   </p>
-                  <div className="relative">
-                     <svg className="size-24 transform -rotate-90">
+                  <div className="relative" role="img" aria-label={`${t("codeReview.overallScore")}: ${result.overallScore}%`}>
+                     <svg className="size-24 transform -rotate-90" aria-hidden="true">
                         <circle
                           cx="48" cy="48" r="40"
                           stroke="currentColor" strokeWidth="8" fill="transparent"

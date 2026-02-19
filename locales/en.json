@@ -111,6 +111,7 @@
   "common.recentHistory": "Recent history",
   "common.noHistory": "No history yet",
   "common.clearAll": "Clear All",
+  "common.delete": "Delete",
   "common.options": "Options",
   "common.result": "Result",
 
@@ -401,6 +402,7 @@
   "promptAnalyzer.qualityIssues": "Quality Issues",
   "promptAnalyzer.readyToAnalyze": "Ready to analyze",
   "promptAnalyzer.emptyStateHint": "Enter a prompt above and click Analyze to get started",
+  "promptAnalyzer.exportReport": "Export analysis report",
   "promptAnalyzer.toastEnterPrompt": "Please enter a prompt to analyze",
   "promptAnalyzer.toastSecurity": "Security issues detected: {count}",
   "promptAnalyzer.toastExcellent": "Excellent prompt quality!",
@@ -833,6 +835,7 @@
   "tokenViz.wastedFound": "Found {count} redundant spaces or invisible characters.",
   "tokenViz.laboratory": "Token Laboratory",
   "tokenViz.laboratoryDesc": "Analyze how different AI models (GPT-4, Claude, Llama) see your text. Optimize your prompts by reducing wasted tokens.",
+  "tokenViz.providerSelection": "Select tokenizer provider",
   "tokenViz.tokenInfo": "Each box represents a token. Red highlights indicate waste (extra spaces/redundancy).",
 
   "ctxMgr.newWindowPlaceholder": "New window name...",
@@ -910,6 +913,7 @@
   "codeReview.refactorDesc": "Optimized version applying clean code and design patterns.",
   "codeReview.applyChanges": "Apply Changes",
   "codeReview.improveNames": "Improve Names",
+  "codeReview.issueActions": "Issue actions",
 
   "promptAnalyzer.checkTokens": "Check Tokens",
   "promptAnalyzer.estimateCost": "Estimate Cost",

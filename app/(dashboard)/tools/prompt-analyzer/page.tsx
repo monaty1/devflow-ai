@@ -279,6 +279,7 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
                       variant="danger"
                       isIconOnly
                       onPress={() => removeFromHistory(item.id)}
+                      aria-label={t("common.delete")}
                     >
                       <Trash2 className="size-4" />
                     </Button>
@@ -310,7 +311,7 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
                   <h2 className="text-xl font-semibold text-foreground">
                     {t("promptAnalyzer.analysisComplete")}
                   </h2>
-                  <Button variant="ghost" size="sm" onPress={handleExport}>
+                  <Button variant="ghost" size="sm" onPress={handleExport} aria-label={t("promptAnalyzer.exportReport")}>
                     <Download className="size-4" />
                   </Button>
                 </div>
