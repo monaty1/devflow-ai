@@ -5,6 +5,34 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2026-02-19
+
+### UX & Polish Iteration
+
+#### Added
+- **Sticky desktop sidebar** — sidebar now stays fixed while content scrolls (`sticky top-0 h-screen overflow-y-auto`)
+- **Locale toggle in dashboard sidebar** — language can be switched from inside any tool page, no need for marketing navbar
+- **Shared `LocaleToggle` component** — extracted from navbar into `components/shared/locale-toggle.tsx` with `icon` and `full` variants
+- **AI Configuration card on Settings page** — enable/disable AI toggle, provider selector (Gemini/Groq), API key input with show/hide, clear key button, "memory only" security note
+- **MagicInput detection badge** — shows "Detected: JSON" / "Detected: Cron" etc. when input type is identified
+- **Radar chart axis labels** — 7 dimension labels (Role, Task, Context, Steps, Format, Constraints, Clarify) displayed around the Prompt Analyzer radar
+- **About page i18n** — 21 new keys replacing all hardcoded English strings
+- **~38 new i18n keys** across both `en.json` and `es.json` (sidebar, settings.ai, about, magic.detected, home.statsLabel)
+
+#### Fixed
+- **MagicInput critical data flow bug** — was writing to `localStorage("magic-input")` but tools read from `devflow-shared-data`; now uses `useSmartNavigation().navigateTo()` for correct data passing
+- **Settings Clear Data** — was hardcoded to only 3 keys; now cleans ALL `devflow-*` localStorage keys
+- **MagicInput dead SQL detection** — removed `sql` case from `DetectedType` (no SQL tool exists)
+
+#### Changed
+- **Landing page simplified** — removed redundant "Why DevFlow" 3-card section and bottom CTA gradient box; single CTA button in hero
+- **AI system prompts enhanced** — all 4 prompts rewritten with chain-of-thought instructions, output format examples with sample values, query complexity classification, and stronger injection defenses
+- **ToolSuggestions visibility** — added subtle background frame (`bg-primary/5 border border-primary/10 rounded-lg`)
+- **Security card hidden when empty** — Prompt Analyzer no longer shows "Security Analysis" card when `securityFlags.length === 0`
+- **Cost Calculator cleanup** — removed dead "View Stats" dropdown item that had no `onPress` handler
+- **Translated sr-only text** — landing page "Project Stats" heading now uses `t("home.statsLabel")`
+- **Translated 5 hardcoded aria-labels** — sidebar close/open buttons, nav, sidebar landmark labels
+
 ## [3.1.0] - 2026-02-19
 
 ### Phase E: Tool-by-Tool Iteration (15 tools)

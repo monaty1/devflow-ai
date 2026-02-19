@@ -58,11 +58,13 @@
 - **No signup** &mdash; no login, no user accounts, no barriers
 - **Local-first** &mdash; every tool works 100% without AI
 - **AI-enhanced** &mdash; 4 providers: Gemini, Groq, OpenRouter, Pollinations (always free, no key needed)
-- **BYOK** &mdash; bring your own API key for higher limits
+- **BYOK** &mdash; bring your own API key for higher limits (configurable in Settings)
 - **Smart suggestions** &mdash; context-aware cross-tool recommendations
+- **MagicInput** &mdash; paste anything, auto-detect type, route to the right tool
 - **Local history** &mdash; localStorage persistence
 - **Copy to clipboard** &mdash; 1-click from any tool
 - **Dark / Light mode** &mdash; auto-detection + manual toggle
+- **Bilingual** &mdash; English / Spanish, switchable from sidebar
 - **Strategic test coverage** &mdash; 100/80/0 architecture with per-file enforcement
 - **TypeScript strict** &mdash; all strict flags enabled, zero `any`
 - **Clean Architecture** &mdash; Domain, Application, Presentation layers
@@ -350,11 +352,13 @@ Coverage reports are uploaded as artifacts on every run.
 - **Sin registro** &mdash; ni login, ni cuentas de usuario, sin barreras
 - **Local-first** &mdash; todas las herramientas funcionan al 100% sin IA
 - **IA integrada** &mdash; 4 proveedores: Gemini, Groq, OpenRouter, Pollinations (siempre gratis, sin API key)
-- **BYOK** &mdash; trae tu propia API key para limites superiores
+- **BYOK** &mdash; trae tu propia API key para limites superiores (configurable en Ajustes)
 - **Sugerencias inteligentes** &mdash; recomendaciones de herramientas segun el contexto
+- **MagicInput** &mdash; pega cualquier cosa, deteccion automatica, redirige a la herramienta correcta
 - **Historial local** &mdash; persistencia con localStorage
 - **Copy to clipboard** &mdash; en 1 click desde cualquier herramienta
 - **Dark / Light mode** &mdash; deteccion automatica + toggle manual
+- **Bilingue** &mdash; Ingles / Espanol, cambiable desde la barra lateral
 - **Cobertura estrategica** &mdash; arquitectura 100/80/0 con enforcement per-file
 - **TypeScript strict** &mdash; todos los flags estrictos activados, cero `any`
 - **Clean Architecture** &mdash; separacion en capas Domain, Application, Presentation
