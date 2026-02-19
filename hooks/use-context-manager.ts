@@ -50,6 +50,7 @@ interface UseContextManagerReturn {
   ) => void;
   removeDocument: (documentId: string) => void;
   changePriority: (documentId: string, priority: Priority) => void;
+  setMaxTokens: (maxTokens: number) => void;
   exportWindow: (format: "xml" | "json" | "markdown") => ExportedContext | null;
   exportForAI: (options?: { stripComments?: boolean }) => string | null;
 }
@@ -138,6 +139,23 @@ export function useContextManager(): UseContextManagerReturn {
     [activeWindow, activeWindowId, windows, saveWindows]
   );
 
+  const setMaxTokens = useCallback(
+    (maxTokens: number) => {
+      if (!activeWindowId) return;
+      const updated = windows.map((w) => {
+        if (w.id !== activeWindowId) return w;
+        const totalTokens = w.documents.reduce((sum, d) => sum + d.tokenCount, 0);
+        return {
+          ...w,
+          maxTokens,
+          utilizationPercentage: Math.round((totalTokens / maxTokens) * 100),
+        };
+      });
+      saveWindows(updated);
+    },
+    [activeWindowId, windows, saveWindows]
+  );
+
   const exportWindowHandler = useCallback(
     (format: "xml" | "json" | "markdown"): ExportedContext | null => {
       if (!activeWindow) return null;
@@ -161,6 +179,7 @@ export function useContextManager(): UseContextManagerReturn {
     addDocument,
     removeDocument,
     changePriority,
+    setMaxTokens,
     exportWindow: exportWindowHandler,
     exportForAI: exportForAIHandler,
   };

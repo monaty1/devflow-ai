@@ -898,6 +898,7 @@
   "tokenViz.laboratoryDesc": "Analiza cómo diferentes modelos de IA (GPT-4, Claude, Llama) ven tu texto. Optimiza tus prompts reduciendo tokens desperdiciados.",
   "tokenViz.providerSelection": "Seleccionar proveedor de tokenización",
   "tokenViz.tokenInfo": "Cada caja representa un token. Los resaltados en rojo indican desperdicio (espacios extra/redundancia).",
+  "tokenViz.contextBudget": "Presupuesto de Contexto",
 
   "ctxMgr.newWindowPlaceholder": "Nombre de nueva ventana...",
   "ctxMgr.createWindowBtn": "Crear Ventana",
@@ -908,6 +909,7 @@
   "ctxMgr.utilization": "Utilización",
   "ctxMgr.estCost": "Costo Est. (GPT-4o)",
   "ctxMgr.deepTokenAudit": "Auditoría Profunda de Tokens",
+  "ctxMgr.modelPreset": "Modelo objetivo",
   "ctxMgr.packagingEngine": "Motor de Empaquetado",
   "ctxMgr.stripComments": "Eliminar Comentarios de Código",
   "ctxMgr.copyAiReady": "Copiar Contexto para IA",
@@ -1005,6 +1007,7 @@
   "dtoMatic.noFiles": "No se generaron archivos.",
   "dtoMatic.rerollData": "Regenerar Datos",
   "dtoMatic.generatedJsonResponse": "Respuesta JSON Generada",
+  "dtoMatic.downloadAll": "Descargar todos los archivos",
   "dtoMatic.architecturalEngine": "Motor Arquitectónico",
   "dtoMatic.architecturalEngineDesc": "Transforma JSON crudo en capas de Clean Architecture listas para producción. Soporta TS, Java, Python, Go y C#.",
   "dtoMatic.pasteJsonHint": "Pega JSON aquí (ej. {\"id\": 1, \"name\": \"User\"})",

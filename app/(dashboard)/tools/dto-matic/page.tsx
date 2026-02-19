@@ -22,6 +22,7 @@ import {
   Binary,
   Box,
   FileCode,
+  Download,
 } from "lucide-react";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { useDtoMatic } from "@/hooks/use-dto-matic";
@@ -363,7 +364,28 @@ export default function DtoMaticPage() {
                       <Card className="h-full p-0 border-primary/20 shadow-lg overflow-hidden bg-muted/30 dark:bg-zinc-900 flex flex-col border-none">
                         <div className="p-3 bg-muted/50 dark:bg-white/5 border-b border-divider dark:border-white/10 flex justify-between items-center">
                           <span className="text-xs font-mono font-bold text-primary ml-2">{selectedFile?.name}</span>
-                          <CopyButton text={selectedFile?.content || ""} variant="ghost" size="sm" />
+                          <div className="flex gap-1">
+                            <Button
+                              isIconOnly
+                              size="sm"
+                              variant="ghost"
+                              onPress={() => {
+                                if (!result) return;
+                                const allCode = result.files.map(f => `// === ${f.name} ===\n${f.content}`).join("\n\n");
+                                const blob = new Blob([allCode], { type: "text/plain" });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement("a");
+                                a.href = url;
+                                a.download = `${config.rootName || "dto"}-generated.txt`;
+                                a.click();
+                                URL.revokeObjectURL(url);
+                              }}
+                              aria-label={t("dtoMatic.downloadAll")}
+                            >
+                              <Download className="size-3.5" />
+                            </Button>
+                            <CopyButton text={selectedFile?.content || ""} variant="ghost" size="sm" />
+                          </div>
                         </div>
                         <pre className="p-6 font-mono text-xs leading-relaxed overflow-auto flex-1 scrollbar-hide text-foreground/80">
                           <code>{selectedFile?.content}</code>

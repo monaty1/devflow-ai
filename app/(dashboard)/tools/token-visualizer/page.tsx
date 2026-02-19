@@ -173,6 +173,32 @@ export default function TokenVisualizerPage() {
             </div>
           )}
 
+          {/* Token Budget Bar */}
+          {visualization && (
+            <Card className="p-4">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">{t("tokenViz.contextBudget")}</p>
+              {[
+                { label: "4K", max: 4096 },
+                { label: "8K", max: 8192 },
+                { label: "128K", max: 131072 },
+              ].map((ctx) => {
+                const pct = Math.min(100, (visualization.totalTokens / ctx.max) * 100);
+                return (
+                  <div key={ctx.label} className="flex items-center gap-2 mb-1.5">
+                    <span className="text-[10px] font-bold text-muted-foreground w-8">{ctx.label}</span>
+                    <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className={cn("h-full rounded-full transition-all", pct > 90 ? "bg-red-500" : pct > 60 ? "bg-amber-500" : "bg-emerald-500")}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] font-mono text-muted-foreground w-10 text-right">{pct.toFixed(0)}%</span>
+                  </div>
+                );
+              })}
+            </Card>
+          )}
+
           {/* Real BPE Tokenization */}
           {isAIEnabled && visualization && (
             <Card className="p-6 border-violet-500/20 bg-violet-500/5" role="region" aria-label={t("ai.realBPE")}>

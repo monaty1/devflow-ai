@@ -23,6 +23,7 @@ import {
   FileCode,
   FileText,
   FolderTree,
+  Cpu,
 } from "lucide-react";
 import { useContextManager } from "@/hooks/use-context-manager";
 import { useToast } from "@/hooks/use-toast";
@@ -31,6 +32,7 @@ import { useSmartNavigation } from "@/hooks/use-smart-navigation";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
 import { formatCost } from "@/lib/application/cost-calculator";
+import { MODEL_PRESETS } from "@/lib/application/context-manager";
 import { AI_MODELS } from "@/config/ai-models";
 import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { ToolSuggestions } from "@/components/shared/tool-suggestions";
@@ -52,6 +54,7 @@ export default function ContextManagerPage() {
     addDocument,
     removeDocument,
     changePriority,
+    setMaxTokens,
     exportForAI,
   } = useContextManager();
 
@@ -238,16 +241,40 @@ export default function ContextManagerPage() {
               {/* Dashboard Row */}
               <div className="grid gap-4 sm:grid-cols-3">
                 <Card className="p-6 bg-gradient-to-br from-indigo-600 to-blue-700 text-white shadow-lg shadow-indigo-500/20 border-none">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-2">
                     <p className="text-[10px] font-bold uppercase opacity-80">{t("ctxMgr.utilization")}</p>
-                    <StatusBadge variant="info">{activeWindow.totalTokens.toLocaleString()} t</StatusBadge>
+                    <StatusBadge variant="info">{activeWindow.totalTokens.toLocaleString()} / {activeWindow.maxTokens.toLocaleString()}</StatusBadge>
                   </div>
-                  <p className="text-4xl font-black mb-2">{activeWindow.utilizationPercentage}%</p>
-                  <div className="h-2 w-full bg-white/20 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-warning" 
-                      style={{ width: `${Math.min(100, activeWindow.utilizationPercentage)}%` }} 
+                  <p className={cn(
+                    "text-4xl font-black mb-2",
+                    activeWindow.utilizationPercentage > 90 ? "text-red-300" : activeWindow.utilizationPercentage > 60 ? "text-amber-300" : "text-white"
+                  )}>{activeWindow.utilizationPercentage}%</p>
+                  <div className="h-2 w-full bg-white/20 rounded-full overflow-hidden mb-3">
+                    <div
+                      className={cn(
+                        "h-full rounded-full transition-all",
+                        activeWindow.utilizationPercentage > 90 ? "bg-red-400" : activeWindow.utilizationPercentage > 60 ? "bg-amber-400" : "bg-emerald-400"
+                      )}
+                      style={{ width: `${Math.min(100, activeWindow.utilizationPercentage)}%` }}
                     />
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Cpu className="size-3 opacity-60" />
+                    <select
+                      value={MODEL_PRESETS.find(m => m.maxTokens === activeWindow.maxTokens)?.id || "custom"}
+                      onChange={(e) => {
+                        const preset = MODEL_PRESETS.find(m => m.id === e.target.value);
+                        if (preset) setMaxTokens(preset.maxTokens);
+                      }}
+                      className="bg-white/10 border border-white/20 rounded-lg text-[10px] font-bold px-2 py-1 outline-none cursor-pointer appearance-none"
+                      aria-label={t("ctxMgr.modelPreset")}
+                    >
+                      {MODEL_PRESETS.filter(m => m.id !== "custom").map(m => (
+                        <option key={m.id} value={m.id} className="bg-indigo-900 text-white">
+                          {m.name} ({(m.maxTokens / 1000).toFixed(0)}K)
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </Card>
 
