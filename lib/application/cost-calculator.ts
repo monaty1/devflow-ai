@@ -61,10 +61,44 @@ export function calculateMonthlyCost(
   return dailyCost * daysPerMonth;
 }
 
-export function formatCost(cost: number): string {
-  if (cost < 0.0001) return "$0.00";
-  if (cost < 0.01) return `$${cost.toFixed(4)}`;
-  if (cost < 1) return `$${cost.toFixed(3)}`;
-  if (cost < 100) return `$${cost.toFixed(2)}`;
-  return `$${cost.toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
+export type Currency = "USD" | "EUR" | "GBP";
+
+const CURRENCY_SYMBOLS: Record<Currency, string> = {
+  USD: "$",
+  EUR: "€",
+  GBP: "£",
+};
+
+// Approximate static exchange rates (relative to USD)
+const EXCHANGE_RATES: Record<Currency, number> = {
+  USD: 1,
+  EUR: 0.92,
+  GBP: 0.79,
+};
+
+export function convertCost(cost: number, currency: Currency): number {
+  return cost * EXCHANGE_RATES[currency];
+}
+
+export function formatCost(cost: number, currency: Currency = "USD"): string {
+  const converted = convertCost(cost, currency);
+  const symbol = CURRENCY_SYMBOLS[currency];
+  if (converted < 0.0001) return `${symbol}0.00`;
+  if (converted < 0.01) return `${symbol}${converted.toFixed(4)}`;
+  if (converted < 1) return `${symbol}${converted.toFixed(3)}`;
+  if (converted < 100) return `${symbol}${converted.toFixed(2)}`;
+  return `${symbol}${converted.toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
+}
+
+export function exportComparisonCsv(comparison: CostComparison, currency: Currency = "USD"): string {
+  const headers = ["Model", "Provider", "Input Cost", "Output Cost", "Total Cost", "Value Score"];
+  const rows = comparison.results.map((r) => [
+    r.model.displayName,
+    r.model.provider,
+    formatCost(r.inputCost, currency),
+    formatCost(r.outputCost, currency),
+    formatCost(r.totalCost, currency),
+    r.valueScore ? (r.valueScore / 1_000_000).toFixed(2) : "N/A",
+  ]);
+  return [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
 }

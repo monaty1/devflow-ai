@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { Chip, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react";
 import {
@@ -14,6 +14,7 @@ import {
   MoreVertical,
   ExternalLink,
   Sparkles,
+  Download,
 } from "lucide-react";
 import { useCostCalculator } from "@/hooks/use-cost-calculator";
 
@@ -22,7 +23,8 @@ const CostProjectionChart = dynamic(
   { ssr: false, loading: () => <div className="h-[300px] w-full animate-pulse rounded-xl bg-muted/50" /> },
 );
 import { useTranslation } from "@/hooks/use-translation";
-import { formatCost } from "@/lib/application/cost-calculator";
+import { formatCost, exportComparisonCsv } from "@/lib/application/cost-calculator";
+import type { Currency } from "@/lib/application/cost-calculator";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { PROVIDER_LABELS } from "@/config/ai-models";
@@ -30,8 +32,15 @@ import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { cn } from "@/lib/utils";
 import type { CostCalculation } from "@/types/cost-calculator";
 
+const CURRENCIES: { value: Currency; label: string; symbol: string }[] = [
+  { value: "USD", label: "USD ($)", symbol: "$" },
+  { value: "EUR", label: "EUR (€)", symbol: "€" },
+  { value: "GBP", label: "GBP (£)", symbol: "£" },
+];
+
 export default function CostCalculatorPage() {
   const { t } = useTranslation();
+  const [currency, setCurrency] = useState<Currency>("USD");
 
   const {
     inputTokens,
@@ -93,7 +102,7 @@ export default function CostCalculatorPage() {
         return (
           <div className="flex flex-col gap-1">
             <span className={cn("font-bold", isCheapest ? "text-success" : "text-foreground")}>
-              {formatCost(result.totalCost)}
+              {formatCost(result.totalCost, currency)}
             </span>
             {isCheapest && <span className="text-[10px] text-success font-bold uppercase tracking-tighter">{t("costCalc.cheapestLabel")}</span>}
           </div>
@@ -139,7 +148,7 @@ export default function CostCalculatorPage() {
       default:
         return String(result[key as keyof typeof result] ?? "");
     }
-  }, [cheapestId, bestValueId, inputTokens, outputTokens, dailyRequests, t]);
+  }, [cheapestId, bestValueId, inputTokens, outputTokens, dailyRequests, currency, t]);
 
   const chartData = useMemo(() => {
     if (!comparison || comparison.results.length === 0) return [];
@@ -286,11 +295,29 @@ export default function CostCalculatorPage() {
 
           {/* Result Card */}
           <Card className="p-6 bg-primary text-white shadow-lg shadow-primary/20 border-none">
-            <p className="text-sm opacity-80 uppercase tracking-wider font-semibold mb-1">
-              {t("costCalc.estimatedMonthlyCost")}
-            </p>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-sm opacity-80 uppercase tracking-wider font-semibold">
+                {t("costCalc.estimatedMonthlyCost")}
+              </p>
+              <div className="flex gap-1">
+                {CURRENCIES.map((c) => (
+                  <button
+                    key={c.value}
+                    type="button"
+                    onClick={() => setCurrency(c.value)}
+                    className={cn(
+                      "px-2 py-0.5 rounded text-xs font-bold transition-colors",
+                      currency === c.value ? "bg-white/20 text-white" : "text-white/50 hover:text-white/80"
+                    )}
+                    aria-label={c.label}
+                  >
+                    {c.symbol}
+                  </button>
+                ))}
+              </div>
+            </div>
             <p className="text-4xl font-bold mb-2">
-              {formatCost(monthlyCost)}
+              {formatCost(monthlyCost, currency)}
             </p>
             <div className="flex items-center gap-2 text-sm opacity-90">
               <ArrowRight className="size-4" />
@@ -310,18 +337,39 @@ export default function CostCalculatorPage() {
         {/* Comparison Table */}
         <div className="lg:col-span-2">
           <Card className="p-6">
-            <div className="mb-6 flex items-center justify-between">
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="text-xl font-bold flex items-center gap-2">
                 <TrendingDown className="size-5 text-emerald-500" />
                 {t("costCalc.priceComparison")}
               </h2>
-              {comparison && (
-                <div className="hidden sm:flex items-center gap-2 text-sm text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-950/20 px-3 py-1 rounded-full border border-emerald-100 dark:border-emerald-900/30">
-                  <span>
-                    {t("costCalc.cheapest", { model: comparison.results[0]?.model.displayName ?? "" })}
-                  </span>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                {comparison && (
+                  <>
+                    <div className="hidden sm:flex items-center gap-2 text-sm text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-950/20 px-3 py-1 rounded-full border border-emerald-100 dark:border-emerald-900/30">
+                      <span>
+                        {t("costCalc.cheapest", { model: comparison.results[0]?.model.displayName ?? "" })}
+                      </span>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onPress={() => {
+                        const csv = exportComparisonCsv(comparison, currency);
+                        const blob = new Blob([csv], { type: "text/csv" });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = `cost-comparison-${new Date().toISOString().slice(0, 10)}.csv`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                      }}
+                      aria-label={t("costCalc.exportCsv")}
+                    >
+                      <Download className="size-4" />
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
 
             {comparison ? (

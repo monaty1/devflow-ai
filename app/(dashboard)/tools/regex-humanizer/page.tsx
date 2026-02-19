@@ -17,6 +17,7 @@ import {
   Bot,
 } from "lucide-react";
 import { useRegexHumanizer } from "@/hooks/use-regex-humanizer";
+import { COMMON_PATTERNS } from "@/lib/application/regex-humanizer";
 import { useAISuggest } from "@/hooks/use-ai-suggest";
 import { useAISettingsStore } from "@/lib/stores/ai-settings-store";
 import { useToast } from "@/hooks/use-toast";
@@ -153,6 +154,21 @@ export default function RegexHumanizerPage() {
                       <AlertTriangle className="size-3" /> {t("regex.invalidSyntax")}
                     </p>
                   )}
+                </div>
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t("regex.presets")}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {COMMON_PATTERNS.slice(0, 8).map((cp) => (
+                      <button
+                        key={cp.id}
+                        type="button"
+                        onClick={() => { setPattern(cp.pattern); explain(cp.pattern); }}
+                        className="px-2.5 py-1 rounded-lg bg-muted/50 text-xs font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors border border-border/50"
+                      >
+                        {cp.name}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <Button
                   onPress={() => explain(pattern)}
@@ -382,6 +398,34 @@ export default function RegexHumanizerPage() {
                               {testResult.matches ? t("regex.matchingLabel") : t("regex.noMatchesLabel")}
                             </StatusBadge>
                           </div>
+
+                          {/* Highlighted text with matches */}
+                          {testResult.allMatches.length > 0 && (
+                            <div className="p-3 bg-muted/20 rounded-xl border border-border font-mono text-sm leading-relaxed break-all">
+                              {(() => {
+                                const parts: { text: string; isMatch: boolean }[] = [];
+                                let lastIndex = 0;
+                                const sorted = [...testResult.allMatches].sort((a, b) => a.index - b.index);
+                                for (const m of sorted) {
+                                  if (m.index > lastIndex) {
+                                    parts.push({ text: testText.slice(lastIndex, m.index), isMatch: false });
+                                  }
+                                  parts.push({ text: m.match, isMatch: true });
+                                  lastIndex = m.index + m.match.length;
+                                }
+                                if (lastIndex < testText.length) {
+                                  parts.push({ text: testText.slice(lastIndex), isMatch: false });
+                                }
+                                return parts.map((p, i) =>
+                                  p.isMatch ? (
+                                    <mark key={i} className="bg-primary/20 text-primary font-bold rounded px-0.5">{p.text}</mark>
+                                  ) : (
+                                    <span key={i} className="text-muted-foreground">{p.text}</span>
+                                  )
+                                );
+                              })()}
+                            </div>
+                          )}
 
                           {testResult.allMatches.length > 0 && (
                             <div className="max-h-48 overflow-y-auto border border-divider rounded-xl divide-y divide-divider bg-muted/10">

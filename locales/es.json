@@ -652,6 +652,7 @@
   "costCalc.allModels": "Todos los Modelos",
   "costCalc.cheapest": "Más barato: {model}",
   "costCalc.noModels": "Ningún modelo coincide con tu búsqueda",
+  "costCalc.exportCsv": "Exportar comparación como CSV",
   "costCalc.emptyState": "Ingresa tokens para ver la comparación",
   "costCalc.estimatedMonthlyCost": "Costo Mensual Estimado",
   "costCalc.reqPerDay": "{count} sol/día x 30 días",
@@ -1078,6 +1079,7 @@
 
   "regex.regexPattern": "Patrón Regex",
   "regex.invalidSyntax": "Sintaxis regex inválida",
+  "regex.presets": "Presets rápidos",
   "regex.analyzePattern": "Analizar Patrón",
   "regex.naturalLangDesc": "Descripción en Lenguaje Natural",
   "regex.generatePatternBtn": "Generar Patrón",
