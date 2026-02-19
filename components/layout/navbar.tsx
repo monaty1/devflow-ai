@@ -5,48 +5,9 @@ import NextLink from "next/link";
 import { linkVariants } from "@heroui/react";
 import { Menu, X, Sparkles, Github } from "lucide-react";
 import { useTranslation } from "@/hooks/use-translation";
-import { useLocaleStore } from "@/lib/stores/locale-store";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { LocaleToggle } from "@/components/shared/locale-toggle";
 import { cn } from "@/lib/utils";
-
-function SpainFlag({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 640 480" aria-hidden="true">
-      <path fill="#AA151B" d="M0 0h640v480H0z" />
-      <path fill="#F1BF00" d="M0 120h640v240H0z" />
-    </svg>
-  );
-}
-
-function USFlag({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 640 480" aria-hidden="true">
-      <path fill="#B22234" d="M0 0h640v480H0z" />
-      <path fill="#fff" d="M0 37h640v37H0zm0 74h640v37H0zm0 74h640v37H0zm0 74h640v37H0zm0 74h640v37H0zm0 74h640v37H0z" />
-      <path fill="#3C3B6E" d="M0 0h256v259H0z" />
-    </svg>
-  );
-}
-
-function LocaleToggle() {
-  const locale = useLocaleStore((s) => s.locale);
-  const setLocale = useLocaleStore((s) => s.setLocale);
-
-  return (
-    <button
-      type="button"
-      onClick={() => setLocale(locale === "en" ? "es" : "en")}
-      className="inline-flex size-9 items-center justify-center rounded-md transition-colors hover:bg-muted"
-      aria-label={`Switch to ${locale === "en" ? "Spanish" : "English"}`}
-    >
-      {locale === "en" ? (
-        <SpainFlag className="size-5 rounded-sm" />
-      ) : (
-        <USFlag className="size-5 rounded-sm" />
-      )}
-    </button>
-  );
-}
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

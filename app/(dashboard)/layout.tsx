@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "@/hooks/use-translation";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { LocaleToggle } from "@/components/shared/locale-toggle";
 import { cn } from "@/lib/utils";
 
 interface DashboardLayoutProps {
@@ -79,7 +80,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 p-4" aria-label="Dashboard navigation">
+      <nav className="flex-1 space-y-1 p-4" aria-label={t("sidebar.navLabel")}>
         {NAV_ITEMS.map((item) => {
           const isActive =
             pathname === item.href || pathname.startsWith(item.href + "/");
@@ -105,6 +106,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Footer */}
       <div className="space-y-1 border-t border-border p-4">
+        <LocaleToggle variant="full" />
         <ThemeToggle variant="full" />
         <p className="px-4 text-xs text-muted-foreground">
           {t("sidebar.freeOpenSource")}
@@ -115,10 +117,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="flex min-h-screen">
-      {/* Desktop Sidebar */}
+      {/* Desktop Sidebar — sticky */}
       <aside
-        className="hidden w-64 flex-col border-r border-border bg-card md:flex"
-        aria-label="Dashboard sidebar"
+        className="sticky top-0 hidden h-screen w-64 flex-col overflow-y-auto border-r border-border bg-card md:flex"
+        aria-label={t("sidebar.sidebarLabel")}
       >
         {sidebarContent}
       </aside>
@@ -138,14 +140,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-border bg-card transition-transform duration-300 ease-in-out md:hidden",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
-        aria-label="Dashboard sidebar"
+        aria-label={t("sidebar.sidebarLabel")}
       >
         {/* Close button */}
         <button
           type="button"
           onClick={closeSidebar}
           className="absolute right-3 top-5 rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
-          aria-label="Close sidebar"
+          aria-label={t("sidebar.closeSidebar")}
         >
           <X className="size-5" />
         </button>
@@ -162,7 +164,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             className="rounded-lg p-2 text-foreground hover:bg-muted"
             aria-expanded={sidebarOpen}
             aria-controls="mobile-sidebar"
-            aria-label="Open sidebar"
+            aria-label={t("sidebar.openSidebar")}
           >
             <Menu className="size-5" />
           </button>

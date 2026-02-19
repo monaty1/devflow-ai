@@ -6,7 +6,9 @@ import { useTheme } from "next-themes";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
 import { useLocaleStore } from "@/lib/stores/locale-store";
-import { Sun, Moon, Monitor } from "lucide-react";
+import { useAISettingsStore } from "@/lib/stores/ai-settings-store";
+import { Sun, Moon, Monitor, Bot, Eye, EyeOff, Trash2 } from "lucide-react";
+import type { AIProviderType } from "@/types/ai";
 
 interface Settings {
   notifications: boolean;
@@ -30,6 +32,11 @@ function getInitialSettings(): Settings {
   return { notifications: true };
 }
 
+const AI_PROVIDERS: { value: AIProviderType; label: string }[] = [
+  { value: "gemini", label: "Google Gemini" },
+  { value: "groq", label: "Groq" },
+];
+
 export default function SettingsPage() {
   const { addToast } = useToast();
   const { theme, setTheme } = useTheme();
@@ -42,6 +49,16 @@ export default function SettingsPage() {
     () => false,
   );
   const [settings, setSettings] = useState<Settings>(() => getInitialSettings());
+  const [showKey, setShowKey] = useState(false);
+
+  // AI settings
+  const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
+  const setAIEnabled = useAISettingsStore((s) => s.setAIEnabled);
+  const byokKey = useAISettingsStore((s) => s.byokKey);
+  const setByokKey = useAISettingsStore((s) => s.setByokKey);
+  const byokProvider = useAISettingsStore((s) => s.byokProvider);
+  const setByokProvider = useAISettingsStore((s) => s.setByokProvider);
+  const clearByok = useAISettingsStore((s) => s.clearByok);
 
   const handleSave = () => {
     localStorage.setItem("devflow-settings", JSON.stringify(settings));
@@ -49,11 +66,7 @@ export default function SettingsPage() {
   };
 
   const handleClearData = () => {
-    const keys = [
-      "devflow-prompt-history",
-      "devflow-favorites",
-      "devflow-context-windows",
-    ];
+    const keys = Object.keys(localStorage).filter((k) => k.startsWith("devflow-"));
     keys.forEach((key) => localStorage.removeItem(key));
     addToast(t("settings.cleared"), "info");
   };
@@ -155,6 +168,114 @@ export default function SettingsPage() {
           <Button onPress={handleSave} className="w-full">
             {t("settings.save")}
           </Button>
+        </div>
+      </Card>
+
+      {/* AI Configuration */}
+      <Card className="p-6">
+        <div className="mb-6 flex items-center gap-2">
+          <Bot className="size-5 text-primary" />
+          <h2 className="text-lg font-semibold">{t("settings.ai.title")}</h2>
+        </div>
+        <div className="space-y-6">
+          {/* Enable/Disable AI */}
+          <div className="flex items-center justify-between">
+            <div>
+              <p id="ai-enabled-label" className="text-sm font-medium text-foreground">
+                {t("settings.ai.enable")}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t("settings.ai.enableDesc")}
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isAIEnabled}
+              aria-labelledby="ai-enabled-label"
+              onClick={() => setAIEnabled(!isAIEnabled)}
+              className={`relative h-6 w-11 rounded-full transition-colors ${
+                isAIEnabled ? "bg-blue-500" : "bg-muted"
+              }`}
+            >
+              <span
+                className={`absolute left-0.5 top-0.5 size-5 rounded-full bg-white shadow transition-transform ${
+                  isAIEnabled ? "translate-x-5" : ""
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Provider Selector */}
+          <div>
+            <Select
+              value={byokProvider}
+              onChange={(value) => { if (value) setByokProvider(value as AIProviderType); }}
+              className="w-full"
+              aria-label={t("settings.ai.provider")}
+            >
+              <Label className="mb-2 block text-sm font-medium text-muted-foreground">
+                {t("settings.ai.provider")}
+              </Label>
+              <Select.Trigger className="rounded-lg border border-border bg-background px-3 py-2 text-sm">
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover>
+                <ListBox>
+                  {AI_PROVIDERS.map((p) => (
+                    <ListBox.Item key={p.value} id={p.value} textValue={p.label}>
+                      {p.label}<ListBox.ItemIndicator />
+                    </ListBox.Item>
+                  ))}
+                </ListBox>
+              </Select.Popover>
+            </Select>
+          </div>
+
+          {/* API Key Input */}
+          <div>
+            <label htmlFor="api-key-input" className="mb-2 block text-sm font-medium text-muted-foreground">
+              {t("settings.ai.apiKey")}
+            </label>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <input
+                  id="api-key-input"
+                  type={showKey ? "text" : "password"}
+                  value={byokKey}
+                  onChange={(e) => setByokKey(e.target.value)}
+                  placeholder={t("settings.ai.apiKeyPlaceholder")}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 pr-10 text-sm font-mono placeholder:text-muted-foreground"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowKey(!showKey)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
+                  aria-label={showKey ? t("settings.ai.hideKey") : t("settings.ai.showKey")}
+                >
+                  {showKey ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
+              {byokKey && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onPress={() => { clearByok(); addToast(t("settings.ai.keyCleared"), "info"); }}
+                  className="shrink-0"
+                >
+                  <Trash2 className="size-4" />
+                </Button>
+              )}
+            </div>
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              {t("settings.ai.memoryOnly")}
+            </p>
+          </div>
+
+          <p className="text-xs text-muted-foreground italic">
+            {t("settings.ai.freeNote")}
+          </p>
         </div>
       </Card>
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import { Card, Button, TextArea } from "@heroui/react";
 import {
   Sparkles,
@@ -13,17 +12,28 @@ import {
   Search,
 } from "lucide-react";
 import { useTranslation } from "@/hooks/use-translation";
+import { useSmartNavigation } from "@/hooks/use-smart-navigation";
+import type { ToolRoute } from "@/hooks/use-smart-navigation";
 
 type DetectedType =
   | "json"
   | "cron"
   | "jwt"
   | "base64"
-  | "sql"
   | "regex"
   | "code"
   | "uuid"
   | null;
+
+const DETECTION_LABELS: Record<Exclude<DetectedType, null>, string> = {
+  json: "JSON",
+  cron: "Cron",
+  jwt: "JWT",
+  base64: "Base64",
+  regex: "Regex",
+  code: "Code",
+  uuid: "UUID",
+};
 
 function detectInputType(trimmed: string): DetectedType {
   if (!trimmed) return null;
@@ -51,10 +61,6 @@ function detectInputType(trimmed: string): DetectedType {
     return "base64";
   }
 
-  if (/^(SELECT|INSERT|UPDATE|DELETE|CREATE|DROP|ALTER)/i.test(trimmed)) {
-    return "sql";
-  }
-
   if (trimmed.startsWith("/") && trimmed.endsWith("/")) {
     return "regex";
   }
@@ -68,46 +74,45 @@ function detectInputType(trimmed: string): DetectedType {
 
 export function MagicInput() {
   const [input, setInput] = useState("");
-  const router = useRouter();
+  const { navigateTo } = useSmartNavigation();
   const { t } = useTranslation();
 
   const detectedType = useMemo(() => detectInputType(input.trim()), [input]);
 
-  const handleAction = (tool: string) => {
-    localStorage.setItem("magic-input", input);
-    router.push(`/tools/${tool}`);
+  const handleAction = (tool: ToolRoute) => {
+    navigateTo(tool, input);
   };
 
   const getActions = () => {
     switch (detectedType) {
       case "json":
         return [
-          { label: t("magic.formatJson"), tool: "json-formatter", icon: FileJson },
-          { label: t("magic.convertTs"), tool: "dto-matic", icon: Code2 },
+          { label: t("magic.formatJson"), tool: "json-formatter" as ToolRoute, icon: FileJson },
+          { label: t("magic.convertTs"), tool: "dto-matic" as ToolRoute, icon: Code2 },
         ];
       case "cron":
         return [
-          { label: t("magic.explainCron"), tool: "cron-builder", icon: Clock },
+          { label: t("magic.explainCron"), tool: "cron-builder" as ToolRoute, icon: Clock },
         ];
       case "jwt":
         return [
-          { label: t("magic.decodeToken"), tool: "base64", icon: Binary },
+          { label: t("magic.decodeToken"), tool: "base64" as ToolRoute, icon: Binary },
         ];
       case "base64":
         return [
-          { label: t("magic.decodeBase64"), tool: "base64", icon: Binary },
+          { label: t("magic.decodeBase64"), tool: "base64" as ToolRoute, icon: Binary },
         ];
       case "uuid":
         return [
-          { label: t("magic.analyzeUuid"), tool: "uuid-generator", icon: Search },
+          { label: t("magic.analyzeUuid"), tool: "uuid-generator" as ToolRoute, icon: Search },
         ];
       case "regex":
         return [
-          { label: t("magic.explainRegex"), tool: "regex-humanizer", icon: Regex },
+          { label: t("magic.explainRegex"), tool: "regex-humanizer" as ToolRoute, icon: Regex },
         ];
       case "code":
         return [
-          { label: t("magic.reviewCode"), tool: "code-review", icon: Sparkles },
+          { label: t("magic.reviewCode"), tool: "code-review" as ToolRoute, icon: Sparkles },
         ];
       default:
         return [];
@@ -131,7 +136,10 @@ export function MagicInput() {
           aria-label={t("magic.ariaLabel")}
         />
         {detectedType && (
-          <div className="absolute right-3 top-3 flex gap-2">
+          <div className="absolute right-3 top-3 flex items-center gap-2">
+            <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+              {t("magic.detected")}: {DETECTION_LABELS[detectedType]}
+            </span>
             {actions.map((action) => (
               <Button
                 key={action.label}

@@ -12,7 +12,6 @@ import {
   Coins,
   ArrowRight,
   MoreVertical,
-  ExternalLink,
   Sparkles,
   Download,
 } from "lucide-react";
@@ -126,12 +125,6 @@ export default function CostCalculatorPage() {
                 </Button>
               </DropdownTrigger>
               <DropdownMenu aria-label="Action Menu">
-                <DropdownItem key="details">
-                  <div className="flex items-center gap-2">
-                    <ExternalLink className="size-3" />
-                    <span>{t("costCalc.viewStats")}</span>
-                  </div>
-                </DropdownItem>
                 <DropdownItem key="copy" onPress={() => {
                   const configStr = JSON.stringify({ model: result.model.id, provider: result.model.provider, inputTokens, outputTokens, dailyRequests, totalCost: result.totalCost }, null, 2);
                   navigator.clipboard.writeText(configStr);

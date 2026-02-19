@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Zap, Monitor, LockOpen, Star, Shield, TrendingUp } from "lucide-react";
+import { Zap, Monitor, LockOpen, Star } from "lucide-react";
 import { t, getServerLocale } from "@/lib/i18n-server";
 import { GsapReveal } from "@/components/marketing/gsap-reveal";
 import { GitHubStarsServer } from "@/components/marketing/github-stars-server";
@@ -26,7 +26,7 @@ export default async function HomePage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Hero Section — fully server-rendered */}
+      {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
 
@@ -48,27 +48,21 @@ export default async function HomePage() {
               {t("home.subtitle", locale)}
             </p>
 
-            <div className="flex flex-col justify-center gap-4 pt-4 sm:flex-row">
+            <div className="pt-4">
               <Link
                 href="/tools"
                 className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg bg-primary px-8 text-base font-semibold text-primary-foreground transition-colors hover:opacity-90"
               >
                 {t("home.getStarted", locale)}
               </Link>
-              <Link
-                href="/tools"
-                className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg border border-border px-8 text-base font-medium transition-colors hover:bg-muted"
-              >
-                {t("home.viewTools", locale)}
-              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Section — server-rendered with real stars */}
+      {/* Stats Section */}
       <GsapReveal className="container mx-auto px-4 py-16">
-        <h2 className="sr-only">Project Stats</h2>
+        <h2 className="sr-only">{t("home.statsLabel", locale)}</h2>
         <div className="mx-auto grid max-w-4xl grid-cols-2 gap-6 md:grid-cols-4">
           {[
             { label: t("home.freeTools", locale), value: "15", icon: <Zap className="size-6" /> },
@@ -94,80 +88,10 @@ export default async function HomePage() {
         </div>
       </GsapReveal>
 
-      {/* Features Section — client island (GSAP stagger + icon mapping) */}
+      {/* Features Section */}
       <FeaturesSection />
 
-      {/* Why DevFlow Section — server-rendered */}
-      <section className="py-20">
-        <div className="container mx-auto max-w-5xl px-4">
-          <div className="mb-12 text-center">
-            <h2 className="mb-3 text-4xl font-bold">{t("home.whyTitle", locale)}</h2>
-            <p className="text-muted-foreground">
-              {t("home.whySubtitle", locale)}
-            </p>
-          </div>
-
-          <div className="grid gap-8 md:grid-cols-3">
-            {[
-              {
-                icon: Shield,
-                title: t("home.securityTitle", locale),
-                description: t("home.securityDesc", locale),
-              },
-              {
-                icon: TrendingUp,
-                title: t("home.costTitle", locale),
-                description: t("home.costDesc", locale),
-              },
-              {
-                icon: Zap,
-                title: t("home.dxTitle", locale),
-                description: t("home.dxDesc", locale),
-              },
-            ].map((item) => (
-              <div key={item.title} className="p-6 text-center">
-                <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/30">
-                  <item.icon className="size-6 text-blue-600 dark:text-blue-400" />
-                </div>
-                <h3 className="mb-2 text-lg font-semibold">{item.title}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {item.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section — client island (GSAP scroll reveal) */}
-      <GsapReveal className="container mx-auto px-4 py-24">
-        <div className="mx-auto max-w-3xl rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 p-12 text-center">
-          <h2 className="mb-4 text-3xl font-bold text-white">
-            {t("home.ctaTitle", locale)}
-          </h2>
-          <p className="mb-8 text-white/90">
-            {t("home.ctaSubtitle", locale)}
-          </p>
-          <div className="flex flex-col justify-center gap-4 sm:flex-row">
-            <Link
-              href="/tools"
-              className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg bg-white px-8 font-semibold text-blue-900 transition-colors hover:bg-blue-50"
-            >
-              {t("home.startUsing", locale)}
-            </Link>
-            <Link
-              href="https://github.com/albertoguinda/devflow-ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg border-2 border-white px-8 font-semibold text-white transition-colors hover:bg-white/10"
-            >
-              {t("home.starGithub", locale)}
-            </Link>
-          </div>
-        </div>
-      </GsapReveal>
-
-      {/* Footer — server-rendered */}
+      {/* Footer */}
       <footer className="mt-auto border-t py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           &copy; 2026 DevFlow AI &middot;{" "}

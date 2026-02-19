@@ -36,7 +36,7 @@ export function ToolSuggestions({ toolId, input, output }: ToolSuggestionsProps)
   if (recommendations.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-primary/10 bg-primary/5 px-3 py-2">
       <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
         <Sparkles className="size-3" aria-hidden="true" />
         {t("tools.suggestions") ?? "Next steps"}

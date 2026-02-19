@@ -72,17 +72,33 @@ const SEVERITY_COLORS = {
   low: "text-blue-900 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-200",
 };
 
+const AXIS_LABELS: Record<AnatomyElement, string> = {
+  role: "Role",
+  task: "Task",
+  context: "Context",
+  steps: "Steps",
+  format: "Format",
+  constraints: "Constraints",
+  clarification: "Clarify",
+};
+
 function AnatomyRadar({ dimensions, compareDimensions }: { dimensions: PromptDimension[]; compareDimensions?: PromptDimension[] | undefined }) {
-  const size = 180;
+  const size = 220;
   const cx = size / 2;
   const cy = size / 2;
   const maxR = 70;
+  const labelR = 88;
   const n = dimensions.length;
 
   const getPoint = (index: number, score: number) => {
     const angle = (Math.PI * 2 * index) / n - Math.PI / 2;
     const r = (score / 100) * maxR;
     return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
+  };
+
+  const getLabelPoint = (index: number) => {
+    const angle = (Math.PI * 2 * index) / n - Math.PI / 2;
+    return { x: cx + labelR * Math.cos(angle), y: cy + labelR * Math.sin(angle) };
   };
 
   const toPath = (dims: PromptDimension[]) =>
@@ -113,6 +129,24 @@ function AnatomyRadar({ dimensions, compareDimensions }: { dimensions: PromptDim
       {dimensions.map((_, i) => {
         const p = getPoint(i, 100);
         return <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="currentColor" strokeOpacity={0.06} strokeWidth={0.5} />;
+      })}
+      {/* Axis labels */}
+      {dimensions.map((d, i) => {
+        const lp = getLabelPoint(i);
+        return (
+          <text
+            key={`label-${d.id}`}
+            x={lp.x}
+            y={lp.y}
+            textAnchor="middle"
+            dominantBaseline="central"
+            className="fill-current text-muted-foreground"
+            fontSize={8}
+            fontWeight={500}
+          >
+            {AXIS_LABELS[d.id]}
+          </text>
+        );
       })}
       {/* Compare fill (if present) */}
       {compareDimensions && (
@@ -649,13 +683,15 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
           )}
 
           {/* Security Flags */}
-          <Card className="p-6">
-            <h3 className="mb-4 flex items-center gap-2 font-semibold text-foreground">
-              <AlertTriangle className="size-5" />
-              {t("promptAnalyzer.securityAnalysis")}
-            </h3>
-            <SecurityFlagsList flags={result.securityFlags} />
-          </Card>
+          {result.securityFlags.length > 0 && (
+            <Card className="p-6">
+              <h3 className="mb-4 flex items-center gap-2 font-semibold text-foreground">
+                <AlertTriangle className="size-5" />
+                {t("promptAnalyzer.securityAnalysis")}
+              </h3>
+              <SecurityFlagsList flags={result.securityFlags} />
+            </Card>
+          )}
 
           {/* Issues */}
           {result.issues.length > 0 && (
