@@ -19,8 +19,11 @@ import {
   Wand2,
   FileCode,
   Sparkles,
+  Bot,
 } from "lucide-react";
 import { useCodeReview } from "@/hooks/use-code-review";
+import { useAICodeReview } from "@/hooks/use-ai-code-review";
+import { useAISettingsStore } from "@/lib/stores/ai-settings-store";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
 import { ToolHeader } from "@/components/shared/tool-header";
@@ -29,7 +32,7 @@ import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { useSmartNavigation } from "@/hooks/use-smart-navigation";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { CodeReviewSkeleton } from "@/components/shared/skeletons";
+import { CodeReviewSkeleton, AISectionSkeleton } from "@/components/shared/skeletons";
 import type { SupportedLanguage, CodeIssue } from "@/types/code-review";
 import type { ToolRoute } from "@/hooks/use-smart-navigation";
 
@@ -49,6 +52,8 @@ export default function CodeReviewPage() {
   const [code, setCode] = useState("");
   const [language, setLanguage] = useState<SupportedLanguage>("typescript");
   const { result, isReviewing, review, reset } = useCodeReview();
+  const { reviewWithAI, aiResult, isAILoading, aiError } = useAICodeReview();
+  const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
   const { addToast } = useToast();
   const { navigateTo } = useSmartNavigation();
 
@@ -59,6 +64,7 @@ export default function CodeReviewPage() {
     }
 
     try {
+      // Run local analysis first (instant)
       const reviewResult = await review(code, language);
       const criticalCount = reviewResult.issues.filter(
         (i) => i.severity === "critical"
@@ -68,6 +74,13 @@ export default function CodeReviewPage() {
         addToast(t("codeReview.toastCritical", { count: criticalCount }), "error");
       } else if (reviewResult.overallScore >= 80) {
         addToast(t("codeReview.toastGreat"), "success");
+      }
+
+      // Fire AI request in parallel (if enabled)
+      if (isAIEnabled) {
+        reviewWithAI(code, language).catch(() => {
+          addToast(t("ai.unavailableLocal"), "info");
+        });
       }
     } catch {
       addToast(t("codeReview.toastFailed"), "error");
@@ -312,6 +325,77 @@ export default function CodeReviewPage() {
                   emptyContent="No issues found. Your code is clean!"
                 />
               </Card>
+
+              {/* AI Deep Analysis */}
+              {isAIEnabled && isAILoading && !aiResult && (
+                <AISectionSkeleton />
+              )}
+              {isAIEnabled && aiResult && (
+                <Card className="p-6 border-violet-500/20 bg-violet-500/5 shadow-xl shadow-violet-500/5" role="region" aria-label={t("ai.deepAnalysis")}>
+                  <div className="mb-4 flex items-center gap-2">
+                    <Bot className="size-5 text-violet-500" aria-hidden="true" />
+                    <h3 className="font-bold text-lg">{t("ai.deepAnalysis")}</h3>
+                    {aiError && (
+                      <span className="text-xs text-danger ml-auto">{t("ai.unavailable")}</span>
+                    )}
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <div className="text-center">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase">{t("ai.score")}</p>
+                        <p className={cn(
+                          "text-2xl font-black",
+                          aiResult.score >= 80 ? "text-emerald-500" : aiResult.score >= 50 ? "text-amber-500" : "text-red-500"
+                        )}>{aiResult.score}</p>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">{t("ai.suggestions")}</p>
+                        <ul className="space-y-1">
+                          {aiResult.suggestions.map((s, i) => (
+                            <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                              <span className="mt-1.5 size-1 shrink-0 rounded-full bg-violet-500" aria-hidden="true" />
+                              {s}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                    {aiResult.issues.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs font-bold text-muted-foreground uppercase">{t("ai.detectedIssues")}</p>
+                        {aiResult.issues.slice(0, 5).map((issue, i) => (
+                          <div key={i} className="flex items-start gap-2 text-xs p-2 bg-background/50 rounded-lg border border-violet-500/10">
+                            <Chip size="sm" color={issue.severity === "critical" ? "danger" : issue.severity === "warning" ? "warning" : "default"} variant="soft" className="capitalize text-[10px] h-5">
+                              {issue.severity}
+                            </Chip>
+                            <div>
+                              <p className="font-medium">{issue.message}</p>
+                              {issue.suggestion && <p className="text-muted-foreground italic mt-0.5">{issue.suggestion}</p>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {aiResult.refactoredCode && (
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-xs font-bold text-muted-foreground uppercase">{t("ai.refactoredCode")}</p>
+                          <div className="flex gap-2">
+                            <CopyButton text={aiResult.refactoredCode} label={t("common.copy")} />
+                            <Button size="sm" variant="primary" onPress={() => {
+                              setCode(aiResult.refactoredCode);
+                              addToast(t("ai.codeApplied"), "success");
+                            }}>{t("ai.applyAICode")}</Button>
+                          </div>
+                        </div>
+                        <pre className="rounded-xl border border-violet-500/10 bg-background/80 p-4 font-mono text-xs leading-relaxed overflow-auto max-h-[200px]">
+                          <code>{aiResult.refactoredCode}</code>
+                        </pre>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              )}
 
               {/* Smart Refactor Preview */}
               {result.refactoredCode && (

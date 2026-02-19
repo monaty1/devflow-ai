@@ -14,8 +14,21 @@ import {
   Download,
   Coins,
   ScanSearch,
+  Bot,
+  UserCircle,
+  Target,
+  Layers,
+  ListOrdered,
+  FileOutput,
+  ShieldAlert,
+  HelpCircle,
+  CheckCircle2,
+  XCircle,
+  CircleDot,
 } from "lucide-react";
 import { usePromptAnalyzer } from "@/hooks/use-prompt-analyzer";
+import { useAIRefine } from "@/hooks/use-ai-refine";
+import { useAISettingsStore } from "@/lib/stores/ai-settings-store";
 import { useToast } from "@/hooks/use-toast";
 import { useSmartNavigation } from "@/hooks/use-smart-navigation";
 import { useTranslation } from "@/hooks/use-translation";
@@ -25,7 +38,27 @@ import { SecurityFlagsList } from "@/components/tools/security-flag";
 import { PromptAnalyzerSkeleton } from "@/components/shared/skeletons";
 import { CopyButton } from "@/components/shared/copy-button";
 import { Card, Button } from "@/components/ui";
-import type { PromptIssue } from "@/types/prompt-analyzer";
+import type { PromptIssue, AnatomyElement } from "@/types/prompt-analyzer";
+
+const DIMENSION_ICONS: Record<AnatomyElement, React.ElementType> = {
+  role: UserCircle,
+  task: Target,
+  context: Layers,
+  steps: ListOrdered,
+  format: FileOutput,
+  constraints: ShieldAlert,
+  clarification: HelpCircle,
+};
+
+const DIMENSION_COLORS: Record<AnatomyElement, string> = {
+  role: "bg-violet-500",
+  task: "bg-blue-500",
+  context: "bg-emerald-500",
+  steps: "bg-amber-500",
+  format: "bg-cyan-500",
+  constraints: "bg-rose-500",
+  clarification: "bg-indigo-500",
+};
 
 const SEVERITY_COLORS = {
   high: "text-red-900 bg-red-100 dark:bg-red-900/30 dark:text-red-200",
@@ -58,6 +91,8 @@ export default function PromptAnalyzerPage() {
   const [showHistory, setShowHistory] = useState(false);
   const { result, history, isAnalyzing, analyze, clearHistory, removeFromHistory } =
     usePromptAnalyzer();
+  const { refineWithAI, aiResult: aiRefineResult, isAILoading: isAIRefining } = useAIRefine();
+  const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
   const { addToast } = useToast();
   const { navigateTo } = useSmartNavigation();
 
@@ -93,9 +128,13 @@ export default function PromptAnalyzerPage() {
     const report = `# Prompt Analysis Report
 Date: ${new Date().toLocaleString()}
 Score: ${result.score}/10 (${result.category})
+Anatomy Score: ${result.anatomyScore}/100
 
 ## Original Prompt
 ${result.prompt}
+
+## Prompt Anatomy (7 Dimensions)
+${result.dimensions.map(d => `- **${d.id}** — ${d.score}% ${d.detected ? "✓" : "✗"} ${d.evidence ? `("${d.evidence}")` : ""}`).join("\n")}
 
 ## Issues Found
 ${result.issues.map(i => `- [${i.severity.toUpperCase()}] ${ISSUE_LABELS[i.type]}: ${i.message}`).join("\n")}
@@ -295,18 +334,92 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
                     onPress={() => navigateTo("token-visualizer", result.prompt)}
                   >
                     <ScanSearch className="mr-1.5 size-3.5" />
-                    Check Tokens
+                    {t("promptAnalyzer.checkTokens")}
                   </Button>
-                  <Button 
-                    size="sm" 
-                    variant="ghost" 
+                  <Button
+                    size="sm"
+                    variant="ghost"
                     onPress={() => navigateTo("cost-calculator", result.prompt)}
                   >
                     <Coins className="mr-1.5 size-3.5" />
-                    Estimate Cost
+                    {t("promptAnalyzer.estimateCost")}
                   </Button>
                 </div>
               </div>
+            </div>
+          </Card>
+
+          {/* Anatomy Breakdown */}
+          <Card className="p-6">
+            <div className="mb-5 flex items-center justify-between">
+              <div>
+                <h3 className="flex items-center gap-2 font-semibold text-foreground">
+                  <Layers className="size-5 text-primary" />
+                  {t("promptAnalyzer.anatomy.title")}
+                </h3>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {t("promptAnalyzer.anatomy.subtitle")}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-1.5">
+                <span className="text-xs font-medium text-muted-foreground">
+                  {t("promptAnalyzer.anatomy.score")}
+                </span>
+                <span className="text-lg font-bold text-primary">
+                  {result.anatomyScore}
+                  <span className="text-xs font-normal text-muted-foreground">/100</span>
+                </span>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {result.dimensions.map((dim) => {
+                const DimIcon = DIMENSION_ICONS[dim.id];
+                const barColor = DIMENSION_COLORS[dim.id];
+                const status = dim.score >= 60 ? "detected" : dim.score >= 30 ? "partial" : "missing";
+                const StatusIcon = status === "detected" ? CheckCircle2 : status === "partial" ? CircleDot : XCircle;
+                const statusColor = status === "detected" ? "text-emerald-500" : status === "partial" ? "text-amber-500" : "text-red-400";
+
+                return (
+                  <div key={dim.id} className="group rounded-lg border border-border p-3 transition-colors hover:bg-muted/30">
+                    <div className="flex items-center gap-3">
+                      <div className={`flex size-8 shrink-0 items-center justify-center rounded-md ${barColor}/15`}>
+                        <DimIcon className={`size-4 ${barColor.replace("bg-", "text-")}`} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-foreground">
+                            {t(`promptAnalyzer.anatomy.${dim.id}`)}
+                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <StatusIcon className={`size-3.5 ${statusColor}`} />
+                            <span className={`text-xs font-medium ${statusColor}`}>
+                              {t(`promptAnalyzer.anatomy.${status}`)}
+                            </span>
+                            <span className="ml-1 text-xs tabular-nums text-muted-foreground">
+                              {dim.score}%
+                            </span>
+                          </div>
+                        </div>
+                        <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                          <div
+                            className={`h-full rounded-full transition-all duration-500 ${barColor}`}
+                            style={{ width: `${dim.score}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    {dim.evidence ? (
+                      <p className="mt-2 ml-11 text-xs text-muted-foreground italic truncate">
+                        &ldquo;{dim.evidence}&rdquo;
+                      </p>
+                    ) : (
+                      <p className="mt-2 ml-11 text-xs text-muted-foreground">
+                        {t(`promptAnalyzer.anatomy.tip.${dim.id}`)}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </Card>
 
@@ -342,6 +455,77 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
               <div className="rounded-lg border border-primary/10 bg-background/50 p-4 font-mono text-sm leading-relaxed whitespace-pre-wrap">
                 {result.refinedPrompt}
               </div>
+            </Card>
+          )}
+
+          {/* AI Refinement */}
+          {isAIEnabled && result && (
+            <Card className="p-6 border-violet-500/20 bg-violet-500/5" role="region" aria-label={t("ai.poweredRefinement")}>
+              <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h3 className="flex items-center gap-2 font-semibold text-foreground">
+                    <Bot className="size-5 text-violet-500" aria-hidden="true" />
+                    {t("ai.poweredRefinement")}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {t("ai.getRefinement")}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  {(["clarity", "specificity", "conciseness"] as const).map((goal) => (
+                    <Button
+                      key={goal}
+                      size="sm"
+                      variant="outline"
+                      isLoading={isAIRefining}
+                      onPress={() => refineWithAI(result.prompt, goal).catch(() => {
+                        addToast(t("ai.unavailable"), "info");
+                      })}
+                      className="capitalize text-xs"
+                    >
+                      {goal}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              {aiRefineResult && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-muted-foreground uppercase">{t("ai.score")}: {aiRefineResult.score}/100</span>
+                    <div className="flex gap-2">
+                      <CopyButton text={aiRefineResult.refinedPrompt} label={t("common.copy")} />
+                      <Button
+                        size="sm"
+                        variant="primary"
+                        onPress={() => {
+                          setPrompt(aiRefineResult.refinedPrompt);
+                          addToast(t("ai.refinedApplied"), "success");
+                        }}
+                        className="gap-1.5"
+                      >
+                        <ArrowRight className="size-3" />
+                        {t("common.apply")}
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="rounded-lg border border-violet-500/10 bg-background/50 p-4 font-mono text-sm leading-relaxed whitespace-pre-wrap">
+                    {aiRefineResult.refinedPrompt}
+                  </div>
+                  {aiRefineResult.changelog.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">{t("ai.changesMade")}</p>
+                      <ul className="space-y-1">
+                        {aiRefineResult.changelog.map((change, i) => (
+                          <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                            <span className="mt-1.5 size-1 shrink-0 rounded-full bg-violet-500" aria-hidden="true" />
+                            {change}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
             </Card>
           )}
 

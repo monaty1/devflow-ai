@@ -8,6 +8,35 @@ import type {
 
 const DEFAULT_MAX_TOKENS = 128000; // GPT-4 context window
 
+// --- Model Presets ---
+
+export interface ModelPreset {
+  id: string;
+  name: string;
+  provider: string;
+  maxTokens: number;
+  outputTokens: number;
+}
+
+export const MODEL_PRESETS: ModelPreset[] = [
+  { id: "gpt-4o", name: "GPT-4o", provider: "OpenAI", maxTokens: 128000, outputTokens: 16384 },
+  { id: "gpt-4o-mini", name: "GPT-4o Mini", provider: "OpenAI", maxTokens: 128000, outputTokens: 16384 },
+  { id: "o1", name: "o1", provider: "OpenAI", maxTokens: 200000, outputTokens: 100000 },
+  { id: "claude-opus-4", name: "Claude Opus 4", provider: "Anthropic", maxTokens: 200000, outputTokens: 32000 },
+  { id: "claude-sonnet-4", name: "Claude Sonnet 4", provider: "Anthropic", maxTokens: 200000, outputTokens: 16000 },
+  { id: "claude-haiku-3.5", name: "Claude 3.5 Haiku", provider: "Anthropic", maxTokens: 200000, outputTokens: 8192 },
+  { id: "gemini-2.0-flash", name: "Gemini 2.0 Flash", provider: "Google", maxTokens: 1048576, outputTokens: 8192 },
+  { id: "gemini-1.5-pro", name: "Gemini 1.5 Pro", provider: "Google", maxTokens: 2097152, outputTokens: 8192 },
+  { id: "llama-3.1-70b", name: "Llama 3.1 70B", provider: "Meta", maxTokens: 131072, outputTokens: 4096 },
+  { id: "deepseek-v3", name: "DeepSeek V3", provider: "DeepSeek", maxTokens: 128000, outputTokens: 8192 },
+  { id: "mistral-large", name: "Mistral Large", provider: "Mistral", maxTokens: 128000, outputTokens: 4096 },
+  { id: "custom", name: "Custom", provider: "—", maxTokens: DEFAULT_MAX_TOKENS, outputTokens: 4096 },
+];
+
+export function getModelPreset(id: string): ModelPreset | undefined {
+  return MODEL_PRESETS.find((m) => m.id === id);
+}
+
 function estimateTokens(text: string): number {
   return Math.ceil(text.length / 4);
 }
@@ -159,13 +188,18 @@ ${docs}
 
 export function stripComments(code: string, type: DocumentType): string {
   if (type !== "code") return code;
-  
-  // Basic regex for multi-line and single-line comments
-  // Handles JS/TS, Java, PHP, C# styles
-  return code
-    .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, "$1")
-    .replace(/^\s*\n/gm, "") // remove empty lines
-    .trim();
+
+  // Remove multi-line comments first
+  let result = code.replace(/\/\*[\s\S]*?\*\//g, "");
+
+  // Remove single-line comments, but preserve URLs (http://, https://, ftp://)
+  // Only match // when preceded by whitespace or at line start (not after : which indicates a URL)
+  result = result.replace(/(?<=^|[\s;{}()])\/\/.*$/gm, "");
+
+  // Remove empty lines left behind
+  result = result.replace(/^\s*\n/gm, "");
+
+  return result.trim();
 }
 
 export function generateTree(documents: ContextDocument[]): string {

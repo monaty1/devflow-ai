@@ -55,6 +55,7 @@ export interface JsonField {
   isOptional: boolean;
   isArray: boolean;
   isDate: boolean;
+  isFloat?: boolean;
   semanticType?: "uuid" | "email" | "url" | "ipv4" | "none";
   children?: JsonField[];
   originalValue: unknown;

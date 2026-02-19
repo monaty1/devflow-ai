@@ -5,6 +5,24 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0] - 2026-02-19
+
+### Added
+- **Prompt Analyzer anatomy-based scoring** — Complete overhaul based on "Anatomia del Prompt Perfecto" (7 dimensions: Role, Task, Context, Steps, Format, Constraints, Clarification). Each dimension scored 0-100 with evidence extraction, weighted average drives the final score. Vague prompts like "hazme una web" now correctly score 1-3/10
+- **Prompt Anatomy UI visualization** — New card in Prompt Analyzer showing all 7 dimensions with progress bars, status indicators (Detected/Partial/Missing), evidence text, and tips for improvement
+- **HTTP Status Finder expanded to 61 codes** — Nearly doubled from 32 to 61 status codes covering RFC 9110, RFC 6585, RFC 7725 and more. Added 202, 203, 206-208, 226, 300, 303, 402, 406-408, 411-416, 418, 421-426, 428, 431, 451, 501, 506
+- **Cron Builder timezone support** — Added `calculateNextExecutions(expr, count, timezone)` with 14 common timezones (UTC, US Eastern/Central/Mountain/Pacific, European capitals, Asia/Pacific). Next executions shown in selected timezone with `Intl.DateTimeFormat`
+- **Context Manager model presets** — 12 model presets with token limits: GPT-4o (128K), o1 (200K), Claude Opus/Sonnet 4 (200K), Gemini 2.0 Flash (1M), Gemini 1.5 Pro (2M), Llama 3.1 70B, DeepSeek V3, Mistral Large, plus Custom
+
+### Fixed
+- **Tailwind Sorter false-positive conflicts** — `px-4` and `py-4` (and all axis-specific utilities like `mx/my`, `pt/pb`, `border-t/b`, `rounded-tl/br`) are no longer flagged as conflicts. Added `AXIS_PREFIXES` set with 30+ axis-specific prefixes for accurate grouping
+- **Prompt Analyzer hardcoded strings** — Replaced 2 remaining hardcoded English strings ("Check Tokens", "Estimate Cost") with i18n `t()` calls
+- **Prompt Analyzer export report** — Now includes anatomy score and dimension breakdown in markdown export
+
+### Changed
+- **Prompt scoring algorithm** — Replaced issue-penalty scoring with anatomy-weighted scoring. Score = weighted average of 7 dimension scores (0-100) mapped to 1-10, minus security deductions
+- **884 tests passing** (up from 877) — 7 new anatomy tests, 7 new Tailwind conflict tests
+
 ## [2.5.2] - 2026-02-18
 
 ### Fixed

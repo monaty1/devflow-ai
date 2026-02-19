@@ -17,7 +17,15 @@ export function encodeBase64(
 ): string {
   const encoder = new TextEncoder();
   const bytes = encoder.encode(input);
-  let base64 = btoa(String.fromCharCode(...bytes));
+  // Chunked conversion to avoid call stack overflow on large inputs
+  let binaryString = "";
+  const chunkSize = 8192;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binaryString += String.fromCharCode(
+      ...Array.from(bytes.slice(i, i + chunkSize)),
+    );
+  }
+  let base64 = btoa(binaryString);
 
   if (config.variant === "url-safe") {
     base64 = base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");

@@ -2,12 +2,12 @@
 
 # DevFlow AI
 
-### 15 developer tools &middot; 0 external deps &middot; 100% local &middot; Open Source
+### 15 developer tools &middot; AI-enhanced &middot; Local-first &middot; Open Source
 
-### 15 herramientas para developers &middot; 0 deps externas &middot; 100% local &middot; Open Source
+### 15 herramientas para developers &middot; IA integrada &middot; Local-first &middot; Open Source
 
 [![Build](https://img.shields.io/github/actions/workflow/status/albertoguinda/devflow-ai/ci.yml?branch=main&style=flat-square&logo=github&label=CI)](https://github.com/albertoguinda/devflow-ai/actions)
-[![Tests](https://img.shields.io/badge/tests-831_passing-brightgreen?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
+[![Tests](https://img.shields.io/badge/tests-884_passing-brightgreen?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
 [![Coverage](https://img.shields.io/badge/coverage-strategic_(100%2F80%2F0)-blue?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
 [![Lighthouse](https://img.shields.io/badge/Lighthouse-100%2F100%2F100%2F100-brightgreen?style=flat-square&logo=lighthouse&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
@@ -27,7 +27,7 @@
 
 15 tools that save you time every day as a developer.
 
-**No login. No API keys. No backend. Everything runs in your browser.**
+**No login. No API keys required. Everything works locally. AI features are optional and free.**
 
 ---
 
@@ -49,14 +49,16 @@
 | `?`   | **Prompt Analyzer**        | Evaluate prompt quality, detect injections and suggest improvements.                     |
 | `Tk`  | **Token Visualizer**       | Real-time tokenization visualization with per-token cost estimation.                     |
 | `[ ]` | **Context Manager**        | Organize LLM context windows with chunking and prioritization.                           |
-| `200` | **HTTP Status Finder**     | Complete reference of 55+ HTTP status codes with examples and usage guides.              |
+| `200` | **HTTP Status Finder**     | Complete reference of 61 HTTP status codes with examples and usage guides.              |
 
 ---
 
 ## Features
 
-- **No signup** &mdash; no login, no user accounts
-- **No external APIs** &mdash; everything processed in the browser
+- **No signup** &mdash; no login, no user accounts, no barriers
+- **Local-first** &mdash; every tool works 100% without AI
+- **AI-enhanced** &mdash; optional Gemini 2.0 Flash integration (free tier, no credit card)
+- **BYOK** &mdash; bring your own API key for higher limits
 - **Local history** &mdash; localStorage persistence
 - **Copy to clipboard** &mdash; 1-click from any tool
 - **Dark / Light mode** &mdash; auto-detection + manual toggle
@@ -88,14 +90,20 @@
 ```
 ├── app/                    # Pages & layouts (App Router)
 │   ├── (marketing)/        # Landing, about
-│   └── (dashboard)/        # Dashboard + 15 tool pages + docs
+│   ├── (dashboard)/        # Dashboard + 15 tool pages + docs
+│   └── api/ai/             # Server-side AI Route Handlers
 ├── components/             # UI components
 ├── hooks/                  # Custom React hooks ("use client")
 ├── lib/
-│   └── application/        # Pure business logic (no React)
+│   ├── application/        # Pure business logic (no React)
+│   └── api/                # Middleware, schemas, prompts (server)
+├── infrastructure/         # AI providers, rate limiter, env config
 ├── types/                  # TypeScript interfaces
 └── config/                 # Tool registry & configuration
 ```
+
+> See [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) for the full AI layer, security model, and data flow diagrams.
+> See [`docs/API.md`](./docs/API.md) for the Route Handler API reference.
 
 **Dependency flow:** `Presentation -> Application -> Domain`
 
@@ -244,8 +252,12 @@ All responses include strict security headers via `next.config.ts`:
 
 ### Design Principles
 
-- **No backend** &mdash; zero server-side attack surface
-- **No API routes** &mdash; all processing happens in the browser
+- **Local-first** &mdash; all tools work without server or AI
+- **API keys server-only** &mdash; no `NEXT_PUBLIC_` prefix, keys never reach the browser
+- **BYOK in-memory only** &mdash; user API keys stored in Zustand (no persist), lost on tab close
+- **Anti-injection** &mdash; system prompts include explicit anti-injection directives
+- **Rate limiting** &mdash; IP-based, in-memory (10 RPM free / 50 RPM BYOK)
+- **Input validation** &mdash; Zod schemas with max-length on all AI endpoints
 - **No user data** &mdash; localStorage only, no external transmission
 - **CSP enforced** &mdash; blocks XSS, clickjacking, and data injection
 - **Prototype pollution protection** &mdash; dangerous keys (`__proto__`, `constructor`, `prototype`) filtered
@@ -301,7 +313,7 @@ Coverage reports are uploaded as artifacts on every run.
 
 15 herramientas que te ahorran tiempo en tu dia a dia como developer.
 
-**Sin login. Sin API keys. Sin backend. Todo se ejecuta en tu navegador.**
+**Sin login. Sin API keys obligatorias. Todo funciona en local. La IA es opcional y gratuita.**
 
 ---
 
@@ -323,14 +335,16 @@ Coverage reports are uploaded as artifacts on every run.
 | `?`   | **Prompt Analyzer**        | Evalua calidad de prompts, detecta inyecciones y sugiere mejoras.                              |
 | `Tk`  | **Token Visualizer**       | Visualiza tokenizacion en tiempo real con estimacion de costes por token.                      |
 | `[ ]` | **Context Manager**        | Organiza ventanas de contexto para LLMs con chunking y priorizacion.                           |
-| `200` | **HTTP Status Finder**     | Referencia completa de 55+ codigos HTTP con ejemplos y guias de uso.                           |
+| `200` | **HTTP Status Finder**     | Referencia completa de 61 codigos HTTP con ejemplos y guias de uso.                           |
 
 ---
 
 ## Caracteristicas
 
-- **Sin registro** &mdash; ni login, ni cuentas de usuario
-- **Sin APIs externas** &mdash; todo se procesa en el navegador
+- **Sin registro** &mdash; ni login, ni cuentas de usuario, sin barreras
+- **Local-first** &mdash; todas las herramientas funcionan al 100% sin IA
+- **IA integrada** &mdash; Gemini 2.0 Flash opcional (tier gratuito, sin tarjeta)
+- **BYOK** &mdash; trae tu propia API key para limites superiores
 - **Historial local** &mdash; persistencia con localStorage
 - **Copy to clipboard** &mdash; en 1 click desde cualquier herramienta
 - **Dark / Light mode** &mdash; deteccion automatica + toggle manual
@@ -362,14 +376,20 @@ Coverage reports are uploaded as artifacts on every run.
 ```
 ├── app/                    # Paginas y layouts (App Router)
 │   ├── (marketing)/        # Landing, about
-│   └── (dashboard)/        # Dashboard + 15 tool pages + docs
+│   ├── (dashboard)/        # Dashboard + 15 tool pages + docs
+│   └── api/ai/             # Route Handlers IA server-side
 ├── components/             # Componentes UI
 ├── hooks/                  # Custom React hooks ("use client")
 ├── lib/
-│   └── application/        # Logica de negocio pura (sin React)
+│   ├── application/        # Logica de negocio pura (sin React)
+│   └── api/                # Middleware, schemas, prompts (server)
+├── infrastructure/         # Proveedores IA, rate limiter, config
 ├── types/                  # Interfaces TypeScript
 └── config/                 # Registro de tools y configuracion
 ```
+
+> Ver [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) para la capa IA, modelo de seguridad y diagramas.
+> Ver [`docs/API.md`](./docs/API.md) para la referencia de los Route Handlers.
 
 **Flujo de dependencias:** `Presentacion -> Aplicacion -> Dominio`
 

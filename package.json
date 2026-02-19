@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@giscus/react": "^3.1.0",
+    "@google/generative-ai": "^0.24.1",
     "@heroui/pagination": "^2.2.26",
     "@heroui/react": "^3.0.0-beta.5",
     "@heroui/styles": "^3.0.0-beta.5",
@@ -28,6 +29,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "^12.30.0",
     "gsap": "^3.14.2",
+    "js-tiktoken": "^1.0.21",
     "lucide-react": "^0.563.0",
     "next": "16.1.6",
     "next-themes": "^0.4.6",

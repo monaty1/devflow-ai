@@ -13,8 +13,12 @@ import {
   Info,
   Play,
   Wand2,
+  Bot,
 } from "lucide-react";
 import { useRegexHumanizer } from "@/hooks/use-regex-humanizer";
+import { useAISuggest } from "@/hooks/use-ai-suggest";
+import { useAISettingsStore } from "@/lib/stores/ai-settings-store";
+import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
@@ -37,6 +41,9 @@ export default function RegexHumanizerPage() {
     reset,
   } = useRegexHumanizer();
 
+  const { generateRegexWithAI, aiResult: aiRegexResult, isAILoading: isAIGenerating } = useAISuggest();
+  const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
+  const { addToast } = useToast();
   const [testText, setTestText] = useState("john.doe@example.com, test@devflow.ai, invalid-email");
   const [activeTab, setActiveTab] = useState<"explain" | "generate" | string>("explain");
   const [resultTab, setResultTab] = useState<"explanation" | "groups" | "test" | string>("explanation");
@@ -174,13 +181,49 @@ export default function RegexHumanizerPage() {
                   />
                 </div>
                 <Button
-                  onPress={() => generate(generateDesc)}
+                  onPress={() => {
+                    generate(generateDesc);
+                    if (isAIEnabled) {
+                      generateRegexWithAI(generateDesc).catch(() => {
+                        addToast(t("ai.unavailableLocal"), "info");
+                      });
+                    }
+                  }}
                   isDisabled={!generateDesc.trim()}
                   variant="primary"
                   className="w-full h-12 font-bold shadow-lg shadow-primary/20"
                 >
                   <Wand2 className="size-4 mr-2" /> Generate Pattern
                 </Button>
+
+                {/* AI-Generated Regex Results */}
+                {isAIEnabled && (isAIGenerating || aiRegexResult) && (
+                  <div className="mt-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Bot className="size-4 text-violet-500" aria-hidden="true" />
+                      <span className="text-xs font-bold text-muted-foreground uppercase">{t("ai.suggestions")}</span>
+                      {isAIGenerating && (
+                        <span className="text-xs text-muted-foreground animate-pulse ml-auto">{t("ai.generating")}</span>
+                      )}
+                    </div>
+                    {aiRegexResult && aiRegexResult.suggestions.map((s, i) => (
+                      <div key={i} className="p-3 bg-violet-500/5 border border-violet-500/10 rounded-xl space-y-2">
+                        <div className="flex items-center justify-between">
+                          <code className="font-mono text-sm font-bold text-violet-600 dark:text-violet-400">{s.value}</code>
+                          <div className="flex gap-2">
+                            <CopyButton text={s.value} size="sm" variant="ghost" />
+                            <Button size="sm" variant="ghost" onPress={() => {
+                              setPattern(s.value);
+                              setActiveTab("explain");
+                              explain(s.value);
+                            }}>Analyze</Button>
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{s.reasoning}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </Tabs.Panel>
           </Tabs>

@@ -1,4 +1,4 @@
 // Application Ports
 // Input/Output port interfaces
 
-export {};
+export type { AIProviderPort } from "./ai-provider.port";

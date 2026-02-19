@@ -21,9 +21,10 @@ This project is built by developers, for developers (_"Para vosotros, developers
 Before writing code, please understand the core principles of this project:
 
 1.  **Zero External Dependencies (if possible):** We prefer native Web APIs (Regex, Intl, JSON, etc.) over installing heavy npm packages. If it can be done with vanilla JS/TS, do it that way.
-2.  **Local & Offline:** All tools must work 100% offline. No API calls to external servers for data processing.
+2.  **Local-First:** All tools must work 100% without AI. AI enhances, never blocks.
 3.  **Clean Architecture:** We strictly separate **Business Logic** from **UI components**.
 4.  **Accessibility (a11y):** We aim for WCAG AAA. Everything must be navigable via keyboard.
+5.  **No Barriers:** No login, no auth, no credit card. Free forever.
 
 ### 🏗 Project Architecture
 
@@ -37,6 +38,8 @@ To keep the project maintainable, we follow a specific folder structure. Please 
 | `app/(dashboard)/tools/` | **Presentation** | UI Pages. Only rendering logic.                                                        |
 | `components/ui/`         | **Shared UI**    | Reusable atoms (Buttons, Cards, Inputs).                                               |
 | `locales/`               | **i18n**         | All text strings must be here (en.json, es.json).                                      |
+| `infrastructure/`        | **Infra**        | AI providers, rate limiter, env config. Server-side only.                              |
+| `app/api/ai/`            | **API Routes**   | Server-side Route Handlers that proxy AI calls.                                        |
 
 ### 👩‍💻 How to Add a New Tool
 
@@ -69,6 +72,9 @@ Want to add a new tool? Follow this **6-Step Workflow** to ensure it matches the
 6.  **Register the Tool (`config/tools-data.ts`):**
     Add your new tool to the configuration so it appears in the sidebar and search.
 
+7.  **(Optional) Add AI Enhancement:**
+    If your tool benefits from AI, add a server-side route at `app/api/ai/<tool>/route.ts`, a Zod schema at `lib/api/schemas/`, and a client hook at `hooks/use-ai-<tool>.ts`. See `docs/ARCHITECTURE.md` for the full AI layer pattern.
+
 ### 🧪 Testing & Quality
 
 - **Tests:** Run `npm run test` to ensure you haven't broken anything.
@@ -96,9 +102,10 @@ Este proyecto está hecho por desarrolladores, para desarrolladores (_"Para voso
 Antes de escribir código, por favor entiende los principios básicos:
 
 1.  **Cero Dependencias Externas (si es posible):** Preferimos APIs nativas (Regex, Intl, JSON) antes que instalar paquetes npm pesados. Si se puede hacer con JS/TS vanilla, hazlo así.
-2.  **Local y Offline:** Todo debe funcionar 100% offline. Nada de llamadas a APIs externas para procesar datos.
+2.  **Local-First:** Todas las herramientas deben funcionar al 100% sin IA. La IA mejora, nunca bloquea.
 3.  **Clean Architecture:** Separamos estrictamente la **Lógica de Negocio** de la **Interfaz de Usuario (UI)**.
 4.  **Accesibilidad (a11y):** Buscamos WCAG AAA. Todo debe ser navegable con teclado.
+5.  **Sin Barreras:** Sin login, sin auth, sin tarjeta de credito. Gratis para siempre.
 
 ### 🏗 Arquitectura
 
@@ -112,6 +119,8 @@ Para mantener el proyecto escalable, seguimos una estructura de carpetas estrict
 | `app/(dashboard)/tools/` | **Presentación** | Páginas UI. Solo lógica de renderizado.                                           |
 | `components/ui/`         | **Shared UI**    | Componentes reutilizables (Botones, Cards, Inputs).                               |
 | `locales/`               | **i18n**         | Todos los textos deben estar aquí (en.json, es.json).                             |
+| `infrastructure/`        | **Infra**        | Proveedores IA, rate limiter, config de entorno. Solo servidor.                   |
+| `app/api/ai/`            | **API Routes**   | Route Handlers server-side que hacen proxy de las llamadas IA.                    |
 
 ### 👩‍💻 Cómo Añadir una Nueva Herramienta
 
@@ -143,6 +152,9 @@ Para mantener el proyecto escalable, seguimos una estructura de carpetas estrict
 
 6.  **Registra la Tool (`config/tools-data.ts`):**
     Añade tu herramienta a la configuración para que salga en la sidebar y el buscador.
+
+7.  **(Opcional) Añadir IA:**
+    Si tu herramienta se beneficia de IA, añade una ruta en `app/api/ai/<tool>/route.ts`, un schema Zod en `lib/api/schemas/`, y un hook cliente en `hooks/use-ai-<tool>.ts`. Consulta `docs/ARCHITECTURE.md` para el patron completo.
 
 ### 🧪 Testing y Calidad
 

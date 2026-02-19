@@ -1,2 +1,6 @@
 // External API Clients
-// OpenAI, Anthropic, and other API integrations
+// AI provider integrations
+
+export { GeminiClient } from "./gemini-client";
+export { GroqClient } from "./groq-client";
+export { createAIProvider } from "./ai-provider-factory";

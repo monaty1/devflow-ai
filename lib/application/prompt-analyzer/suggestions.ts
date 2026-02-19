@@ -1,10 +1,35 @@
-import type { PromptIssue, SecurityFlag } from "@/types/prompt-analyzer";
+import type { PromptDimension, PromptIssue, SecurityFlag } from "@/types/prompt-analyzer";
+
+const ANATOMY_SUGGESTIONS: Record<string, string> = {
+  role: 'Define a professional role: e.g., "Act as a senior backend developer specialized in REST APIs"',
+  task: 'Be specific about your objective: e.g., "Create a REST API endpoint that validates user input and returns a structured JSON response"',
+  context: 'Provide background context: technology stack, project type, environment, and target audience',
+  steps: 'Break down the task into steps: e.g., "First, analyze the requirements. Then, implement the solution. Finally, write tests."',
+  format: 'Specify the expected output format: e.g., "Return as JSON", "Format as a markdown table", "Provide as a code block"',
+  constraints: 'Add constraints and restrictions: e.g., "Avoid deprecated APIs", "Maximum 200 lines", "Follow SOLID principles"',
+  clarification: 'Add a clarification clause: e.g., "If anything is unclear, ask before proceeding"',
+};
+
+const WEAK_THRESHOLD = 30;
 
 export function generateSuggestions(
+  dimensions: PromptDimension[],
   issues: PromptIssue[],
   securityFlags: SecurityFlag[],
 ): string[] {
   const suggestions: string[] = [];
+
+  // 1. Anatomy-based suggestions (primary)
+  for (const dim of dimensions) {
+    if (dim.score < WEAK_THRESHOLD) {
+      const tip = ANATOMY_SUGGESTIONS[dim.id];
+      if (tip) {
+        suggestions.push(tip);
+      }
+    }
+  }
+
+  // 2. Quality issue suggestions (secondary)
   const issueTypes = new Set(issues.map((i) => i.type));
 
   if (issueTypes.has("vague_instruction")) {
@@ -12,17 +37,17 @@ export function generateSuggestions(
       "Add more specific details about what you want to accomplish",
     );
   }
-  if (issueTypes.has("missing_context")) {
+  if (issueTypes.has("missing_context") && !suggestions.some(s => s.includes("context"))) {
     suggestions.push(
       "Provide background information or context for better results",
     );
   }
-  if (issueTypes.has("no_output_format")) {
+  if (issueTypes.has("no_output_format") && !suggestions.some(s => s.includes("output format"))) {
     suggestions.push(
       'Specify the desired output format (e.g., "Respond in JSON format")',
     );
   }
-  if (issueTypes.has("missing_role")) {
+  if (issueTypes.has("missing_role") && !suggestions.some(s => s.includes("role"))) {
     suggestions.push(
       'Define a role for the AI (e.g., "Act as a senior developer...")',
     );
@@ -40,7 +65,7 @@ export function generateSuggestions(
       'Replace vague terms like "something" or "stuff" with specific nouns',
     );
   }
-  if (issueTypes.has("no_constraints")) {
+  if (issueTypes.has("no_constraints") && !suggestions.some(s => s.includes("constraints"))) {
     suggestions.push(
       'Add constraints to narrow the output (e.g., "Avoid using deprecated APIs")',
     );
@@ -86,14 +111,14 @@ export function generateSuggestions(
     );
   }
 
-  // Security-related suggestions
+  // 3. Security-related suggestions
   if (securityFlags.length > 0) {
     suggestions.push(
       "Review and remove any content that could be interpreted as prompt injection",
     );
   }
 
-  // General suggestions if score is low
+  // 4. Positive feedback if nothing wrong
   if (suggestions.length === 0) {
     suggestions.push("Your prompt looks good! Consider adding examples for even better results.");
   }

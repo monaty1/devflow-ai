@@ -463,9 +463,60 @@ function buildHumanReadable(cron: CronExpression): string {
   return parts.join(" ") || "Cada minuto";
 }
 
+// --- Timezones ---
+
+export interface TimezoneOption {
+  id: string;
+  label: string;
+  offset: string;
+}
+
+export const COMMON_TIMEZONES: TimezoneOption[] = [
+  { id: "UTC", label: "UTC", offset: "+00:00" },
+  { id: "America/New_York", label: "US Eastern", offset: "-05:00" },
+  { id: "America/Chicago", label: "US Central", offset: "-06:00" },
+  { id: "America/Denver", label: "US Mountain", offset: "-07:00" },
+  { id: "America/Los_Angeles", label: "US Pacific", offset: "-08:00" },
+  { id: "Europe/London", label: "London", offset: "+00:00" },
+  { id: "Europe/Madrid", label: "Madrid", offset: "+01:00" },
+  { id: "Europe/Berlin", label: "Berlin", offset: "+01:00" },
+  { id: "Europe/Paris", label: "Paris", offset: "+01:00" },
+  { id: "Asia/Tokyo", label: "Tokyo", offset: "+09:00" },
+  { id: "Asia/Shanghai", label: "Shanghai", offset: "+08:00" },
+  { id: "Asia/Kolkata", label: "Kolkata", offset: "+05:30" },
+  { id: "Australia/Sydney", label: "Sydney", offset: "+11:00" },
+  { id: "Pacific/Auckland", label: "Auckland", offset: "+13:00" },
+];
+
+/** Get date components in a specific timezone using Intl API */
+function getDateInTimezone(date: Date, timezone: string): { minute: number; hour: number; day: number; month: number; weekday: number } {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    hour: "numeric",
+    minute: "numeric",
+    day: "numeric",
+    month: "numeric",
+    weekday: "short",
+    hour12: false,
+  }).formatToParts(date);
+
+  const get = (type: Intl.DateTimeFormatPartTypes): string =>
+    parts.find((p) => p.type === type)?.value ?? "0";
+
+  const weekdayMap: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+
+  return {
+    minute: parseInt(get("minute")),
+    hour: parseInt(get("hour")),
+    day: parseInt(get("day")),
+    month: parseInt(get("month")),
+    weekday: weekdayMap[get("weekday")] ?? 0,
+  };
+}
+
 // --- Next Executions ---
 
-export function calculateNextExecutions(expression: string, count: number = 5): NextExecution[] {
+export function calculateNextExecutions(expression: string, count: number = 5, timezone?: string): NextExecution[] {
   const validation = validateExpression(expression);
   if (!validation.isValid) {
     return [];
@@ -487,10 +538,14 @@ export function calculateNextExecutions(expression: string, count: number = 5): 
   const maxIterations = 525600; // Max 1 year of minutes
 
   while (executions.length < count && iterations < maxIterations) {
-    if (matchesCron(current, cron)) {
+    const matches = timezone
+      ? matchesCronInTimezone(current, cron, timezone)
+      : matchesCron(current, cron);
+
+    if (matches) {
       executions.push({
         date: new Date(current),
-        formatted: formatDate(current),
+        formatted: timezone ? formatDateWithTimezone(current, timezone) : formatDate(current),
         relative: formatRelative(current, now),
       });
     }
@@ -500,6 +555,18 @@ export function calculateNextExecutions(expression: string, count: number = 5): 
   }
 
   return executions;
+}
+
+function matchesCronInTimezone(date: Date, cron: CronExpression, timezone: string): boolean {
+  const tz = getDateInTimezone(date, timezone);
+
+  return (
+    matchesField(tz.minute, cron.minute, 0) &&
+    matchesField(tz.hour, cron.hour, 0) &&
+    matchesField(tz.day, cron.dayOfMonth, 1) &&
+    matchesField(tz.month, cron.month, 1) &&
+    matchesField(tz.weekday, cron.dayOfWeek, 0)
+  );
 }
 
 function matchesCron(date: Date, cron: CronExpression): boolean {
@@ -559,6 +626,20 @@ function formatDate(date: Date): string {
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+  };
+  return date.toLocaleDateString("es-ES", options);
+}
+
+function formatDateWithTimezone(date: Date, timezone: string): string {
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: timezone,
+    timeZoneName: "short",
   };
   return date.toLocaleDateString("es-ES", options);
 }

@@ -3,6 +3,7 @@
 import { useEffect, type ReactNode } from "react";
 import { ThemeProvider } from "next-themes";
 import { HeroUIProvider } from "@heroui/system";
+import { SWRConfig } from "swr";
 import { FavoritesProvider } from "@/lib/context";
 import { ToastProvider } from "@/components/shared/toast-container";
 import { useLocaleStore } from "@/lib/stores/locale-store";
@@ -41,13 +42,15 @@ export function Providers({ children }: ProvidersProps) {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
       <HeroUIProvider>
-        <FavoritesProvider>
-          <ToastProvider>
-            <HtmlLangSync />
-            <ConsoleEasterEgg />
-            {children}
-          </ToastProvider>
-        </FavoritesProvider>
+        <SWRConfig value={{ revalidateOnFocus: false, errorRetryCount: 2 }}>
+          <FavoritesProvider>
+            <ToastProvider>
+              <HtmlLangSync />
+              <ConsoleEasterEgg />
+              {children}
+            </ToastProvider>
+          </FavoritesProvider>
+        </SWRConfig>
       </HeroUIProvider>
     </ThemeProvider>
   );

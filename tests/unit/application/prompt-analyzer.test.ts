@@ -10,11 +10,16 @@ describe("Prompt Analyzer", () => {
       expect(result).toHaveProperty("prompt");
       expect(result).toHaveProperty("score");
       expect(result).toHaveProperty("category");
+      expect(result).toHaveProperty("dimensions");
+      expect(result).toHaveProperty("anatomyScore");
       expect(result).toHaveProperty("issues");
       expect(result).toHaveProperty("suggestions");
       expect(result).toHaveProperty("securityFlags");
       expect(result).toHaveProperty("tokenCount");
       expect(result).toHaveProperty("refinedPrompt");
+      expect(result.dimensions).toHaveLength(7);
+      expect(result.anatomyScore).toBeGreaterThanOrEqual(0);
+      expect(result.anatomyScore).toBeLessThanOrEqual(100);
     });
 
     it("should generate a refined prompt that is different from the original for poor prompts", () => {
@@ -302,7 +307,7 @@ describe("Prompt Analyzer", () => {
       expect(result.issues.some((i) => i.type === "missing_context")).toBe(true);
       expect(
         result.suggestions.some((s) =>
-          s.includes("Provide background information")
+          s.toLowerCase().includes("context")
         )
       ).toBe(true);
     });
@@ -319,7 +324,7 @@ describe("Prompt Analyzer", () => {
       expect(result.issues.some((i) => i.type === "no_output_format")).toBe(true);
       expect(
         result.suggestions.some((s) =>
-          s.includes("Specify the desired output format")
+          s.toLowerCase().includes("output format")
         )
       ).toBe(true);
     });
@@ -334,7 +339,7 @@ describe("Prompt Analyzer", () => {
       expect(result.issues.some((i) => i.type === "missing_role")).toBe(true);
       expect(
         result.suggestions.some((s) =>
-          s.includes("Define a role for the AI")
+          s.toLowerCase().includes("role")
         )
       ).toBe(true);
     });
@@ -383,18 +388,116 @@ describe("Prompt Analyzer", () => {
     });
 
     it("should return a default positive suggestion when no issues or security flags exist", () => {
-      // A well-formed prompt that has no issues
+      // A well-formed prompt covering anatomy elements without triggering quality thresholds
       const prompt =
-        "You are a senior developer. Given the context, provide the output in JSON format. " +
+        "You are a senior developer. Given the context, " +
+        "provide the output in JSON format. " +
         "Avoid deprecated APIs. The result should be clear for beginner developers.";
 
       const result = analyzePrompt(prompt);
 
+      // No quality issues or security flags
       expect(result.issues.length).toBe(0);
       expect(result.securityFlags.length).toBe(0);
-      expect(
-        result.suggestions.some((s) => s.includes("looks good"))
-      ).toBe(true);
+      // Suggestions exist (anatomy-based for missing dimensions, or "looks good" if all present)
+      expect(result.suggestions.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("anatomy-based scoring (7-element ebook methodology)", () => {
+    it("should score vague prompts like 'hazme una web espectacular' very low", () => {
+      const result = analyzePrompt("hazme una web espectacular");
+
+      expect(result.score).toBeLessThanOrEqual(3);
+      expect(result.category).toBe("critical");
+      expect(result.anatomyScore).toBeLessThan(30);
+    });
+
+    it("should score prompts with all 7 anatomy elements highly", () => {
+      const result = analyzePrompt(
+        "You are a senior full-stack developer. " +
+        "Given the context of a Next.js 16 project with TypeScript and Tailwind, " +
+        "create a responsive landing page with a hero section and pricing table. " +
+        "Step 1: Design the component hierarchy. Step 2: Implement the layout. Step 3: Add styling. " +
+        "Return the output as a single TypeScript file with comments. " +
+        "Avoid deprecated APIs and ensure WCAG AA compliance. " +
+        "If anything is unclear, ask before coding."
+      );
+
+      expect(result.score).toBeGreaterThanOrEqual(8);
+      expect(result.category).toMatch(/excellent|good/);
+      expect(result.anatomyScore).toBeGreaterThanOrEqual(70);
+      expect(result.dimensions.filter(d => d.detected).length).toBeGreaterThanOrEqual(6);
+    });
+
+    it("should detect all 7 anatomy dimensions", () => {
+      const result = analyzePrompt(
+        "Act as a database architect. " +
+        "Given a PostgreSQL production environment with 10M+ users, " +
+        "design an indexing strategy for the orders table. " +
+        "First, analyze current query patterns. Then, propose indexes. Finally, estimate performance gains. " +
+        "Provide the result as a markdown table with columns: Index Name, Columns, Expected Speedup. " +
+        "Avoid composite indexes with more than 3 columns. " +
+        "If you need more details about the schema, ask me."
+      );
+
+      const dimensionIds = result.dimensions.map(d => d.id);
+      expect(dimensionIds).toContain("role");
+      expect(dimensionIds).toContain("task");
+      expect(dimensionIds).toContain("context");
+      expect(dimensionIds).toContain("steps");
+      expect(dimensionIds).toContain("format");
+      expect(dimensionIds).toContain("constraints");
+      expect(dimensionIds).toContain("clarification");
+
+      for (const dim of result.dimensions) {
+        expect(dim.detected).toBe(true);
+        expect(dim.score).toBeGreaterThanOrEqual(40);
+      }
+    });
+
+    it("should detect missing dimensions and score them as 0", () => {
+      const result = analyzePrompt("Write code");
+
+      const missingDimensions = result.dimensions.filter(d => !d.detected);
+      expect(missingDimensions.length).toBeGreaterThanOrEqual(4);
+
+      const roleDim = result.dimensions.find(d => d.id === "role");
+      expect(roleDim?.detected).toBe(false);
+      expect(roleDim?.score).toBe(0);
+    });
+
+    it("should include anatomyScore as weighted average of dimensions", () => {
+      const result = analyzePrompt("You are a senior developer. Write a React component.");
+
+      expect(result.anatomyScore).toBeGreaterThanOrEqual(0);
+      expect(result.anatomyScore).toBeLessThanOrEqual(100);
+      expect(typeof result.anatomyScore).toBe("number");
+    });
+
+    it("should give higher anatomy score to specific roles than generic ones", () => {
+      const senior = analyzePrompt("You are a senior backend developer. Write an API.");
+      const generic = analyzePrompt("You are a helpful assistant. Write an API.");
+
+      const seniorRole = senior.dimensions.find(d => d.id === "role");
+      const genericRole = generic.dimensions.find(d => d.id === "role");
+
+      expect(seniorRole?.score).toBeGreaterThan(genericRole?.score ?? 0);
+    });
+
+    it("should detect Spanish prompts with anatomy elements", () => {
+      const result = analyzePrompt(
+        "Actua como un ingeniero de software senior. " +
+        "Dado el contexto de una aplicacion web en React, " +
+        "crea un componente de tabla con paginacion. " +
+        "Primero, define las interfaces. Luego, implementa el componente. " +
+        "Devuelve el resultado en formato TypeScript. " +
+        "Evita usar dependencias externas. " +
+        "Si algo no queda claro, pregunta antes de empezar."
+      );
+
+      expect(result.dimensions.filter(d => d.detected).length).toBeGreaterThanOrEqual(5);
+      expect(result.score).toBeGreaterThanOrEqual(5);
     });
   });
 });

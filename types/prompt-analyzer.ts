@@ -1,8 +1,27 @@
+export type AnatomyElement =
+  | "role"          // 1. Rol o Persona
+  | "task"          // 2. Objetivo o Tarea
+  | "context"       // 3. Contexto
+  | "steps"         // 4. Instrucciones o Pasos
+  | "format"        // 5. Formato de Respuesta
+  | "constraints"   // 6. Restricciones y Advertencias
+  | "clarification"; // 7. Clausula de Clarificacion
+
+export interface PromptDimension {
+  id: AnatomyElement;
+  detected: boolean;
+  score: number;       // 0-100 per dimension
+  evidence: string | null;
+  weight: number;      // percentage weight (all sum to 100)
+}
+
 export interface PromptAnalysisResult {
   id: string;
   prompt: string;
   score: number;
   category: ScoreCategory;
+  dimensions: PromptDimension[];
+  anatomyScore: number; // 0-100 weighted average
   issues: PromptIssue[];
   suggestions: string[];
   securityFlags: SecurityFlag[];

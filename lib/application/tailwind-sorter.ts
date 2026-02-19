@@ -215,6 +215,33 @@ const VARIANT_ORDER = [
 
 // --- Conflict Detection ---
 
+// Axis-specific prefixes that should NOT conflict with each other.
+// e.g. px-4 and py-4 target different CSS properties (padding-left/right vs top/bottom).
+const AXIS_PREFIXES = new Set([
+  "px", "py", "pt", "pr", "pb", "pl", "ps", "pe",
+  "mx", "my", "mt", "mr", "mb", "ml", "ms", "me",
+  "inset-x", "inset-y",
+  "border-t", "border-r", "border-b", "border-l",
+  "border-x", "border-y",
+  "rounded-t", "rounded-r", "rounded-b", "rounded-l",
+  "rounded-tl", "rounded-tr", "rounded-bl", "rounded-br",
+  "rounded-ss", "rounded-se", "rounded-es", "rounded-ee",
+  "scroll-mx", "scroll-my", "scroll-mt", "scroll-mr", "scroll-mb", "scroll-ml",
+  "scroll-px", "scroll-py", "scroll-pt", "scroll-pr", "scroll-pb", "scroll-pl",
+]);
+
+function getConflictGroup(base: string): string {
+  // Check axis-specific prefixes (longest match first)
+  // e.g. "scroll-px" before "scroll", "rounded-tl" before "rounded"
+  for (const prefix of AXIS_PREFIXES) {
+    if (base === prefix || base.startsWith(`${prefix}-`)) {
+      return prefix;
+    }
+  }
+  // Default: group by first segment (e.g., "text", "bg", "w", "h")
+  return base.split("-")[0] || base;
+}
+
 function findConflicts(classes: string[]): TailwindConflict[] {
   const conflicts: TailwindConflict[] = [];
   const propertyMap = new Map<string, string[]>();
@@ -222,11 +249,10 @@ function findConflicts(classes: string[]): TailwindConflict[] {
   for (const cls of classes) {
     const base = getBaseClass(cls);
     const variants = getVariants(cls).sort().join(":");
-    
-    // Group by common prefix (e.g., p-, m-, text-, bg-)
-    const prop = base.split("-")[0] || base;
-    
-    // Handle special cases like 'flex-row' vs 'flex-col' which are both 'flex-'
+
+    // Determine the CSS property group for conflict detection
+    const prop = getConflictGroup(base);
+
     let key = `${variants}:${prop}`;
     if (base.startsWith("flex-") && !base.startsWith("flex-grow") && !base.startsWith("flex-shrink")) {
       key = `${variants}:flex-direction`;

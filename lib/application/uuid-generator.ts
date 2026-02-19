@@ -51,6 +51,48 @@ export function generateUuidV7(): string {
 }
 
 /**
+ * Generates a ULID (Universally Unique Lexicographically Sortable Identifier).
+ * Format: 26 characters, Crockford's Base32, timestamp + randomness.
+ */
+export function generateUlid(): string {
+  const CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+  const now = Date.now();
+
+  // Encode 48-bit timestamp (10 chars)
+  let ts = now;
+  const timePart: string[] = [];
+  for (let i = 0; i < 10; i++) {
+    timePart.unshift(CROCKFORD[ts % 32]!);
+    ts = Math.floor(ts / 32);
+  }
+
+  // Encode 80 bits of randomness (16 chars)
+  const randPart: string[] = [];
+  for (let i = 0; i < 16; i++) {
+    randPart.push(CROCKFORD[Math.floor(Math.random() * 32)]!);
+  }
+
+  return timePart.join("") + randPart.join("");
+}
+
+/**
+ * Generates a NanoID (URL-friendly unique string identifier).
+ * Default alphabet: A-Za-z0-9_- (64 chars), 21 characters long.
+ */
+export function generateNanoId(size: number = 21): string {
+  const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-";
+  const bytes = new Uint8Array(size);
+  crypto.getRandomValues(bytes);
+
+  let id = "";
+  for (let i = 0; i < size; i++) {
+    id += ALPHABET[(bytes[i] ?? 0) & 63];
+  }
+
+  return id;
+}
+
+/**
  * Generates a single UUID based on version with optional prefix
  */
 export function generateUuid(version: UuidVersion = "v4", prefix: string = ""): string {
@@ -60,6 +102,8 @@ export function generateUuid(version: UuidVersion = "v4", prefix: string = ""): 
     case "v7": uuid = generateUuidV7(); break;
     case "nil": uuid = NIL_UUID; break;
     case "max": uuid = MAX_UUID; break;
+    case "ulid": return generateUlid();
+    case "nanoid": return generateNanoId();
     case "v4":
     default: uuid = generateUuidV4(); break;
   }

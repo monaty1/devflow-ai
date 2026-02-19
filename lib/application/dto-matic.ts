@@ -146,6 +146,7 @@ function analyzeValue(name: string, value: unknown): JsonField {
       isOptional: false,
       isArray: false,
       isDate: false,
+      isFloat: !Number.isInteger(value),
       originalValue: value,
     };
   }
@@ -312,50 +313,89 @@ function generateJava(
   config: DtoMaticConfig
 ): GeneratedFile[] {
   const files: GeneratedFile[] = [];
+  const nestedClasses: { name: string; fields: JsonField[] }[] = [];
+  collectNestedObjects(fields, rootName, nestedClasses);
+
   const packageName = config.javaPackage || "com.example.dto";
-  const content = `package ${packageName};
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import java.util.List;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class ${rootName} {
-${generateJavaFields(fields, config)}
-}
-`;
-
+  // Generate root class
   files.push({
     id: crypto.randomUUID(),
     name: `${rootName}.java`,
     type: "class",
-    content,
+    content: buildJavaClass(rootName, fields, packageName, config),
     language: "java",
   });
+
+  // Generate nested classes as separate files
+  for (const nested of nestedClasses) {
+    files.push({
+      id: crypto.randomUUID(),
+      name: `${nested.name}.java`,
+      type: "class",
+      content: buildJavaClass(nested.name, nested.fields, packageName, config),
+      language: "java",
+    });
+  }
 
   return files;
 }
 
-function generateJavaFields(fields: JsonField[], _config: DtoMaticConfig): string {
+function buildJavaClass(
+  className: string,
+  fields: JsonField[],
+  packageName: string,
+  config: DtoMaticConfig
+): string {
+  const hasDate = fields.some(f => f.type === "date");
+  const hasList = fields.some(f => f.isArray);
+
+  const imports = [
+    "import lombok.Data;",
+    "import lombok.NoArgsConstructor;",
+    "import lombok.AllArgsConstructor;",
+  ];
+  if (hasList) imports.push("import java.util.List;");
+  if (hasDate) imports.push("import java.time.LocalDateTime;");
+
+  return `package ${packageName};
+
+${imports.join("\n")}
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class ${className} {
+${generateJavaFields(fields, className, config)}
+}
+`;
+}
+
+function generateJavaFields(fields: JsonField[], parentName: string, _config: DtoMaticConfig): string {
   return fields.map(field => {
-    const type = getJavaType(field);
+    const type = getJavaType(field, parentName);
     const name = applyNaming(field.name, "camelCase");
     return `    private ${type} ${name};`;
   }).join("\n");
 }
 
-function getJavaType(field: JsonField): string {
+function getJavaType(field: JsonField, parentName: string): string {
+  let baseType: string;
+
   switch (field.type) {
-    case "string": return "String";
-    case "number": return "Integer"; // Simplified
-    case "boolean": return "Boolean";
-    case "date": return "String";
-    case "object": return "Object"; // Should handle nested
-    default: return "Object";
+    case "string": baseType = "String"; break;
+    case "number": baseType = field.isFloat ? "Double" : "Integer"; break;
+    case "boolean": baseType = "Boolean"; break;
+    case "date": baseType = "LocalDateTime"; break;
+    case "object":
+      baseType = (field.children && field.children.length > 0)
+        ? `${parentName}${toPascalCase(field.name)}`
+        : "Object";
+      break;
+    default: baseType = "Object";
   }
+
+  return field.isArray ? `List<${baseType}>` : baseType;
 }
 
 // --- C# Generator ---
@@ -366,46 +406,78 @@ function generateCSharp(
   config: DtoMaticConfig
 ): GeneratedFile[] {
   const files: GeneratedFile[] = [];
+  const nestedClasses: { name: string; fields: JsonField[] }[] = [];
+  collectNestedObjects(fields, rootName, nestedClasses);
+
   const namespace = config.csharpNamespace || "App.Domain.Models";
-  const content = `using System;
-using System.Collections.Generic;
 
-namespace ${namespace}
-{
-    public class ${rootName}
-    {
-${generateCSharpFields(fields, config)}
-    }
-}
-`;
-
+  // Generate root class
   files.push({
     id: crypto.randomUUID(),
     name: `${rootName}.cs`,
     type: "class",
-    content,
+    content: buildCSharpClass(rootName, fields, namespace, config),
     language: "csharp",
   });
+
+  // Generate nested classes as separate files
+  for (const nested of nestedClasses) {
+    files.push({
+      id: crypto.randomUUID(),
+      name: `${nested.name}.cs`,
+      type: "class",
+      content: buildCSharpClass(nested.name, nested.fields, namespace, config),
+      language: "csharp",
+    });
+  }
 
   return files;
 }
 
-function generateCSharpFields(fields: JsonField[], _config: DtoMaticConfig): string {
+function buildCSharpClass(
+  className: string,
+  fields: JsonField[],
+  namespace: string,
+  config: DtoMaticConfig
+): string {
+  return `using System;
+using System.Collections.Generic;
+
+namespace ${namespace}
+{
+    public class ${className}
+    {
+${generateCSharpFields(fields, className, config)}
+    }
+}
+`;
+}
+
+function generateCSharpFields(fields: JsonField[], parentName: string, _config: DtoMaticConfig): string {
   return fields.map(field => {
-    const type = getCSharpType(field);
+    const type = getCSharpType(field, parentName);
     const name = applyNaming(field.name, "PascalCase");
     return `        public ${type} ${name} { get; set; }`;
   }).join("\n");
 }
 
-function getCSharpType(field: JsonField): string {
+function getCSharpType(field: JsonField, parentName: string): string {
+  let baseType: string;
+
   switch (field.type) {
-    case "string": return "string";
-    case "number": return "int";
-    case "boolean": return "bool";
-    case "date": return "DateTime";
-    default: return "object";
+    case "string": baseType = "string"; break;
+    case "number": baseType = field.isFloat ? "double" : "int"; break;
+    case "boolean": baseType = "bool"; break;
+    case "date": baseType = "DateTime"; break;
+    case "object":
+      baseType = (field.children && field.children.length > 0)
+        ? `${parentName}${toPascalCase(field.name)}`
+        : "object";
+      break;
+    default: baseType = "object";
   }
+
+  return field.isArray ? `List<${baseType}>` : baseType;
 }
 
 // --- Go Generator ---
@@ -416,12 +488,25 @@ function generateGo(
   config: DtoMaticConfig
 ): GeneratedFile[] {
   const files: GeneratedFile[] = [];
-  const packageName = config.goPackage || "models";
-  const content = `package ${packageName}
+  const nestedStructs: { name: string; fields: JsonField[] }[] = [];
+  collectNestedObjects(fields, rootName, nestedStructs);
 
-type ${rootName} struct {
-${generateGoFields(fields, config)}
-}
+  const packageName = config.goPackage || "models";
+
+  // Build all structs in one file (Go convention)
+  const allStructs: string[] = [];
+  allStructs.push(buildGoStruct(rootName, fields));
+  for (const nested of nestedStructs) {
+    allStructs.push(buildGoStruct(nested.name, nested.fields));
+  }
+
+  const hasTime = fields.some(f => f.type === "date") ||
+    nestedStructs.some(n => n.fields.some(f => f.type === "date"));
+  const imports = hasTime ? '\nimport "time"\n' : "";
+
+  const content = `package ${packageName}
+${imports}
+${allStructs.join("\n\n")}
 `;
 
   files.push({
@@ -435,23 +520,34 @@ ${generateGoFields(fields, config)}
   return files;
 }
 
-function generateGoFields(fields: JsonField[], _config: DtoMaticConfig): string {
-  return fields.map(field => {
-    const type = getGoType(field);
+function buildGoStruct(structName: string, fields: JsonField[]): string {
+  const goFields = fields.map(field => {
+    const type = getGoType(field, structName);
     const name = applyNaming(field.name, "PascalCase");
     const jsonTag = field.name;
     return `\t${name} ${type} \`json:"${jsonTag}"\``;
   }).join("\n");
+
+  return `type ${structName} struct {\n${goFields}\n}`;
 }
 
-function getGoType(field: JsonField): string {
+function getGoType(field: JsonField, parentName: string): string {
+  let baseType: string;
+
   switch (field.type) {
-    case "string": return "string";
-    case "number": return "int";
-    case "boolean": return "bool";
-    case "date": return "string";
-    default: return "interface{}";
+    case "string": baseType = "string"; break;
+    case "number": baseType = field.isFloat ? "float64" : "int"; break;
+    case "boolean": baseType = "bool"; break;
+    case "date": baseType = "time.Time"; break;
+    case "object":
+      baseType = (field.children && field.children.length > 0)
+        ? `${parentName}${toPascalCase(field.name)}`
+        : "interface{}";
+      break;
+    default: baseType = "interface{}";
   }
+
+  return field.isArray ? `[]${baseType}` : baseType;
 }
 
 // --- Python Generator ---
@@ -462,11 +558,24 @@ function generatePython(
   config: DtoMaticConfig
 ): GeneratedFile[] {
   const files: GeneratedFile[] = [];
-  const content = `from pydantic import BaseModel
-from typing import List, Optional
+  const nestedModels: { name: string; fields: JsonField[] }[] = [];
+  collectNestedObjects(fields, rootName, nestedModels);
 
-class ${rootName}(BaseModel):
-${generatePythonFields(fields, config)}
+  // Build all models in one file (nested models first so forward refs are resolved)
+  const allModels: string[] = [];
+  for (const nested of nestedModels) {
+    allModels.push(buildPythonModel(nested.name, nested.fields, config));
+  }
+  allModels.push(buildPythonModel(rootName, fields, config));
+
+  const hasDate = fields.some(f => f.type === "date") ||
+    nestedModels.some(n => n.fields.some(f => f.type === "date"));
+  const dateImport = hasDate ? "\nfrom datetime import datetime" : "";
+
+  const content = `from pydantic import BaseModel
+from typing import List, Optional${dateImport}
+
+${allModels.join("\n\n")}
 `;
 
   files.push({
@@ -480,22 +589,34 @@ ${generatePythonFields(fields, config)}
   return files;
 }
 
-function generatePythonFields(fields: JsonField[], _config: DtoMaticConfig): string {
-  return fields.map(field => {
-    const type = getPythonType(field);
+function buildPythonModel(className: string, fields: JsonField[], _config: DtoMaticConfig): string {
+  const pyFields = fields.map(field => {
+    const type = getPythonType(field, className);
     const name = applyNaming(field.name, "snake_case");
-    return `    ${name}: ${type}`;
+    const optional = field.isOptional ? `Optional[${type}]` : type;
+    return `    ${name}: ${field.isOptional ? optional : type}`;
   }).join("\n");
+
+  return `class ${className}(BaseModel):\n${pyFields || "    pass"}`;
 }
 
-function getPythonType(field: JsonField): string {
+function getPythonType(field: JsonField, parentName: string): string {
+  let baseType: string;
+
   switch (field.type) {
-    case "string": return "str";
-    case "number": return "int";
-    case "boolean": return "bool";
-    case "date": return "str";
-    default: return "Any";
+    case "string": baseType = "str"; break;
+    case "number": baseType = field.isFloat ? "float" : "int"; break;
+    case "boolean": baseType = "bool"; break;
+    case "date": baseType = "datetime"; break;
+    case "object":
+      baseType = (field.children && field.children.length > 0)
+        ? `${parentName}${toPascalCase(field.name)}`
+        : "Any";
+      break;
+    default: baseType = "Any";
   }
+
+  return field.isArray ? `List[${baseType}]` : baseType;
 }
 
 function generateInterface(
@@ -925,6 +1046,36 @@ function generateReversedMapping(
   }
 
   return `entity.${entityField}`;
+}
+
+// --- Nested Object Collection ---
+
+/**
+ * Recursively collects all nested object fields into a flat list of
+ * { name, fields } pairs. Used by Java/C#/Go/Python generators to
+ * produce separate class/struct definitions for nested objects.
+ */
+function collectNestedObjects(
+  fields: JsonField[],
+  parentName: string,
+  result: { name: string; fields: JsonField[] }[]
+): void {
+  for (const field of fields) {
+    if (field.type === "object" && field.children && field.children.length > 0) {
+      const nestedName = `${parentName}${toPascalCase(field.name)}`;
+      result.push({ name: nestedName, fields: field.children });
+      collectNestedObjects(field.children, nestedName, result);
+    }
+    // Also handle arrays of objects
+    if (field.isArray && field.type === "object" && field.children && field.children.length > 0) {
+      const nestedName = `${parentName}${toPascalCase(field.name)}`;
+      // Avoid duplicates if already collected by the object check above
+      if (!result.some(r => r.name === nestedName)) {
+        result.push({ name: nestedName, fields: field.children });
+        collectNestedObjects(field.children, nestedName, result);
+      }
+    }
+  }
 }
 
 // --- Naming Utilities ---

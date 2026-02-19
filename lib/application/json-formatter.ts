@@ -71,25 +71,55 @@ export function fixJson(input: string): string {
 }
 
 /**
- * Basic JSON to YAML conversion (without external libs for weight)
+ * Basic JSON to YAML conversion (without external libs for weight).
+ * Properly escapes special YAML characters in string values.
  */
 export function jsonToYaml(obj: unknown, indent = 0): string {
   const spaces = "  ".repeat(indent);
   if (obj === null) return "null";
-  if (typeof obj !== "object") return String(obj);
+  if (typeof obj === "boolean") return String(obj);
+  if (typeof obj === "number") return String(obj);
+  if (typeof obj === "string") return escapeYamlString(obj);
 
   if (Array.isArray(obj)) {
-    return obj.map(item => `\n${spaces}- ${jsonToYaml(item, indent + 1)}`).join("").trim();
+    if (obj.length === 0) return "[]";
+    return obj.map(item => {
+      const val = jsonToYaml(item, indent + 1);
+      const isComplex = typeof item === "object" && item !== null;
+      return isComplex
+        ? `\n${spaces}-\n${val}`
+        : `\n${spaces}- ${val}`;
+    }).join("").trim();
   }
 
-  return Object.entries(obj)
+  const entries = Object.entries(obj as Record<string, unknown>);
+  if (entries.length === 0) return "{}";
+
+  return entries
     .map(([key, value]) => {
-      const val = typeof value === "object" && value !== null 
-        ? `\n${jsonToYaml(value, indent + 1)}` 
-        : ` ${value}`;
-      return `${spaces}${key}:${val}`;
+      const safeKey = /^[a-zA-Z_][a-zA-Z0-9_ -]*$/.test(key) ? key : `"${key}"`;
+      if (typeof value === "object" && value !== null) {
+        return `${spaces}${safeKey}:\n${jsonToYaml(value, indent + 1)}`;
+      }
+      return `${spaces}${safeKey}: ${jsonToYaml(value, indent)}`;
     })
     .join("\n");
+}
+
+function escapeYamlString(str: string): string {
+  // Strings that need quoting: contain special chars, look like other YAML types, etc.
+  if (
+    str === "" ||
+    str === "true" || str === "false" ||
+    str === "null" || str === "~" ||
+    /^[\d.eE+-]+$/.test(str) ||
+    /[:#\[\]{}&*!|>'"`,?@]/.test(str) ||
+    str.startsWith("- ") || str.startsWith("? ") ||
+    str.includes("\n")
+  ) {
+    return `"${str.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n")}"`;
+  }
+  return str;
 }
 
 /**
@@ -113,21 +143,61 @@ export function jsonToXml(obj: unknown, rootName = "root"): string {
 }
 
 /**
- * Basic JSON to CSV conversion
+ * JSON to CSV conversion with dot-notation flattening for nested objects.
  */
 export function jsonToCsv(obj: unknown): string {
   const arr = Array.isArray(obj) ? obj : [obj];
   if (arr.length === 0) return "";
-  
-  const headers = Object.keys(arr[0] || {});
-  const rows = arr.map(item => 
-    headers.map(header => {
-      const val = item[header];
-      return typeof val === "string" ? `"${val.replace(/"/g, '""')}"` : val;
-    }).join(",")
+
+  // Flatten each row using dot-notation
+  const flatRows = arr.map((item) => flattenObject(item as Record<string, unknown>));
+
+  // Collect all unique headers across all rows
+  const headerSet = new Set<string>();
+  for (const row of flatRows) {
+    for (const key of Object.keys(row)) {
+      headerSet.add(key);
+    }
+  }
+  const headers = [...headerSet];
+
+  const rows = flatRows.map((row) =>
+    headers
+      .map((header) => {
+        const val = row[header];
+        if (val === undefined || val === null) return "";
+        if (typeof val === "string")
+          return `"${val.replace(/"/g, '""')}"`;
+        return String(val);
+      })
+      .join(","),
   );
-  
+
   return [headers.join(","), ...rows].join("\n");
+}
+
+function flattenObject(
+  obj: Record<string, unknown>,
+  prefix = "",
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(obj)) {
+    const newKey = prefix ? `${prefix}.${key}` : key;
+
+    if (Array.isArray(value)) {
+      result[newKey] = JSON.stringify(value);
+    } else if (value !== null && typeof value === "object") {
+      const nested = flattenObject(value as Record<string, unknown>, newKey);
+      for (const [nk, nv] of Object.entries(nested)) {
+        result[nk] = nv;
+      }
+    } else {
+      result[newKey] = value;
+    }
+  }
+
+  return result;
 }
 
 /**

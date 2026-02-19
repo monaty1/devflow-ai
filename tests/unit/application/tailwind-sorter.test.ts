@@ -272,4 +272,55 @@ describe("Tailwind Sorter", () => {
       expect(result.stats.totalClasses).toBe(2);
     });
   });
+
+  describe("conflict detection", () => {
+    it("should NOT flag px-4 and py-4 as conflicts", () => {
+      const input = "px-4 py-4";
+      const result = sortClasses(input, DEFAULT_SORTER_CONFIG);
+
+      expect(result.conflicts).toHaveLength(0);
+    });
+
+    it("should NOT flag mx-auto and my-2 as conflicts", () => {
+      const input = "mx-auto my-2";
+      const result = sortClasses(input, DEFAULT_SORTER_CONFIG);
+
+      expect(result.conflicts).toHaveLength(0);
+    });
+
+    it("should NOT flag pt-4 and pb-8 as conflicts", () => {
+      const input = "pt-4 pb-8";
+      const result = sortClasses(input, DEFAULT_SORTER_CONFIG);
+
+      expect(result.conflicts).toHaveLength(0);
+    });
+
+    it("should NOT flag border-t and border-b as conflicts", () => {
+      const input = "border-t border-b";
+      const result = sortClasses(input, DEFAULT_SORTER_CONFIG);
+
+      expect(result.conflicts).toHaveLength(0);
+    });
+
+    it("should NOT flag rounded-tl and rounded-br as conflicts", () => {
+      const input = "rounded-tl rounded-br";
+      const result = sortClasses(input, DEFAULT_SORTER_CONFIG);
+
+      expect(result.conflicts).toHaveLength(0);
+    });
+
+    it("should flag actual conflicts like p-4 and p-8", () => {
+      const input = "p-4 p-8";
+      const result = sortClasses(input, DEFAULT_SORTER_CONFIG);
+
+      expect(result.conflicts.length).toBeGreaterThan(0);
+    });
+
+    it("should flag actual conflicts like text-red-500 and text-blue-500", () => {
+      const input = "text-red-500 text-blue-500";
+      const result = sortClasses(input, DEFAULT_SORTER_CONFIG);
+
+      expect(result.conflicts.length).toBeGreaterThan(0);
+    });
+  });
 });

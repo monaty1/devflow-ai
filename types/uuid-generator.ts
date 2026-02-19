@@ -1,6 +1,6 @@
 // UUID Generator Types
 
-export type UuidVersion = "v1" | "v4" | "v7" | "nil" | "max";
+export type UuidVersion = "v1" | "v4" | "v7" | "nil" | "max" | "ulid" | "nanoid";
 export type UuidFormat = "standard" | "uppercase" | "no-hyphens" | "braces" | "urn" | "base64" | "base58";
 
 export interface UuidConfig {

@@ -11,9 +11,13 @@ import {
   Timer,
   Fingerprint,
   Info,
+  Bot,
 } from "lucide-react";
 import { useTokenVisualizer } from "@/hooks/use-token-visualizer";
+import { useAITokenize } from "@/hooks/use-ai-tokenize";
+import { useAISettingsStore } from "@/lib/stores/ai-settings-store";
 import { useSmartNavigation } from "@/hooks/use-smart-navigation";
+import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
@@ -35,6 +39,9 @@ export default function TokenVisualizerPage() {
     reset 
   } = useTokenVisualizer();
 
+  const { tokenizeReal, aiResult: realTokenResult, isAILoading: isRealTokenizing } = useAITokenize();
+  const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
+  const { addToast } = useToast();
   const { navigateTo } = useSmartNavigation();
   const [isCompareMode, setIsCompareMode] = useState(false);
 
@@ -156,6 +163,48 @@ export default function TokenVisualizerPage() {
                 Estimate Cost
               </Button>
             </div>
+          )}
+
+          {/* Real BPE Tokenization */}
+          {isAIEnabled && visualization && (
+            <Card className="p-6 border-violet-500/20 bg-violet-500/5" role="region" aria-label={t("ai.realBPE")}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xs font-black uppercase flex items-center gap-2">
+                  <Bot className="size-3 text-violet-500" aria-hidden="true" /> {t("ai.realBPE")}
+                </h3>
+                <div className="flex gap-2">
+                  {["gpt-4o", "gpt-4", "cl100k_base"].map((model) => (
+                    <Button
+                      key={model}
+                      size="sm"
+                      variant="outline"
+                      isLoading={isRealTokenizing}
+                      onPress={() => tokenizeReal(input, model).catch(() => {
+                        addToast(t("ai.tokenizerUnavailable"), "info");
+                      })}
+                      className="text-[10px] h-6 px-2"
+                    >
+                      {model}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              {realTokenResult && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Model: <strong>{realTokenResult.model}</strong></span>
+                    <StatusBadge variant="info">{realTokenResult.totalTokens} real tokens</StatusBadge>
+                  </div>
+                  <div className="flex flex-wrap gap-1 p-3 bg-background/50 rounded-xl border border-violet-500/10 max-h-[150px] overflow-auto">
+                    {realTokenResult.segments.map((s, i) => (
+                      <span key={i} title={`Token ID: ${s.tokenId}`} className="px-1 py-0.5 rounded font-mono text-[10px] border bg-violet-500/10 border-violet-500/20 text-violet-600 dark:text-violet-400 cursor-default hover:scale-110 transition-transform">
+                        {s.text.replace(/ /g, "\u2423")}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </Card>
           )}
 
           {/* Efficiency Audit Card */}

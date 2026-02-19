@@ -23,8 +23,12 @@ import {
   LayoutGrid,
   Settings2,
   AlertTriangle,
+  Bot,
 } from "lucide-react";
 import { useVariableNameWizard } from "@/hooks/use-variable-name-wizard";
+import { useAISuggest } from "@/hooks/use-ai-suggest";
+import { useAISettingsStore } from "@/lib/stores/ai-settings-store";
+import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
@@ -49,6 +53,9 @@ export default function VariableNameWizardPage() {
     loadExample,
   } = useVariableNameWizard();
 
+  const { suggestWithAI, aiResult: aiSuggestResult, isAILoading: isAISuggesting } = useAISuggest();
+  const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
+  const { addToast } = useToast();
   const [activeTab, setActiveTab] = useState<"generate" | "convert" | string>("generate");
 
   const suggestionColumns: ColumnConfig[] = [
@@ -200,8 +207,19 @@ export default function VariableNameWizardPage() {
                 </select>
               </div>
 
-              <Button 
-                onPress={activeTab === "generate" ? generate : convert} 
+              <Button
+                onPress={() => {
+                  if (activeTab === "generate") {
+                    generate();
+                    if (isAIEnabled) {
+                      suggestWithAI(input, config.type, config.language).catch(() => {
+                        addToast(t("ai.unavailableLocal"), "info");
+                      });
+                    }
+                  } else {
+                    convert();
+                  }
+                }}
                 variant="primary"
                 className="w-full h-12 font-black shadow-xl shadow-primary/20 text-md"
                 isLoading={isProcessing}
@@ -312,6 +330,35 @@ export default function VariableNameWizardPage() {
                       emptyContent="No suggestions available."
                     />
                   </Card>
+
+                  {/* AI Suggestions */}
+                  {isAIEnabled && (isAISuggesting || aiSuggestResult) && (
+                    <Card className="p-6 border-violet-500/20 bg-violet-500/5 shadow-xl shadow-violet-500/5" role="region" aria-label={t("ai.poweredSuggestions")}>
+                      <div className="mb-4 flex items-center gap-2">
+                        <Bot className="size-5 text-violet-500" aria-hidden="true" />
+                        <h3 className="font-bold text-sm">{t("ai.poweredSuggestions")}</h3>
+                        {isAISuggesting && (
+                          <span className="text-xs text-muted-foreground animate-pulse ml-auto">{t("ai.generating")}</span>
+                        )}
+                      </div>
+                      {aiSuggestResult && aiSuggestResult.suggestions.length > 0 && (
+                        <div className="space-y-3">
+                          {aiSuggestResult.suggestions.map((s, i) => (
+                            <div key={i} className="flex items-center justify-between p-3 bg-background/50 rounded-lg border border-violet-500/10">
+                              <div className="flex flex-col gap-0.5">
+                                <span className="font-mono text-sm font-black text-violet-600 dark:text-violet-400">{s.value}</span>
+                                <span className="text-[10px] text-muted-foreground">{s.reasoning}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold">{s.score}%</span>
+                                <CopyButton text={s.value} size="sm" variant="ghost" />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </Card>
+                  )}
                 </div>
               ) : (
                 <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center h-[500px]">

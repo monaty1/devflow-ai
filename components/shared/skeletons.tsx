@@ -67,6 +67,32 @@ export function CodeReviewSkeleton() {
   );
 }
 
+export function AISectionSkeleton() {
+  return (
+    <div className="rounded-lg border border-violet-500/20 bg-violet-500/5 p-6 space-y-4" role="status" aria-label="Loading AI analysis">
+      <div className="flex items-center gap-2">
+        <Skeleton className="size-5 rounded" />
+        <SkeletonText className="w-1/3" />
+      </div>
+      <div className="flex items-center gap-4">
+        <div className="space-y-2 w-16">
+          <SkeletonText className="w-full" />
+          <Skeleton className="h-8 w-full" />
+        </div>
+        <div className="flex-1 space-y-2">
+          <SkeletonText className="w-1/4" />
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex items-start gap-1.5">
+              <Skeleton className="mt-1.5 size-1 shrink-0 rounded-full" />
+              <SkeletonText className="flex-1" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function PromptAnalyzerSkeleton() {
   return (
     <div className="space-y-6">

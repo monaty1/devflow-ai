@@ -492,7 +492,7 @@ describe("DTO-Matic", () => {
       });
 
       const javaFile = result.files.find((f) => f.language === "java");
-      expect(javaFile!.content).toContain("private String createdAt;");
+      expect(javaFile!.content).toContain("private LocalDateTime createdAt;");
       expect(javaFile!.content).toContain("private Object meta;");
     });
 
@@ -607,7 +607,7 @@ describe("DTO-Matic", () => {
       });
 
       const goFile = result.files.find((f) => f.language === "go");
-      expect(goFile!.content).toContain("string");
+      expect(goFile!.content).toContain("time.Time");
       expect(goFile!.content).toContain("interface{}");
     });
   });
@@ -640,8 +640,8 @@ describe("DTO-Matic", () => {
       });
 
       const pyFile = result.files.find((f) => f.language === "python");
-      expect(pyFile!.content).toContain("created_at: str");
-      expect(pyFile!.content).toContain("data: Any");
+      expect(pyFile!.content).toContain("created_at: datetime");
+      expect(pyFile!.content).toContain("from datetime import datetime");
     });
   });
 
