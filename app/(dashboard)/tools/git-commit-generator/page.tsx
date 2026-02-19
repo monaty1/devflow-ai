@@ -33,6 +33,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
 import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
+import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { StatusBadge } from "@/components/shared/status-badge";
 import type { CommitType, CommitResult } from "@/types/git-commit-generator";
 import { COMMIT_TYPES, getCommitTypeInfo } from "@/lib/application/git-commit-generator";
@@ -110,6 +111,8 @@ export default function GitCommitGeneratorPage() {
           </Button>
         }
       />
+
+      <ToolSuggestions toolId="git-commit-generator" input={config.description} output={message || ""} />
 
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Input Column */}

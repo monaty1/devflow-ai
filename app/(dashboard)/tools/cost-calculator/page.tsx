@@ -26,6 +26,7 @@ import { formatCost } from "@/lib/application/cost-calculator";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { PROVIDER_LABELS } from "@/config/ai-models";
+import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { cn } from "@/lib/utils";
 import type { CostCalculation } from "@/types/cost-calculator";
 
@@ -193,6 +194,8 @@ export default function CostCalculatorPage() {
           </div>
         }
       />
+
+      <ToolSuggestions toolId="cost-calculator" input={inputTokens.toString()} output={monthlyCost.toString()} />
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Settings Panel */}

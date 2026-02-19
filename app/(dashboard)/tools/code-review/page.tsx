@@ -34,6 +34,7 @@ import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
 import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { useSmartNavigation } from "@/hooks/use-smart-navigation";
+import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { CodeReviewSkeleton, AISectionSkeleton } from "@/components/shared/skeletons";
@@ -184,6 +185,8 @@ export default function CodeReviewPage() {
           </Button>
         }
       />
+
+      <ToolSuggestions toolId="code-review" input={code} output={result?.refactoredCode || ""} />
 
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Input Panel */}

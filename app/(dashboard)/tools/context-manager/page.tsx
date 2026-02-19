@@ -33,6 +33,7 @@ import { CopyButton } from "@/components/shared/copy-button";
 import { formatCost } from "@/lib/application/cost-calculator";
 import { AI_MODELS } from "@/config/ai-models";
 import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
+import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/shared/status-badge";
 import type { ContextDocument as Document, Priority, DocumentType } from "@/types/context-manager";
@@ -156,6 +157,8 @@ export default function ContextManagerPage() {
         description={t("ctxMgr.description")}
         breadcrumb
       />
+
+      <ToolSuggestions toolId="context-manager" input={activeWindow?.name || ""} output={""} />
 
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Sidebar: Windows List */}

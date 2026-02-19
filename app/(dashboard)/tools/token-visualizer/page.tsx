@@ -24,6 +24,7 @@ import { CopyButton } from "@/components/shared/copy-button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { TextArea } from "@heroui/react";
 import { Card, Button } from "@/components/ui";
+import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { cn } from "@/lib/utils";
 import type { TokenizerProvider } from "@/types/token-visualizer";
 
@@ -77,6 +78,8 @@ export default function TokenVisualizerPage() {
           </Button>
         }
       />
+
+      <ToolSuggestions toolId="token-visualizer" input={input} output={visualization?.totalTokens.toString() || ""} />
 
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Input Column */}

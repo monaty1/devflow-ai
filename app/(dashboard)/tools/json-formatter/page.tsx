@@ -26,6 +26,7 @@ import { CopyButton } from "@/components/shared/copy-button";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { cn } from "@/lib/utils";
 import type { JsonPathResult, JsonFormatMode } from "@/types/json-formatter";
 
@@ -98,6 +99,8 @@ export default function JsonFormatterPage() {
           </Button>
         }
       />
+
+      <ToolSuggestions toolId="json-formatter" input={input} output={result?.output || ""} />
 
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Control Panel */}

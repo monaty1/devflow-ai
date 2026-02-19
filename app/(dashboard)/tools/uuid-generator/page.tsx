@@ -33,6 +33,7 @@ import { CopyButton } from "@/components/shared/copy-button";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button, Card } from "@/components/ui";
+import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { cn } from "@/lib/utils";
 import type { UuidVersion, UuidFormat } from "@/types/uuid-generator";
 
@@ -104,6 +105,8 @@ export default function UuidGeneratorPage() {
           </Button>
         }
       />
+
+      <ToolSuggestions toolId="uuid-generator" input={analyzeInput} output={result?.uuids[0] || ""} />
 
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Config Column */}

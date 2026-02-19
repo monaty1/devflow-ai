@@ -27,6 +27,7 @@ import { CopyButton } from "@/components/shared/copy-button";
 import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { getCategoryInfo } from "@/lib/application/http-status-finder";
+import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { cn } from "@/lib/utils";
 import type { HttpStatusCode, HttpStatusCategory } from "@/types/http-status-finder";
 
@@ -131,6 +132,8 @@ export default function HttpStatusFinderPage() {
           </div>
         }
       />
+
+      <ToolSuggestions toolId="http-status-finder" input={searchInput} output={selectedCode?.description || ""} />
 
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Search & Selector Column */}

@@ -25,6 +25,7 @@ import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
 import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { cn } from "@/lib/utils";
 import type { RegexGroup } from "@/types/regex-humanizer";
 
@@ -100,6 +101,8 @@ export default function RegexHumanizerPage() {
           </Button>
         }
       />
+
+      <ToolSuggestions toolId="regex-humanizer" input={pattern} output={explanation?.explanation || ""} />
 
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Pattern Input & Generation */}

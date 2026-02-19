@@ -27,6 +27,7 @@ import { useSmartNavigation } from "@/hooks/use-smart-navigation";
 import { CopyButton } from "@/components/shared/copy-button";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { DataTable, type ColumnConfig } from "@/components/ui";
 
 export default function Base64Page() {
@@ -108,6 +109,8 @@ export default function Base64Page() {
           </Button>
         }
       />
+
+      <ToolSuggestions toolId="base64" input={input} output={result?.output || ""} />
 
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Input Column */}

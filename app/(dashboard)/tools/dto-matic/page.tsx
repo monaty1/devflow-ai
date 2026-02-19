@@ -28,6 +28,7 @@ import { useDtoMatic } from "@/hooks/use-dto-matic";
 import { useTranslation } from "@/hooks/use-translation";
 import { CopyButton } from "@/components/shared/copy-button";
 import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
+import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { cn } from "@/lib/utils";
 import type { TargetLanguage, GeneratedFile } from "@/types/dto-matic";
 
@@ -119,6 +120,8 @@ export default function DtoMaticPage() {
           </Button>
         }
       />
+
+      <ToolSuggestions toolId="dto-matic" input={jsonInput} output={selectedFile?.content || ""} />
 
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Input & Config Column */}

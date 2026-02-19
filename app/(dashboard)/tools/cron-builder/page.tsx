@@ -24,6 +24,7 @@ import { useTranslation } from "@/hooks/use-translation";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
 import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
+import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { cn } from "@/lib/utils";
 import type { ConfigFormat, NextExecution } from "@/types/cron-builder";
 
@@ -97,6 +98,8 @@ export default function CronBuilderPage() {
           </Button>
         }
       />
+
+      <ToolSuggestions toolId="cron-builder" input={Object.values(expression).join(" ")} output={explanation?.summary || ""} />
 
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Builder Column */}

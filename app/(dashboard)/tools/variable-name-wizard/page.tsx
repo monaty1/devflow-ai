@@ -38,6 +38,7 @@ import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
 import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { cn } from "@/lib/utils";
 import type { NameSuggestion, VariableType, WizardConfig } from "@/types/variable-name-wizard";
 
@@ -149,6 +150,8 @@ export default function VariableNameWizardPage() {
           </Button>
         }
       />
+
+      <ToolSuggestions toolId="variable-name-wizard" input={input} output={generationResult?.suggestions[0]?.name || ""} />
 
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Configuration Column */}

@@ -39,6 +39,7 @@ import { PromptAnalyzerSkeleton } from "@/components/shared/skeletons";
 import { CopyButton } from "@/components/shared/copy-button";
 import { TextArea } from "@heroui/react";
 import { Card, Button } from "@/components/ui";
+import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import type { PromptIssue, AnatomyElement } from "@/types/prompt-analyzer";
 
 const DIMENSION_ICONS: Record<AnatomyElement, React.ElementType> = {
@@ -164,6 +165,8 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
         description={t("promptAnalyzer.description")}
         breadcrumb
       />
+
+      <ToolSuggestions toolId="prompt-analyzer" input={prompt} output={result?.refinedPrompt || ""} />
 
       {/* Input Section */}
       <Card className="p-6">
