@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
   parseExpression,
   buildExpression,
@@ -6,6 +6,7 @@ import {
   explainExpression,
   calculateNextExecutions,
   isValidExpression,
+  generateConfig,
   CRON_PRESETS,
 } from "@/lib/application/cron-builder";
 
@@ -258,6 +259,76 @@ describe("Cron Builder", () => {
       expect(ids).toContain("daily-midnight");
       expect(ids).toContain("weekly-monday");
       expect(ids).toContain("monthly");
+    });
+  });
+
+  describe("generateConfig", () => {
+    it("should generate linux-crontab config", () => {
+      const config = generateConfig("0 12 * * *", "linux-crontab");
+      expect(config.format).toBe("linux-crontab");
+      expect(config.language).toBe("bash");
+      expect(config.code).toContain("0 12 * * *");
+    });
+
+    it("should generate kubernetes config", () => {
+      const config = generateConfig("*/5 * * * *", "kubernetes");
+      expect(config.format).toBe("kubernetes");
+      expect(config.language).toBe("yaml");
+      expect(config.code).toContain("*/5 * * * *");
+    });
+
+    it("should generate github-actions config", () => {
+      const config = generateConfig("0 0 * * *", "github-actions");
+      expect(config.format).toBe("github-actions");
+      expect(config.language).toBe("yaml");
+      expect(config.code).toContain("0 0 * * *");
+    });
+
+    it("should generate aws-eventbridge config", () => {
+      const config = generateConfig("0 12 * * *", "aws-eventbridge");
+      expect(config.format).toBe("aws-eventbridge");
+      expect(config.language).toBe("json");
+      expect(config.code).toContain("ScheduleExpression");
+    });
+  });
+
+  describe("calculateNextExecutions with timezone", () => {
+    it("should return executions with timezone", () => {
+      const executions = calculateNextExecutions("* * * * *", 3, "UTC");
+      expect(executions.length).toBe(3);
+    });
+
+    it("should format dates with timezone info", () => {
+      const executions = calculateNextExecutions("* * * * *", 1, "America/New_York");
+      expect(executions[0]!.formatted).toBeTruthy();
+    });
+
+    it("should return empty for invalid expression with timezone", () => {
+      const executions = calculateNextExecutions("invalid", 3, "UTC");
+      expect(executions.length).toBe(0);
+    });
+  });
+
+  describe("formatRelative exact-hours branch", () => {
+    it("should format exact whole hours", () => {
+      vi.useFakeTimers();
+      const now = new Date("2025-06-01T10:00:00Z");
+      vi.setSystemTime(now);
+      const targetHour = (now.getHours() + 2) % 24;
+      const executions = calculateNextExecutions(`0 ${targetHour} * * *`, 1);
+      expect(executions.length).toBe(1);
+      expect(executions[0]!.relative).toContain("en 2 horas");
+      vi.useRealTimers();
+    });
+
+    it("should use singular hora for exactly 1 hour", () => {
+      vi.useFakeTimers();
+      const now = new Date("2025-06-01T10:00:00Z");
+      vi.setSystemTime(now);
+      const targetHour = (now.getHours() + 1) % 24;
+      const executions = calculateNextExecutions(`0 ${targetHour} * * *`, 1);
+      expect(executions[0]!.relative).toBe("en 1 hora");
+      vi.useRealTimers();
     });
   });
 

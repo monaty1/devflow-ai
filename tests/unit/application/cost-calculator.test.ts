@@ -4,6 +4,8 @@ import {
   compareAllModels,
   calculateMonthlyCost,
   formatCost,
+  convertCost,
+  exportComparisonCsv,
 } from "@/lib/application/cost-calculator";
 import { AI_MODELS } from "@/config/ai-models";
 import type { AIModel } from "@/types/cost-calculator";
@@ -115,6 +117,47 @@ describe("Cost Calculator", () => {
       const cost20 = calculateMonthlyCost(testModel, 20, 1000, 500);
 
       expect(cost20).toBeCloseTo(cost10 * 2, 6);
+    });
+  });
+
+  describe("convertCost", () => {
+    it("should return same value for USD", () => {
+      expect(convertCost(10, "USD")).toBe(10);
+    });
+
+    it("should convert to EUR", () => {
+      expect(convertCost(10, "EUR")).toBeCloseTo(9.2, 5);
+    });
+
+    it("should convert to GBP", () => {
+      expect(convertCost(10, "GBP")).toBeCloseTo(7.9, 5);
+    });
+  });
+
+  describe("exportComparisonCsv", () => {
+    it("should have correct CSV headers", () => {
+      const comparison = compareAllModels(1000, 500);
+      const csv = exportComparisonCsv(comparison);
+      const firstLine = csv.split("\n")[0];
+      expect(firstLine).toBe("Model,Provider,Input Cost,Output Cost,Total Cost,Value Score");
+    });
+
+    it("should produce one row per model", () => {
+      const comparison = compareAllModels(1000, 500);
+      const lines = exportComparisonCsv(comparison).split("\n");
+      expect(lines.length).toBe(comparison.results.length + 1);
+    });
+
+    it("should apply EUR currency", () => {
+      const comparison = compareAllModels(1000000, 500000);
+      const csv = exportComparisonCsv(comparison, "EUR");
+      expect(csv).toContain("€");
+    });
+
+    it("should apply GBP currency", () => {
+      const comparison = compareAllModels(1000000, 500000);
+      const csv = exportComparisonCsv(comparison, "GBP");
+      expect(csv).toContain("£");
     });
   });
 

@@ -9,6 +9,9 @@ import {
   validateUuid,
   parseUuid,
   processUuidGeneration,
+  generateUlid,
+  generateNanoId,
+  formatBulkExport,
 } from "@/lib/application/uuid-generator";
 import { DEFAULT_UUID_CONFIG } from "@/types/uuid-generator";
 
@@ -99,6 +102,87 @@ describe("UUID Generator", () => {
     it("should return max UUID", () => {
       const uuid = generateUuid("max");
       expect(uuid).toBe("ffffffff-ffff-ffff-ffff-ffffffffffff");
+    });
+  });
+
+  describe("generateUuid with prefix", () => {
+    it("should apply hex prefix", () => {
+      const uuid = generateUuid("v4", "deadbeef");
+      expect(uuid.replace(/-/g, "").startsWith("deadbeef")).toBe(true);
+    });
+
+    it("should sanitize non-hex characters from prefix", () => {
+      const uuid = generateUuid("v4", "xyz!");
+      expect(uuid).toMatch(UUID_REGEX);
+    });
+
+    it("should limit prefix to 8 hex characters", () => {
+      const uuid = generateUuid("v4", "aabbccdd11223344");
+      expect(uuid.replace(/-/g, "").startsWith("aabbccdd")).toBe(true);
+    });
+
+    it("should not apply prefix to ulid (early return)", () => {
+      const ulid = generateUuid("ulid", "aabbccdd");
+      expect(ulid).toHaveLength(26);
+    });
+
+    it("should not apply prefix to nanoid (early return)", () => {
+      const nanoid = generateUuid("nanoid", "aabbccdd");
+      expect(nanoid).toHaveLength(21);
+    });
+  });
+
+  describe("generateUlid", () => {
+    it("should generate a 26-character string", () => {
+      expect(generateUlid()).toHaveLength(26);
+    });
+
+    it("should use Crockford Base32 characters", () => {
+      expect(generateUlid()).toMatch(/^[0-9A-HJKMNP-TV-Z]{26}$/);
+    });
+
+    it("should generate unique ULIDs", () => {
+      expect(generateUlid()).not.toBe(generateUlid());
+    });
+  });
+
+  describe("generateNanoId", () => {
+    it("should generate 21-char string by default", () => {
+      expect(generateNanoId()).toHaveLength(21);
+    });
+
+    it("should generate custom length", () => {
+      expect(generateNanoId(10)).toHaveLength(10);
+    });
+
+    it("should use URL-safe characters", () => {
+      expect(generateNanoId(100)).toMatch(/^[A-Za-z0-9_-]+$/);
+    });
+  });
+
+  describe("formatBulkExport", () => {
+    const uuids = ["550e8400-e29b-41d4-a716-446655440000", "6ba7b810-9dad-11d1-80b4-00c04fd430c8"];
+
+    it("should format as plain text", () => {
+      expect(formatBulkExport(uuids, "text")).toBe(uuids.join("\n"));
+    });
+
+    it("should format as JSON", () => {
+      const parsed = JSON.parse(formatBulkExport(uuids, "json")) as string[];
+      expect(parsed).toEqual(uuids);
+    });
+
+    it("should format as CSV with header", () => {
+      const lines = formatBulkExport(uuids, "csv").split("\n");
+      expect(lines[0]).toBe("uuid");
+      expect(lines[1]).toBe(uuids[0]);
+    });
+
+    it("should format as SQL INSERT", () => {
+      const sql = formatBulkExport(uuids, "sql");
+      expect(sql).toContain("INSERT INTO");
+      expect(sql).toContain(uuids[0]!);
+      expect(sql.endsWith(";")).toBe(true);
     });
   });
 
