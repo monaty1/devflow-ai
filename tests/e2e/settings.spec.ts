@@ -4,17 +4,13 @@ test.describe("Settings", () => {
   test("theme toggle switches between dark and light mode", async ({ page }) => {
     await page.goto("/settings");
 
-    // Find the theme toggle and verify the HTML element has the class attribute for theme
-    const html = page.locator("html");
-    const initialClass = await html.getAttribute("class");
+    // Click the "dark" theme button on the settings page (guarantees a class change)
+    const darkButton = page.getByRole("button", { name: "dark", exact: true });
+    await expect(darkButton).toBeVisible({ timeout: 5000 });
+    await darkButton.click();
 
-    // Click the theme toggle button
-    const themeToggle = page.getByRole("button", { name: /theme|dark|light/i }).first();
-    await themeToggle.click();
-
-    // Class should change after toggle
-    const newClass = await html.getAttribute("class");
-    expect(newClass).not.toBe(initialClass);
+    // next-themes should apply "dark" class on <html>
+    await expect(page.locator("html")).toHaveClass(/dark/, { timeout: 5000 });
   });
 
   test("locale toggle switches between EN and ES", async ({ page }) => {

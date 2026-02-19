@@ -25,7 +25,7 @@ test.describe("JSON Formatter", () => {
     const formatBtn = page.getByRole("button", { name: /format/i }).first();
     await formatBtn.click();
 
-    // Error message should appear
-    await expect(page.getByText(/error|invalid|syntax/i)).toBeVisible();
+    // Error badge should appear
+    await expect(page.getByText("ERROR")).toBeVisible();
   });
 });
