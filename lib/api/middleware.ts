@@ -31,7 +31,13 @@ export function extractBYOK(request: NextRequest): BYOKConfig | undefined {
     | null;
 
   if (!key || !provider) return undefined;
-  if (provider !== "gemini" && provider !== "groq") return undefined;
+  if (
+    provider !== "gemini" &&
+    provider !== "groq" &&
+    provider !== "openrouter" &&
+    provider !== "pollinations"
+  )
+    return undefined;
 
   return { key, provider };
 }

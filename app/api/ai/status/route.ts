@@ -1,5 +1,5 @@
 import type { AIStatusResult } from "@/types/ai";
-import { isAIConfigured, getServerEnv } from "@/infrastructure/config/env";
+import { getServerEnv } from "@/infrastructure/config/env";
 import { successResponse } from "@/lib/api/middleware";
 
 /**
@@ -8,13 +8,16 @@ import { successResponse } from "@/lib/api/middleware";
  */
 export async function GET() {
   const env = getServerEnv();
-  const configured = isAIConfigured();
+  // Always configured — Pollinations fallback requires no API key
+  const configured = true;
 
   const provider = env.GEMINI_API_KEY
     ? ("gemini" as const)
     : env.GROQ_API_KEY
       ? ("groq" as const)
-      : null;
+      : env.OPENROUTER_API_KEY
+        ? ("openrouter" as const)
+        : ("pollinations" as const);
 
   const result: AIStatusResult = {
     configured,

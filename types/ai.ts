@@ -1,7 +1,7 @@
 // AI Integration Types
 
 /** Supported AI providers */
-export type AIProviderType = "gemini" | "groq";
+export type AIProviderType = "gemini" | "groq" | "openrouter" | "pollinations";
 
 /** BYOK (Bring Your Own Key) configuration */
 export interface BYOKConfig {

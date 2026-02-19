@@ -7,6 +7,7 @@ import { z } from "zod";
 const serverEnvSchema = z.object({
   GEMINI_API_KEY: z.string().min(1).optional(),
   GROQ_API_KEY: z.string().min(1).optional(),
+  OPENROUTER_API_KEY: z.string().min(1).optional(),
   RATE_LIMIT_RPM: z.coerce.number().int().positive().default(10),
   RATE_LIMIT_DAILY_TOKENS: z.coerce.number().int().positive().default(500_000),
 });
@@ -25,6 +26,7 @@ export function getServerEnv(): ServerEnv {
   const result = serverEnvSchema.safeParse({
     GEMINI_API_KEY: process.env["GEMINI_API_KEY"],
     GROQ_API_KEY: process.env["GROQ_API_KEY"],
+    OPENROUTER_API_KEY: process.env["OPENROUTER_API_KEY"],
     RATE_LIMIT_RPM: process.env["RATE_LIMIT_RPM"],
     RATE_LIMIT_DAILY_TOKENS: process.env["RATE_LIMIT_DAILY_TOKENS"],
   });
@@ -35,6 +37,7 @@ export function getServerEnv(): ServerEnv {
     cachedEnv = {
       GEMINI_API_KEY: undefined,
       GROQ_API_KEY: undefined,
+      OPENROUTER_API_KEY: undefined,
       RATE_LIMIT_RPM: 10,
       RATE_LIMIT_DAILY_TOKENS: 500_000,
     };
@@ -48,5 +51,5 @@ export function getServerEnv(): ServerEnv {
 /** Check if any AI provider is configured on the server */
 export function isAIConfigured(): boolean {
   const env = getServerEnv();
-  return Boolean(env.GEMINI_API_KEY ?? env.GROQ_API_KEY);
+  return Boolean(env.GEMINI_API_KEY ?? env.GROQ_API_KEY ?? env.OPENROUTER_API_KEY);
 }
