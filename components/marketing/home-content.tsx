@@ -26,7 +26,7 @@ export function HomeContent({ stars }: HomeContentProps) {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
 
-        <div className="container mx-auto px-4 py-24 md:py-32">
+        <div className="container mx-auto px-4 py-16 md:py-24">
           <div className="mx-auto max-w-4xl space-y-6 text-center">
             <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-900 dark:bg-blue-900/30 dark:text-blue-200">
               <Zap className="size-4" />

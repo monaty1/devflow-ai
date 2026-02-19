@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import NextLink from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu, X, Sparkles, Github, Wrench, BookOpen } from "lucide-react";
+import { Menu, X, Github, Wrench, BookOpen } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useTranslation } from "@/hooks/use-translation";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
@@ -30,18 +31,24 @@ export function Navbar() {
         {t("nav.skipToContent")}
       </a>
 
-      <nav className="container mx-auto flex h-16 items-center px-4" aria-label="Main navigation">
+      <nav className="container mx-auto flex h-16 items-center px-4 relative" aria-label="Main navigation">
         {/* Logo */}
         <NextLink
           href="/"
           className="flex items-center gap-2 text-xl font-bold text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-md"
         >
-          <Sparkles className="size-6 text-primary" />
+          <Image
+            src="/logo.webp"
+            alt="DevFlow AI"
+            width={28}
+            height={28}
+            className="rounded-md"
+          />
           <span>DevFlow AI</span>
         </NextLink>
 
-        {/* Desktop Navigation — centered with animated underline */}
-        <div className="hidden flex-1 items-center justify-center gap-1 md:flex">
+        {/* Desktop Navigation — absolutely centered with animated underline */}
+        <div className="hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-1 md:flex">
           {navLinks.map((link) => {
             const isActive = pathname.startsWith(link.href);
             return (
@@ -63,6 +70,9 @@ export function Navbar() {
             );
           })}
         </div>
+
+        {/* Spacer to push right section */}
+        <div className="hidden flex-1 md:block" />
 
         {/* Desktop CTA + Toggles */}
         <div className="hidden items-center gap-1 md:flex">
