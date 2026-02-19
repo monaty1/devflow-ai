@@ -5,6 +5,30 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.1] - 2026-02-19
+
+### UX Polish: Cost Calculator Detail Modal, Navbar Redesign & i18n Fixes
+
+#### Cost Calculator
+- **Blur detail modal** — Eye button opens model detail with blur backdrop showing pricing per 1M tokens, context window, max output, benchmark score, per-request cost, monthly estimate
+- **Copy config action** — Copy icon exports model config as JSON
+- **Translated column headers** — all table columns now use `t()` keys
+
+#### Navbar Redesign (WCAG AAA)
+- **Descriptive icons** — Wrench for Tools, BookOpen for Docs in nav links
+- **Skip-to-content link** — hidden link for screen readers, visible on focus
+- **Focus indicators** — `focus-visible:outline-2 outline-offset-2` on all interactive elements
+- **44px touch targets** — mobile menu button meets WCAG 2.2 AA minimum
+- **CTA button** — includes Wrench icon for visual consistency
+
+#### i18n Fixes
+- **Landing page** — refactored to client component (`HomeContent`) so locale changes apply instantly
+- **Theme toggle** — translated aria-labels ("Light mode" / "Modo claro", etc.)
+- **Copy button** — translated default "Copy to clipboard" aria-label
+- **Navbar** — translated toggle menu aria-label
+- **History page** — tool names keyed by slug, displayed via `t()` instead of hardcoded English
+- **~55 new i18n keys** across both locale files
+
 ## [3.4.0] - 2026-02-19
 
 ### Full i18n, Dynamic Card Borders, Landing Polish & AI Setup Guide
