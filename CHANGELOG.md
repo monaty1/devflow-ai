@@ -5,6 +5,26 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-02-19
+
+### Phase E: Tool-by-Tool Iteration
+
+#### Added
+- **ToolSuggestions integration** — Context-aware cross-tool recommendation banners integrated into all 15 tool pages
+- **4 new i18n keys** — `common.delete`, `codeReview.issueActions`, `promptAnalyzer.exportReport`, `tokenViz.providerSelection`
+
+#### Changed
+- **i18n sweep** — ~230 hardcoded English strings replaced with `t()` calls across 12 tool pages (base64, code-review, context-manager, cron-builder, dto-matic, git-commit-generator, http-status-finder, regex-humanizer, tailwind-sorter, token-visualizer, uuid-generator, variable-name-wizard)
+- **Accessibility sweep (WCAG AAA)** — 8 tool pages improved:
+  - `cost-calculator`: aria-label on all 6 range/number inputs
+  - `code-review`: aria-label on DropdownTrigger, `role="img"` on SVG score chart
+  - `prompt-analyzer`: aria-label on delete + export buttons
+  - `context-manager`: `role="button"` + `tabIndex` + keyboard nav on window selector, fixed hardcoded "Cancel"
+  - `dto-matic`: keyboard nav on file selector, `role="radiogroup"` on mode chips + language buttons
+  - `token-visualizer`: `role="radiogroup"` on provider buttons, keyboard support on leaderboard Cards
+  - `variable-name-wizard`: `role="radiogroup"` on language selector
+  - `git-commit-generator`: `type="button"` + `aria-hidden` on "Add point"
+
 ## [3.0.0] - 2026-02-19
 
 ### Added
