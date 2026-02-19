@@ -32,13 +32,14 @@ export function Button({
   isDisabled,
   ...props
 }: ButtonProps) {
+  const isIconOnly = (props as Record<string, unknown>)["isIconOnly"] === true;
   return (
     <HeroButton
       variant={variant}
       size={size}
       isPending={isLoading}
       isDisabled={isDisabled === true || isLoading}
-      className={cn(className)}
+      className={cn(isIconOnly && "min-w-11 min-h-11", className)}
       {...props}
     >
       {({ isPending }) => (

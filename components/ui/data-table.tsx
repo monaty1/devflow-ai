@@ -19,12 +19,13 @@ import {
 } from "@heroui/react";
 import { Pagination } from "@heroui/pagination";
 import type { Selection } from "@heroui/react";
-import { 
-  ChevronDown, 
-  Plus, 
+import {
+  ChevronDown,
+  Plus,
   Columns,
 } from "lucide-react";
 import { Button } from "./button";
+import { useTranslation } from "@/hooks/use-translation";
 
 export interface ColumnConfig {
   name: string;
@@ -42,6 +43,7 @@ interface DataTableProps<T> {
   onAdd?: () => void;
   emptyContent?: string;
   placeholder?: string;
+  ariaLabel?: string;
 }
 
 export function DataTable<T extends { id: string | number }>({
@@ -52,9 +54,11 @@ export function DataTable<T extends { id: string | number }>({
   initialVisibleColumns,
   renderCell,
   onAdd,
-  emptyContent = "No items found",
-  placeholder = "Search...",
+  emptyContent,
+  placeholder,
+  ariaLabel,
 }: DataTableProps<T>) {
+  const { t } = useTranslation();
   const [filterValue, setFilterValue] = useState("");
   const [selectedKeys, setSelectedKeys] = useState<Selection>(new Set([]));
   const [visibleColumns, setVisibleColumns] = useState<Selection>(
@@ -129,7 +133,7 @@ export function DataTable<T extends { id: string | number }>({
         <div className="flex justify-between gap-3 items-end">
           <Input
             className="w-full sm:max-w-[44%]"
-            placeholder={placeholder}
+            placeholder={placeholder ?? t("tools.search")}
             value={filterValue}
             onChange={(e) => onSearchChange(e.target.value)}
             variant="primary"
@@ -139,13 +143,13 @@ export function DataTable<T extends { id: string | number }>({
               <Dropdown>
                 <DropdownTrigger className="hidden sm:flex">
                   <Button variant="ghost" className="gap-2">
-                    Status
-                    <ChevronDown className="text-small" />
+                    {t("table.status")}
+                    <ChevronDown className="text-small" aria-hidden="true" />
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu
                   disallowEmptySelection
-                  aria-label="Table Columns"
+                  aria-label={t("table.status")}
                   selectedKeys={statusFilter}
                   selectionMode="multiple"
                   onSelectionChange={setStatusFilter}
@@ -161,13 +165,13 @@ export function DataTable<T extends { id: string | number }>({
             <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
                 <Button variant="ghost" className="gap-2">
-                  Columns
-                  <Columns className="size-4" />
+                  {t("table.columns")}
+                  <Columns className="size-4" aria-hidden="true" />
                 </Button>
               </DropdownTrigger>
               <DropdownMenu
                 disallowEmptySelection
-                aria-label="Table Columns"
+                aria-label={t("table.columns")}
                 selectedKeys={visibleColumns}
                 selectionMode="multiple"
                 onSelectionChange={setVisibleColumns}
@@ -181,16 +185,16 @@ export function DataTable<T extends { id: string | number }>({
             </Dropdown>
             {onAdd && (
               <Button variant="primary" className="gap-2" onPress={onAdd}>
-                <Plus className="size-4" />
-                Add New
+                <Plus className="size-4" aria-hidden="true" />
+                {t("table.addNew")}
               </Button>
             )}
           </div>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-default-400 text-small">Total {data.length} items</span>
+          <span className="text-default-400 text-small">{t("table.totalItems", { count: data.length })}</span>
           <label className="flex items-center text-default-400 text-small">
-            Rows per page:
+            {t("table.rowsPerPage")}
             <select
               className="bg-transparent outline-none text-default-400 text-small cursor-pointer ml-1"
               onChange={(e) => setRowsPerPage(Number(e.target.value))}
@@ -204,15 +208,15 @@ export function DataTable<T extends { id: string | number }>({
         </div>
       </div>
     );
-  }, [filterValue, statusFilter, visibleColumns, data.length, onSearchChange, statusOptions, columns, onAdd, rowsPerPage, placeholder]);
+  }, [filterValue, statusFilter, visibleColumns, data.length, onSearchChange, statusOptions, columns, onAdd, rowsPerPage, placeholder, t]);
 
   const bottomContent = useMemo(() => {
     return (
       <div className="py-2 px-2 flex justify-between items-center">
         <span className="w-[30%] text-small text-default-400">
           {selectedKeys === "all"
-            ? "All items selected"
-            : `${(selectedKeys as Set<string>).size} of ${filteredItems.length} selected`}
+            ? t("table.allSelected")
+            : t("table.selectedOf", { selected: (selectedKeys as Set<string>).size, total: filteredItems.length })}
         </span>
         <Pagination
           color="primary"
@@ -222,20 +226,20 @@ export function DataTable<T extends { id: string | number }>({
         />
         <div className="hidden sm:flex w-[30%] justify-end gap-2">
           <Button isDisabled={pages === 1} size="sm" variant="ghost" onPress={() => setPage(p => Math.max(1, p - 1))}>
-            Previous
+            {t("table.previous")}
           </Button>
           <Button isDisabled={pages === 1} size="sm" variant="ghost" onPress={() => setPage(p => Math.min(pages, p + 1))}>
-            Next
+            {t("table.next")}
           </Button>
         </div>
       </div>
     );
-  }, [selectedKeys, filteredItems.length, page, pages]);
+  }, [selectedKeys, filteredItems.length, page, pages, t]);
 
   return (
     <Table
       isHeaderSticky
-      aria-label="Data Table"
+      aria-label={ariaLabel ?? t("table.ariaLabel")}
       bottomContent={bottomContent}
       bottomContentPlacement="outside"
       classNames={{
@@ -262,7 +266,7 @@ export function DataTable<T extends { id: string | number }>({
           </TableColumn>
         )}
       </TableHeader>
-      <TableBody emptyContent={emptyContent} items={sortedItems}>
+      <TableBody emptyContent={emptyContent ?? t("table.noItems")} items={sortedItems}>
         {(item: T) => (
           <TableRow key={item.id}>
             {(columnKey: React.Key) => <TableCell>{renderCell(item, columnKey)}</TableCell>}

@@ -109,8 +109,8 @@ export default function CronBuilderPage() {
             >
               <Tabs.ListContainer>
                 <Tabs.List aria-label="Builder mode">
-                  <Tabs.Tab id="builder">Expression Builder</Tabs.Tab>
-                  <Tabs.Tab id="infra">Infrastructure</Tabs.Tab>
+                  <Tabs.Tab id="builder">{t("cron.expressionBuilder")}</Tabs.Tab>
+                  <Tabs.Tab id="infra">{t("cron.infrastructure")}</Tabs.Tab>
                 </Tabs.List>
               </Tabs.ListContainer>
 
@@ -131,11 +131,11 @@ export default function CronBuilderPage() {
 
                   <div className="space-y-4">
                     {[
-                      { field: "minute", label: "Minute", range: "0-59" },
-                      { field: "hour", label: "Hour", range: "0-23" },
-                      { field: "dayOfMonth", label: "Day", range: "1-31" },
-                      { field: "month", label: "Month", range: "1-12" },
-                      { field: "dayOfWeek", label: "Weekday", range: "0-6" },
+                      { field: "minute", label: t("cron.fieldMinute"), range: "0-59" },
+                      { field: "hour", label: t("cron.fieldHour"), range: "0-23" },
+                      { field: "dayOfMonth", label: t("cron.fieldDay"), range: "1-31" },
+                      { field: "month", label: t("cron.fieldMonth"), range: "1-12" },
+                      { field: "dayOfWeek", label: t("cron.fieldWeekday"), range: "0-6" },
                     ].map((f) => (
                       <div key={f.field} className="flex items-center gap-4">
                         <label className="w-16 text-xs font-bold uppercase tracking-widest text-muted-foreground text-right">{f.label}</label>
@@ -158,15 +158,15 @@ export default function CronBuilderPage() {
                   </div>
 
                   <div className="pt-4 border-t border-divider">
-                    <p className="text-[10px] font-black uppercase text-muted-foreground mb-3 tracking-widest">Common Presets</p>
-                    <div className="grid grid-cols-3 gap-2">
+                    <p className="text-[10px] font-black uppercase text-muted-foreground mb-3 tracking-widest">{t("cron.commonPresets")}</p>
+                    <div className="grid grid-cols-3 gap-2" role="group" aria-label={t("cron.commonPresets")}>
                       {[
-                        { name: "Every 1m", exp: { minute: "*", hour: "*", dayOfMonth: "*", month: "*", dayOfWeek: "*" } },
-                        { name: "Hourly", exp: { minute: "0", hour: "*", dayOfMonth: "*", month: "*", dayOfWeek: "*" } },
-                        { name: "Daily", exp: { minute: "0", hour: "0", dayOfMonth: "*", month: "*", dayOfWeek: "*" } },
-                        { name: "Weekly", exp: { minute: "0", hour: "0", dayOfMonth: "*", month: "*", dayOfWeek: "1" } },
-                        { name: "Monthly", exp: { minute: "0", hour: "0", dayOfMonth: "1", month: "*", dayOfWeek: "*" } },
-                        { name: "Weekdays", exp: { minute: "0", hour: "9", dayOfMonth: "*", month: "*", dayOfWeek: "1-5" } },
+                        { name: t("cron.every1m"), exp: { minute: "*", hour: "*", dayOfMonth: "*", month: "*", dayOfWeek: "*" } },
+                        { name: t("cron.hourly"), exp: { minute: "0", hour: "*", dayOfMonth: "*", month: "*", dayOfWeek: "*" } },
+                        { name: t("cron.daily"), exp: { minute: "0", hour: "0", dayOfMonth: "*", month: "*", dayOfWeek: "*" } },
+                        { name: t("cron.weekly"), exp: { minute: "0", hour: "0", dayOfMonth: "*", month: "*", dayOfWeek: "1" } },
+                        { name: t("cron.monthly"), exp: { minute: "0", hour: "0", dayOfMonth: "1", month: "*", dayOfWeek: "*" } },
+                        { name: t("cron.weekdays"), exp: { minute: "0", hour: "9", dayOfMonth: "*", month: "*", dayOfWeek: "1-5" } },
                       ].map((p) => (
                         <Button
                           key={p.name}
@@ -228,7 +228,7 @@ export default function CronBuilderPage() {
           {explanation && (
             <Card className="p-8 bg-gradient-to-br from-orange-500/10 to-amber-500/10 border-orange-500/20 shadow-lg">
               <h3 className="text-xs font-black uppercase text-orange-600 mb-4 flex items-center gap-2 tracking-widest">
-                <Sparkles className="size-4" /> Human Readable
+                <Sparkles className="size-4" aria-hidden="true" /> {t("cron.humanReadable")}
               </h3>
               <p className="text-2xl font-black leading-tight text-foreground">
                 “{explanation.summary}”
@@ -248,18 +248,18 @@ export default function CronBuilderPage() {
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-bold flex items-center gap-2 text-emerald-600">
                 <Play className="size-4" />
-                Schedule Forecast
+                {t("cron.scheduleForecast")}
               </h3>
               <div className="flex items-center gap-2">
-                <Globe className="size-3 text-muted-foreground" />
-                <span className="text-xs font-mono text-muted-foreground">UTC vs Local</span>
+                <Globe className="size-3 text-muted-foreground" aria-hidden="true" />
+                <span className="text-xs font-mono text-muted-foreground">{t("cron.utcVsLocal")}</span>
               </div>
             </div>
             
             {explanation?.humanReadable.includes("inválida") ? (
               <div className="p-12 text-center border-2 border-dashed border-divider rounded-xl">
                 <AlertTriangle className="size-8 text-amber-500 mx-auto mb-3" />
-                <p className="text-sm font-medium text-muted-foreground">Invalid cron expression</p>
+                <p className="text-sm font-medium text-muted-foreground">{t("cron.invalidExpression")}</p>
               </div>
             ) : (
               <DataTable
@@ -268,7 +268,7 @@ export default function CronBuilderPage() {
                 filterField="formatted"
                 renderCell={renderExecutionCell}
                 initialVisibleColumns={["formatted", "utc", "relative"]}
-                emptyContent="No upcoming executions found."
+                emptyContent={t("cron.noUpcoming")}
               />
             )}
           </Card>

@@ -12,6 +12,7 @@ import {
   Regex,
   Search,
 } from "lucide-react";
+import { useTranslation } from "@/hooks/use-translation";
 
 type DetectedType =
   | "json"
@@ -68,13 +69,11 @@ function detectInputType(trimmed: string): DetectedType {
 export function MagicInput() {
   const [input, setInput] = useState("");
   const router = useRouter();
+  const { t } = useTranslation();
 
   const detectedType = useMemo(() => detectInputType(input.trim()), [input]);
 
-  const handleAction = (tool: string, _action: string) => {
-    // In a real app, we would pass the 'input' via query param or global state context
-    // For now, we just route to the tool
-    // We could use localStorage to pass the data "magically"
+  const handleAction = (tool: string) => {
     localStorage.setItem("magic-input", input);
     router.push(`/tools/${tool}`);
   };
@@ -83,32 +82,32 @@ export function MagicInput() {
     switch (detectedType) {
       case "json":
         return [
-          { label: "Format JSON", tool: "json-formatter", icon: FileJson },
-          { label: "Convert to TS", tool: "dto-matic", icon: Code2 },
+          { label: t("magic.formatJson"), tool: "json-formatter", icon: FileJson },
+          { label: t("magic.convertTs"), tool: "dto-matic", icon: Code2 },
         ];
       case "cron":
         return [
-          { label: "Explain Cron", tool: "cron-builder", icon: Clock },
+          { label: t("magic.explainCron"), tool: "cron-builder", icon: Clock },
         ];
       case "jwt":
         return [
-          { label: "Decode Token", tool: "base64", icon: Binary },
+          { label: t("magic.decodeToken"), tool: "base64", icon: Binary },
         ];
       case "base64":
         return [
-          { label: "Decode Base64", tool: "base64", icon: Binary },
+          { label: t("magic.decodeBase64"), tool: "base64", icon: Binary },
         ];
       case "uuid":
         return [
-          { label: "Analyze UUID", tool: "uuid-generator", icon: Search },
+          { label: t("magic.analyzeUuid"), tool: "uuid-generator", icon: Search },
         ];
       case "regex":
         return [
-          { label: "Explain Regex", tool: "regex-humanizer", icon: Regex },
+          { label: t("magic.explainRegex"), tool: "regex-humanizer", icon: Regex },
         ];
       case "code":
         return [
-          { label: "Review Code", tool: "code-review", icon: Sparkles },
+          { label: t("magic.reviewCode"), tool: "code-review", icon: Sparkles },
         ];
       default:
         return [];
@@ -121,15 +120,15 @@ export function MagicInput() {
     <Card className="p-1 shadow-md border-primary/20 ring-4 ring-primary/5 transition-all focus-within:ring-primary/20">
       <div className="relative">
         <div className="absolute left-4 top-4 text-muted-foreground">
-          <Sparkles className="size-5" />
+          <Sparkles className="size-5" aria-hidden="true" />
         </div>
         <TextArea
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Paste anything here... JSON, Cron, JWT, Code, etc."
+          placeholder={t("magic.placeholder")}
           className="w-full resize-none bg-transparent px-12 py-4 text-base placeholder:text-muted-foreground/50 focus:outline-none min-h-[60px]"
           rows={Math.min(5, Math.max(2, input.split("\n").length))}
-          aria-label="Paste anything here"
+          aria-label={t("magic.ariaLabel")}
         />
         {detectedType && (
           <div className="absolute right-3 top-3 flex gap-2">
@@ -139,9 +138,9 @@ export function MagicInput() {
                 size="sm"
                 variant="primary"
                 className="shadow-sm"
-                onPress={() => handleAction(action.tool, action.label)}
+                onPress={() => handleAction(action.tool)}
               >
-                <action.icon className="mr-1.5 size-3.5" />
+                <action.icon className="mr-1.5 size-3.5" aria-hidden="true" />
                 {action.label}
               </Button>
             ))}

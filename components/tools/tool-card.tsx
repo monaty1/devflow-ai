@@ -5,6 +5,7 @@ import { Card, Button } from "@heroui/react";
 import { Heart } from "lucide-react";
 import { useFavorites } from "@/lib/context";
 import { TOOL_ICON_MAP } from "@/config/tool-icon-map";
+import { useTranslation } from "@/hooks/use-translation";
 import type { Tool } from "@/types/tools";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +15,7 @@ interface ToolCardProps {
 
 export function ToolCard({ tool }: ToolCardProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { t } = useTranslation();
   const favorited = isFavorite(tool.id);
   const IconComponent = TOOL_ICON_MAP[tool.icon];
 
@@ -44,7 +46,7 @@ export function ToolCard({ tool }: ToolCardProps) {
             size="sm"
             onPress={() => toggleFavorite(tool.id)}
             className="relative z-10 cursor-pointer opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100"
-            aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+            aria-label={favorited ? t("favorites.remove") : t("favorites.add")}
           >
             <Heart
               className={cn(
