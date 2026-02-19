@@ -158,7 +158,7 @@ export default function CodeReviewPage() {
               >
                 <div className="flex items-center gap-2">
                   <Wand2 className="size-3" />
-                  <span>Improve Names</span>
+                  <span>{t("codeReview.improveNames")}</span>
                 </div>
               </DropdownItem>
             </DropdownMenu>
@@ -167,7 +167,7 @@ export default function CodeReviewPage() {
       default:
         return String(issue[key as keyof typeof issue] ?? "");
     }
-  }, [navigateTo]);
+  }, [navigateTo, t]);
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -226,7 +226,7 @@ export default function CodeReviewPage() {
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                  Lines
+                  {t("codeReview.linesLabel")}
                 </label>
                 <div className="h-10 flex items-center px-3 bg-muted/30 rounded-xl border border-border/50 font-mono text-sm">
                   {code.split("\n").length}
@@ -305,7 +305,7 @@ export default function CodeReviewPage() {
                       <p className="text-xl font-bold flex items-center gap-2">
                         {result.metrics.complexity}
                         <StatusBadge variant={result.metrics.complexity > 10 ? "warning" : "success"}>
-                          {result.metrics.complexity > 10 ? "High" : "Optimal"}
+                          {result.metrics.complexity > 10 ? t("codeReview.high") : t("codeReview.optimal")}
                         </StatusBadge>
                       </p>
                     </div>
@@ -316,7 +316,7 @@ export default function CodeReviewPage() {
                   </div>
                   <div className="mt-4 space-y-2">
                     <div className="flex justify-between text-xs font-medium">
-                      <span>Documentation Coverage</span>
+                      <span>{t("codeReview.docCoverage")}</span>
                       <span>{Math.round((result.metrics.commentLines / result.metrics.totalLines) * 100)}%</span>
                     </div>
                     <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
@@ -333,14 +333,14 @@ export default function CodeReviewPage() {
               <Card className="p-6">
                 <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                   <ShieldAlert className="size-5 text-danger" />
-                  Detailed Audit Findings
+                  {t("codeReview.auditFindings")}
                 </h3>
                 <DataTable
                   columns={issueColumns}
                   data={result.issues.map((issue, id) => ({ ...issue, id }))}
                   filterField="message"
                   renderCell={renderIssueCell}
-                  emptyContent="No issues found. Your code is clean!"
+                  emptyContent={t("codeReview.noIssues")}
                 />
               </Card>
 
@@ -422,10 +422,10 @@ export default function CodeReviewPage() {
                     <div>
                       <h3 className="flex items-center gap-2 font-bold text-lg">
                         <Zap className="size-5 text-primary fill-primary/20" />
-                        Senior Developer Refactor
+                        {t("codeReview.seniorRefactor")}
                       </h3>
                       <p className="text-xs text-muted-foreground">
-                        Optimized version applying clean code and design patterns.
+                        {t("codeReview.refactorDesc")}
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
@@ -439,7 +439,7 @@ export default function CodeReviewPage() {
                         }}
                         className="font-bold"
                       >
-                        Apply Changes
+                        {t("codeReview.applyChanges")}
                       </Button>
                     </div>
                   </div>

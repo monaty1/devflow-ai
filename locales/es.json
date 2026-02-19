@@ -811,6 +811,7 @@
   "tailwind.styledElement": "Elemento Estilizado",
   "tailwind.sampleElement": "Elemento de Muestra",
   "tailwind.sandboxNote": "Nota: Las clases se aplican a este elemento en tiempo real desde el Web Worker.",
+  "tailwind.inputPlaceholder": "Pega tus clases de Tailwind desordenadas aquí...",
 
   "gitCommit.commitArchitect": "Arquitecto de Commits",
   "gitCommit.typeLabel": "Tipo",

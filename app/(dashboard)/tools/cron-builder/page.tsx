@@ -113,7 +113,7 @@ export default function CronBuilderPage() {
               <Tabs.ListContainer>
                 <Tabs.List aria-label="Builder mode">
                   <Tabs.Tab id="builder">{t("cron.expressionBuilder")}</Tabs.Tab>
-                  <Tabs.Tab id="infra">{t("cron.infrastructure")}</Tabs.Tab>
+                  <Tabs.Tab id="infra">{t("cron.infrastructureTab")}</Tabs.Tab>
                 </Tabs.List>
               </Tabs.ListContainer>
 
@@ -134,11 +134,11 @@ export default function CronBuilderPage() {
 
                   <div className="space-y-4">
                     {[
-                      { field: "minute", label: t("cron.fieldMinute"), range: "0-59" },
-                      { field: "hour", label: t("cron.fieldHour"), range: "0-23" },
-                      { field: "dayOfMonth", label: t("cron.fieldDay"), range: "1-31" },
-                      { field: "month", label: t("cron.fieldMonth"), range: "1-12" },
-                      { field: "dayOfWeek", label: t("cron.fieldWeekday"), range: "0-6" },
+                      { field: "minute", label: t("cron.minuteLabel"), range: "0-59" },
+                      { field: "hour", label: t("cron.hourLabel"), range: "0-23" },
+                      { field: "dayOfMonth", label: t("cron.dayLabel"), range: "1-31" },
+                      { field: "month", label: t("cron.monthLabel"), range: "1-12" },
+                      { field: "dayOfWeek", label: t("cron.weekdayLabel"), range: "0-6" },
                     ].map((f) => (
                       <div key={f.field} className="flex items-center gap-4">
                         <label className="w-16 text-xs font-bold uppercase tracking-widest text-muted-foreground text-right">{f.label}</label>
@@ -165,11 +165,11 @@ export default function CronBuilderPage() {
                     <div className="grid grid-cols-3 gap-2" role="group" aria-label={t("cron.commonPresets")}>
                       {[
                         { name: t("cron.every1m"), exp: { minute: "*", hour: "*", dayOfMonth: "*", month: "*", dayOfWeek: "*" } },
-                        { name: t("cron.hourly"), exp: { minute: "0", hour: "*", dayOfMonth: "*", month: "*", dayOfWeek: "*" } },
-                        { name: t("cron.daily"), exp: { minute: "0", hour: "0", dayOfMonth: "*", month: "*", dayOfWeek: "*" } },
-                        { name: t("cron.weekly"), exp: { minute: "0", hour: "0", dayOfMonth: "*", month: "*", dayOfWeek: "1" } },
-                        { name: t("cron.monthly"), exp: { minute: "0", hour: "0", dayOfMonth: "1", month: "*", dayOfWeek: "*" } },
-                        { name: t("cron.weekdays"), exp: { minute: "0", hour: "9", dayOfMonth: "*", month: "*", dayOfWeek: "1-5" } },
+                        { name: t("cron.hourlyPreset"), exp: { minute: "0", hour: "*", dayOfMonth: "*", month: "*", dayOfWeek: "*" } },
+                        { name: t("cron.dailyPreset"), exp: { minute: "0", hour: "0", dayOfMonth: "*", month: "*", dayOfWeek: "*" } },
+                        { name: t("cron.weeklyPreset"), exp: { minute: "0", hour: "0", dayOfMonth: "*", month: "*", dayOfWeek: "1" } },
+                        { name: t("cron.monthlyPreset"), exp: { minute: "0", hour: "0", dayOfMonth: "1", month: "*", dayOfWeek: "*" } },
+                        { name: t("cron.weekdaysPreset"), exp: { minute: "0", hour: "9", dayOfMonth: "*", month: "*", dayOfWeek: "1-5" } },
                       ].map((p) => (
                         <Button
                           key={p.name}
@@ -271,7 +271,7 @@ export default function CronBuilderPage() {
                 filterField="formatted"
                 renderCell={renderExecutionCell}
                 initialVisibleColumns={["formatted", "utc", "relative"]}
-                emptyContent={t("cron.noUpcoming")}
+                emptyContent={t("cron.noUpcomingExecutions")}
               />
             )}
           </Card>

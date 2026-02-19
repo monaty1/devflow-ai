@@ -169,7 +169,7 @@ export default function GitCommitGeneratorPage() {
                   <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("gitCommit.scopeLabel")}</label>
                   <Input 
                     variant="primary"
-                    placeholder="e.g. auth, ui" 
+                    placeholder={t("gitCommit.scopePlaceholder")}
                     value={config.scope} 
                     onChange={(e) => updateConfig("scope", e.target.value)} 
                     className="font-bold text-xs"
@@ -181,7 +181,7 @@ export default function GitCommitGeneratorPage() {
                 <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("gitCommit.summaryLabel")}</label>
                 <Input
                   variant="primary"
-                  placeholder="What changed?"
+                  placeholder={t("gitCommit.descriptionPlaceholder")}
                   value={config.description}
                   onChange={(e) => updateConfig("description", e.target.value)}
                   onKeyDown={(e) => {
@@ -205,7 +205,7 @@ export default function GitCommitGeneratorPage() {
                   </button>
                 </div>
                 <TextArea
-                  placeholder="Detailed explanation..."
+                  placeholder={t("gitCommit.bodyPlaceholder")}
                   value={config.body}
                   onChange={(e) => updateConfig("body", e.target.value)}
                   className="font-mono text-xs"
@@ -218,7 +218,7 @@ export default function GitCommitGeneratorPage() {
                     <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("gitCommit.refsLabel")}</label>
                     <Input 
                       variant="primary"
-                      placeholder="#123" 
+                      placeholder={t("gitCommit.issuesPlaceholder")}
                       value={config.issueRef} 
                       onChange={(e) => updateConfig("issueRef", e.target.value)} 
                       className="font-bold"
@@ -354,7 +354,7 @@ export default function GitCommitGeneratorPage() {
                     <div className="flex justify-between items-center text-xs">
                       <span>{t("gitCommit.headerLength")}</span>
                       <StatusBadge variant={config.description.length <= 72 ? "success" : "error"}>
-                        {config.description.length} chars
+                        {t("gitCommit.chars", { count: String(config.description.length) })}
                       </StatusBadge>
                     </div>
                     <div className="flex justify-between items-center text-xs">

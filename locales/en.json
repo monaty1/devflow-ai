@@ -757,6 +757,7 @@
   "tailwind.styledElement": "Styled Element",
   "tailwind.sampleElement": "Sample Element",
   "tailwind.sandboxNote": "Note: Classes are applied to this element in real-time from the Web Worker.",
+  "tailwind.inputPlaceholder": "Paste your messy tailwind classes here...",
 
   "gitCommit.commitArchitect": "Commit Architect",
   "gitCommit.typeLabel": "Type",

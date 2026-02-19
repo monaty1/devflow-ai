@@ -94,7 +94,7 @@ export default function ContextManagerPage() {
             <div className="flex flex-col">
               <span className="font-bold text-sm">{doc.title}</span>
               <span className="text-[10px] text-muted-foreground font-mono truncate max-w-[150px]">
-                {doc.filePath || "No path set"}
+                {doc.filePath || t("ctxMgr.noPathSet")}
               </span>
             </div>
           </div>
@@ -139,7 +139,7 @@ export default function ContextManagerPage() {
         );
       case "actions":
         return (
-          <Button isIconOnly size="sm" variant="ghost" onPress={() => removeDocument(doc.id)} aria-label="Remove document">
+          <Button isIconOnly size="sm" variant="ghost" onPress={() => removeDocument(doc.id)} aria-label={t("ctxMgr.removeDocLabel2")}>
             <Trash2 className="size-4 text-danger" />
           </Button>
         );
@@ -165,7 +165,7 @@ export default function ContextManagerPage() {
         <Card className="p-4 lg:col-span-3 flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <Input
-              placeholder="New window name..."
+              placeholder={t("ctxMgr.newWindowPlaceholder")}
               value={newWindowName}
               onChange={(e) => setNewWindowName(e.target.value)}
               onKeyDown={(e) => {
@@ -188,12 +188,12 @@ export default function ContextManagerPage() {
               }}
               className="font-bold text-primary"
             >
-              <Plus className="size-4 mr-1" /> Create Window
+              <Plus className="size-4 mr-1" /> {t("ctxMgr.createWindowBtn")}
             </Button>
           </div>
 
           <div className="space-y-2 mt-4 overflow-auto max-h-[600px] pr-2 scrollbar-hide">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-2">Project Contexts</p>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-2">{t("ctxMgr.projectContexts")}</p>
             {windows.map((w) => (
               <div
                 key={w.id}
@@ -214,7 +214,7 @@ export default function ContextManagerPage() {
                   size="sm"
                   variant="ghost"
                   className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  aria-label="Delete workspace"
+                  aria-label={t("ctxMgr.deleteWorkspace")}
                   onPress={() => {
                     deleteWindow(w.id);
                   }}
@@ -234,7 +234,7 @@ export default function ContextManagerPage() {
               <div className="grid gap-4 sm:grid-cols-3">
                 <Card className="p-6 bg-gradient-to-br from-indigo-600 to-blue-700 text-white shadow-lg shadow-indigo-500/20 border-none">
                   <div className="flex items-center justify-between mb-4">
-                    <p className="text-[10px] font-bold uppercase opacity-80">Utilization</p>
+                    <p className="text-[10px] font-bold uppercase opacity-80">{t("ctxMgr.utilization")}</p>
                     <StatusBadge variant="info">{activeWindow.totalTokens.toLocaleString()} t</StatusBadge>
                   </div>
                   <p className="text-4xl font-black mb-2">{activeWindow.utilizationPercentage}%</p>
@@ -252,7 +252,7 @@ export default function ContextManagerPage() {
                       <Coins className="size-6" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Est. Cost (GPT-4o)</p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t("ctxMgr.estCost")}</p>
                       <p className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">
                         {formatCost((activeWindow.totalTokens / 1_000_000) * (AI_MODELS.find(m => m.id === "gpt-4o")?.inputPricePerMToken || 2.5))}
                       </p>
@@ -267,24 +267,24 @@ export default function ContextManagerPage() {
                       navigateTo("token-visualizer", fullContent);
                     }}
                   >
-                    Deep Token Audit
+                    {t("ctxMgr.deepTokenAudit")}
                   </Button>
                 </Card>
 
                 <Card className="p-6 flex flex-col gap-4">
                   <div className="flex flex-col gap-1">
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Packaging Engine</p>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase">{t("ctxMgr.packagingEngine")}</p>
                     <Checkbox 
                       isSelected={stripComments} 
                       onChange={() => setStripComments(!stripComments)}
                       className="mt-1"
                     >
-                      <span className="text-[10px] font-black uppercase text-primary tracking-tighter">Strip Code Comments</span>
+                      <span className="text-[10px] font-black uppercase text-primary tracking-tighter">{t("ctxMgr.stripComments")}</span>
                     </Checkbox>
                   </div>
                   <CopyButton
                     getText={() => exportForAI({ stripComments }) || ""}
-                    label="Copy AI-Ready Context"
+                    label={t("ctxMgr.copyAiReady")}
                     className="font-bold shadow-lg shadow-primary/20 h-12 w-full"
                   />
                 </Card>
@@ -295,7 +295,7 @@ export default function ContextManagerPage() {
                 {/* Visual Tree */}
                 <Card className="p-6 lg:col-span-2 bg-muted/10">
                   <h3 className="text-xs font-black uppercase text-muted-foreground mb-4 flex items-center gap-2 tracking-widest">
-                    <FolderTree className="size-3 text-primary" /> Project Hierarchy
+                    <FolderTree className="size-3 text-primary" /> {t("ctxMgr.projectHierarchy")}
                   </h3>
                   {activeWindow.documents.length > 0 ? (
                     <div className="text-[10px] font-mono leading-tight overflow-auto max-h-[400px] text-primary/80 space-y-1">
@@ -307,7 +307,7 @@ export default function ContextManagerPage() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-[10px] text-muted-foreground italic text-center py-10">Add files to see the project map.</p>
+                    <p className="text-[10px] text-muted-foreground italic text-center py-10">{t("ctxMgr.addFilesHint")}</p>
                   )}
                 </Card>
 
@@ -316,7 +316,7 @@ export default function ContextManagerPage() {
                   <div className="p-4 border-b border-divider flex items-center justify-between bg-muted/20">
                     <h3 className="font-bold flex items-center gap-2 text-sm">
                       <FileText className="size-4 text-primary" />
-                      Context Units
+                      {t("ctxMgr.contextUnits")}
                     </h3>
                     <Button 
                       variant="ghost" 
@@ -324,7 +324,7 @@ export default function ContextManagerPage() {
                       onPress={() => setShowAddDoc(true)}
                       className="font-black text-[10px] uppercase h-7 px-3 text-primary"
                     >
-                      <Plus className="size-3 mr-1" /> Add Source
+                      <Plus className="size-3 mr-1" /> {t("ctxMgr.addSourceBtn")}
                     </Button>
                   </div>
 
@@ -334,7 +334,7 @@ export default function ContextManagerPage() {
                     filterField="title"
                     renderCell={renderDocCell}
                     initialVisibleColumns={["title", "tokens", "priority", "actions"]}
-                    emptyContent="No documents in this window."
+                    emptyContent={t("ctxMgr.noDocsWindow")}
                   />
                 </Card>
               </div>
@@ -344,9 +344,9 @@ export default function ContextManagerPage() {
               <div className="size-24 bg-muted rounded-full flex items-center justify-center mb-6">
                 <FolderPlus className="size-12 text-muted-foreground/30" />
               </div>
-              <h3 className="text-2xl font-black mb-2 opacity-80 text-foreground/50">Select or Create a Context</h3>
+              <h3 className="text-2xl font-black mb-2 opacity-80 text-foreground/50">{t("ctxMgr.selectCreateTitle")}</h3>
               <p className="text-muted-foreground max-w-sm mx-auto font-medium">
-                Organize your project code, API docs, and instructions into a single AI-optimized payload.
+                {t("ctxMgr.selectCreateDesc")}
               </p>
             </Card>
           )}
@@ -362,8 +362,8 @@ export default function ContextManagerPage() {
                 <FileCode className="size-6" />
               </div>
               <div>
-                <h3 id="add-doc-title" className="text-2xl font-black">Add Context Source</h3>
-                <p className="text-xs text-muted-foreground font-medium">Paste code, documentation or prompt instructions.</p>
+                <h3 id="add-doc-title" className="text-2xl font-black">{t("ctxMgr.addContextSource")}</h3>
+                <p className="text-xs text-muted-foreground font-medium">{t("ctxMgr.addContextSourceDesc")}</p>
               </div>
             </div>
 
@@ -379,19 +379,19 @@ export default function ContextManagerPage() {
                     value={docType}
                     onChange={(value) => { if (value) setDocType(value as DocumentType); }}
                     className="w-full"
-                    aria-label="Document Type"
+                    aria-label={t("ctxMgr.documentTypeLabel")}
                   >
-                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Document Type</Label>
+                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("ctxMgr.documentTypeLabel")}</Label>
                     <Select.Trigger className="h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm">
                       <Select.Value />
                       <Select.Indicator />
                     </Select.Trigger>
                     <Select.Popover>
                       <ListBox>
-                        <ListBox.Item id="code" textValue="Source Code">Source Code<ListBox.ItemIndicator /></ListBox.Item>
-                        <ListBox.Item id="documentation" textValue="Technical Docs">Technical Docs<ListBox.ItemIndicator /></ListBox.Item>
-                        <ListBox.Item id="api" textValue="API Specification">API Specification<ListBox.ItemIndicator /></ListBox.Item>
-                        <ListBox.Item id="notes" textValue="Context Instructions">Context Instructions<ListBox.ItemIndicator /></ListBox.Item>
+                        <ListBox.Item id="code" textValue={t("ctxMgr.optSourceCode")}>{t("ctxMgr.optSourceCode")}<ListBox.ItemIndicator /></ListBox.Item>
+                        <ListBox.Item id="documentation" textValue={t("ctxMgr.optTechnicalDocs")}>{t("ctxMgr.optTechnicalDocs")}<ListBox.ItemIndicator /></ListBox.Item>
+                        <ListBox.Item id="api" textValue={t("ctxMgr.optApiSpec")}>{t("ctxMgr.optApiSpec")}<ListBox.ItemIndicator /></ListBox.Item>
+                        <ListBox.Item id="notes" textValue={t("ctxMgr.optContextInstructions")}>{t("ctxMgr.optContextInstructions")}<ListBox.ItemIndicator /></ListBox.Item>
                       </ListBox>
                     </Select.Popover>
                   </Select>
@@ -401,18 +401,18 @@ export default function ContextManagerPage() {
                     value={docPriority}
                     onChange={(value) => { if (value) setDocPriority(value as Priority); }}
                     className="w-full"
-                    aria-label="Priority"
+                    aria-label={t("ctxMgr.priorityLabel")}
                   >
-                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Priority</Label>
+                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("ctxMgr.priorityLabel")}</Label>
                     <Select.Trigger className="h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm">
                       <Select.Value />
                       <Select.Indicator />
                     </Select.Trigger>
                     <Select.Popover>
                       <ListBox>
-                        <ListBox.Item id="high" textValue="High (Crucial Logic)">High (Crucial Logic)<ListBox.ItemIndicator /></ListBox.Item>
-                        <ListBox.Item id="medium" textValue="Medium (Standard)">Medium (Standard)<ListBox.ItemIndicator /></ListBox.Item>
-                        <ListBox.Item id="low" textValue="Low (Reference)">Low (Reference)<ListBox.ItemIndicator /></ListBox.Item>
+                        <ListBox.Item id="high" textValue={t("ctxMgr.optHighCrucial")}>{t("ctxMgr.optHighCrucial")}<ListBox.ItemIndicator /></ListBox.Item>
+                        <ListBox.Item id="medium" textValue={t("ctxMgr.optMediumStandard")}>{t("ctxMgr.optMediumStandard")}<ListBox.ItemIndicator /></ListBox.Item>
+                        <ListBox.Item id="low" textValue={t("ctxMgr.optLowReference")}>{t("ctxMgr.optLowReference")}<ListBox.ItemIndicator /></ListBox.Item>
                       </ListBox>
                     </Select.Popover>
                   </Select>
@@ -420,7 +420,7 @@ export default function ContextManagerPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Content</label>
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("ctxMgr.contentLabel")}</label>
                 <TextArea
                   value={docContent}
                   onChange={(e) => setDocContent(e.target.value)}
@@ -435,9 +435,9 @@ export default function ContextManagerPage() {
                       }
                     }
                   }}
-                  placeholder="Paste context content here..."
+                  placeholder={t("ctxMgr.pasteContentPlaceholder")}
                   className="h-48 w-full resize-none rounded-2xl border-2 border-divider bg-background p-4 font-mono text-sm focus:border-indigo-500 outline-none transition-all shadow-inner"
-                  aria-label="Content"
+                  aria-label={t("ctxMgr.contentLabel")}
                 />
               </div>
 
@@ -453,7 +453,7 @@ export default function ContextManagerPage() {
                     setShowAddDoc(false);
                   }}
                 >
-                  Ingest to Context
+                  {t("ctxMgr.ingestToContext")}
                 </Button>
                 <Button variant="ghost" className="font-black h-12" onPress={() => { resetDocForm(); setShowAddDoc(false); }}>Cancel</Button>
               </div>

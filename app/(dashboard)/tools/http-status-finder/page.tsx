@@ -127,7 +127,7 @@ export default function HttpStatusFinderPage() {
               <Button isIconOnly size="sm" variant={activeView === "table" ? "primary" : "ghost"} onPress={() => setActiveView("table")} aria-label="Table view"><Database className="size-3.5" /></Button>
             </div>
             <Button variant="outline" size="sm" onPress={clearSearch} className="gap-2 font-bold">
-              <RotateCcw className="size-4" /> Reset
+              <RotateCcw className="size-4" /> {t("httpStatus.resetBtn")}
             </Button>
           </div>
         }
@@ -141,10 +141,10 @@ export default function HttpStatusFinderPage() {
           <Card className="p-6">
             <h3 className="font-bold flex items-center gap-2 mb-6 text-foreground/80 uppercase text-[10px] tracking-widest">
               <Search className="size-4 text-primary" />
-              Smart Navigator
+              {t("httpStatus.smartNavigator")}
             </h3>
             <Input
-              placeholder="Code (404) or Keyword (not found)..."
+              placeholder={t("httpStatus.searchHint")}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               variant="primary"
@@ -171,7 +171,7 @@ export default function HttpStatusFinderPage() {
           {/* Decision Wizard Card */}
           <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-2xl border-none">
             <h3 className="text-xs font-black uppercase opacity-60 mb-6 flex items-center gap-2 tracking-widest">
-              <HelpCircle className="size-3 text-cyan-400" /> Decision Pipeline
+              <HelpCircle className="size-3 text-cyan-400" /> {t("httpStatus.decisionPipeline")}
             </h3>
             <div className="space-y-4">
               {[
@@ -217,7 +217,7 @@ export default function HttpStatusFinderPage() {
                       </div>
                       <div className="flex gap-2 items-center">
                         <StatusBadge variant="info">{getCategoryInfo(selectedCode.category).label.toUpperCase()}</StatusBadge>
-                        <span className="text-[10px] font-black opacity-30 uppercase tracking-widest">RFC Compliant</span>
+                        <span className="text-[10px] font-black opacity-30 uppercase tracking-widest">{t("httpStatus.rfcCompliant")}</span>
                       </div>
                     </div>
                   </div>
@@ -227,13 +227,13 @@ export default function HttpStatusFinderPage() {
                 <div className="mt-12 grid gap-10 sm:grid-cols-2 border-t border-divider pt-10">
                   <div className="space-y-3">
                     <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2">
-                      <Info className="size-3" /> Description
+                      <Info className="size-3" /> {t("httpStatus.descriptionHeader")}
                     </label>
                     <p className="text-sm font-medium leading-relaxed opacity-80">{selectedCode.description}</p>
                   </div>
                   <div className="space-y-3">
                     <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2">
-                      <Activity className="size-3" /> Usage Context
+                      <Activity className="size-3" /> {t("httpStatus.usageContext")}
                     </label>
                     <p className="text-sm font-medium leading-relaxed opacity-80">{selectedCode.whenToUse}</p>
                   </div>
@@ -244,21 +244,21 @@ export default function HttpStatusFinderPage() {
               <div className="grid gap-6 sm:grid-cols-2">
                 <Card className="p-6">
                   <h3 className="text-xs font-black uppercase text-muted-foreground mb-4 tracking-widest flex items-center gap-2">
-                    <History className="size-4 text-primary" /> Associated Headers
+                    <History className="size-4 text-primary" /> {t("httpStatus.associatedHeaders")}
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {selectedCode.relatedHeaders?.length ? selectedCode.relatedHeaders.map(h => (
                       <Chip key={h} variant="primary" color="default" className="font-mono text-[10px] font-bold">{h}</Chip>
-                    )) : <p className="text-xs italic opacity-40">No specific required headers.</p>}
+                    )) : <p className="text-xs italic opacity-40">{t("httpStatus.noHeaders")}</p>}
                   </div>
                   <div className="mt-8 pt-6 border-t border-divider flex gap-3">
                     {selectedCode.rfcLink && (
                       <Button size="sm" variant="outline" className="font-bold flex-1" onPress={() => window.open(selectedCode.rfcLink, "_blank")}>
-                        <ExternalLink className="size-3.5 mr-2" /> RFC Docs
+                        <ExternalLink className="size-3.5 mr-2" /> {t("httpStatus.rfcDocs")}
                       </Button>
                     )}
                     <Button size="sm" variant="outline" className="font-bold flex-1" onPress={() => window.open(`https://http.cat/${selectedCode.code}`, "_blank")}>
-                      🐱 HTTP Cat
+                      🐱 {t("httpStatus.httpCat")}
                     </Button>
                   </div>
                 </Card>
@@ -268,17 +268,17 @@ export default function HttpStatusFinderPage() {
                   <div className="flex items-center justify-between mb-6 relative z-10">
                     <h3 className="text-xs font-black uppercase opacity-60 tracking-widest flex items-center gap-2">
                       <Activity className="size-4 text-emerald-400" />
-                      Live Error Simulation
+                      {t("httpStatus.liveSimulation")}
                     </h3>
                     <Button size="sm" variant="primary" className="font-black h-8 bg-emerald-500 hover:bg-emerald-600 border-none shadow-lg shadow-emerald-500/20" onPress={() => runMockTest(selectedCode.code)} isLoading={isTesting}>
-                      Trigger Response
+                      {t("httpStatus.triggerResponse")}
                     </Button>
                   </div>
                   {testResponse ? (
                     <div className="space-y-4 animate-in fade-in duration-500 relative z-10">
                       <div className="flex justify-between items-center px-1">
                         <span className={cn("text-[10px] font-black uppercase px-2 py-0.5 rounded", testResponse.ok ? "bg-emerald-500/20 text-emerald-400" : "bg-rose-500/20 text-rose-400")}>
-                          {testResponse.ok ? "HTTP 2xx OK" : `ERROR SIGNAL`}
+                          {testResponse.ok ? t("httpStatus.httpOk") : t("httpStatus.errorSignal")}
                         </span>
                         <span className="text-[10px] font-mono opacity-40">{testResponse.time}ms</span>
                       </div>
@@ -293,7 +293,7 @@ export default function HttpStatusFinderPage() {
                     </div>
                   ) : (
                     <div className="h-40 flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-2xl text-center p-6 relative z-10">
-                      <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest">Awaiting execution...</p>
+                      <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest">{t("httpStatus.awaitingExecution")}</p>
                     </div>
                   )}
                 </Card>
@@ -303,7 +303,7 @@ export default function HttpStatusFinderPage() {
               <Card className="p-8">
                 <h3 className="font-black text-lg mb-6 flex items-center gap-2">
                   <Terminal className="size-5 text-primary" />
-                  Code Implementation
+                  {t("httpStatus.codeImpl")}
                 </h3>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {selectedCode.snippets ? Object.entries(selectedCode.snippets).map(([lang, code]) => (
@@ -318,7 +318,7 @@ export default function HttpStatusFinderPage() {
                     </div>
                   )) : (
                     <div className="col-span-full p-10 bg-muted/10 border-2 border-dashed border-divider rounded-3xl text-center">
-                      <p className="text-sm italic opacity-40">Generic response standard applies to this status code.</p>
+                      <p className="text-sm italic opacity-40">{t("httpStatus.genericResponse")}</p>
                     </div>
                   )}
                 </div>
@@ -328,9 +328,9 @@ export default function HttpStatusFinderPage() {
             <div className="space-y-6">
               <div className="flex justify-between items-center px-2">
                 <h2 className="text-sm font-black uppercase tracking-widest text-muted-foreground">
-                  {query.trim() || categoryFilter ? "Search Results" : "Most Common Codes"}
+                  {query.trim() || categoryFilter ? t("httpStatus.searchResultsTitle") : t("httpStatus.mostCommonTitle")}
                 </h2>
-                {displayCodes.length > 0 && <StatusBadge variant="info">{displayCodes.length} CODES FOUND</StatusBadge>}
+                {displayCodes.length > 0 && <StatusBadge variant="info">{t("httpStatus.codesFound", { count: String(displayCodes.length) })}</StatusBadge>}
               </div>
 
               {activeView === "grid" ? (
@@ -365,8 +365,8 @@ export default function HttpStatusFinderPage() {
               {displayCodes.length === 0 && (
                 <Card className="p-20 border-dashed border-2 bg-muted/20 text-center">
                   <Globe className="size-16 mx-auto mb-4 opacity-20" />
-                  <h3 className="text-xl font-bold opacity-40">No matching status codes</h3>
-                  <p className="text-sm opacity-30 mt-1">Try searching by numeric code (e.g. 404) or name (e.g. &quot;auth&quot;).</p>
+                  <h3 className="text-xl font-bold opacity-40">{t("httpStatus.noMatchingCodes")}</h3>
+                  <p className="text-sm opacity-30 mt-1">{t("httpStatus.trySearching")}</p>
                 </Card>
               )}
             </div>

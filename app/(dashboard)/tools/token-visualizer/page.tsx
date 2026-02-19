@@ -89,7 +89,7 @@ export default function TokenVisualizerPage() {
               <div className="flex items-center justify-between">
                 <h3 className="font-bold flex items-center gap-2">
                   <Database className="size-4 text-primary" />
-                  Source Text
+                  {t("tokenViz.sourceText")}
                 </h3>
                 <div className="flex bg-muted p-1 rounded-xl">
                   <Button
@@ -116,7 +116,7 @@ export default function TokenVisualizerPage() {
               <TextArea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Type or paste text to visualize tokenization..."
+                placeholder={t("tokenViz.typePaste")}
                 onKeyDown={(e) => {
                   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
                     e.preventDefault();
@@ -124,7 +124,7 @@ export default function TokenVisualizerPage() {
                   }
                 }}
                 className="h-64 w-full resize-none rounded-xl border border-divider bg-background p-4 font-mono text-sm focus:ring-2 focus:ring-primary/20 shadow-inner"
-                aria-label="Type or paste text to visualize tokenization"
+                aria-label={t("tokenViz.typePaste")}
               />
 
               {!isCompareMode && (
@@ -157,7 +157,7 @@ export default function TokenVisualizerPage() {
                 className="font-bold text-xs"
                 onPress={() => navigateTo("prompt-analyzer", input)}
               >
-                Analyze Prompt
+                {t("tokenViz.analyzePrompt")}
               </Button>
               <Button
                 size="sm"
@@ -165,7 +165,7 @@ export default function TokenVisualizerPage() {
                 className="font-bold text-xs"
                 onPress={() => navigateTo("cost-calculator", visualization.totalTokens.toString())}
               >
-                Estimate Cost
+                {t("tokenViz.estimateCost")}
               </Button>
             </div>
           )}
@@ -216,11 +216,11 @@ export default function TokenVisualizerPage() {
           {visualization && (
             <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl shadow-slate-500/20 border-none">
               <h3 className="text-xs font-black uppercase opacity-60 mb-4 tracking-widest flex items-center gap-2">
-                <ShieldAlert className="size-3" /> Token Audit
+                <ShieldAlert className="size-3" /> {t("tokenViz.tokenAudit")}
               </h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-end">
-                  <span className="text-[10px] font-bold uppercase opacity-60">Optimization</span>
+                  <span className="text-[10px] font-bold uppercase opacity-60">{t("tokenViz.optimization")}</span>
                   <span className={cn("text-xl font-black", visualization.efficiencyScore > 80 ? "text-emerald-400" : "text-amber-400")}>
                     {visualization.efficiencyScore}%
                   </span>
@@ -235,8 +235,8 @@ export default function TokenVisualizerPage() {
                 </div>
                 {visualization.wasteCount > 0 && (
                   <div className="p-3 bg-white/5 rounded-xl border border-white/10">
-                    <p className="text-[10px] text-amber-300 font-bold mb-1 uppercase tracking-tighter">Wasted Tokens Detected</p>
-                    <p className="text-xs opacity-70 italic">Found {visualization.wasteCount} redundant spaces or invisible characters.</p>
+                    <p className="text-[10px] text-amber-300 font-bold mb-1 uppercase tracking-tighter">{t("tokenViz.wastedDetected")}</p>
+                    <p className="text-xs opacity-70 italic">{t("tokenViz.wastedFound", { count: String(visualization.wasteCount) })}</p>
                   </div>
                 )}
               </div>
@@ -279,9 +279,9 @@ export default function TokenVisualizerPage() {
                 <div className="p-4 border-b border-divider bg-muted/20 flex justify-between items-center">
                   <div className="flex items-center gap-4">
                     <StatusBadge variant="info">
-                      <Timer className="size-3 mr-1" /> {visualization.totalTokens} Tokens
+                      <Timer className="size-3 mr-1" /> {visualization.totalTokens} {t("tokenViz.totalTokens")}
                     </StatusBadge>
-                    <span className="text-[10px] font-black opacity-40 uppercase">{visualization.input.length} Characters</span>
+                    <span className="text-[10px] font-black opacity-40 uppercase">{visualization.input.length} {t("tokenViz.characters")}</span>
                   </div>
                   <CopyButton text={visualization.input} />
                 </div>
@@ -300,7 +300,7 @@ export default function TokenVisualizerPage() {
                 <div className="p-4 border-t border-divider bg-muted/10">
                   <p className="text-[10px] text-muted-foreground italic flex items-center gap-2">
                     <Info className="size-3" />
-                    Each box represents a token. Red highlights indicate &quot;waste&quot; (extra spaces/redundancy).
+                    {t("tokenViz.tokenInfo")}
                   </p>
                 </div>
               </Card>
@@ -310,9 +310,9 @@ export default function TokenVisualizerPage() {
               <div className="size-24 bg-muted rounded-full flex items-center justify-center mb-6">
                 <Fingerprint className="size-12 text-muted-foreground/30" />
               </div>
-              <h3 className="text-2xl font-black mb-2 opacity-80 text-foreground/50">Token Laboratory</h3>
+              <h3 className="text-2xl font-black mb-2 opacity-80 text-foreground/50">{t("tokenViz.laboratory")}</h3>
               <p className="text-muted-foreground max-w-sm mx-auto font-medium">
-                Analyze how different AI models (GPT-4, Claude, Llama) see your text. Optimize your prompts by reducing wasted tokens.
+                {t("tokenViz.laboratoryDesc")}
               </p>
             </Card>
           )}

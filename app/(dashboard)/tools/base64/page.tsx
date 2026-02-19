@@ -118,11 +118,11 @@ export default function Base64Page() {
           <Card className="p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex bg-muted p-1 rounded-xl">
-                <Button size="sm" variant={mode === "encode" ? "primary" : "ghost"} onPress={() => setMode("encode")} className="font-bold h-8">Encode</Button>
-                <Button size="sm" variant={mode === "decode" ? "primary" : "ghost"} onPress={() => setMode("decode")} className="font-bold h-8">Decode</Button>
+                <Button size="sm" variant={mode === "encode" ? "primary" : "ghost"} onPress={() => setMode("encode")} className="font-bold h-8">{t("base64.encodeBtn")}</Button>
+                <Button size="sm" variant={mode === "decode" ? "primary" : "ghost"} onPress={() => setMode("decode")} className="font-bold h-8">{t("base64.decodeBtn")}</Button>
               </div>
               <div className="flex gap-1">
-                <Button size="sm" variant="ghost" onPress={() => loadExample("json")}>Example</Button>
+                <Button size="sm" variant="ghost" onPress={() => loadExample("json")}>{t("base64.exampleBtn")}</Button>
                 <Button size="sm" variant="ghost" onPress={() => setInput("")} isIconOnly aria-label="Clear input"><Trash2 className="size-3.5 text-danger" /></Button>
               </div>
             </div>
@@ -130,7 +130,7 @@ export default function Base64Page() {
             <TextArea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={mode === "encode" ? "Enter text or JSON to encode..." : "Paste Base64 string here..."}
+              placeholder={mode === "encode" ? t("base64.encodePlaceholder") : t("base64.decodePlaceholder")}
               onKeyDown={(e) => {
                 if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
                   e.preventDefault();
@@ -138,37 +138,37 @@ export default function Base64Page() {
                 }
               }}
               className="h-48 w-full resize-none rounded-xl border border-divider bg-background p-4 font-mono text-xs focus:ring-2 focus:ring-primary/20 shadow-inner"
-              aria-label={mode === "encode" ? "Enter text or JSON to encode" : "Paste Base64 string here"}
+              aria-label={mode === "encode" ? t("base64.encodePlaceholder") : t("base64.decodePlaceholder")}
             />
 
             <div className="mt-6 space-y-4 pt-4 border-t border-divider">
               <div className="flex items-center gap-2 text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                <Settings2 className="size-3" /> Base64 Configuration
+                <Settings2 className="size-3" /> {t("base64.configTitle")}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <Button size="sm" variant={config.variant === "standard" ? "primary" : "ghost"} onPress={() => updateConfig("variant", "standard")} className="font-bold">Standard</Button>
-                <Button size="sm" variant={config.variant === "url-safe" ? "primary" : "ghost"} onPress={() => updateConfig("variant", "url-safe")} className="font-bold">URL-Safe</Button>
+                <Button size="sm" variant={config.variant === "standard" ? "primary" : "ghost"} onPress={() => updateConfig("variant", "standard")} className="font-bold">{t("base64.standardBtn")}</Button>
+                <Button size="sm" variant={config.variant === "url-safe" ? "primary" : "ghost"} onPress={() => updateConfig("variant", "url-safe")} className="font-bold">{t("base64.urlSafeBtn")}</Button>
               </div>
             </div>
 
             <Button onPress={process} variant="primary" className="w-full mt-6 h-12 font-black shadow-xl shadow-primary/20 text-md">
-              <Sparkles className="size-4 mr-2" /> {mode === "encode" ? "Generate Encoding" : "Execute Decoding"}
+              <Sparkles className="size-4 mr-2" /> {mode === "encode" ? t("base64.generateEncoding") : t("base64.executeDecoding")}
             </Button>
           </Card>
 
           {result && (
             <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl shadow-slate-500/20">
               <h3 className="text-xs font-black uppercase opacity-60 mb-6 tracking-widest flex items-center gap-2">
-                <FileDigit className="size-3 text-cyan-400" /> Forensic Metrics
+                <FileDigit className="size-3 text-cyan-400" /> {t("base64.forensicMetrics")}
               </h3>
               <div className="space-y-6">
                 <div className="flex justify-between items-end">
-                  <span className="text-[10px] font-bold uppercase opacity-40">Output Size</span>
+                  <span className="text-[10px] font-bold uppercase opacity-40">{t("base64.outputSize")}</span>
                   <span className="text-2xl font-black text-cyan-400">{result.stats.outputBytes} bytes</span>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-[9px] font-black uppercase opacity-40">
-                    <span>Byte Overhead</span>
+                    <span>{t("base64.byteOverhead")}</span>
                     <span>{Math.round(result.stats.compressionRatio * 100)}%</span>
                   </div>
                   <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
@@ -179,7 +179,7 @@ export default function Base64Page() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 pt-4 border-t border-white/5">
-                  <StatusBadge variant="info">{result.detectedType?.toUpperCase()} DETECTED</StatusBadge>
+                  <StatusBadge variant="info">{t("base64.detectedBadge", { type: result.detectedType?.toUpperCase() || "" })}</StatusBadge>
                 </div>
               </div>
             </Card>
@@ -196,15 +196,15 @@ export default function Base64Page() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <Tabs.ListContainer>
                 <Tabs.List aria-label="View mode">
-                  <Tabs.Tab id="text">Text View</Tabs.Tab>
-                  <Tabs.Tab id="preview">Smart Preview</Tabs.Tab>
-                  <Tabs.Tab id="inspector">Byte Inspector</Tabs.Tab>
+                  <Tabs.Tab id="text">{t("base64.textView")}</Tabs.Tab>
+                  <Tabs.Tab id="preview">{t("base64.smartPreview")}</Tabs.Tab>
+                  <Tabs.Tab id="inspector">{t("base64.byteInspector")}</Tabs.Tab>
                 </Tabs.List>
               </Tabs.ListContainer>
               <div className="flex gap-2">
                 {result?.detectedType === "json" && (
                   <Button size="sm" variant="ghost" className="font-bold" onPress={() => navigateTo("json-formatter", mode === "decode" ? result.output : result.input)}>
-                    <FileJson className="size-3.5 mr-1.5 text-secondary" /> JSON Lab
+                    <FileJson className="size-3.5 mr-1.5 text-secondary" /> {t("base64.jsonLab")}
                   </Button>
                 )}
                 <CopyButton text={result?.output || ""} />
@@ -215,7 +215,7 @@ export default function Base64Page() {
               <Tabs.Panel id="text">
                 <Card className="p-0 border-divider shadow-xl overflow-hidden h-[600px] flex flex-col">
                   <div className="p-4 border-b border-divider flex justify-between items-center bg-muted/20">
-                    <span className="text-[10px] font-black opacity-40 uppercase tracking-widest">Raw Encoded/Decoded Payload</span>
+                    <span className="text-[10px] font-black opacity-40 uppercase tracking-widest">{t("base64.rawPayload")}</span>
                     <span className="text-[9px] font-mono opacity-30">{result?.stats.outputLength || 0} characters</span>
                   </div>
                   <pre className="p-8 font-mono text-[11px] leading-relaxed overflow-auto flex-1 bg-background break-all">
@@ -229,15 +229,15 @@ export default function Base64Page() {
                   {result?.detectedType === "jwt" && jwtParts && (
                     <div className="grid gap-4">
                       <Card className="p-6 border-blue-500/20 bg-blue-500/5">
-                        <p className="text-[10px] font-black text-blue-500 uppercase mb-3 tracking-widest">Header</p>
+                        <p className="text-[10px] font-black text-blue-500 uppercase mb-3 tracking-widest">{t("base64.jwtHeader")}</p>
                         <pre className="text-xs font-mono text-blue-700 dark:text-blue-300">{jwtParts.header}</pre>
                       </Card>
                       <Card className="p-6 border-purple-500/20 bg-purple-500/5">
-                        <p className="text-[10px] font-black text-purple-500 uppercase mb-3 tracking-widest">Payload (Claims)</p>
+                        <p className="text-[10px] font-black text-purple-500 uppercase mb-3 tracking-widest">{t("base64.jwtPayload")}</p>
                         <pre className="text-xs font-mono text-purple-700 dark:text-purple-300">{jwtParts.payload}</pre>
                       </Card>
                       <Card className="p-6 border-divider bg-muted/5">
-                        <p className="text-[10px] font-black text-muted-foreground uppercase mb-3 tracking-widest">Cryptographic Signature</p>
+                        <p className="text-[10px] font-black text-muted-foreground uppercase mb-3 tracking-widest">{t("base64.jwtSignature")}</p>
                         <p className="text-[10px] font-mono break-all opacity-40 leading-relaxed">{jwtParts.signature}</p>
                       </Card>
                     </div>
@@ -251,7 +251,7 @@ export default function Base64Page() {
                         a.href = mode === "decode" ? `data:image/*;base64,${result.input}` : `data:image/*;base64,${result.output}`;
                         a.download = "devflow-decoded"; a.click();
                       }}>
-                        <Download className="size-4 mr-2" /> Download Resource
+                        <Download className="size-4 mr-2" /> {t("base64.downloadResource")}
                       </Button>
                     </Card>
                   )}
@@ -260,10 +260,10 @@ export default function Base64Page() {
                     <Card className="p-8 border-emerald-500/20 bg-emerald-500/5 h-full">
                       <div className="flex items-center justify-between mb-6">
                         <h3 className="font-black text-emerald-600 flex items-center gap-2 text-md italic">
-                          <Database className="size-5" /> Structured Object
+                          <Database className="size-5" /> {t("base64.structuredObject")}
                         </h3>
                         <Button size="sm" variant="ghost" className="font-black text-success" onPress={() => navigateTo("json-formatter", mode === "decode" ? result.output : result.input)}>
-                          Full Analysis <ArrowRight className="size-3.5 ml-1" />
+                          {t("base64.fullAnalysis")} <ArrowRight className="size-3.5 ml-1" />
                         </Button>
                       </div>
                       <pre className="text-xs font-mono text-emerald-700 dark:text-emerald-300 overflow-auto leading-relaxed">
@@ -277,8 +277,8 @@ export default function Base64Page() {
                       <div className="size-20 bg-muted rounded-full flex items-center justify-center mb-6">
                         <Search className="size-10 text-muted-foreground/40" />
                       </div>
-                      <h3 className="text-xl font-bold mb-2">No Smart Preview Available</h3>
-                      <p className="text-muted-foreground max-w-xs">Content identified as raw string or unknown binary. Use the Text View or Byte Inspector for analysis.</p>
+                      <h3 className="text-xl font-bold mb-2">{t("base64.noPreview")}</h3>
+                      <p className="text-muted-foreground max-w-xs">{t("base64.noPreviewDesc")}</p>
                     </Card>
                   )}
                 </div>
@@ -289,7 +289,7 @@ export default function Base64Page() {
                   <div className="p-4 border-b border-divider bg-muted/20 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Cpu className="size-4 text-primary" />
-                      <span className="text-xs font-black uppercase tracking-widest">Low-Level Byte Analysis</span>
+                      <span className="text-xs font-black uppercase tracking-widest">{t("base64.byteAnalysis")}</span>
                     </div>
                     <div className="flex gap-4">
                       <div className="flex items-center gap-1.5"><div className="size-2 rounded-full bg-primary" /><span className="text-[9px] font-black uppercase opacity-60">HEX</span></div>
@@ -303,7 +303,7 @@ export default function Base64Page() {
                       filterField="hex"
                       renderCell={renderByteCell}
                       initialVisibleColumns={["offset", "hex", "binary", "decimal"]}
-                      emptyContent="Process content to see byte breakdown."
+                      emptyContent={t("base64.processContent")}
                     />
                   </div>
                 </Card>

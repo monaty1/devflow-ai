@@ -62,19 +62,19 @@ export default function UuidGeneratorPage() {
   }, [uuids, exportFormat, exportBulk]);
 
   const VERSIONS: { id: UuidVersion; label: string; desc: string }[] = [
-    { id: "v4", label: "Version 4 (Random)", desc: "Standard random UUID" },
-    { id: "v7", label: "Version 7 (Time-sortable)", desc: "Unix epoch based" },
-    { id: "v1", label: "Version 1 (Time-based)", desc: "Timestamp + Node" },
-    { id: "nil", label: "Nil UUID", desc: "All zeros" },
-    { id: "max", label: "Max UUID", desc: "All f's" },
+    { id: "v4", label: t("uuid.v4Label"), desc: t("uuid.v4DescShort") },
+    { id: "v7", label: t("uuid.v7Label"), desc: t("uuid.v7DescShort") },
+    { id: "v1", label: t("uuid.v1Label"), desc: t("uuid.v1DescShort") },
+    { id: "nil", label: t("uuid.nilLabel"), desc: t("uuid.nilDescShort") },
+    { id: "max", label: t("uuid.maxLabel"), desc: t("uuid.maxDescShort") },
   ];
 
   const FORMATS: { id: UuidFormat; label: string }[] = [
-    { id: "standard", label: "Standard (Lower)" },
-    { id: "uppercase", label: "Uppercase" },
-    { id: "no-hyphens", label: "No Hyphens" },
-    { id: "braces", label: "With Braces {}" },
-    { id: "urn", label: "URN Prefix" },
+    { id: "standard", label: t("uuid.standardLower") },
+    { id: "uppercase", label: t("uuid.uppercaseFormat") },
+    { id: "no-hyphens", label: t("uuid.noHyphensFormat") },
+    { id: "braces", label: t("uuid.bracesFormat") },
+    { id: "urn", label: t("uuid.urnFormat") },
   ];
 
   const handleExport = () => {
@@ -87,7 +87,7 @@ export default function UuidGeneratorPage() {
     a.download = `uuids.${exportFormat}`;
     a.click();
     URL.revokeObjectURL(url);
-    addToast(`Exported as ${exportFormat.toUpperCase()}`, "success");
+    addToast(t("uuid.exportedAs", { format: exportFormat.toUpperCase() }), "success");
   };
 
   return (
@@ -119,15 +119,15 @@ export default function UuidGeneratorPage() {
             >
               <Tabs.ListContainer>
                 <Tabs.List aria-label="UUID mode">
-                  <Tabs.Tab id="generate">Generator</Tabs.Tab>
-                  <Tabs.Tab id="analyze">Analyzer</Tabs.Tab>
+                  <Tabs.Tab id="generate">{t("uuid.generatorTab")}</Tabs.Tab>
+                  <Tabs.Tab id="analyze">{t("uuid.analyzerTab")}</Tabs.Tab>
                 </Tabs.List>
               </Tabs.ListContainer>
 
               <Tabs.Panel id="generate">
                 <div className="space-y-6 mt-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Version</label>
+                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("uuid.versionLabel")}</label>
                     <div className="grid gap-2">
                       {VERSIONS.map((v) => (
                         <button
@@ -148,7 +148,7 @@ export default function UuidGeneratorPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Custom Prefix (Hex)</label>
+                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("uuid.customPrefix")}</label>
                     <Input
                       variant="primary"
                       placeholder="e.g. deadbeef"
@@ -162,7 +162,7 @@ export default function UuidGeneratorPage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Quantity</label>
+                      <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("uuid.quantityLabel")}</label>
                       <Input
                         type="number"
                         min={1}
@@ -177,9 +177,9 @@ export default function UuidGeneratorPage() {
                         value={config.format}
                         onChange={(value) => { if (value) updateConfig("format", value as UuidFormat); }}
                         className="w-full"
-                        aria-label="Format"
+                        aria-label={t("uuid.formatLabelShort")}
                       >
-                        <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Format</Label>
+                        <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("uuid.formatLabelShort")}</Label>
                         <Select.Trigger className="h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm">
                           <Select.Value />
                           <Select.Indicator />
@@ -203,7 +203,7 @@ export default function UuidGeneratorPage() {
                     variant="primary"
                     className="w-full h-12 font-black shadow-lg shadow-primary/20 text-md"
                   >
-                    <Sparkles className="size-4 mr-2" /> Generate Sequence
+                    <Sparkles className="size-4 mr-2" /> {t("uuid.generateSequence")}
                   </Button>
                 </div>
               </Tabs.Panel>
@@ -211,11 +211,11 @@ export default function UuidGeneratorPage() {
               <Tabs.Panel id="analyze">
                 <div className="space-y-6 mt-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">UUID to Inspect</label>
+                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("uuid.uuidToInspect")}</label>
                     <TextArea
                       value={analyzeInput}
                       onChange={(e) => setAnalyzeInput(e.target.value)}
-                      placeholder="Paste UUID here..."
+                      placeholder={t("uuid.pasteUuid")}
                       onKeyDown={(e) => {
                         if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
                           e.preventDefault();
@@ -223,7 +223,7 @@ export default function UuidGeneratorPage() {
                         }
                       }}
                       className="h-32 w-full resize-none rounded-xl border-2 border-divider bg-background p-4 font-mono text-sm focus:border-primary outline-none transition-all shadow-inner"
-                      aria-label="UUID to Inspect"
+                      aria-label={t("uuid.uuidToInspect")}
                     />
                   </div>
                   <Button
@@ -232,7 +232,7 @@ export default function UuidGeneratorPage() {
                     className="w-full h-12 font-black shadow-lg shadow-primary/20 bg-secondary"
                     isDisabled={!analyzeInput.trim()}
                   >
-                    <Search className="size-4 mr-2" /> Deep Audit
+                    <Search className="size-4 mr-2" /> {t("uuid.deepAudit")}
                   </Button>
                 </div>
               </Tabs.Panel>
@@ -242,19 +242,19 @@ export default function UuidGeneratorPage() {
           {activeTab === "generate" && result && (
             <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl border-none">
               <h3 className="text-xs font-black uppercase opacity-60 mb-6 tracking-widest flex items-center gap-2">
-                <Activity className="size-3 text-emerald-400" /> Collision Health
+                <Activity className="size-3 text-emerald-400" /> {t("uuid.collisionHealth")}
               </h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-end">
-                  <span className="text-[10px] font-bold uppercase opacity-40">Probability</span>
+                  <span className="text-[10px] font-bold uppercase opacity-40">{t("uuid.probabilityLabel")}</span>
                   <span className="text-sm font-black text-emerald-400">{result.collisionStats?.probability}</span>
                 </div>
                 <div className="flex justify-between items-end">
-                  <span className="text-[10px] font-bold uppercase opacity-40">Uniqueness</span>
-                  <span className="text-sm font-black text-blue-400">Guaranteed</span>
+                  <span className="text-[10px] font-bold uppercase opacity-40">{t("uuid.uniquenessLabel")}</span>
+                  <span className="text-sm font-black text-blue-400">{t("uuid.guaranteed")}</span>
                 </div>
                 <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-[10px] opacity-60 italic">
-                  At a rate of 1 billion UUIDs per second, it would take 100 years to have a 50% chance of a collision.
+                  {t("uuid.collisionNote")}
                 </div>
               </div>
             </Card>
@@ -268,7 +268,7 @@ export default function UuidGeneratorPage() {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h3 className="font-black text-lg flex items-center gap-2">
                   <List className="size-5 text-primary" />
-                  Sequence Registry ({result.uuids.length})
+                  {t("uuid.sequenceRegistry", { count: result.uuids.length })}
                 </h3>
                 <div className="flex gap-2 w-full sm:w-auto">
                   <Dropdown>
@@ -281,14 +281,14 @@ export default function UuidGeneratorPage() {
                       </Button>
                     </DropdownTrigger>
                     <DropdownMenu onAction={(k) => setExportFormat(k as "text" | "json" | "csv" | "sql")}>
-                      <DropdownItem key="text">Plain Text</DropdownItem>
-                      <DropdownItem key="json">JSON Array</DropdownItem>
-                      <DropdownItem key="csv">CSV Table</DropdownItem>
-                      <DropdownItem key="sql">SQL Insert</DropdownItem>
+                      <DropdownItem key="text">{t("uuid.plainText")}</DropdownItem>
+                      <DropdownItem key="json">{t("uuid.jsonArray")}</DropdownItem>
+                      <DropdownItem key="csv">{t("uuid.csvTable")}</DropdownItem>
+                      <DropdownItem key="sql">{t("uuid.sqlInsert")}</DropdownItem>
                     </DropdownMenu>
                   </Dropdown>
                   <Button size="sm" variant="primary" onPress={handleExport} className="font-black">
-                    <Download className="size-3 mr-1" /> Save
+                    <Download className="size-3 mr-1" /> {t("uuid.saveBtn")}
                   </Button>
                   <CopyButton getText={() => result.uuids.join("\n")} />
                 </div>
@@ -306,18 +306,18 @@ export default function UuidGeneratorPage() {
               {/* Analysis Overview Cards */}
               <div className="grid gap-4 sm:grid-cols-3">
                 <Card className="p-6 text-center border-b-4 border-b-primary rounded-b-none">
-                  <p className="text-[10px] font-black text-muted-foreground uppercase mb-1">Version</p>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase mb-1">{t("uuid.versionLabel")}</p>
                   <p className="text-3xl font-black text-primary">v{analysis.version}</p>
                 </Card>
                 <Card className="p-6 text-center border-b-4 border-b-secondary rounded-b-none">
-                  <p className="text-[10px] font-black text-muted-foreground uppercase mb-1">Entropy</p>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase mb-1">{t("uuid.entropyLabel")}</p>
                   <p className="text-3xl font-black text-secondary">{analysis.entropyScore}%</p>
                 </Card>
                 <Card className="p-6 text-center border-b-4 border-b-emerald-500 rounded-b-none">
-                  <p className="text-[10px] font-black text-muted-foreground uppercase mb-1">Status</p>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase mb-1">{t("uuid.statusLabel")}</p>
                   <div className="flex justify-center pt-1">
                     <StatusBadge variant={analysis.isValid ? "success" : "error"}>
-                      {analysis.isValid ? "SECURE" : "CORRUPT"}
+                      {analysis.isValid ? t("uuid.secure") : t("uuid.corrupt")}
                     </StatusBadge>
                   </div>
                 </Card>
@@ -326,7 +326,7 @@ export default function UuidGeneratorPage() {
               {/* Binary Structure Visualizer */}
               <Card className="p-8 shadow-xl border-divider">
                 <h3 className="text-xs font-black uppercase text-muted-foreground mb-8 flex items-center gap-2 tracking-widest">
-                  <Binary className="size-4 text-primary" /> Binary Payload Architecture
+                  <Binary className="size-4 text-primary" /> {t("uuid.binaryPayload")}
                 </h3>
                 <div className="flex flex-wrap gap-1 font-mono text-[9px] leading-none mb-10">
                   {analysis.binaryView?.map((part, i) => (
@@ -358,16 +358,16 @@ export default function UuidGeneratorPage() {
               {/* Technical Profile */}
               <Card className="p-6 bg-muted/10">
                 <h3 className="font-bold flex items-center gap-2 mb-4 text-sm">
-                  <Cpu className="size-4" /> Technical Profile
+                  <Cpu className="size-4" /> {t("uuid.technicalProfile")}
                 </h3>
                 <div className="space-y-4">
                   <div className="flex justify-between border-b border-divider pb-2">
-                    <span className="text-xs font-bold opacity-50 uppercase">Variant</span>
+                    <span className="text-xs font-bold opacity-50 uppercase">{t("uuid.variantField")}</span>
                     <span className="text-xs font-mono font-bold">{analysis.variant}</span>
                   </div>
                   {analysis.timestamp && (
                     <div className="flex justify-between border-b border-divider pb-2">
-                      <span className="text-xs font-bold opacity-50 uppercase">Embedded Time</span>
+                      <span className="text-xs font-bold opacity-50 uppercase">{t("uuid.embeddedTime")}</span>
                       <span className="text-xs font-mono font-bold flex items-center gap-2">
                         <Clock className="size-3" /> {analysis.timestamp.toLocaleString()}
                       </span>
@@ -375,7 +375,7 @@ export default function UuidGeneratorPage() {
                   )}
                   {analysis.node && (
                     <div className="flex justify-between border-b border-divider pb-2 text-warning">
-                      <span className="text-xs font-bold opacity-50 uppercase">Node (MAC)</span>
+                      <span className="text-xs font-bold opacity-50 uppercase">{t("uuid.nodeField")}</span>
                       <span className="text-xs font-mono font-bold">{analysis.node}</span>
                     </div>
                   )}
@@ -387,9 +387,9 @@ export default function UuidGeneratorPage() {
               <div className="size-24 bg-muted rounded-full flex items-center justify-center mb-6">
                 <Fingerprint className="size-12 text-muted-foreground/30" />
               </div>
-              <h3 className="text-2xl font-black mb-2 opacity-80 text-foreground/50">UUID Control Center</h3>
+              <h3 className="text-2xl font-black mb-2 opacity-80 text-foreground/50">{t("uuid.controlCenter")}</h3>
               <p className="text-muted-foreground max-w-sm mx-auto font-medium">
-                Generate secure unique identifiers or perform bit-level analysis on existing ones to detect privacy leaks and version data.
+                {t("uuid.controlCenterDesc")}
               </p>
             </Card>
           )}

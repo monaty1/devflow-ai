@@ -130,7 +130,7 @@ export default function DtoMaticPage() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold flex items-center gap-2">
                 <FileJson className="size-4 text-primary" />
-                Payload Source
+                {t("dtoMatic.payloadSource")}
               </h3>
               <div className="flex gap-1">
                 <Button isIconOnly size="sm" variant="ghost" onPress={loadExample} aria-label="Load example"><Wand2 className="size-3.5" /></Button>
@@ -142,7 +142,7 @@ export default function DtoMaticPage() {
               <TextArea
                 value={jsonInput}
                 onChange={(e) => setJsonInput(e.target.value)}
-                placeholder='Paste JSON here (e.g. {"id": 1, "name": "User"})'
+                placeholder={t("dtoMatic.pasteJsonHint")}
                 className={cn(
                   "h-[300px] w-full resize-none rounded-xl border p-4 font-mono text-xs focus:ring-2 transition-all shadow-inner leading-relaxed",
                   !isValidJson(jsonInput) && jsonInput ? "border-danger ring-danger/10" : "border-divider focus:ring-primary/20"
@@ -154,11 +154,11 @@ export default function DtoMaticPage() {
                     if (jsonInput.trim()) generate();
                   }
                 }}
-                aria-label="Paste JSON here"
+                aria-label={t("dtoMatic.jsonInputLabel")}
               />
               {!isValidJson(jsonInput) && jsonInput && (
                 <div className="absolute bottom-4 right-4 flex items-center gap-2 text-danger text-xs font-bold bg-background/80 backdrop-blur px-2 py-1 rounded-lg border border-danger/20">
-                  <AlertCircle className="size-3" /> Invalid JSON
+                  <AlertCircle className="size-3" /> {t("dtoMatic.invalidJsonBadge")}
                 </div>
               )}
             </div>
@@ -170,18 +170,18 @@ export default function DtoMaticPage() {
               className="w-full mt-4 font-bold h-12 shadow-lg shadow-primary/20 text-md"
               isDisabled={!jsonInput.trim() || !config.rootName.trim()}
             >
-              <Sparkles className="size-4 mr-2" /> Generate Architecture
+              <Sparkles className="size-4 mr-2" /> {t("dtoMatic.generateArch")}
             </Button>
           </Card>
 
           <Card className="p-6">
             <h3 className="font-bold mb-4 flex items-center gap-2 text-foreground/80">
               <Braces className="size-4" />
-              Generator Config
+              {t("dtoMatic.generatorConfig")}
             </h3>
             <div className="space-y-5">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Root Name</label>
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("dtoMatic.rootNameLabel")}</label>
                 <Input 
                   variant="primary"
                   value={config.rootName} 
@@ -192,7 +192,7 @@ export default function DtoMaticPage() {
               </div>
               
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Target Stack</label>
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("dtoMatic.targetStack")}</label>
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     { val: "typescript", label: "TypeScript" },
@@ -218,31 +218,31 @@ export default function DtoMaticPage() {
               </div>
 
               <div className="space-y-1.5 pt-2 border-t border-divider">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Output Mode</label>
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("dtoMatic.outputModeLabel")}</label>
                 <div className="flex gap-2">
                   <Chip
                     size="sm"
                     variant={config.mode === "clean-arch" ? "primary" : "soft"}
                     className="cursor-pointer font-bold h-8"
                     onClick={() => setMode("clean-arch")}
-                  >Clean Arch</Chip>
+                  >{t("dtoMatic.cleanArch")}</Chip>
                   <Chip
                     size="sm"
                     variant={config.mode === "zod" ? "primary" : "soft"}
                     className="cursor-pointer font-bold h-8"
                     onClick={() => setMode("zod")}
-                  >Zod Schema</Chip>
+                  >{t("dtoMatic.zodSchemaLabel")}</Chip>
                   <Chip
                     size="sm"
                     variant={config.mode === "quick" ? "primary" : "soft"}
                     className="cursor-pointer font-bold h-8"
                     onClick={() => setMode("quick")}
-                  >DTO Only</Chip>
+                  >{t("dtoMatic.dtoOnlyLabel")}</Chip>
                 </div>
                 <p className="text-[10px] text-muted-foreground/70 ml-1 mt-1">
-                  {config.mode === "clean-arch" && "Generates Entity + Mapper + DTO — 3-layer Clean Architecture pattern"}
-                  {config.mode === "zod" && "Generates TypeScript interfaces + Zod schemas for runtime validation"}
-                  {config.mode === "quick" && "Quick DTO class only — fastest output, no mappers or extra layers"}
+                  {config.mode === "clean-arch" && t("dtoMatic.cleanArchDescLong")}
+                  {config.mode === "zod" && t("dtoMatic.zodDescLong")}
+                  {config.mode === "quick" && t("dtoMatic.quickDescLong")}
                 </p>
               </div>
             </div>
@@ -256,19 +256,19 @@ export default function DtoMaticPage() {
               {/* Quick Stats */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <Card className="p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/20 text-center">
-                  <p className="text-[10px] font-black uppercase text-green-600 mb-1">Total Types</p>
+                  <p className="text-[10px] font-black uppercase text-green-600 mb-1">{t("dtoMatic.totalTypes")}</p>
                   <p className="text-2xl font-black text-green-700 dark:text-green-400">{result.stats.totalTypes}</p>
                 </Card>
                 <Card className="p-4 bg-muted/30 text-center">
-                  <p className="text-[10px] font-black uppercase text-muted-foreground mb-1">Nested Objects</p>
+                  <p className="text-[10px] font-black uppercase text-muted-foreground mb-1">{t("dtoMatic.nestedObjects")}</p>
                   <p className="text-2xl font-black">{result.stats.nestedObjects}</p>
                 </Card>
                 <Card className="p-4 bg-muted/30 text-center">
-                  <p className="text-[10px] font-black uppercase text-muted-foreground mb-1">Arrays</p>
+                  <p className="text-[10px] font-black uppercase text-muted-foreground mb-1">{t("dtoMatic.arraysLabel")}</p>
                   <p className="text-2xl font-black">{result.stats.arrays}</p>
                 </Card>
                 <Card className="p-4 bg-muted/30 text-center">
-                  <p className="text-[10px] font-black uppercase text-muted-foreground mb-1">Files</p>
+                  <p className="text-[10px] font-black uppercase text-muted-foreground mb-1">{t("dtoMatic.filesLabel")}</p>
                   <p className="text-2xl font-black">{result.files.length}</p>
                 </Card>
               </div>
@@ -285,13 +285,13 @@ export default function DtoMaticPage() {
                       <Tabs.Tab id="code">
                         <div className="flex items-center gap-2">
                           <Code2 className="size-4" />
-                          <span>Generated Code</span>
+                          <span>{t("dtoMatic.generatedCodeTab")}</span>
                         </div>
                       </Tabs.Tab>
                       <Tabs.Tab id="mock">
                         <div className="flex items-center gap-2">
                           <Database className="size-4" />
-                          <span>Mock Data</span>
+                          <span>{t("dtoMatic.mockDataTab")}</span>
                         </div>
                       </Tabs.Tab>
                     </Tabs.List>
@@ -321,7 +321,7 @@ export default function DtoMaticPage() {
                         </Select.Popover>
                       </Select>
                       <Button size="sm" variant="ghost" onPress={() => generateMock(mockCount)} className="font-bold text-secondary">
-                        <Wand2 className="size-3 mr-1" /> Re-roll Data
+                        <Wand2 className="size-3 mr-1" /> {t("dtoMatic.rerollData")}
                       </Button>
                     </div>
                   )}
@@ -337,7 +337,7 @@ export default function DtoMaticPage() {
                           filterField="name"
                           renderCell={renderFileCell}
                           initialVisibleColumns={["name", "type"]}
-                          emptyContent="No files generated."
+                          emptyContent={t("dtoMatic.noFiles")}
                         />
                       </Card>
                     </div>
@@ -360,7 +360,7 @@ export default function DtoMaticPage() {
                   <Card className="p-0 overflow-hidden h-[600px] flex flex-col border-none">
                     <div className="p-4 border-b border-divider flex justify-between items-center bg-muted/20">
                       <span className="text-xs font-bold text-secondary flex items-center gap-2 uppercase tracking-wider">
-                        <Box className="size-4" /> Generated JSON Response
+                        <Box className="size-4" /> {t("dtoMatic.generatedJsonResponse")}
                       </span>
                       <CopyButton text={mockData || ""} />
                     </div>
@@ -376,9 +376,9 @@ export default function DtoMaticPage() {
               <div className="size-24 bg-muted rounded-full flex items-center justify-center mb-6">
                 <FolderTree className="size-12 text-muted-foreground/30" />
               </div>
-              <h3 className="text-2xl font-black mb-2 opacity-80 text-foreground/50">Architectural Engine</h3>
+              <h3 className="text-2xl font-black mb-2 opacity-80 text-foreground/50">{t("dtoMatic.architecturalEngine")}</h3>
               <p className="text-muted-foreground max-w-sm mx-auto font-medium">
-                Transform raw JSON into production-ready Clean Architecture layers. Supports TS, Java, Python, Go & C#.
+                {t("dtoMatic.architecturalEngineDesc")}
               </p>
             </Card>
           )}

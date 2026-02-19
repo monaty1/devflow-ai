@@ -117,13 +117,13 @@ export default function RegexHumanizerPage() {
                 <Tabs.Tab id="explain">
                   <div className="flex items-center gap-2">
                     <Search className="size-4" />
-                    <span>Explain</span>
+                    <span>{t("regex.tabExplain")}</span>
                   </div>
                 </Tabs.Tab>
                 <Tabs.Tab id="generate">
                   <div className="flex items-center gap-2">
                     <Wand2 className="size-4" />
-                    <span>Generate</span>
+                    <span>{t("regex.tabGenerate")}</span>
                   </div>
                 </Tabs.Tab>
               </Tabs.List>
@@ -133,7 +133,7 @@ export default function RegexHumanizerPage() {
               <div className="space-y-4 mt-4">
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                    Regex Pattern
+                    {t("regex.regexPattern")}
                   </label>
                   <TextArea
                     value={pattern}
@@ -146,11 +146,11 @@ export default function RegexHumanizerPage() {
                     }}
                     placeholder="/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi"
                     className="h-32 w-full resize-none rounded-xl border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-inner transition-all"
-                    aria-label="Regex Pattern"
+                    aria-label={t("regex.regexPattern")}
                   />
                   {!isValidRegex && pattern.trim() && (
                     <p className="text-xs text-danger font-bold flex items-center gap-1">
-                      <AlertTriangle className="size-3" /> Invalid regex syntax
+                      <AlertTriangle className="size-3" /> {t("regex.invalidSyntax")}
                     </p>
                   )}
                 </div>
@@ -161,7 +161,7 @@ export default function RegexHumanizerPage() {
                   variant="primary"
                   className="w-full h-12 font-bold shadow-lg shadow-primary/20"
                 >
-                  Analyze Pattern
+                  {t("regex.analyzePattern")}
                 </Button>
               </div>
             </Tabs.Panel>
@@ -170,7 +170,7 @@ export default function RegexHumanizerPage() {
               <div className="space-y-4 mt-4">
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                    Natural Language Description
+                    {t("regex.naturalLangDesc")}
                   </label>
                   <TextArea
                     value={generateDesc}
@@ -183,7 +183,7 @@ export default function RegexHumanizerPage() {
                         if (generateDesc.trim()) generate(generateDesc);
                       }
                     }}
-                    aria-label="Natural Language Description"
+                    aria-label={t("regex.naturalLangDesc")}
                   />
                 </div>
                 <Button
@@ -199,7 +199,7 @@ export default function RegexHumanizerPage() {
                   variant="primary"
                   className="w-full h-12 font-bold shadow-lg shadow-primary/20"
                 >
-                  <Wand2 className="size-4 mr-2" /> Generate Pattern
+                  <Wand2 className="size-4 mr-2" /> {t("regex.generatePatternBtn")}
                 </Button>
 
                 {/* AI-Generated Regex Results */}
@@ -222,7 +222,7 @@ export default function RegexHumanizerPage() {
                               setPattern(s.value);
                               setActiveTab("explain");
                               explain(s.value);
-                            }}>Analyze</Button>
+                            }}>{t("regex.analyzePattern")}</Button>
                           </div>
                         </div>
                         <p className="text-xs text-muted-foreground">{s.reasoning}</p>
@@ -236,7 +236,7 @@ export default function RegexHumanizerPage() {
 
           {/* Quick Cheat Sheet */}
           <div className="mt-auto border-t border-divider pt-4">
-            <h4 className="text-[10px] font-bold text-muted-foreground uppercase mb-3">Quick Reference</h4>
+            <h4 className="text-[10px] font-bold text-muted-foreground uppercase mb-3">{t("regex.quickRef")}</h4>
             <div className="grid grid-cols-2 gap-2">
               {[
                 { s: "\\d", d: "Digit" }, { s: "\\w", d: "Word" },
@@ -266,7 +266,7 @@ export default function RegexHumanizerPage() {
               {/* Safety & Overview */}
               <div className="grid gap-4 sm:grid-cols-3">
                 <Card className="p-6 col-span-1 flex flex-col items-center justify-center text-center">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase mb-3">Safety Score</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase mb-3">{t("regex.safetyScoreLabel")}</p>
                   <div className="relative mb-2">
                     <svg className="size-20 transform -rotate-90">
                       <circle cx="40" cy="40" r="32" stroke="currentColor" strokeWidth="6" fill="transparent" className="text-muted" />
@@ -285,14 +285,14 @@ export default function RegexHumanizerPage() {
                     </div>
                   </div>
                   <StatusBadge variant={explanation.isDangerous ? "error" : "success"}>
-                    {explanation.isDangerous ? "Vulnerable" : "Secure"}
+                    {explanation.isDangerous ? t("regex.vulnerableLabel") : t("regex.secureLabel")}
                   </StatusBadge>
                 </Card>
 
                 <Card className="p-6 col-span-2">
                   <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
                     <Info className="size-4 text-primary" />
-                    Structural Breakdown
+                    {t("regex.structuralBreakdown")}
                   </h3>
                   <div className="space-y-3">
                     {explanation.warnings.length > 0 ? (
@@ -305,7 +305,7 @@ export default function RegexHumanizerPage() {
                     ) : (
                       <div className="flex items-center gap-2 p-2 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-lg">
                         <ShieldCheck className="size-4 text-emerald-600" />
-                        <p className="text-xs text-emerald-800 dark:text-emerald-200">No catastrophic backtracking detected.</p>
+                        <p className="text-xs text-emerald-800 dark:text-emerald-200">{t("regex.noBacktracking")}</p>
                       </div>
                     )}
                     <div className="flex flex-wrap gap-2 pt-2">
@@ -329,16 +329,16 @@ export default function RegexHumanizerPage() {
                 >
                   <Tabs.ListContainer>
                     <Tabs.List aria-label="Result analysis">
-                      <Tabs.Tab id="explanation">Explanation</Tabs.Tab>
-                      <Tabs.Tab id="groups">Groups ({explanation.groups.length})</Tabs.Tab>
-                      <Tabs.Tab id="test">Interactive Test</Tabs.Tab>
+                      <Tabs.Tab id="explanation">{t("regex.explanationTab")}</Tabs.Tab>
+                      <Tabs.Tab id="groups">{t("regex.groupsTab", { count: String(explanation.groups.length) })}</Tabs.Tab>
+                      <Tabs.Tab id="test">{t("regex.interactiveTest")}</Tabs.Tab>
                     </Tabs.List>
                   </Tabs.ListContainer>
 
                   <Tabs.Panel id="explanation">
                     <div className="p-6">
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-bold">Human Readable Logic</h3>
+                        <h3 className="font-bold">{t("regex.humanReadableLogic")}</h3>
                         <CopyButton text={explanation.explanation} />
                       </div>
                       <pre className="text-sm font-mono leading-relaxed bg-muted/30 p-4 rounded-xl whitespace-pre-wrap">
@@ -354,7 +354,7 @@ export default function RegexHumanizerPage() {
                         data={explanation.groups.map(g => ({ ...g, id: g.index }))}
                         filterField="description"
                         renderCell={renderGroupCell}
-                        emptyContent="No capture groups found in this pattern."
+                        emptyContent={t("regex.noCaptureGroups")}
                       />
                     </div>
                   </Tabs.Panel>
@@ -362,24 +362,24 @@ export default function RegexHumanizerPage() {
                   <Tabs.Panel id="test">
                     <div className="p-6 space-y-4">
                       <div className="flex flex-col gap-2">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase">Sample Text to Test</label>
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase">{t("regex.sampleText")}</label>
                         <TextArea
                           value={testText}
                           onChange={(e) => setTestText(e.target.value)}
                           className="h-32 w-full resize-none rounded-xl border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                          aria-label="Sample Text to Test"
+                          aria-label={t("regex.sampleText")}
                         />
                       </div>
                       <Button onPress={handleTest} variant="ghost" className="w-full text-primary">
-                        <Play className="size-4 mr-2" /> Run Test Matches
+                        <Play className="size-4 mr-2" /> {t("regex.runTest")}
                       </Button>
 
                       {testResult && (
                         <div className="mt-4 space-y-4">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm font-bold">Matches Found: {testResult.allMatches.length}</span>
+                            <span className="text-sm font-bold">{t("regex.matchesFoundLabel", { count: String(testResult.allMatches.length) })}</span>
                             <StatusBadge variant={testResult.matches ? "success" : "warning"}>
-                              {testResult.matches ? "Matching" : "No Matches"}
+                              {testResult.matches ? t("regex.matchingLabel") : t("regex.noMatchesLabel")}
                             </StatusBadge>
                           </div>
 
@@ -418,9 +418,9 @@ export default function RegexHumanizerPage() {
               <div className="size-20 bg-muted rounded-full flex items-center justify-center mb-6">
                 <Regex className="size-10 text-muted-foreground/40" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Ready to Decode</h3>
+              <h3 className="text-xl font-bold mb-2">{t("regex.readyToDecode")}</h3>
               <p className="text-muted-foreground max-w-xs">
-                Paste a complex regex pattern or describe what you need to get a human-friendly analysis.
+                {t("regex.readyToDecodeDesc")}
               </p>
             </Card>
           )}

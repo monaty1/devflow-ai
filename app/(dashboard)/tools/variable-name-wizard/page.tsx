@@ -160,18 +160,18 @@ export default function VariableNameWizardPage() {
             <div className="flex justify-between items-center mb-6">
               <h3 className="font-bold flex items-center gap-2 text-foreground/80">
                 <Settings2 className="size-4 text-primary" />
-                Wizard Setup
+                {t("varName.wizardSetup")}
               </h3>
-              <Button size="sm" variant="ghost" onPress={loadExample}>Example</Button>
+              <Button size="sm" variant="ghost" onPress={loadExample}>{t("varName.exampleBtn")}</Button>
             </div>
 
             <div className="space-y-6">
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Context / Description</label>
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("varName.contextDescLabel")}</label>
                 <TextArea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="e.g. get the active user session token"
+                  placeholder={t("varName.inputPlaceholder")}
                   onKeyDown={(e) => {
                     if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
                       e.preventDefault();
@@ -179,12 +179,12 @@ export default function VariableNameWizardPage() {
                     }
                   }}
                   className="h-24 w-full resize-none rounded-xl border border-divider bg-background p-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 shadow-inner"
-                  aria-label="Context / Description"
+                  aria-label={t("varName.contextDescLabel")}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Target Language</label>
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("varName.targetLang")}</label>
                 <div className="grid grid-cols-2 gap-2">
                   {LANGUAGES.map(lang => (
                     <button
@@ -209,9 +209,9 @@ export default function VariableNameWizardPage() {
                   value={config.type}
                   onChange={(value) => { if (value) updateConfig("type", value as VariableType); }}
                   className="w-full"
-                  aria-label="Variable Type"
+                  aria-label={t("varName.variableType")}
                 >
-                  <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Variable Type</Label>
+                  <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("varName.variableType")}</Label>
                   <Select.Trigger className="h-10 rounded-xl border border-divider bg-background px-3 text-xs font-bold uppercase">
                     <Select.Value />
                     <Select.Indicator />
@@ -248,7 +248,7 @@ export default function VariableNameWizardPage() {
                 isDisabled={!input.trim()}
               >
                 <Sparkles className="size-4 mr-2" />
-                Cast Naming Spell
+                {t("varName.castSpell")}
               </Button>
             </div>
           </Card>
@@ -257,28 +257,28 @@ export default function VariableNameWizardPage() {
           {generationResult && (
             <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl shadow-slate-500/20 border-none">
               <h3 className="text-xs font-black uppercase opacity-60 mb-6 flex items-center gap-2 tracking-widest">
-                <Activity className="size-3 text-emerald-400" /> Semantical Analysis
+                <Activity className="size-3 text-emerald-400" /> {t("varName.semanticAnalysis")}
               </h3>
               <div className="space-y-6">
                 <div className="flex justify-around items-center">
                   <div className="text-center">
-                    <p className="text-[10px] font-bold uppercase opacity-40 mb-1">Clarity</p>
+                    <p className="text-[10px] font-bold uppercase opacity-40 mb-1">{t("varName.clarityLabel")}</p>
                     <p className={cn("text-xl font-black", (generationResult.suggestions[0]?.score ?? 0) >= 80 ? "text-emerald-400" : (generationResult.suggestions[0]?.score ?? 0) >= 50 ? "text-amber-400" : "text-red-400")}>
-                      {(generationResult.suggestions[0]?.score ?? 0) >= 80 ? "High" : (generationResult.suggestions[0]?.score ?? 0) >= 50 ? "Medium" : "Low"}
+                      {(generationResult.suggestions[0]?.score ?? 0) >= 80 ? t("varName.highLabel") : (generationResult.suggestions[0]?.score ?? 0) >= 50 ? t("varName.mediumLabel") : t("varName.lowLabel")}
                     </p>
                   </div>
                   <div className="size-px h-8 bg-white/10" />
                   <div className="text-center">
-                    <p className="text-[10px] font-bold uppercase opacity-40 mb-1">Avg Score</p>
+                    <p className="text-[10px] font-bold uppercase opacity-40 mb-1">{t("varName.avgScore")}</p>
                     <p className="text-xl font-black text-blue-400">
                       {Math.round(generationResult.suggestions.reduce((sum, s) => sum + s.score, 0) / generationResult.suggestions.length)}%
                     </p>
                   </div>
                 </div>
                 <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
-                  <p className="text-[10px] text-primary-400 font-bold mb-2 uppercase">Pro Tip</p>
+                  <p className="text-[10px] text-primary-400 font-bold mb-2 uppercase">{t("varName.proTip")}</p>
                   <p className="text-xs opacity-70 leading-relaxed italic">
-                    &quot;Use intent-revealing names. The name of a variable should tell you why it exists, what it does, and how it is used.&quot;
+                    {t("varName.proTipQuote")}
                   </p>
                 </div>
               </div>
@@ -295,8 +295,8 @@ export default function VariableNameWizardPage() {
           >
             <Tabs.ListContainer>
               <Tabs.List aria-label="Wizard mode">
-                <Tabs.Tab id="generate">Smart Suggestions</Tabs.Tab>
-                <Tabs.Tab id="convert">Case Transformer</Tabs.Tab>
+                <Tabs.Tab id="generate">{t("varName.smartSuggestions")}</Tabs.Tab>
+                <Tabs.Tab id="convert">{t("varName.caseTransformer")}</Tabs.Tab>
               </Tabs.List>
             </Tabs.ListContainer>
 
@@ -308,10 +308,10 @@ export default function VariableNameWizardPage() {
                     <Card className="p-6 border-emerald-500/20 bg-emerald-500/5">
                       <div className="flex justify-between items-start">
                         <div>
-                          <p className="text-[10px] font-black text-emerald-600 uppercase mb-1">Recommended Choice</p>
+                          <p className="text-[10px] font-black text-emerald-600 uppercase mb-1">{t("varName.recommendedChoice")}</p>
                           <h4 className="text-xl font-black font-mono">{generationResult.suggestions[0]?.name}</h4>
                         </div>
-                        <StatusBadge variant="success">BEST MATCH</StatusBadge>
+                        <StatusBadge variant="success">{t("varName.bestMatch")}</StatusBadge>
                       </div>
                       <div className="mt-4 flex gap-2">
                         <CopyButton text={generationResult.suggestions[0]?.name || ""} size="sm" />
@@ -321,7 +321,7 @@ export default function VariableNameWizardPage() {
                     <Card className="p-6 border-blue-500/20 bg-blue-500/5">
                       <div className="flex justify-between items-start">
                         <div>
-                          <p className="text-[10px] font-black text-blue-600 uppercase mb-1">Naming Score</p>
+                          <p className="text-[10px] font-black text-blue-600 uppercase mb-1">{t("varName.namingScoreLabel")}</p>
                           <h4 className="text-2xl font-black">{generationResult.suggestions[0]?.score}/100</h4>
                         </div>
                         <div className="p-2 bg-blue-500/20 rounded-full text-blue-600"><Star className="size-5 fill-current" /></div>
@@ -340,7 +340,7 @@ export default function VariableNameWizardPage() {
                     <div className="p-4 border-b border-divider flex items-center justify-between bg-muted/20">
                       <h3 className="font-bold flex items-center gap-2 text-sm">
                         <Sparkles className="size-4 text-primary" />
-                        Technically Sound Alternatives
+                        {t("varName.soundAlternatives")}
                       </h3>
                     </div>
                     <DataTable
@@ -349,7 +349,7 @@ export default function VariableNameWizardPage() {
                       filterField="name"
                       renderCell={renderSuggestionCell}
                       initialVisibleColumns={["name", "score", "audit", "actions"]}
-                      emptyContent="No suggestions available."
+                      emptyContent={t("varName.noSuggestionsAvail")}
                     />
                   </Card>
 
@@ -387,9 +387,9 @@ export default function VariableNameWizardPage() {
                   <div className="size-24 bg-muted rounded-full flex items-center justify-center mb-6">
                     <Wand2 className="size-12 text-muted-foreground/30" />
                   </div>
-                  <h3 className="text-2xl font-black mb-2 opacity-80 text-foreground/50">Ready to Magic Name</h3>
+                  <h3 className="text-2xl font-black mb-2 opacity-80 text-foreground/50">{t("varName.readyToMagic")}</h3>
                   <p className="text-muted-foreground max-w-sm mx-auto font-medium">
-                    Describe the purpose of your variable or paste a name to transform it into professional naming conventions for any language.
+                    {t("varName.readyToMagicDesc")}
                   </p>
                 </Card>
               )}
@@ -418,9 +418,9 @@ export default function VariableNameWizardPage() {
                   <div className="size-24 bg-muted rounded-full flex items-center justify-center mb-6">
                     <Wand2 className="size-12 text-muted-foreground/30" />
                   </div>
-                  <h3 className="text-2xl font-black mb-2 opacity-80 text-foreground/50">Ready to Magic Name</h3>
+                  <h3 className="text-2xl font-black mb-2 opacity-80 text-foreground/50">{t("varName.readyToMagic")}</h3>
                   <p className="text-muted-foreground max-w-sm mx-auto font-medium">
-                    Describe the purpose of your variable or paste a name to transform it into professional naming conventions for any language.
+                    {t("varName.readyToMagicDesc")}
                   </p>
                 </Card>
               )}

@@ -102,7 +102,7 @@ export default function TailwindSorterPage() {
             <TextArea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Paste your messy tailwind classes here..."
+              placeholder={t("tailwind.inputPlaceholder")}
               onKeyDown={(e) => {
                 if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
                   e.preventDefault();
@@ -110,7 +110,7 @@ export default function TailwindSorterPage() {
                 }
               }}
               className="h-48 w-full resize-none rounded-xl border border-divider bg-background p-4 font-mono text-sm focus:ring-2 focus:ring-sky-500/20 shadow-inner"
-              aria-label="Paste your messy tailwind classes here"
+              aria-label={t("tailwind.inputPlaceholder")}
             />
             
             <div className="mt-6 space-y-4">
