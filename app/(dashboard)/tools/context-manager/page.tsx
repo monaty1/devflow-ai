@@ -9,6 +9,10 @@ import {
   DropdownMenu,
   DropdownItem,
   Checkbox,
+  TextArea,
+  Select,
+  Label,
+  ListBox,
 } from "@heroui/react";
 import {
   Plus,
@@ -368,27 +372,53 @@ export default function ContextManagerPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Document Type</label>
-                  <select value={docType} onChange={(e) => setDocType(e.target.value as DocumentType)} className="w-full h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm focus:border-indigo-500 outline-none transition-all">
-                    <option value="code">Source Code</option>
-                    <option value="documentation">Technical Docs</option>
-                    <option value="api">API Specification</option>
-                    <option value="notes">Context Instructions</option>
-                  </select>
+                  <Select
+                    value={docType}
+                    onChange={(value) => { if (value) setDocType(value as DocumentType); }}
+                    className="w-full"
+                    aria-label="Document Type"
+                  >
+                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Document Type</Label>
+                    <Select.Trigger className="h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm">
+                      <Select.Value />
+                      <Select.Indicator />
+                    </Select.Trigger>
+                    <Select.Popover>
+                      <ListBox>
+                        <ListBox.Item id="code" textValue="Source Code">Source Code<ListBox.ItemIndicator /></ListBox.Item>
+                        <ListBox.Item id="documentation" textValue="Technical Docs">Technical Docs<ListBox.ItemIndicator /></ListBox.Item>
+                        <ListBox.Item id="api" textValue="API Specification">API Specification<ListBox.ItemIndicator /></ListBox.Item>
+                        <ListBox.Item id="notes" textValue="Context Instructions">Context Instructions<ListBox.ItemIndicator /></ListBox.Item>
+                      </ListBox>
+                    </Select.Popover>
+                  </Select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Priority</label>
-                  <select value={docPriority} onChange={(e) => setDocPriority(e.target.value as Priority)} className="w-full h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm focus:border-indigo-500 outline-none transition-all">
-                    <option value="high">High (Crucial Logic)</option>
-                    <option value="medium">Medium (Standard)</option>
-                    <option value="low">Low (Reference)</option>
-                  </select>
+                  <Select
+                    value={docPriority}
+                    onChange={(value) => { if (value) setDocPriority(value as Priority); }}
+                    className="w-full"
+                    aria-label="Priority"
+                  >
+                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Priority</Label>
+                    <Select.Trigger className="h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm">
+                      <Select.Value />
+                      <Select.Indicator />
+                    </Select.Trigger>
+                    <Select.Popover>
+                      <ListBox>
+                        <ListBox.Item id="high" textValue="High (Crucial Logic)">High (Crucial Logic)<ListBox.ItemIndicator /></ListBox.Item>
+                        <ListBox.Item id="medium" textValue="Medium (Standard)">Medium (Standard)<ListBox.ItemIndicator /></ListBox.Item>
+                        <ListBox.Item id="low" textValue="Low (Reference)">Low (Reference)<ListBox.ItemIndicator /></ListBox.Item>
+                      </ListBox>
+                    </Select.Popover>
+                  </Select>
                 </div>
               </div>
 
               <div className="space-y-1">
                 <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Content</label>
-                <textarea
+                <TextArea
                   value={docContent}
                   onChange={(e) => setDocContent(e.target.value)}
                   onKeyDown={(e) => {
@@ -404,6 +434,7 @@ export default function ContextManagerPage() {
                   }}
                   placeholder="Paste context content here..."
                   className="h-48 w-full resize-none rounded-2xl border-2 border-divider bg-background p-4 font-mono text-sm focus:border-indigo-500 outline-none transition-all shadow-inner"
+                  aria-label="Content"
                 />
               </div>
 

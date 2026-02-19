@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Card, Button } from "@heroui/react";
+import { Card, Button, TextArea } from "@heroui/react";
 import {
   Sparkles,
   FileJson,
@@ -123,12 +123,13 @@ export function MagicInput() {
         <div className="absolute left-4 top-4 text-muted-foreground">
           <Sparkles className="size-5" />
         </div>
-        <textarea
+        <TextArea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Paste anything here... JSON, Cron, JWT, Code, etc."
           className="w-full resize-none bg-transparent px-12 py-4 text-base placeholder:text-muted-foreground/50 focus:outline-none min-h-[60px]"
           rows={Math.min(5, Math.max(2, input.split("\n").length))}
+          aria-label="Paste anything here"
         />
         {detectedType && (
           <div className="absolute right-3 top-3 flex gap-2">

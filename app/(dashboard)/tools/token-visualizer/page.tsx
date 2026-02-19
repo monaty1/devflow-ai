@@ -22,6 +22,7 @@ import { useTranslation } from "@/hooks/use-translation";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { TextArea } from "@heroui/react";
 import { Card, Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import type { TokenizerProvider } from "@/types/token-visualizer";
@@ -109,7 +110,7 @@ export default function TokenVisualizerPage() {
                 </div>
               </div>
 
-              <textarea
+              <TextArea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Type or paste text to visualize tokenization..."
@@ -120,6 +121,7 @@ export default function TokenVisualizerPage() {
                   }
                 }}
                 className="h-64 w-full resize-none rounded-xl border border-divider bg-background p-4 font-mono text-sm focus:ring-2 focus:ring-primary/20 shadow-inner"
+                aria-label="Type or paste text to visualize tokenization"
               />
 
               {!isCompareMode && (

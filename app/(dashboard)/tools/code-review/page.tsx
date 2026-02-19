@@ -7,6 +7,10 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
+  TextArea,
+  Select,
+  Label,
+  ListBox,
 } from "@heroui/react";
 import {
   RotateCcw,
@@ -192,20 +196,30 @@ export default function CodeReviewPage() {
             
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                  {t("codeReview.language")}
-                </label>
-                <select
+                <Select
                   value={language}
-                  onChange={(e) => setLanguage(e.target.value as SupportedLanguage)}
-                  className="w-full rounded-xl border border-border bg-muted/50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                  onChange={(value) => { if (value) setLanguage(value as SupportedLanguage); }}
+                  className="w-full"
+                  aria-label={t("codeReview.language")}
                 >
-                  {LANGUAGES.map((lang) => (
-                    <option key={lang.value} value={lang.value}>
-                      {lang.label}
-                    </option>
-                  ))}
-                </select>
+                  <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                    {t("codeReview.language")}
+                  </Label>
+                  <Select.Trigger className="rounded-xl border border-border bg-muted/50 px-3 py-2 text-sm">
+                    <Select.Value />
+                    <Select.Indicator />
+                  </Select.Trigger>
+                  <Select.Popover>
+                    <ListBox>
+                      {LANGUAGES.map((lang) => (
+                        <ListBox.Item key={lang.value} id={lang.value} textValue={lang.label}>
+                          {lang.label}
+                          <ListBox.ItemIndicator />
+                        </ListBox.Item>
+                      ))}
+                    </ListBox>
+                  </Select.Popover>
+                </Select>
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -217,7 +231,7 @@ export default function CodeReviewPage() {
               </div>
             </div>
 
-            <textarea
+            <TextArea
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder={t("codeReview.placeholder")}
@@ -229,6 +243,7 @@ export default function CodeReviewPage() {
                   if (code.trim()) handleReview();
                 }
               }}
+              aria-label={t("codeReview.placeholder")}
             />
 
             <Button

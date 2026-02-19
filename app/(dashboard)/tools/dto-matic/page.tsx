@@ -5,6 +5,9 @@ import {
   Tabs,
   Chip,
   Input,
+  TextArea,
+  Select,
+  ListBox,
 } from "@heroui/react";
 import {
   FileJson,
@@ -133,7 +136,7 @@ export default function DtoMaticPage() {
             </div>
             
             <div className="relative">
-              <textarea
+              <TextArea
                 value={jsonInput}
                 onChange={(e) => setJsonInput(e.target.value)}
                 placeholder='Paste JSON here (e.g. {"id": 1, "name": "User"})'
@@ -148,6 +151,7 @@ export default function DtoMaticPage() {
                     if (jsonInput.trim()) generate();
                   }
                 }}
+                aria-label="Paste JSON here"
               />
               {!isValidJson(jsonInput) && jsonInput && (
                 <div className="absolute bottom-4 right-4 flex items-center gap-2 text-danger text-xs font-bold bg-background/80 backdrop-blur px-2 py-1 rounded-lg border border-danger/20">
@@ -292,13 +296,27 @@ export default function DtoMaticPage() {
 
                   {view === "mock" && (
                     <div className="flex items-center gap-2">
-                      <select
-                        value={mockCount}
-                        onChange={(e) => setMockCount(parseInt(e.target.value))}
-                        className="h-8 rounded-lg border border-divider bg-background px-2 text-xs font-bold"
+                      <Select
+                        value={String(mockCount)}
+                        onChange={(value) => { if (value) setMockCount(parseInt(String(value))); }}
+                        className="w-28"
+                        aria-label="Mock data count"
                       >
-                        {[1, 3, 5, 10, 25, 50].map(n => <option key={n} value={n}>{n} items</option>)}
-                      </select>
+                        <Select.Trigger className="h-8 rounded-lg border border-divider bg-background px-2 text-xs font-bold">
+                          <Select.Value />
+                          <Select.Indicator />
+                        </Select.Trigger>
+                        <Select.Popover>
+                          <ListBox>
+                            {[1, 3, 5, 10, 25, 50].map(n => (
+                              <ListBox.Item key={String(n)} id={String(n)} textValue={`${n} items`}>
+                                {n} items
+                                <ListBox.ItemIndicator />
+                              </ListBox.Item>
+                            ))}
+                          </ListBox>
+                        </Select.Popover>
+                      </Select>
                       <Button size="sm" variant="ghost" onPress={() => generateMock(mockCount)} className="font-bold text-secondary">
                         <Wand2 className="size-3 mr-1" /> Re-roll Data
                       </Button>

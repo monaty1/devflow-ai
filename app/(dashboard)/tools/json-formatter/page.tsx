@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo } from "react";
 import {
   Tabs,
   Chip,
+  TextArea,
 } from "@heroui/react";
 import {
   Braces,
@@ -114,7 +115,7 @@ export default function JsonFormatterPage() {
             </div>
             
             <div className="relative group">
-              <textarea
+              <TextArea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={t("jsonFmt.pasteJson")}
@@ -129,6 +130,7 @@ export default function JsonFormatterPage() {
                   input && !inputValidation.isValid ? "border-danger ring-danger/10 bg-danger/5" : "border-divider focus:ring-primary/20 bg-background"
                 )}
                 spellCheck={false}
+                aria-label={t("jsonFmt.pasteJson")}
               />
               {!inputValidation.isValid && input && (
                 <div className="absolute top-4 right-4 animate-pulse">
@@ -305,11 +307,12 @@ export default function JsonFormatterPage() {
                     <ArrowRightLeft className="size-4" />
                     {t("jsonFmt.comparisonTarget")}
                   </h3>
-                  <textarea
+                  <TextArea
                     value={compareInput}
                     onChange={(e) => setCompareInput(e.target.value)}
                     placeholder={t("jsonFmt.pasteDiffJson")}
                     className="h-48 w-full resize-none rounded-2xl border border-divider bg-background p-4 font-mono text-xs focus:ring-2 focus:ring-primary/20 shadow-inner"
+                    aria-label={t("jsonFmt.comparisonTarget")}
                   />
                 </Card>
                 

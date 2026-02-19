@@ -3,6 +3,10 @@
 import { useState } from "react";
 import {
   Tabs,
+  TextArea,
+  Select,
+  Label,
+  ListBox,
 } from "@heroui/react";
 import {
   Wand2,
@@ -161,7 +165,7 @@ export default function VariableNameWizardPage() {
             <div className="space-y-6">
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Context / Description</label>
-                <textarea
+                <TextArea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="e.g. get the active user session token"
@@ -172,6 +176,7 @@ export default function VariableNameWizardPage() {
                     }
                   }}
                   className="h-24 w-full resize-none rounded-xl border border-divider bg-background p-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 shadow-inner"
+                  aria-label="Context / Description"
                 />
               </div>
 
@@ -197,14 +202,28 @@ export default function VariableNameWizardPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Variable Type</label>
-                <select 
-                  className="w-full h-10 rounded-xl border border-divider bg-background px-3 text-xs font-bold uppercase outline-none focus:ring-2 focus:ring-primary/20"
+                <Select
                   value={config.type}
-                  onChange={(e) => updateConfig("type", e.target.value as VariableType)}
+                  onChange={(value) => { if (value) updateConfig("type", value as VariableType); }}
+                  className="w-full"
+                  aria-label="Variable Type"
                 >
-                  {TYPE_OPTIONS.map(opt => <option key={opt.id} value={opt.id}>{opt.label}</option>)}
-                </select>
+                  <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Variable Type</Label>
+                  <Select.Trigger className="h-10 rounded-xl border border-divider bg-background px-3 text-xs font-bold uppercase">
+                    <Select.Value />
+                    <Select.Indicator />
+                  </Select.Trigger>
+                  <Select.Popover>
+                    <ListBox>
+                      {TYPE_OPTIONS.map(opt => (
+                        <ListBox.Item key={opt.id} id={opt.id} textValue={opt.label}>
+                          {opt.label}
+                          <ListBox.ItemIndicator />
+                        </ListBox.Item>
+                      ))}
+                    </ListBox>
+                  </Select.Popover>
+                </Select>
               </div>
 
               <Button

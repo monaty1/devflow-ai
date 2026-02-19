@@ -260,7 +260,7 @@ export default function GitCommitGeneratorPage() {
             <h3 className="text-xs font-black uppercase text-indigo-600 mb-4 flex items-center gap-2 tracking-widest">
               <FileDiff className="size-4" /> {t("gitCommit.aiDiffAuditor")}
             </h3>
-            <textarea
+            <TextArea
               placeholder={t("gitCommit.pasteDiff")}
               className="h-32 w-full resize-none rounded-xl border border-divider bg-background p-3 font-mono text-[10px] mb-3 focus:ring-2 focus:ring-indigo-500/20 shadow-inner"
               onChange={(e) => setDiffInput(e.target.value)}
@@ -271,6 +271,7 @@ export default function GitCommitGeneratorPage() {
                   if (diffInput.trim()) handleDiffAnalysis();
                 }
               }}
+              aria-label={t("gitCommit.pasteDiff")}
             />
             <Button size="sm" variant="ghost" className="w-full font-black text-secondary" onPress={handleDiffAnalysis} isDisabled={!diffInput.trim()}>
               {t("gitCommit.analyzePrefill")}

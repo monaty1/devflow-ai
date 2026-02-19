@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
-import { Card, Button } from "@heroui/react";
+import { Card, Button, Select, Label, ListBox } from "@heroui/react";
 import { useTheme } from "next-themes";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
@@ -130,18 +130,26 @@ export default function SettingsPage() {
 
           {/* Language */}
           <div>
-            <label htmlFor="settings-language" className="mb-2 block text-sm font-medium text-muted-foreground">
-              {t("settings.language")}
-            </label>
-            <select
-              id="settings-language"
+            <Select
               value={locale}
-              onChange={(e) => setLocale(e.target.value as "en" | "es")}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              onChange={(value) => { if (value) setLocale(value as "en" | "es"); }}
+              className="w-full"
+              aria-label={t("settings.language")}
             >
-              <option value="en">English</option>
-              <option value="es">Español</option>
-            </select>
+              <Label className="mb-2 block text-sm font-medium text-muted-foreground">
+                {t("settings.language")}
+              </Label>
+              <Select.Trigger className="rounded-lg border border-border bg-background px-3 py-2 text-sm">
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover>
+                <ListBox>
+                  <ListBox.Item id="en" textValue="English">English<ListBox.ItemIndicator /></ListBox.Item>
+                  <ListBox.Item id="es" textValue="Español">Español<ListBox.ItemIndicator /></ListBox.Item>
+                </ListBox>
+              </Select.Popover>
+            </Select>
           </div>
 
           <Button onPress={handleSave} className="w-full">

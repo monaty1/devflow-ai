@@ -5,6 +5,7 @@ import {
   Card,
   Button,
   Tabs,
+  TextArea,
 } from "@heroui/react";
 import {
   Binary,
@@ -123,7 +124,7 @@ export default function Base64Page() {
               </div>
             </div>
 
-            <textarea
+            <TextArea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={mode === "encode" ? "Enter text or JSON to encode..." : "Paste Base64 string here..."}
@@ -134,6 +135,7 @@ export default function Base64Page() {
                 }
               }}
               className="h-48 w-full resize-none rounded-xl border border-divider bg-background p-4 font-mono text-xs focus:ring-2 focus:ring-primary/20 shadow-inner"
+              aria-label={mode === "encode" ? "Enter text or JSON to encode" : "Paste Base64 string here"}
             />
 
             <div className="mt-6 space-y-4 pt-4 border-t border-divider">

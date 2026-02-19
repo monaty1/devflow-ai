@@ -5,6 +5,7 @@ import {
   Tabs,
   Chip,
   Checkbox,
+  TextArea,
 } from "@heroui/react";
 import {
   Palette,
@@ -95,7 +96,7 @@ export default function TailwindSorterPage() {
                 <Button size="sm" variant="ghost" onPress={() => setInput("")} isIconOnly aria-label="Clear input"><Trash2 className="size-3 text-danger" /></Button>
               </div>
             </div>
-            <textarea
+            <TextArea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Paste your messy tailwind classes here..."
@@ -106,6 +107,7 @@ export default function TailwindSorterPage() {
                 }
               }}
               className="h-48 w-full resize-none rounded-xl border border-divider bg-background p-4 font-mono text-sm focus:ring-2 focus:ring-sky-500/20 shadow-inner"
+              aria-label="Paste your messy tailwind classes here"
             />
             
             <div className="mt-6 space-y-4">

@@ -37,6 +37,7 @@ import { ScoreBadge } from "@/components/tools/score-badge";
 import { SecurityFlagsList } from "@/components/tools/security-flag";
 import { PromptAnalyzerSkeleton } from "@/components/shared/skeletons";
 import { CopyButton } from "@/components/shared/copy-button";
+import { TextArea } from "@heroui/react";
 import { Card, Button } from "@/components/ui";
 import type { PromptIssue, AnatomyElement } from "@/types/prompt-analyzer";
 
@@ -184,7 +185,7 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
             </button>
           </div>
 
-          <textarea
+          <TextArea
             id="prompt-input"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
@@ -196,6 +197,7 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
               }
             }}
             className="min-h-[160px] w-full resize-y rounded-lg border border-border bg-background p-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            aria-label={t("promptAnalyzer.enterPrompt")}
           />
 
           <div className="flex items-center justify-between">

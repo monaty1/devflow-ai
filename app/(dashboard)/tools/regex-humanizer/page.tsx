@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo } from "react";
 import {
   Tabs,
+  TextArea,
 } from "@heroui/react";
 import {
   Regex,
@@ -131,7 +132,7 @@ export default function RegexHumanizerPage() {
                   <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
                     Regex Pattern
                   </label>
-                  <textarea
+                  <TextArea
                     value={pattern}
                     onChange={(e) => setPattern(e.target.value)}
                     onKeyDown={(e) => {
@@ -142,6 +143,7 @@ export default function RegexHumanizerPage() {
                     }}
                     placeholder="/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi"
                     className="h-32 w-full resize-none rounded-xl border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-inner transition-all"
+                    aria-label="Regex Pattern"
                   />
                   {!isValidRegex && pattern.trim() && (
                     <p className="text-xs text-danger font-bold flex items-center gap-1">
@@ -167,7 +169,7 @@ export default function RegexHumanizerPage() {
                   <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
                     Natural Language Description
                   </label>
-                  <textarea
+                  <TextArea
                     value={generateDesc}
                     onChange={(e) => setGenerateDesc(e.target.value)}
                     placeholder="E.g.: A valid email address with optional plus signs"
@@ -178,6 +180,7 @@ export default function RegexHumanizerPage() {
                         if (generateDesc.trim()) generate(generateDesc);
                       }
                     }}
+                    aria-label="Natural Language Description"
                   />
                 </div>
                 <Button
@@ -357,10 +360,11 @@ export default function RegexHumanizerPage() {
                     <div className="p-6 space-y-4">
                       <div className="flex flex-col gap-2">
                         <label className="text-[10px] font-bold text-muted-foreground uppercase">Sample Text to Test</label>
-                        <textarea
+                        <TextArea
                           value={testText}
                           onChange={(e) => setTestText(e.target.value)}
                           className="h-32 w-full resize-none rounded-xl border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                          aria-label="Sample Text to Test"
                         />
                       </div>
                       <Button onPress={handleTest} variant="ghost" className="w-full text-primary">

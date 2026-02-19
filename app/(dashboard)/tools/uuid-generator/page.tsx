@@ -8,6 +8,10 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
+  TextArea,
+  Select,
+  Label,
+  ListBox,
 } from "@heroui/react";
 import {
   Fingerprint,
@@ -166,14 +170,28 @@ export default function UuidGeneratorPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Format</label>
-                      <select
-                        className="w-full h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm focus:border-primary outline-none"
+                      <Select
                         value={config.format}
-                        onChange={(e) => updateConfig("format", e.target.value as UuidFormat)}
+                        onChange={(value) => { if (value) updateConfig("format", value as UuidFormat); }}
+                        className="w-full"
+                        aria-label="Format"
                       >
-                        {FORMATS.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
-                      </select>
+                        <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">Format</Label>
+                        <Select.Trigger className="h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm">
+                          <Select.Value />
+                          <Select.Indicator />
+                        </Select.Trigger>
+                        <Select.Popover>
+                          <ListBox>
+                            {FORMATS.map(f => (
+                              <ListBox.Item key={f.id} id={f.id} textValue={f.label}>
+                                {f.label}
+                                <ListBox.ItemIndicator />
+                              </ListBox.Item>
+                            ))}
+                          </ListBox>
+                        </Select.Popover>
+                      </Select>
                     </div>
                   </div>
 
@@ -191,7 +209,7 @@ export default function UuidGeneratorPage() {
                 <div className="space-y-6 mt-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">UUID to Inspect</label>
-                    <textarea
+                    <TextArea
                       value={analyzeInput}
                       onChange={(e) => setAnalyzeInput(e.target.value)}
                       placeholder="Paste UUID here..."
@@ -202,6 +220,7 @@ export default function UuidGeneratorPage() {
                         }
                       }}
                       className="h-32 w-full resize-none rounded-xl border-2 border-divider bg-background p-4 font-mono text-sm focus:border-primary outline-none transition-all shadow-inner"
+                      aria-label="UUID to Inspect"
                     />
                   </div>
                   <Button
