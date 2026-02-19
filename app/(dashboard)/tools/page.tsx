@@ -25,13 +25,16 @@ export default function ToolsPage() {
 
   const filteredTools = useMemo(() => {
     return TOOLS_DATA.filter((tool) => {
+      const q = search.toLowerCase();
+      const translatedName = t(`tool.${tool.slug}.name`).toLowerCase();
+      const translatedDesc = t(`tool.${tool.slug}.description`).toLowerCase();
       const matchesSearch =
-        tool.name.toLowerCase().includes(search.toLowerCase()) ||
-        tool.description.toLowerCase().includes(search.toLowerCase());
+        translatedName.includes(q) ||
+        translatedDesc.includes(q);
       const matchesCategory = category === "all" || tool.category === category;
       return matchesSearch && matchesCategory;
     });
-  }, [search, category]);
+  }, [search, category, t]);
 
   return (
     <div className="space-y-8">

@@ -67,7 +67,7 @@ export default function ToolDetailPage({ params }: ToolDetailPageProps) {
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-foreground">
-                  {tool.name}
+                  {t(`tool.${tool.slug}.name`)}
                 </h1>
                 <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
@@ -76,7 +76,7 @@ export default function ToolDetailPage({ params }: ToolDetailPageProps) {
                   </span>
                   <span className="flex items-center gap-1">
                     <Users className="size-4" />
-                    {tool.usersCount.toLocaleString()} users
+                    {t("tools.users", { count: tool.usersCount.toLocaleString() })}
                   </span>
                   {tool.isFree && (
                     <StatusBadge variant="success">{t("tools.free")}</StatusBadge>
@@ -91,7 +91,7 @@ export default function ToolDetailPage({ params }: ToolDetailPageProps) {
               variant="outline"
               onPress={() => toggleFavorite(tool.id)}
               aria-label={
-                favorited ? "Remove from favorites" : "Add to favorites"
+                favorited ? t("favorites.remove") : t("favorites.add")
               }
             >
               <Heart
@@ -107,7 +107,7 @@ export default function ToolDetailPage({ params }: ToolDetailPageProps) {
 
           {/* Description */}
           <p className="mb-6 leading-relaxed text-muted-foreground">
-            {tool.longDescription}
+            {t(`tool.${tool.slug}.longDescription`)}
           </p>
 
           {/* Tags */}
@@ -128,13 +128,13 @@ export default function ToolDetailPage({ params }: ToolDetailPageProps) {
               {t("common.features")}
             </h2>
             <div className="grid gap-2 sm:grid-cols-2">
-              {tool.features.map((feature) => (
+              {tool.features.map((_, idx) => (
                 <div
-                  key={feature}
+                  key={idx}
                   className="flex items-center gap-3 rounded-lg bg-muted/50 px-4 py-3"
                 >
                   <Check className="size-5 shrink-0 text-green-500" />
-                  <span className="text-sm text-foreground">{feature}</span>
+                  <span className="text-sm text-foreground">{t(`tool.${tool.slug}.feature.${String(idx)}`)}</span>
                 </div>
               ))}
             </div>
@@ -142,7 +142,7 @@ export default function ToolDetailPage({ params }: ToolDetailPageProps) {
 
           {/* CTA Button */}
           <Button size="lg" className="w-full">
-            {t("common.launch", { name: tool.name })}
+            {t("common.launch", { name: t(`tool.${tool.slug}.name`) })}
           </Button>
         </div>
       </Card>

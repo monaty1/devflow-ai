@@ -14,10 +14,12 @@ import {
   Menu,
   X,
   BookOpen,
+  Wand2,
 } from "lucide-react";
 import { useTranslation } from "@/hooks/use-translation";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { LocaleToggle } from "@/components/shared/locale-toggle";
+import { ApiKeyGuide } from "@/components/shared/api-key-guide";
 import { cn } from "@/lib/utils";
 
 interface DashboardLayoutProps {
@@ -28,6 +30,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname();
   const { t } = useTranslation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(false);
 
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 
@@ -104,6 +107,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           );
         })}
       </nav>
+
+      {/* Setup AI */}
+      <div className="px-4 pb-2">
+        <button
+          type="button"
+          onClick={() => setGuideOpen(true)}
+          className="flex w-full items-center gap-3 rounded-lg bg-primary/10 px-4 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
+        >
+          <Wand2 className="size-5" />
+          {t("guide.ai.setupAI")}
+        </button>
+      </div>
 
       {/* Footer */}
       <div className="space-y-1 border-t border-border p-4">
@@ -183,6 +198,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           {children}
         </main>
       </div>
+
+      {/* API Key Guide Modal */}
+      <ApiKeyGuide open={guideOpen} onClose={() => setGuideOpen(false)} />
 
       {/* Speculation Rules — prefetch tool pages for instant navigation (Chromium only) */}
       <Script id="speculation-rules" type="speculationrules" strategy="afterInteractive">

@@ -12,7 +12,7 @@ import { TOOLS_DATA } from "@/config/tools-data";
 import { TOOL_ICON_MAP } from "@/config/tool-icon-map";
 import { useTranslation } from "@/hooks/use-translation";
 import { ToolHeader } from "@/components/shared/tool-header";
-import { cn } from "@/lib/utils";
+import { cn, getToolGlowClass } from "@/lib/utils";
 import type { ToolCategory } from "@/types/tools";
 
 const CATEGORY_COLORS: Record<ToolCategory, string> = {
@@ -44,15 +44,18 @@ export default function DocsPage() {
   const filteredTools = useMemo(() => {
     return TOOLS_DATA.filter((tool) => {
       const q = search.toLowerCase();
+      const translatedName = t(`tool.${tool.slug}.name`).toLowerCase();
+      const translatedDesc = t(`tool.${tool.slug}.description`).toLowerCase();
+      const translatedLong = t(`tool.${tool.slug}.longDescription`).toLowerCase();
       const matchesSearch =
-        tool.name.toLowerCase().includes(q) ||
-        tool.description.toLowerCase().includes(q) ||
-        tool.longDescription.toLowerCase().includes(q) ||
+        translatedName.includes(q) ||
+        translatedDesc.includes(q) ||
+        translatedLong.includes(q) ||
         tool.tags.some((tag) => tag.toLowerCase().includes(q));
       const matchesCategory = category === "all" || tool.category === category;
       return matchesSearch && matchesCategory;
     });
-  }, [search, category]);
+  }, [search, category, t]);
 
   return (
     <div className="space-y-8">
@@ -106,7 +109,7 @@ export default function DocsPage() {
             <article
               key={tool.id}
               id={tool.slug}
-              className="overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-primary/30"
+              className={cn("overflow-hidden rounded-xl border bg-card transition-all", getToolGlowClass(tool.color))}
             >
               {/* Header */}
               <div className={cn("bg-gradient-to-r p-6", tool.color)}>
@@ -119,10 +122,10 @@ export default function DocsPage() {
                     )}
                     <div>
                       <h2 className="text-xl font-bold text-white">
-                        {tool.name}
+                        {t(`tool.${tool.slug}.name`)}
                       </h2>
                       <p className="mt-0.5 text-sm text-white/80">
-                        {tool.description}
+                        {t(`tool.${tool.slug}.description`)}
                       </p>
                     </div>
                   </div>
@@ -140,7 +143,7 @@ export default function DocsPage() {
               <div className="space-y-4 p-6">
                 {/* Long Description */}
                 <p className="leading-relaxed text-foreground/90">
-                  {tool.longDescription}
+                  {t(`tool.${tool.slug}.longDescription`)}
                 </p>
 
                 {/* Features */}
@@ -150,13 +153,13 @@ export default function DocsPage() {
                     {t("common.features")}
                   </h3>
                   <ul className="grid gap-1.5 sm:grid-cols-2">
-                    {tool.features.map((feature) => (
+                    {tool.features.map((_, idx) => (
                       <li
-                        key={feature}
+                        key={idx}
                         className="flex items-start gap-2 text-sm text-muted-foreground"
                       >
                         <span className="mt-1.5 size-1 shrink-0 rounded-full bg-primary/60" />
-                        {feature}
+                        {t(`tool.${tool.slug}.feature.${String(idx)}`)}
                       </li>
                     ))}
                   </ul>

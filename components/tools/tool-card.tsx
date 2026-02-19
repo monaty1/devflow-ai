@@ -7,7 +7,7 @@ import { useFavorites } from "@/lib/context";
 import { TOOL_ICON_MAP } from "@/config/tool-icon-map";
 import { useTranslation } from "@/hooks/use-translation";
 import type { Tool } from "@/types/tools";
-import { cn } from "@/lib/utils";
+import { cn, getToolGlowClass } from "@/lib/utils";
 
 interface ToolCardProps {
   tool: Tool;
@@ -20,7 +20,7 @@ export function ToolCard({ tool }: ToolCardProps) {
   const IconComponent = TOOL_ICON_MAP[tool.icon];
 
   return (
-    <Card className="group relative cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+    <Card className={cn("group relative cursor-pointer overflow-hidden border transition-all duration-300 hover:shadow-lg hover:-translate-y-1", getToolGlowClass(tool.color))}>
       {/* Color Banner */}
       <div className={cn("h-2 bg-gradient-to-r", tool.color)} />
 
@@ -59,10 +59,10 @@ export function ToolCard({ tool }: ToolCardProps) {
 
         {/* Title & Description */}
         <h3 className="mb-1 text-lg font-semibold text-foreground">
-          {tool.name}
+          {t(`tool.${tool.slug}.name`)}
         </h3>
         <p className="mb-4 line-clamp-2 text-sm text-muted-foreground">
-          {tool.description}
+          {t(`tool.${tool.slug}.description`)}
         </p>
 
         {/* Tags */}
@@ -80,7 +80,7 @@ export function ToolCard({ tool }: ToolCardProps) {
         {/* Footer: Category */}
         <div className="flex items-center">
           <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground capitalize">
-            {tool.category}
+            {t(`tools.${tool.category}`)}
           </span>
         </div>
       </div>
@@ -89,7 +89,7 @@ export function ToolCard({ tool }: ToolCardProps) {
       <NextLink
         href={`/tools/${tool.slug}`}
         className="absolute inset-0 z-0"
-        aria-label={`Open ${tool.name}`}
+        aria-label={t("common.launch", { name: t(`tool.${tool.slug}.name`) })}
       />
     </Card>
   );

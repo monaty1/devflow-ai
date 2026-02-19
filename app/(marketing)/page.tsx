@@ -48,7 +48,7 @@ export default async function HomePage() {
               {t("home.subtitle", locale)}
             </p>
 
-            <div className="pt-4">
+            <div className="pt-2">
               <Link
                 href="/tools"
                 className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg bg-primary px-8 text-base font-semibold text-primary-foreground transition-colors hover:opacity-90"
@@ -61,7 +61,7 @@ export default async function HomePage() {
       </section>
 
       {/* Stats Section */}
-      <GsapReveal className="container mx-auto px-4 py-16">
+      <GsapReveal className="container mx-auto px-4 py-10">
         <h2 className="sr-only">{t("home.statsLabel", locale)}</h2>
         <div className="mx-auto grid max-w-4xl grid-cols-2 gap-6 md:grid-cols-4">
           {[
