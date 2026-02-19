@@ -917,6 +917,7 @@
   "base64.noPreview": "No Smart Preview Available",
   "base64.noPreviewDesc": "Content identified as raw string or unknown binary. Use the Text View or Byte Inspector for analysis.",
   "base64.byteAnalysis": "Low-Level Byte Analysis",
+  "base64.uploadFile": "Upload",
   "base64.processContent": "Process content to see byte breakdown.",
   "base64.downloadResource": "Download Resource",
 
@@ -1032,6 +1033,12 @@
   "uuid.embeddedTime": "Embedded Time",
   "uuid.nodeField": "Node (MAC)",
   "uuid.controlCenter": "UUID Control Center",
+  "uuid.collisionChecker": "Collision Checker",
+  "uuid.collisionPlaceholder": "Paste UUIDs (one per line) to find duplicates",
+  "uuid.totalLabel": "Total",
+  "uuid.uniqueLabel": "Unique",
+  "uuid.duplicatesLabel": "Duplicates",
+  "uuid.onLines": "on lines",
   "uuid.controlCenterDesc": "Generate secure unique identifiers or perform bit-level analysis on existing ones to detect privacy leaks and version data.",
   "uuid.exportedAs": "Exported as {format}",
 
@@ -1132,6 +1139,11 @@
   "httpStatus.codeImpl": "Code Implementation",
   "httpStatus.genericResponse": "Generic response standard applies to this status code.",
   "httpStatus.noMatchingCodes": "No matching status codes",
+  "httpStatus.decisionQ1": "Resource not modified?",
+  "httpStatus.decisionQ2": "Authentication required?",
+  "httpStatus.decisionQ3": "Permission denied?",
+  "httpStatus.decisionQ4": "Request body too large?",
+  "httpStatus.decisionQ5": "External API down?",
   "httpStatus.trySearching": "Try searching by numeric code (e.g. 404) or name (e.g. \"auth\").",
 
   "ai.deepAnalysis": "AI Deep Analysis",

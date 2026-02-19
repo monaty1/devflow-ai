@@ -971,6 +971,7 @@
   "base64.noPreview": "Sin Previsualización Disponible",
   "base64.noPreviewDesc": "Contenido identificado como texto plano o binario desconocido. Usa la Vista de Texto o el Inspector de Bytes para analizar.",
   "base64.byteAnalysis": "Análisis de Bytes de Bajo Nivel",
+  "base64.uploadFile": "Subir",
   "base64.processContent": "Procesa contenido para ver el desglose de bytes.",
   "base64.downloadResource": "Descargar Recurso",
 
@@ -1065,6 +1066,12 @@
   "uuid.embeddedTime": "Tiempo Embebido",
   "uuid.nodeField": "Nodo (MAC)",
   "uuid.controlCenter": "Centro de Control UUID",
+  "uuid.collisionChecker": "Detector de Colisiones",
+  "uuid.collisionPlaceholder": "Pega UUIDs (uno por línea) para encontrar duplicados",
+  "uuid.totalLabel": "Total",
+  "uuid.uniqueLabel": "Únicos",
+  "uuid.duplicatesLabel": "Duplicados",
+  "uuid.onLines": "en líneas",
   "uuid.controlCenterDesc": "Genera identificadores únicos seguros o realiza análisis a nivel de bits en los existentes para detectar filtraciones de privacidad y datos de versión.",
   "uuid.exportedAs": "Exportado como {format}",
 
@@ -1165,6 +1172,11 @@
   "httpStatus.codeImpl": "Implementación de Código",
   "httpStatus.genericResponse": "Se aplica el estándar de respuesta genérica a este código de estado.",
   "httpStatus.noMatchingCodes": "No se encontraron códigos de estado",
+  "httpStatus.decisionQ1": "¿Recurso no modificado?",
+  "httpStatus.decisionQ2": "¿Autenticación requerida?",
+  "httpStatus.decisionQ3": "¿Permiso denegado?",
+  "httpStatus.decisionQ4": "¿Cuerpo muy grande?",
+  "httpStatus.decisionQ5": "¿API externa caída?",
   "httpStatus.trySearching": "Intenta buscar por código numérico (ej. 404) o nombre (ej. \"auth\").",
 
   "ai.deepAnalysis": "Análisis Profundo con IA",

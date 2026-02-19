@@ -54,6 +54,18 @@ export default function UuidGeneratorPage() {
   const [activeTab, setActiveTab] = useState<"generate" | "analyze" | string>("generate");
   const [analyzeInput, setAnalyzeInput] = useState("");
   const [exportFormat, setExportFormat] = useState<"text" | "json" | "csv" | "sql">("text");
+  const [collisionInput, setCollisionInput] = useState("");
+  const collisionResult = useMemo(() => {
+    if (!collisionInput.trim()) return null;
+    const lines = collisionInput.split("\n").map(l => l.trim().toLowerCase()).filter(Boolean);
+    const seen = new Map<string, number[]>();
+    lines.forEach((uuid, i) => {
+      const existing = seen.get(uuid);
+      if (existing) { existing.push(i + 1); } else { seen.set(uuid, [i + 1]); }
+    });
+    const duplicates = [...seen.entries()].filter(([, indices]) => indices.length > 1);
+    return { total: lines.length, unique: seen.size, duplicates };
+  }, [collisionInput]);
 
   const uuids = result?.uuids;
   const exportedContent = useMemo(() => {
@@ -237,6 +249,37 @@ export default function UuidGeneratorPage() {
                 </div>
               </Tabs.Panel>
             </Tabs>
+          </Card>
+
+          {/* Collision Checker */}
+          <Card className="p-6 border-amber-500/20 bg-amber-500/5">
+            <h3 className="text-xs font-black uppercase text-amber-600 mb-4 flex items-center gap-2 tracking-widest">
+              <Search className="size-3" /> {t("uuid.collisionChecker")}
+            </h3>
+            <TextArea
+              value={collisionInput}
+              onChange={(e) => setCollisionInput(e.target.value)}
+              placeholder={t("uuid.collisionPlaceholder")}
+              className="h-24 w-full resize-none rounded-xl border border-divider bg-background p-3 font-mono text-[10px] focus:ring-2 focus:ring-amber-500/20 shadow-inner mb-3"
+              aria-label={t("uuid.collisionChecker")}
+            />
+            {collisionResult && (
+              <div className="space-y-2">
+                <div className="flex gap-4 text-[10px] font-bold">
+                  <span>{t("uuid.totalLabel")}: {collisionResult.total}</span>
+                  <span className="text-emerald-600">{t("uuid.uniqueLabel")}: {collisionResult.unique}</span>
+                  <span className={collisionResult.duplicates.length > 0 ? "text-red-600" : "text-emerald-600"}>
+                    {t("uuid.duplicatesLabel")}: {collisionResult.duplicates.length}
+                  </span>
+                </div>
+                {collisionResult.duplicates.map(([uuid, lines]) => (
+                  <div key={uuid} className="p-2 bg-red-500/10 border border-red-500/20 rounded-lg text-[10px]">
+                    <span className="font-mono text-red-600 font-bold">{uuid}</span>
+                    <span className="text-muted-foreground ml-2">{t("uuid.onLines")} {lines.join(", ")}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </Card>
 
           {activeTab === "generate" && result && (

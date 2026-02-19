@@ -20,6 +20,7 @@ import {
   Database,
   Search,
   Cpu,
+  Upload,
 } from "lucide-react";
 import { useBase64 } from "@/hooks/use-base64";
 import { useTranslation } from "@/hooks/use-translation";
@@ -122,6 +123,26 @@ export default function Base64Page() {
                 <Button size="sm" variant={mode === "decode" ? "primary" : "ghost"} onPress={() => setMode("decode")} className="font-bold h-8">{t("base64.decodeBtn")}</Button>
               </div>
               <div className="flex gap-1">
+                <Button size="sm" variant="ghost" onPress={() => {
+                  const fileInput = document.createElement("input");
+                  fileInput.type = "file";
+                  fileInput.onchange = (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    if (mode === "encode") {
+                      reader.onload = () => {
+                        const base64 = (reader.result as string).split(",")[1];
+                        if (base64) setInput(base64);
+                      };
+                      reader.readAsDataURL(file);
+                    } else {
+                      reader.onload = () => setInput(reader.result as string);
+                      reader.readAsText(file);
+                    }
+                  };
+                  fileInput.click();
+                }} aria-label={t("base64.uploadFile")}><Upload className="size-3.5 mr-1" />{t("base64.uploadFile")}</Button>
                 <Button size="sm" variant="ghost" onPress={() => loadExample("json")}>{t("base64.exampleBtn")}</Button>
                 <Button size="sm" variant="ghost" onPress={() => setInput("")} isIconOnly aria-label="Clear input"><Trash2 className="size-3.5 text-danger" /></Button>
               </div>

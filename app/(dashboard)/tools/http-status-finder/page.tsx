@@ -175,23 +175,20 @@ export default function HttpStatusFinderPage() {
             </h3>
             <div className="space-y-4">
               {[
-                { q: "Resource modified?", a: "304 Not Modified" },
-                { q: "Auth required?", a: "401 Unauthorized" },
-                { q: "Permission denied?", a: "403 Forbidden" },
-                { q: "Body too large?", a: "413 Payload Too Large" },
-                { q: "External API down?", a: "502 Bad Gateway" },
+                { q: t("httpStatus.decisionQ1"), a: "304" },
+                { q: t("httpStatus.decisionQ2"), a: "401" },
+                { q: t("httpStatus.decisionQ3"), a: "403" },
+                { q: t("httpStatus.decisionQ4"), a: "413" },
+                { q: t("httpStatus.decisionQ5"), a: "502" },
               ].map((item, i) => (
                 <button
                   key={i}
-                  onClick={() => {
-                    const code = parseInt(item.a.split(" ")[0] ?? "");
-                    if (!isNaN(code)) setSearchInput(code.toString());
-                  }}
+                  onClick={() => setSearchInput(item.a)}
                   className="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5 group hover:bg-white/10 transition-colors cursor-pointer w-full"
                 >
                   <span className="text-[10px] font-bold opacity-80">{item.q}</span>
                   <ChevronRight className="size-3 opacity-20 group-hover:translate-x-1 transition-transform" />
-                  <span className="text-[10px] font-black uppercase text-cyan-400">{item.a.split(" ")[0]}</span>
+                  <span className="text-[10px] font-black uppercase text-cyan-400">{item.a}</span>
                 </button>
               ))}
             </div>
