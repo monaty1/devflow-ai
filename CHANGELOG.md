@@ -7,11 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.1.0] - 2026-02-19
 
-### Phase E: Tool-by-Tool Iteration
+### Phase E: Tool-by-Tool Iteration (15 tools)
 
 #### Added
 - **ToolSuggestions integration** — Context-aware cross-tool recommendation banners integrated into all 15 tool pages
-- **4 new i18n keys** — `common.delete`, `codeReview.issueActions`, `promptAnalyzer.exportReport`, `tokenViz.providerSelection`
+- **JSON Formatter** — Line-by-line diff view between two JSON documents, path copy-on-click in tree view, line numbers in formatted output
+- **Prompt Analyzer** — Heptagonal radar chart visualization for 7-dimension anatomy scoring, history comparison
+- **Code Review** — Severity filter chips (critical/warning/info) to focus on specific issue types
+- **Cost Calculator** — Currency selector (USD/EUR/GBP) with live conversion, CSV export of comparison table
+- **Token Visualizer** — Context window budget bar with 4K/8K/128K presets and color-coded utilization (green/amber/red)
+- **Context Manager** — Model preset selector (11 models from GPT-4o to Gemini 2M tokens), color-coded utilization progress bar
+- **DTO-Matic** — "Download All Files" button to export all generated code files as a single text file
+- **Regex Humanizer** — 6 preset patterns (email, URL, IP, date, phone, hex color) with one-click load, live match highlighting
+- **Variable Name Wizard** — Batch rename: paste multiple names, select target convention, convert all at once with copy-all
+- **Cron Builder** — Mini calendar visualization showing execution dates for the current month with highlighted active days
+- **Git Commit Generator** — Batch generation: paste multiple descriptions, generate all conventional commit messages at once
+- **Tailwind Sorter** — Before/after diff tab showing removed classes (red strikethrough), kept classes (green), and reordered output
+- **UUID Generator** — Collision checker: paste UUIDs to detect duplicates with line numbers and statistics (total/unique/duplicates)
+- **Base64** — File upload button using FileReader API (readAsDataURL for encode, readAsText for decode)
+- **HTTP Status Finder** — i18n for decision pipeline (5 questions translated to Spanish)
+- **~55 new i18n keys** across all 15 tools in both `en.json` and `es.json`
 
 #### Changed
 - **i18n sweep** — ~230 hardcoded English strings replaced with `t()` calls across 12 tool pages (base64, code-review, context-manager, cron-builder, dto-matic, git-commit-generator, http-status-finder, regex-humanizer, tailwind-sorter, token-visualizer, uuid-generator, variable-name-wizard)
@@ -24,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `token-visualizer`: `role="radiogroup"` on provider buttons, keyboard support on leaderboard Cards
   - `variable-name-wizard`: `role="radiogroup"` on language selector
   - `git-commit-generator`: `type="button"` + `aria-hidden` on "Add point"
+- **911 tests passing** (up from 906) — 5 new tests from tool iterations
 
 ## [3.0.0] - 2026-02-19
 
