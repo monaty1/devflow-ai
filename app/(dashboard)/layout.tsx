@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import NextLink from "next/link";
+import Script from "next/script";
 import type { ReactNode } from "react";
 import {
   Wrench,
@@ -178,10 +179,29 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </header>
 
         {/* Main Content */}
-        <main id="main-content" className="flex-1 overflow-auto bg-background p-4 md:p-8">
+        <main id="main-content" className="flex-1 overflow-auto scroll-pt-4 bg-background p-4 md:p-8">
           {children}
         </main>
       </div>
+
+      {/* Speculation Rules — prefetch tool pages for instant navigation (Chromium only) */}
+      <Script id="speculation-rules" type="speculationrules" strategy="afterInteractive">
+        {JSON.stringify({
+          prefetch: [
+            { source: "document", where: { href_matches: "/tools/*" } },
+          ],
+          prerender: [
+            {
+              source: "list",
+              urls: [
+                "/tools/json-formatter",
+                "/tools/regex-tester",
+                "/tools/uuid-generator",
+              ],
+            },
+          ],
+        })}
+      </Script>
     </div>
   );
 }

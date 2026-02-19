@@ -132,6 +132,8 @@
   "about.email": "Send email",
 
   "common.tools": "Tools",
+  "common.help": "Help",
+  "common.helpDocs": "View documentation and help",
   "common.backToTools": "Back to Tools",
   "common.features": "Features",
   "common.launch": "Launch {name}",
@@ -1214,6 +1216,9 @@
   "error.stackTrace": "Stack trace",
   "error.tryAgain": "Try Again",
   "error.goHome": "Go Home",
+  "error.dashboardTitle": "Something went wrong",
+  "error.dashboardDesc": "An unexpected error occurred",
+  "error.errorId": "Error ID",
 
   "table.noItems": "No items found",
   "table.status": "Status",

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/hooks/use-translation";
+import { HelpLink } from "./help-link";
 
 interface ToolHeaderProps {
   /** Tool title */
@@ -42,11 +43,18 @@ export function ToolHeader({
     </nav>
   ) : null;
 
+  const actionsWithHelp = (
+    <div className="flex items-center gap-3">
+      {actions}
+      <HelpLink />
+    </div>
+  );
+
   if (Icon && gradient) {
     return (
       <div>
         {breadcrumbNav}
-        <div className={cn("flex items-center gap-3", actions && "justify-between")}>
+        <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div
               className={cn(
@@ -63,7 +71,7 @@ export function ToolHeader({
               <p className="text-sm text-muted-foreground">{description}</p>
             </div>
           </div>
-          {actions}
+          {actionsWithHelp}
         </div>
       </div>
     );
@@ -72,14 +80,14 @@ export function ToolHeader({
   return (
     <div>
       {breadcrumbNav}
-      <div className={cn(actions && "flex items-start justify-between")}>
+      <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
             {title}
           </h1>
           <p className="mt-1 text-muted-foreground">{description}</p>
         </div>
-        {actions}
+        {actionsWithHelp}
       </div>
     </div>
   );

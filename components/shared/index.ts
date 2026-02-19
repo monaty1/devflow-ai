@@ -12,4 +12,5 @@ export { ShareButtons } from "./share-buttons";
 export { GiscusComments } from "./giscus-comments";
 export { CopyButton } from "./copy-button";
 export { ToolHeader } from "./tool-header";
+export { HelpLink } from "./help-link";
 export { GitHubStars } from "./github-stars";

@@ -5,6 +5,52 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2026-02-19
+
+### 2026 Trends: Security, Performance & Testing
+
+#### Phase 1: CI/CD Permissions & SHA Pinning
+- **Least-privilege permissions** — top-level `permissions: {}` with per-job scoping in `ci.yml`
+- **SHA-pinned actions** — all GitHub Actions pinned to commit SHAs with version comments in `ci.yml` and `codeql.yml`
+- **Audit level raised** — `npm audit --audit-level=high` (was `critical`) matching local `audit:security` script
+
+#### Phase 2: ESLint Security & Supply Chain
+- **eslint-plugin-security** — catches `eval()`, non-literal `require()`, `child_process`, trojan source (unicode bidi), `Buffer()` constructor
+- **Lockfile integrity** — `lockfile-lint` validates `package-lock.json` only references `https://registry.npmjs.org`
+- **SBOM generation** — CycloneDX SBOM generated and uploaded as artifact on every build (90-day retention)
+
+#### Phase 3: Advanced SAST & Runner Hardening
+- **Semgrep SAST workflow** — new `.github/workflows/semgrep.yml` with `p/javascript`, `p/typescript`, `p/react`, `p/nextjs`, `p/owasp-top-ten` rulesets; SARIF output to GitHub Security tab
+- **StepSecurity harden-runner** — all CI jobs start with `step-security/harden-runner` in audit mode (monitors network egress, file integrity, processes)
+- **Enhanced Permissions-Policy** — added `payment=(), usb=(), bluetooth=(), midi=(), magnetometer=(), gyroscope=(), accelerometer=()` restrictions
+
+#### Phase 4: React Compiler & View Transitions
+- **React Compiler** — `babel-plugin-react-compiler` enabled via `reactCompiler: true` in `next.config.ts`; automatic memoization at build time
+- **View Transitions API** — `viewTransition: true` in experimental config; native CSS transitions between routes (Chrome/Edge 126+)
+- **Speculation Rules** — prefetch all `/tools/*` links, prerender top 3 tools (JSON Formatter, Regex Tester, UUID Generator) for instant navigation
+
+#### Phase 5: Performance CI Workflows
+- **Lighthouse CI** — new `.github/workflows/lighthouse.yml` audits landing page, tools list, and JSON Formatter on every PR
+- **Performance budgets** — `lighthouse-budget.json` with LCP <2.5s, FCP <1.8s, TTI <3.5s, JS <300KB, total <500KB
+- **Coverage PR comments** — `vitest-coverage-report-action` posts coverage delta on pull requests
+
+#### Phase 6: E2E Testing with Playwright
+- **Playwright E2E** — `@playwright/test` with 5 tests across 3 spec files (navigation, JSON formatter, settings)
+- **Playwright config** — `playwright.config.ts` with Chromium, trace-on-retry, screenshot-on-failure
+- **CI integration** — E2E job runs after build, uploads report on failure (7-day retention)
+- **npm scripts** — `test:e2e` and `test:e2e:ui` added to `package.json`
+
+#### Phase 7: WCAG 2.2 AA Compliance
+- **Focus Not Obscured (2.4.11)** — `scroll-pt-4` on main content area prevents sticky sidebar from covering focused elements
+- **Consistent Help (3.2.6)** — `HelpLink` component rendered on every tool page via `ToolHeader`
+- **i18n error boundary** — dashboard `error.tsx` fully internationalized with `useTranslation()`
+- **8 new i18n keys** — `common.help`, `common.helpDocs`, `error.dashboardTitle`, `error.dashboardDesc`, `error.errorId` in both locales
+
+#### Phase 8: Renovate Config & Documentation
+- **Renovate** — `renovate.json` with auto-merge patches, HeroUI grouping, action digest pinning, vulnerability alerts
+- **CHANGELOG** — updated with all 8 phases
+- **README** — updated with new CI workflows, security features, and E2E testing
+
 ## [3.2.0] - 2026-02-19
 
 ### UX & Polish Iteration

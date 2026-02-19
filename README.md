@@ -213,7 +213,9 @@ Open [http://localhost:3000](http://localhost:3000)
 | `npm run test`          | Vitest watch mode                      |
 | `npm run test:run`      | Single test run                        |
 | `npm run test:coverage` | Coverage with per-file thresholds      |
-| `npm run audit:security`| npm audit (moderate+)                  |
+| `npm run test:e2e`      | Playwright E2E tests                   |
+| `npm run test:e2e:ui`   | Playwright UI mode                     |
+| `npm run audit:security`| npm audit (high+)                      |
 | `npm run analyze`       | Bundle analysis (webpack)              |
 
 ---
@@ -231,10 +233,11 @@ We follow a **Strategic Coverage** architecture. Not all code needs the same lev
 **Per-file enforcement** is enabled: each CORE file must individually meet thresholds. The CI pipeline fails if any file drops below its floor.
 
 ```bash
-npm run test:run                                             # All tests
+npm run test:run                                             # All unit tests (942+)
 npx vitest run tests/unit/application/json-formatter.test.ts # Single file
 npx vitest run -t "should format"                            # By pattern
 npm run test:coverage                                        # Coverage report
+npm run test:e2e                                             # Playwright E2E (5 tests)
 ```
 
 ---
@@ -251,7 +254,7 @@ All responses include strict security headers via `next.config.ts`:
 | `Strict-Transport-Security`  | `max-age=63072000; includeSubDomains; preload` |
 | `X-Content-Type-Options`     | `nosniff`                                |
 | `X-Frame-Options`            | `DENY`                                   |
-| `Permissions-Policy`         | camera, mic, geolocation disabled        |
+| `Permissions-Policy`         | camera, mic, geolocation, payment, usb, bluetooth, midi, magnetometer, gyroscope, accelerometer disabled |
 | `Referrer-Policy`            | `strict-origin-when-cross-origin`        |
 
 ### Design Principles
@@ -265,7 +268,12 @@ All responses include strict security headers via `next.config.ts`:
 - **No user data** &mdash; localStorage only, no external transmission
 - **CSP enforced** &mdash; blocks XSS, clickjacking, and data injection
 - **Prototype pollution protection** &mdash; dangerous keys (`__proto__`, `constructor`, `prototype`) filtered
-- **Dependency audit** &mdash; `npm audit` runs in CI on every push
+- **Dependency audit** &mdash; `npm audit --audit-level=high` runs in CI on every push
+- **Supply chain** &mdash; lockfile-lint validates registry sources, CycloneDX SBOM generated on every build
+- **SAST** &mdash; Semgrep (OWASP Top 10 + React/Next.js rules) + CodeQL JS/TS on every push and PR
+- **SHA-pinned actions** &mdash; all GitHub Actions pinned to full commit SHAs
+- **Runner hardening** &mdash; StepSecurity harden-runner monitors all CI jobs
+- **eslint-plugin-security** &mdash; catches eval(), non-literal require(), trojan source attacks
 
 ---
 
@@ -298,14 +306,18 @@ NEXT_PUBLIC_SENTRY_DSN=https://xxxxx@oXXXXX.ingest.sentry.io/XXXXXX
 GitHub Actions runs on every push to `main` and all pull requests:
 
 ```
-quality:    ESLint → TypeScript → Tests + Coverage (thresholds enforced)
-security:   npm audit --audit-level=moderate (parallel)
+quality:    ESLint (+ security plugin) → TypeScript → Tests + Coverage → PR coverage comments
+security:   npm audit --audit-level=high + lockfile-lint (parallel)
 dep-review: dependency-review-action on PRs (moderate+ blocked)
-build:      next build (gates on quality + security)
+build:      next build → SBOM generation (CycloneDX, 90-day retention)
+e2e:        Playwright E2E tests (5 tests, Chromium, after build)
 codeql:     CodeQL JS/TS SAST (push + PRs + weekly)
+semgrep:    Semgrep SAST — OWASP Top 10, React, Next.js, TypeScript rules (SARIF → Security tab)
+lighthouse: Lighthouse CI performance audit on PRs (LCP <2.5s, FCP <1.8s, JS <300KB)
 ```
 
-Coverage reports are uploaded as artifacts on every run.
+All jobs run with least-privilege permissions and StepSecurity harden-runner.
+Coverage reports and Playwright reports are uploaded as artifacts.
 
 > See [`docs/SENTRY.md`](./docs/SENTRY.md) for the full Sentry setup guide.
 
@@ -505,7 +517,7 @@ Todas las respuestas incluyen cabeceras de seguridad estrictas via `next.config.
 | `Strict-Transport-Security`  | `max-age=63072000; includeSubDomains; preload` |
 | `X-Content-Type-Options`     | `nosniff`                                |
 | `X-Frame-Options`            | `DENY`                                   |
-| `Permissions-Policy`         | camara, micro, geolocalizacion deshabilitados |
+| `Permissions-Policy`         | camara, micro, geolocalizacion, pago, usb, bluetooth, midi, magnetometro, giroscopio, acelerometro deshabilitados |
 | `Referrer-Policy`            | `strict-origin-when-cross-origin`        |
 
 ### Principios de Diseno
@@ -515,7 +527,12 @@ Todas las respuestas incluyen cabeceras de seguridad estrictas via `next.config.
 - **Sin datos de usuario** &mdash; solo localStorage, sin transmision externa
 - **CSP reforzado** &mdash; bloquea XSS, clickjacking e inyeccion de datos
 - **Proteccion contra prototype pollution** &mdash; claves peligrosas (`__proto__`, `constructor`, `prototype`) filtradas
-- **Auditoria de dependencias** &mdash; `npm audit` se ejecuta en CI en cada push
+- **Auditoria de dependencias** &mdash; `npm audit --audit-level=high` se ejecuta en CI en cada push
+- **Cadena de suministro** &mdash; lockfile-lint valida fuentes del registro, SBOM CycloneDX generado en cada build
+- **SAST** &mdash; Semgrep (OWASP Top 10 + reglas React/Next.js) + CodeQL JS/TS en cada push y PR
+- **Acciones con SHA fijo** &mdash; todas las GitHub Actions fijadas a SHAs completos
+- **Endurecimiento del runner** &mdash; StepSecurity harden-runner monitorea todos los jobs CI
+- **eslint-plugin-security** &mdash; detecta eval(), require() no literal, ataques trojan source
 
 ---
 
@@ -546,14 +563,18 @@ NEXT_PUBLIC_SENTRY_DSN=https://xxxxx@oXXXXX.ingest.sentry.io/XXXXXX
 GitHub Actions se ejecuta en cada push a `main` y todas las pull requests:
 
 ```
-quality:    ESLint → TypeScript → Tests + Coverage (umbrales obligatorios)
-security:   npm audit --audit-level=moderate (en paralelo)
+quality:    ESLint (+ plugin seguridad) → TypeScript → Tests + Coverage → comentarios de cobertura en PR
+security:   npm audit --audit-level=high + lockfile-lint (en paralelo)
 dep-review: dependency-review-action en PRs (moderate+ bloqueado)
-build:      next build (requiere quality + security)
+build:      next build → generacion SBOM (CycloneDX, retencion 90 dias)
+e2e:        Tests E2E Playwright (5 tests, Chromium, despues de build)
 codeql:     CodeQL JS/TS SAST (push + PRs + semanal)
+semgrep:    Semgrep SAST — OWASP Top 10, React, Next.js, TypeScript (SARIF → pestana Security)
+lighthouse: Lighthouse CI auditoria de rendimiento en PRs (LCP <2.5s, FCP <1.8s, JS <300KB)
 ```
 
-Los reportes de cobertura se suben como artifacts en cada ejecucion.
+Todos los jobs se ejecutan con permisos minimos y StepSecurity harden-runner.
+Los reportes de cobertura y Playwright se suben como artifacts.
 
 > Ver [`docs/SENTRY.md`](./docs/SENTRY.md) para la guia completa de configuracion de Sentry.
 

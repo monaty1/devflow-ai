@@ -130,6 +130,8 @@
   "about.email": "Enviar email",
 
   "common.tools": "Herramientas",
+  "common.help": "Ayuda",
+  "common.helpDocs": "Ver documentación y ayuda",
   "common.backToTools": "Volver a Herramientas",
   "common.features": "Caracteristicas",
   "common.launch": "Abrir {name}",
@@ -1247,6 +1249,9 @@
   "error.stackTrace": "Traza de errores",
   "error.tryAgain": "Reintentar",
   "error.goHome": "Ir al inicio",
+  "error.dashboardTitle": "Algo salió mal",
+  "error.dashboardDesc": "Ocurrió un error inesperado",
+  "error.errorId": "ID del error",
 
   "table.noItems": "No se encontraron elementos",
   "table.status": "Estado",

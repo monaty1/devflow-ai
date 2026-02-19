@@ -20,7 +20,7 @@ const securityHeaders = [
   },
   {
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=()",
+    value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), midi=(), magnetometer=(), gyroscope=(), accelerometer=()",
   },
   {
     key: "Strict-Transport-Security",
@@ -49,6 +49,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
+  reactCompiler: true,
   images: {
     formats: ["image/avif", "image/webp"],
   },
@@ -56,6 +57,7 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === "production",
   },
   experimental: {
+    viewTransition: true,
     optimizePackageImports: [
       "lucide-react",
       "framer-motion",
@@ -66,7 +68,7 @@ const nextConfig: NextConfig = {
       "react-hook-form",
       "recharts",
     ],
-  },
+  } as NextConfig["experimental"] & { viewTransition: boolean },
   async headers() {
     return [
       {
