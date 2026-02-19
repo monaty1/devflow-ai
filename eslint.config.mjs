@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // External files
     "system_prompts_leaks-main/**",
+    // HeroUI v3 docs (third-party demos, not our code)
+    ".heroui-docs/**",
     // Generated coverage reports
     "coverage/**",
   ]),

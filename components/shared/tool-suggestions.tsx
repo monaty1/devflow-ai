@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui";
@@ -17,9 +18,7 @@ export function ToolSuggestions({ toolId, input, output }: ToolSuggestionsProps)
   const router = useRouter();
   const { t } = useTranslation();
 
-  if (recommendations.length === 0) return null;
-
-  const handleNavigate = (slug: string, data?: string) => {
+  const handleNavigate = useCallback((slug: string, data?: string) => {
     if (data) {
       localStorage.setItem(
         "devflow-shared-data",
@@ -32,7 +31,9 @@ export function ToolSuggestions({ toolId, input, output }: ToolSuggestionsProps)
       );
     }
     router.push(`/tools/${slug}`);
-  };
+  }, [toolId, router]);
+
+  if (recommendations.length === 0) return null;
 
   return (
     <div className="flex flex-wrap items-center gap-2">

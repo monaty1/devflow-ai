@@ -149,7 +149,7 @@ export default function ContextManagerPage() {
       default:
         return String(doc[key as keyof typeof doc] ?? "");
     }
-  }, [activeWindow, changePriority, removeDocument]);
+  }, [activeWindow, changePriority, removeDocument, t]);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
