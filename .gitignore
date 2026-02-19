@@ -63,6 +63,7 @@ system_prompts_leaks-main/
 # Claude
 CLAUDE.md
 GEMINI.md
+AGENTS.md
 
 # Internal planning
 TODO.md
@@ -71,3 +72,6 @@ ENTREGA_TFM.md
 EBOOK_200_PROMPTS_MDEV1.pdf
 # heroui-agents-md
 .heroui-docs/
+
+free-llm-api-resources-main
+audit-report.md

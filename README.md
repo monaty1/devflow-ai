@@ -7,7 +7,7 @@
 ### 15 herramientas para developers &middot; IA integrada &middot; Local-first &middot; Open Source
 
 [![Build](https://img.shields.io/github/actions/workflow/status/albertoguinda/devflow-ai/ci.yml?branch=main&style=flat-square&logo=github&label=CI)](https://github.com/albertoguinda/devflow-ai/actions)
-[![Tests](https://img.shields.io/badge/tests-884_passing-brightgreen?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
+[![Tests](https://img.shields.io/badge/tests-906_passing-brightgreen?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
 [![Coverage](https://img.shields.io/badge/coverage-strategic_(100%2F80%2F0)-blue?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
 [![Lighthouse](https://img.shields.io/badge/Lighthouse-100%2F100%2F100%2F100-brightgreen?style=flat-square&logo=lighthouse&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
@@ -57,8 +57,9 @@
 
 - **No signup** &mdash; no login, no user accounts, no barriers
 - **Local-first** &mdash; every tool works 100% without AI
-- **AI-enhanced** &mdash; optional Gemini 2.0 Flash integration (free tier, no credit card)
+- **AI-enhanced** &mdash; 4 providers: Gemini, Groq, OpenRouter, Pollinations (always free, no key needed)
 - **BYOK** &mdash; bring your own API key for higher limits
+- **Smart suggestions** &mdash; context-aware cross-tool recommendations
 - **Local history** &mdash; localStorage persistence
 - **Copy to clipboard** &mdash; 1-click from any tool
 - **Dark / Light mode** &mdash; auto-detection + manual toggle
@@ -210,7 +211,8 @@ Open [http://localhost:3000](http://localhost:3000)
 | `npm run test`          | Vitest watch mode                      |
 | `npm run test:run`      | Single test run                        |
 | `npm run test:coverage` | Coverage with per-file thresholds      |
-| `npm run audit:security`| npm audit (high + critical)            |
+| `npm run audit:security`| npm audit (moderate+)                  |
+| `npm run analyze`       | Bundle analysis (webpack)              |
 
 ---
 
@@ -294,12 +296,16 @@ NEXT_PUBLIC_SENTRY_DSN=https://xxxxx@oXXXXX.ingest.sentry.io/XXXXXX
 GitHub Actions runs on every push to `main` and all pull requests:
 
 ```
-quality:   ESLint → TypeScript → Tests + Coverage (thresholds enforced)
-security:  npm audit --audit-level=high (parallel)
-build:     next build (gates on quality passing)
+quality:    ESLint → TypeScript → Tests + Coverage (thresholds enforced)
+security:   npm audit --audit-level=moderate (parallel)
+dep-review: dependency-review-action on PRs (moderate+ blocked)
+build:      next build (gates on quality + security)
+codeql:     CodeQL JS/TS SAST (push + PRs + weekly)
 ```
 
 Coverage reports are uploaded as artifacts on every run.
+
+> See [`docs/SENTRY.md`](./docs/SENTRY.md) for the full Sentry setup guide.
 
 ---
 
@@ -343,8 +349,9 @@ Coverage reports are uploaded as artifacts on every run.
 
 - **Sin registro** &mdash; ni login, ni cuentas de usuario, sin barreras
 - **Local-first** &mdash; todas las herramientas funcionan al 100% sin IA
-- **IA integrada** &mdash; Gemini 2.0 Flash opcional (tier gratuito, sin tarjeta)
+- **IA integrada** &mdash; 4 proveedores: Gemini, Groq, OpenRouter, Pollinations (siempre gratis, sin API key)
 - **BYOK** &mdash; trae tu propia API key para limites superiores
+- **Sugerencias inteligentes** &mdash; recomendaciones de herramientas segun el contexto
 - **Historial local** &mdash; persistencia con localStorage
 - **Copy to clipboard** &mdash; en 1 click desde cualquier herramienta
 - **Dark / Light mode** &mdash; deteccion automatica + toggle manual
@@ -535,12 +542,16 @@ NEXT_PUBLIC_SENTRY_DSN=https://xxxxx@oXXXXX.ingest.sentry.io/XXXXXX
 GitHub Actions se ejecuta en cada push a `main` y todas las pull requests:
 
 ```
-quality:   ESLint → TypeScript → Tests + Coverage (umbrales obligatorios)
-security:  npm audit --audit-level=high (en paralelo)
-build:     next build (requiere que quality pase)
+quality:    ESLint → TypeScript → Tests + Coverage (umbrales obligatorios)
+security:   npm audit --audit-level=moderate (en paralelo)
+dep-review: dependency-review-action en PRs (moderate+ bloqueado)
+build:      next build (requiere quality + security)
+codeql:     CodeQL JS/TS SAST (push + PRs + semanal)
 ```
 
 Los reportes de cobertura se suben como artifacts en cada ejecucion.
+
+> Ver [`docs/SENTRY.md`](./docs/SENTRY.md) para la guia completa de configuracion de Sentry.
 
 ---
 
