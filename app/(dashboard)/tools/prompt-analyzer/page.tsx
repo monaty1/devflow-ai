@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Sparkles,
   History,
@@ -11,6 +11,9 @@ import {
   Clock,
   Zap,
   ArrowRight,
+  ArrowUp,
+  ArrowDown,
+  Minus as MinusIcon,
   Download,
   Coins,
   ScanSearch,
@@ -25,6 +28,7 @@ import {
   CheckCircle2,
   XCircle,
   CircleDot,
+  GitCompareArrows,
 } from "lucide-react";
 import { usePromptAnalyzer } from "@/hooks/use-prompt-analyzer";
 import { useAIRefine } from "@/hooks/use-ai-refine";
@@ -40,7 +44,7 @@ import { CopyButton } from "@/components/shared/copy-button";
 import { TextArea } from "@heroui/react";
 import { Card, Button } from "@/components/ui";
 import { ToolSuggestions } from "@/components/shared/tool-suggestions";
-import type { PromptIssue, AnatomyElement } from "@/types/prompt-analyzer";
+import type { PromptIssue, AnatomyElement, PromptAnalysisResult, PromptDimension } from "@/types/prompt-analyzer";
 
 const DIMENSION_ICONS: Record<AnatomyElement, React.ElementType> = {
   role: UserCircle,
@@ -68,9 +72,67 @@ const SEVERITY_COLORS = {
   low: "text-blue-900 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-200",
 };
 
+function AnatomyRadar({ dimensions, compareDimensions }: { dimensions: PromptDimension[]; compareDimensions?: PromptDimension[] | undefined }) {
+  const size = 180;
+  const cx = size / 2;
+  const cy = size / 2;
+  const maxR = 70;
+  const n = dimensions.length;
+
+  const getPoint = (index: number, score: number) => {
+    const angle = (Math.PI * 2 * index) / n - Math.PI / 2;
+    const r = (score / 100) * maxR;
+    return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
+  };
+
+  const toPath = (dims: PromptDimension[]) =>
+    dims.map((d, i) => {
+      const p = getPoint(i, d.score);
+      return `${i === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`;
+    }).join(" ") + " Z";
+
+  const gridLevels = [25, 50, 75, 100];
+
+  return (
+    <svg viewBox={`0 0 ${size} ${size}`} className="w-full h-full" aria-hidden="true">
+      {/* Grid */}
+      {gridLevels.map((level) => (
+        <polygon
+          key={level}
+          points={Array.from({ length: n }, (_, i) => {
+            const p = getPoint(i, level);
+            return `${p.x.toFixed(1)},${p.y.toFixed(1)}`;
+          }).join(" ")}
+          fill="none"
+          stroke="currentColor"
+          strokeOpacity={0.08}
+          strokeWidth={0.5}
+        />
+      ))}
+      {/* Axis lines */}
+      {dimensions.map((_, i) => {
+        const p = getPoint(i, 100);
+        return <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="currentColor" strokeOpacity={0.06} strokeWidth={0.5} />;
+      })}
+      {/* Compare fill (if present) */}
+      {compareDimensions && (
+        <path d={toPath(compareDimensions)} fill="rgb(168 85 247 / 0.12)" stroke="rgb(168 85 247)" strokeWidth={1} strokeDasharray="3 2" />
+      )}
+      {/* Main fill */}
+      <path d={toPath(dimensions)} fill="rgb(59 130 246 / 0.15)" stroke="rgb(59 130 246)" strokeWidth={1.5} />
+      {/* Dots */}
+      {dimensions.map((d, i) => {
+        const p = getPoint(i, d.score);
+        return <circle key={i} cx={p.x} cy={p.y} r={2.5} fill="rgb(59 130 246)" />;
+      })}
+    </svg>
+  );
+}
+
 export default function PromptAnalyzerPage() {
   const { t } = useTranslation();
   const [prompt, setPrompt] = useState("");
+  const [compareItem, setCompareItem] = useState<PromptAnalysisResult | null>(null);
 
   const ISSUE_LABELS: Record<PromptIssue["type"], string> = {
     vague_instruction: t("promptAnalyzer.issueVague"),
@@ -93,6 +155,19 @@ export default function PromptAnalyzerPage() {
   const [showHistory, setShowHistory] = useState(false);
   const { result, history, isAnalyzing, analyze, clearHistory, removeFromHistory } =
     usePromptAnalyzer();
+
+  const scoreDelta = useMemo(() => {
+    if (!result || !compareItem) return null;
+    const dimDeltas = result.dimensions.map((dim) => {
+      const prev = compareItem.dimensions.find((d) => d.id === dim.id);
+      return { id: dim.id, delta: dim.score - (prev?.score ?? 0) };
+    });
+    return {
+      overall: result.score - compareItem.score,
+      anatomy: result.anatomyScore - compareItem.anatomyScore,
+      dimensions: dimDeltas,
+    };
+  }, [result, compareItem]);
   const { refineWithAI, aiResult: aiRefineResult, isAILoading: isAIRefining } = useAIRefine();
   const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
   const { addToast } = useToast();
@@ -274,6 +349,17 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
                     >
                       {t("promptAnalyzer.load")}
                     </Button>
+                    {result && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        isIconOnly
+                        onPress={() => setCompareItem(item)}
+                        aria-label={t("promptAnalyzer.compareWithCurrent")}
+                      >
+                        <GitCompareArrows className="size-4" />
+                      </Button>
+                    )}
                     <Button
                       size="sm"
                       variant="danger"
@@ -301,11 +387,31 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
           {/* Score Card */}
           <Card className="p-6">
             <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
-              <ScoreBadge
-                score={result.score}
-                category={result.category}
-                size="lg"
-              />
+              <div className="flex flex-col items-center gap-3">
+                <ScoreBadge
+                  score={result.score}
+                  category={result.category}
+                  size="lg"
+                />
+                <div className="size-[140px]">
+                  <AnatomyRadar dimensions={result.dimensions} compareDimensions={compareItem?.dimensions} />
+                </div>
+                {compareItem && scoreDelta && (
+                  <div className="flex items-center gap-1 text-xs">
+                    {scoreDelta.overall > 0 ? (
+                      <><ArrowUp className="size-3 text-emerald-500" /><span className="font-bold text-emerald-600">+{scoreDelta.overall}</span></>
+                    ) : scoreDelta.overall < 0 ? (
+                      <><ArrowDown className="size-3 text-red-500" /><span className="font-bold text-red-600">{scoreDelta.overall}</span></>
+                    ) : (
+                      <><MinusIcon className="size-3 text-muted-foreground" /><span className="font-bold text-muted-foreground">0</span></>
+                    )}
+                    <span className="text-muted-foreground">{t("promptAnalyzer.vsHistory")}</span>
+                    <button type="button" onClick={() => setCompareItem(null)} className="ml-1 text-muted-foreground hover:text-foreground">
+                      <XCircle className="size-3" />
+                    </button>
+                  </div>
+                )}
+              </div>
               <div className="flex-1 text-center sm:text-left">
                 <div className="flex items-start justify-between">
                   <h2 className="text-xl font-semibold text-foreground">
@@ -404,6 +510,13 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
                             <span className="ml-1 text-xs tabular-nums text-muted-foreground">
                               {dim.score}%
                             </span>
+                            {scoreDelta && (() => {
+                              const dd = scoreDelta.dimensions.find((d) => d.id === dim.id);
+                              if (!dd || dd.delta === 0) return null;
+                              return dd.delta > 0
+                                ? <span className="ml-1 text-[10px] font-bold text-emerald-500">+{dd.delta}</span>
+                                : <span className="ml-1 text-[10px] font-bold text-red-500">{dd.delta}</span>;
+                            })()}
                           </div>
                         </div>
                         <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">

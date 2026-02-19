@@ -54,3 +54,19 @@ export interface JsonPathResult {
   value: unknown;
   type: string;
 }
+
+export type DiffLineStatus = "added" | "removed" | "unchanged";
+
+export interface JsonDiffLine {
+  lineNumber: number;
+  otherLineNumber: number;
+  content: string;
+  status: DiffLineStatus;
+}
+
+export interface JsonDiffResult {
+  lines: JsonDiffLine[];
+  addedCount: number;
+  removedCount: number;
+  unchangedCount: number;
+}

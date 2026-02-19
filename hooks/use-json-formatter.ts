@@ -13,6 +13,7 @@ import {
   extractJsonPaths,
   jsonToTypeScript,
   compareJson,
+  diffJsonLines,
   fixJson,
   EXAMPLE_JSON,
 } from "@/lib/application/json-formatter";
@@ -107,6 +108,11 @@ export function useJsonFormatter() {
     return compareJson(input, compareInput);
   }, [input, compareInput]);
 
+  const getDiff = useCallback(() => {
+    if (!input.trim() || !compareInput.trim()) return null;
+    return diffJsonLines(input, compareInput);
+  }, [input, compareInput]);
+
   const updateConfig = useCallback(
     <K extends keyof JsonFormatterConfig>(key: K, value: JsonFormatterConfig[K]) => {
       setConfig((prev) => ({ ...prev, [key]: value }));
@@ -168,6 +174,7 @@ export function useJsonFormatter() {
     getPaths,
     toTypeScript,
     compare,
+    getDiff,
     loadExample,
     reset,
     fix,

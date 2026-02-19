@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   Chip,
   Dropdown,
@@ -92,9 +92,27 @@ export default function CodeReviewPage() {
     }
   };
 
+  const [severityFilter, setSeverityFilter] = useState<"all" | "critical" | "warning" | "info">("all");
+
+  const filteredIssues = useMemo(() => {
+    if (!result) return [];
+    if (severityFilter === "all") return result.issues;
+    return result.issues.filter((i) => i.severity === severityFilter);
+  }, [result, severityFilter]);
+
+  const severityCounts = useMemo(() => {
+    if (!result) return { critical: 0, warning: 0, info: 0 };
+    return {
+      critical: result.issues.filter((i) => i.severity === "critical").length,
+      warning: result.issues.filter((i) => i.severity === "warning").length,
+      info: result.issues.filter((i) => i.severity === "info").length,
+    };
+  }, [result]);
+
   const handleReset = () => {
     setCode("");
     setLanguage("typescript");
+    setSeverityFilter("all");
     reset();
   };
 
@@ -331,13 +349,42 @@ export default function CodeReviewPage() {
 
               {/* Issues DataTable */}
               <Card className="p-6">
-                <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                  <ShieldAlert className="size-5 text-danger" />
-                  {t("codeReview.auditFindings")}
-                </h3>
+                <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <h3 className="text-lg font-bold flex items-center gap-2">
+                    <ShieldAlert className="size-5 text-danger" />
+                    {t("codeReview.auditFindings")}
+                  </h3>
+                  <div className="flex gap-2 flex-wrap" role="radiogroup" aria-label={t("codeReview.filterBySeverity")}>
+                    {([
+                      { key: "all" as const, label: `${t("common.all")} (${result.issues.length})`, icon: null, activeVariant: "primary" as const },
+                      ...(severityCounts.critical > 0 ? [{ key: "critical" as const, label: `${t("codeReview.critical")} (${severityCounts.critical})`, icon: ShieldAlert, activeVariant: "danger" as const }] : []),
+                      ...(severityCounts.warning > 0 ? [{ key: "warning" as const, label: `${t("codeReview.warnings")} (${severityCounts.warning})`, icon: AlertTriangle, activeVariant: "outline" as const }] : []),
+                      ...(severityCounts.info > 0 ? [{ key: "info" as const, label: `${t("codeReview.infoLabel")} (${severityCounts.info})`, icon: Info, activeVariant: "outline" as const }] : []),
+                    ]).map((filter) => {
+                      const FilterIcon = filter.icon;
+                      const isActive = severityFilter === filter.key;
+                      return (
+                        <button
+                          key={filter.key}
+                          type="button"
+                          role="radio"
+                          aria-checked={isActive}
+                          onClick={() => setSeverityFilter(filter.key)}
+                          className={cn(
+                            "inline-flex items-center gap-1 px-3 h-7 rounded-lg text-xs font-bold transition-colors",
+                            isActive ? "bg-primary text-primary-foreground" : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                          )}
+                        >
+                          {FilterIcon && <FilterIcon className="size-3" aria-hidden="true" />}
+                          {filter.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
                 <DataTable
                   columns={issueColumns}
-                  data={result.issues.map((issue, id) => ({ ...issue, id }))}
+                  data={filteredIssues.map((issue, id) => ({ ...issue, id }))}
                   filterField="message"
                   renderCell={renderIssueCell}
                   emptyContent={t("codeReview.noIssues")}

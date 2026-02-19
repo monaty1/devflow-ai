@@ -18,6 +18,9 @@ import {
   Database,
   ArrowRightLeft,
   Fingerprint,
+  Copy,
+  Plus,
+  Minus,
 } from "lucide-react";
 import { useJsonFormatter } from "@/hooks/use-json-formatter";
 import { useTranslation } from "@/hooks/use-translation";
@@ -28,7 +31,7 @@ import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { cn } from "@/lib/utils";
-import type { JsonPathResult, JsonFormatMode } from "@/types/json-formatter";
+import type { JsonPathResult, JsonFormatMode, JsonDiffResult } from "@/types/json-formatter";
 
 export default function JsonFormatterPage() {
   const { t } = useTranslation();
@@ -47,6 +50,7 @@ export default function JsonFormatterPage() {
     getPaths,
     toTypeScript,
     compare,
+    getDiff,
     loadExample,
     reset,
     applyOutput,
@@ -54,6 +58,13 @@ export default function JsonFormatterPage() {
   } = useJsonFormatter();
 
   const [activeTab, setActiveTab] = useState<"output" | "paths" | "typescript" | "compare" | string>("output");
+  const [copiedPath, setCopiedPath] = useState<string | null>(null);
+
+  const copyPath = useCallback((path: string) => {
+    void navigator.clipboard.writeText(path);
+    setCopiedPath(path);
+    setTimeout(() => setCopiedPath(null), 1500);
+  }, []);
 
   const pathColumns: ColumnConfig[] = [
     { name: "PATH", uid: "path", sortable: true },
@@ -65,7 +76,21 @@ export default function JsonFormatterPage() {
     const key = columnKey.toString();
     switch (key) {
       case "path":
-        return <code className="text-[11px] font-bold text-primary bg-primary/5 px-1.5 py-0.5 rounded">{item.path}</code>;
+        return (
+          <button
+            type="button"
+            onClick={() => copyPath(item.path)}
+            className="group/path flex items-center gap-1.5 cursor-pointer hover:bg-primary/10 rounded px-1 -mx-1 transition-colors"
+            aria-label={t("jsonFmt.copyPath", { path: item.path })}
+          >
+            <code className="text-[11px] font-bold text-primary bg-primary/5 px-1.5 py-0.5 rounded">{item.path}</code>
+            {copiedPath === item.path ? (
+              <CheckCircle className="size-3 text-success shrink-0" />
+            ) : (
+              <Copy className="size-3 text-muted-foreground opacity-0 group-hover/path:opacity-100 transition-opacity shrink-0" />
+            )}
+          </button>
+        );
       case "type":
         return (
           <Chip size="sm" variant="primary" className="capitalize text-[9px] font-black h-5">
@@ -78,11 +103,12 @@ export default function JsonFormatterPage() {
       default:
         return String(item[key as keyof typeof item] ?? "");
     }
-  }, []);
+  }, [copiedPath, copyPath, t]);
 
   const paths = useMemo(() => (inputValidation.isValid ? getPaths() : []), [inputValidation.isValid, getPaths]);
   const tsOutput = useMemo(() => (inputValidation.isValid ? toTypeScript("Root") : ""), [inputValidation.isValid, toTypeScript]);
   const isEqual = activeTab === "compare" && compareInput ? compare() : null;
+  const diffResult: JsonDiffResult | null = activeTab === "compare" && compareInput && input ? getDiff() : null;
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
@@ -165,6 +191,9 @@ export default function JsonFormatterPage() {
                 <Minimize2 className="size-4 mr-2" /> {t("jsonFmt.minifyBtn")}
               </Button>
             </div>
+            <p className="text-[9px] text-muted-foreground text-center mt-2 font-medium">
+              Ctrl+Enter → {t("jsonFmt.formatBtn")}
+            </p>
           </Card>
 
           {/* Luxury Analytics Card */}
@@ -254,8 +283,13 @@ export default function JsonFormatterPage() {
                 </div>
                 <div className="flex-1 overflow-auto bg-background relative group">
                   {result?.output ? (
-                    <pre className="p-8 font-mono text-[11px] leading-relaxed">
-                      <code>{result.output}</code>
+                    <pre className="p-4 font-mono text-[11px] leading-relaxed">
+                      <code>{result.output.split("\n").map((line, i) => (
+                        <div key={i} className="flex">
+                          <span className="inline-block w-10 pr-3 text-right text-muted-foreground/40 select-none shrink-0">{i + 1}</span>
+                          <span>{line}</span>
+                        </div>
+                      ))}</code>
                     </pre>
                   ) : (
                     <div className="flex flex-col items-center justify-center h-full text-center p-8 opacity-40">
@@ -318,29 +352,68 @@ export default function JsonFormatterPage() {
                     aria-label={t("jsonFmt.comparisonTarget")}
                   />
                 </Card>
-                
-                {compareInput && (
+
+                {compareInput && isEqual !== null && (
                   <Card className={cn(
-                    "p-8 flex flex-col items-center justify-center border-2 transition-all duration-500",
+                    "p-4 flex items-center gap-3 border-2 transition-all duration-500",
                     isEqual ? "bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-950/10 dark:border-emerald-900/30 dark:text-emerald-400" : "bg-danger-50 border-danger-200 text-danger-700 dark:bg-danger-950/10 dark:border-danger-900/30 dark:text-danger-400"
                   )}>
                     {isEqual ? (
-                      <div className="text-center space-y-3">
-                        <div className="size-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
-                          <CheckCircle className="size-10" />
-                        </div>
-                        <p className="text-2xl font-black">{t("jsonFmt.identityMatch")}</p>
-                        <p className="text-sm font-medium opacity-70">{t("jsonFmt.identityMatchDesc")}</p>
-                      </div>
+                      <>
+                        <CheckCircle className="size-5 shrink-0" />
+                        <span className="font-black text-sm">{t("jsonFmt.identityMatch")}</span>
+                        <span className="text-xs opacity-70 hidden sm:inline">— {t("jsonFmt.identityMatchDesc")}</span>
+                      </>
                     ) : (
-                      <div className="text-center space-y-3">
-                        <div className="size-16 bg-danger-100 dark:bg-danger-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
-                          <AlertCircle className="size-10" />
-                        </div>
-                        <p className="text-2xl font-black">{t("jsonFmt.divergence")}</p>
-                        <p className="text-sm font-medium opacity-70">{t("jsonFmt.divergenceDesc")}</p>
-                      </div>
+                      <>
+                        <AlertCircle className="size-5 shrink-0" />
+                        <span className="font-black text-sm">{t("jsonFmt.divergence")}</span>
+                        {diffResult && (
+                          <span className="text-xs opacity-70 hidden sm:inline ml-auto flex items-center gap-3">
+                            <span className="flex items-center gap-1"><Plus className="size-3" aria-hidden="true" />{diffResult.addedCount} {t("jsonFmt.diffAdded")}</span>
+                            <span className="flex items-center gap-1"><Minus className="size-3" aria-hidden="true" />{diffResult.removedCount} {t("jsonFmt.diffRemoved")}</span>
+                          </span>
+                        )}
+                      </>
                     )}
+                  </Card>
+                )}
+
+                {diffResult && !isEqual && (
+                  <Card className="p-0 overflow-hidden shadow-xl border-divider">
+                    <div className="p-3 border-b border-divider bg-muted/20 flex items-center justify-between">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("jsonFmt.lineDiff")}</span>
+                      <div className="flex gap-3 text-[10px] font-bold">
+                        <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400"><Plus className="size-3" aria-hidden="true" />{diffResult.addedCount}</span>
+                        <span className="flex items-center gap-1 text-red-600 dark:text-red-400"><Minus className="size-3" aria-hidden="true" />{diffResult.removedCount}</span>
+                      </div>
+                    </div>
+                    <div className="max-h-[500px] overflow-auto">
+                      <pre className="text-[11px] font-mono leading-relaxed">
+                        {diffResult.lines.map((line, i) => (
+                          <div
+                            key={i}
+                            className={cn(
+                              "flex px-4 border-l-3",
+                              line.status === "added" && "bg-emerald-50 dark:bg-emerald-950/20 border-l-emerald-500 text-emerald-800 dark:text-emerald-300",
+                              line.status === "removed" && "bg-red-50 dark:bg-red-950/20 border-l-red-500 text-red-800 dark:text-red-300",
+                              line.status === "unchanged" && "border-l-transparent"
+                            )}
+                          >
+                            <span className="inline-block w-8 pr-2 text-right text-muted-foreground/40 select-none shrink-0">
+                              {line.status === "added" ? "" : line.lineNumber}
+                            </span>
+                            <span className="inline-block w-8 pr-2 text-right text-muted-foreground/40 select-none shrink-0">
+                              {line.status === "removed" ? "" : line.otherLineNumber}
+                            </span>
+                            <span className="inline-block w-4 text-center select-none shrink-0 font-bold">
+                              {line.status === "added" ? "+" : line.status === "removed" ? "−" : " "}
+                            </span>
+                            <span className="flex-1 whitespace-pre">{line.content}</span>
+                          </div>
+                        ))}
+                      </pre>
+                    </div>
                   </Card>
                 )}
               </div>

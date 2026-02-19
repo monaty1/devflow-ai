@@ -7,6 +7,8 @@ import type {
   JsonStats,
   JsonPathResult,
   JsonFormatMode,
+  JsonDiffLine,
+  JsonDiffResult,
 } from "@/types/json-formatter";
 import { DEFAULT_FORMATTER_CONFIG } from "@/types/json-formatter";
 
@@ -533,6 +535,81 @@ export function processJson(
     isValid: true,
     stats,
     timestamp: new Date().toISOString(),
+  };
+}
+
+/**
+ * Computes a line-by-line diff between two JSON strings.
+ * Both inputs are pretty-printed first (sorted keys) so structural differences are highlighted.
+ * Uses a simple LCS-based diff algorithm.
+ */
+export function diffJsonLines(json1: string, json2: string): JsonDiffResult {
+  const format = (s: string): string[] => {
+    try {
+      const parsed = JSON.parse(s);
+      return JSON.stringify(sortObjectKeys(parsed), null, 2).split("\n");
+    } catch {
+      return s.split("\n");
+    }
+  };
+
+  const lines1 = format(json1);
+  const lines2 = format(json2);
+
+  // LCS table
+  const m = lines1.length;
+  const n = lines2.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array<number>(n + 1).fill(0));
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (lines1[i - 1] === lines2[j - 1]) {
+        dp[i]![j] = (dp[i - 1]?.[j - 1] ?? 0) + 1;
+      } else {
+        dp[i]![j] = Math.max(dp[i - 1]?.[j] ?? 0, dp[i]?.[j - 1] ?? 0);
+      }
+    }
+  }
+
+  // Backtrack to build diff
+  const result: JsonDiffLine[] = [];
+  let i = m;
+  let j = n;
+
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && lines1[i - 1] === lines2[j - 1]) {
+      result.unshift({
+        lineNumber: i,
+        otherLineNumber: j,
+        content: lines1[i - 1]!,
+        status: "unchanged",
+      });
+      i--;
+      j--;
+    } else if (j > 0 && (i === 0 || (dp[i]?.[j - 1] ?? 0) >= (dp[i - 1]?.[j] ?? 0))) {
+      result.unshift({
+        lineNumber: 0,
+        otherLineNumber: j,
+        content: lines2[j - 1]!,
+        status: "added",
+      });
+      j--;
+    } else {
+      result.unshift({
+        lineNumber: i,
+        otherLineNumber: 0,
+        content: lines1[i - 1]!,
+        status: "removed",
+      });
+      i--;
+    }
+  }
+
+  return {
+    lines: result,
+    addedCount: result.filter((l) => l.status === "added").length,
+    removedCount: result.filter((l) => l.status === "removed").length,
+    unchangedCount: result.filter((l) => l.status === "unchanged").length,
   };
 }
 

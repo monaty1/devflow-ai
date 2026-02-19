@@ -9,6 +9,7 @@ import {
   extractJsonPaths,
   getValueAtPath,
   compareJson,
+  diffJsonLines,
   jsonToTypeScript,
   jsonToYaml,
   jsonToXml,
@@ -209,6 +210,46 @@ describe("JSON Formatter", () => {
 
     it("should handle invalid JSON", () => {
       expect(compareJson("invalid", '{"a": 1}')).toBe(false);
+    });
+  });
+
+  describe("diffJsonLines", () => {
+    it("should return all unchanged for identical JSON", () => {
+      const json = '{"a": 1, "b": 2}';
+      const result = diffJsonLines(json, json);
+      expect(result.addedCount).toBe(0);
+      expect(result.removedCount).toBe(0);
+      expect(result.unchangedCount).toBeGreaterThan(0);
+      expect(result.lines.every((l) => l.status === "unchanged")).toBe(true);
+    });
+
+    it("should detect added lines", () => {
+      const json1 = '{"a": 1}';
+      const json2 = '{"a": 1, "b": 2}';
+      const result = diffJsonLines(json1, json2);
+      expect(result.addedCount).toBeGreaterThan(0);
+      expect(result.lines.some((l) => l.status === "added" && l.content.includes('"b"'))).toBe(true);
+    });
+
+    it("should detect removed lines", () => {
+      const json1 = '{"a": 1, "b": 2}';
+      const json2 = '{"a": 1}';
+      const result = diffJsonLines(json1, json2);
+      expect(result.removedCount).toBeGreaterThan(0);
+      expect(result.lines.some((l) => l.status === "removed" && l.content.includes('"b"'))).toBe(true);
+    });
+
+    it("should detect changed values", () => {
+      const json1 = '{"a": 1}';
+      const json2 = '{"a": 99}';
+      const result = diffJsonLines(json1, json2);
+      expect(result.addedCount).toBeGreaterThan(0);
+      expect(result.removedCount).toBeGreaterThan(0);
+    });
+
+    it("should handle invalid JSON gracefully", () => {
+      const result = diffJsonLines("not json", '{"a": 1}');
+      expect(result.lines.length).toBeGreaterThan(0);
     });
   });
 
