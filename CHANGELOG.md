@@ -5,6 +5,38 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.0] - 2026-02-19
+
+### Full i18n, Dynamic Card Borders, Landing Polish & AI Setup Guide
+
+#### i18n Completion (~232 new keys)
+- **Tool long descriptions** — all 15 `tool.<slug>.longDescription` keys added in both `en.json` and `es.json`
+- **Tool features** — all ~100 `tool.<slug>.feature.N` keys translated per locale
+- **Translated pages** — `docs/page.tsx`, `tool-card.tsx`, `[toolId]/page.tsx` now use `t()` for name, description, longDescription, features, category, and aria-labels
+- **Translated search** — tools page and docs page search now queries translated text, not raw English from config
+- **`tools.users`** — "{count} users" / "{count} usuarios" replaces hardcoded "users"
+- **Hardcoded aria-labels fixed** — tool detail "Add/Remove from favorites" now uses `t()`
+- **~30 `guide.ai.*` keys** — full Spanish translations for the API Key guide wizard
+
+#### Dynamic Colored Card Borders
+- **`getToolGlowClass()` utility** — `lib/utils.ts` maps tool gradient colors to decorative border + glow classes (14 colors)
+- **Tool cards** — each card now has a subtle colored border + shadow matching its gradient header
+- **Docs article cards** — same glow ring applied to documentation page tool cards
+- **WCAG compliant** — decorative borders at 25% opacity, intensify to 40% on hover
+
+#### Landing Page Polish
+- **Stats section** — padding reduced from `py-16` to `py-10`
+- **Hero CTA gap** — reduced from `pt-4` to `pt-2` for tighter visual flow
+
+#### Sidebar API Key Guide
+- **3-step wizard modal** — new `components/shared/api-key-guide.tsx` (~230 lines)
+- **Step 1** — choose provider (Pollinations, Gemini, Groq, OpenRouter) with pricing badges
+- **Step 2** — numbered instructions + direct link to provider dashboard (skipped for Pollinations)
+- **Step 3** — paste API key with show/hide toggle, or Pollinations confirmation
+- **"Setup AI" button** — added to sidebar between nav and footer with accent styling
+- **Zustand integration** — saves BYOK key + provider via `useAISettingsStore`
+- **Fully internationalized** — all text uses `t()` with keys in both locales
+
 ## [3.3.0] - 2026-02-19
 
 ### 2026 Trends: Security, Performance & Testing

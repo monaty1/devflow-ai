@@ -59,6 +59,7 @@
 - **Local-first** &mdash; every tool works 100% without AI
 - **AI-enhanced** &mdash; 4 providers: Gemini, Groq, OpenRouter, Pollinations (always free, no key needed)
 - **BYOK** &mdash; bring your own API key for higher limits (configurable in Settings)
+- **AI Setup Guide** &mdash; 3-step wizard in the sidebar to configure AI providers
 - **Smart suggestions** &mdash; context-aware cross-tool recommendations
 - **MagicInput** &mdash; paste anything, auto-detect type, route to the right tool
 - **Local history** &mdash; localStorage persistence
@@ -365,6 +366,7 @@ Coverage reports and Playwright reports are uploaded as artifacts.
 - **Local-first** &mdash; todas las herramientas funcionan al 100% sin IA
 - **IA integrada** &mdash; 4 proveedores: Gemini, Groq, OpenRouter, Pollinations (siempre gratis, sin API key)
 - **BYOK** &mdash; trae tu propia API key para limites superiores (configurable en Ajustes)
+- **Guia de configuracion IA** &mdash; wizard de 3 pasos en la barra lateral para configurar proveedores de IA
 - **Sugerencias inteligentes** &mdash; recomendaciones de herramientas segun el contexto
 - **MagicInput** &mdash; pega cualquier cosa, deteccion automatica, redirige a la herramienta correcta
 - **Historial local** &mdash; persistencia con localStorage
