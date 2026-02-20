@@ -666,4 +666,320 @@ describe("Regex Humanizer", () => {
       expect(regex).toContain("[67]");
     });
   });
+
+  // ============================================================
+  // NEW TESTS — targeting uncovered branches for function coverage
+  // ============================================================
+
+  describe("performSafetyAnalysis (via explainRegex)", () => {
+    it("should detect nested quantifiers as critical (ReDoS)", () => {
+      // The DANGEROUS_PATTERNS[0] regex matches: (stuff)quantifier followed by *
+      // e.g. "(x*)**" — the regex sees (x*)* then trailing *
+      const result = explainRegex("(x*)**");
+      expect(result.isDangerous).toBe(true);
+      expect(result.safetyScore).toBeLessThanOrEqual(50);
+      expect(result.warnings.length).toBeGreaterThan(0);
+      expect(result.warnings[0]).toContain("catastrophic backtracking");
+    });
+
+    it("should detect multiple overlapping wildcards as warning", () => {
+      // Pattern: .*.*.* — 3+ wildcards triggers warning severity
+      const result = explainRegex(".*.*.*");
+      expect(result.warnings.length).toBeGreaterThan(0);
+      expect(result.warnings.some((w) => w.includes("overlapping wildcards"))).toBe(true);
+      expect(result.safetyScore).toBeLessThan(100);
+    });
+
+    it("should detect character class with quantifier as info", () => {
+      // Pattern: [abc]+ — character class + quantifier triggers info severity
+      const result = explainRegex("[abc]+");
+      expect(result.warnings.length).toBeGreaterThan(0);
+      expect(result.warnings.some((w) => w.includes("character class"))).toBe(true);
+      // info only removes 5 points
+      expect(result.safetyScore).toBe(95);
+    });
+
+    it("should return safe score for simple patterns", () => {
+      const result = explainRegex("^\\d{3}$");
+      expect(result.isDangerous).toBe(false);
+      expect(result.safetyScore).toBe(100);
+      expect(result.warnings.length).toBe(0);
+    });
+  });
+
+  describe("explainCharClass — uncovered branches", () => {
+    it("should explain negated character class with [^a-z]", () => {
+      const result = explainRegex("[^a-z]");
+      const charClass = result.tokens.find((t) => t.type === "charClass");
+      expect(charClass).toBeDefined();
+      expect(charClass!.description).toContain("EXCEPT");
+    });
+
+    it("should explain \\d shorthand inside character class", () => {
+      const result = explainRegex("[\\d]");
+      const charClass = result.tokens.find((t) => t.type === "charClass");
+      expect(charClass).toBeDefined();
+      expect(charClass!.description).toContain("digit");
+    });
+
+    it("should explain \\w shorthand inside character class", () => {
+      const result = explainRegex("[\\w]");
+      const charClass = result.tokens.find((t) => t.type === "charClass");
+      expect(charClass).toBeDefined();
+      expect(charClass!.description).toContain("word");
+    });
+
+    it("should explain \\s shorthand inside character class", () => {
+      const result = explainRegex("[\\s]");
+      const charClass = result.tokens.find((t) => t.type === "charClass");
+      expect(charClass).toBeDefined();
+      expect(charClass!.description).toContain("whitespace");
+    });
+
+    it("should explain negated class with \\d in Spanish", () => {
+      const result = explainRegex("[^\\d]", "javascript", "es");
+      const charClass = result.tokens.find((t) => t.type === "charClass");
+      expect(charClass).toBeDefined();
+      expect(charClass!.description).toContain("EXCEPTO");
+    });
+
+    it("should explain class with only special characters (no ranges)", () => {
+      const result = explainRegex("[._%+-]");
+      const charClass = result.tokens.find((t) => t.type === "charClass");
+      expect(charClass).toBeDefined();
+      expect(charClass!.description).toContain("characters:");
+    });
+  });
+
+  describe("explainGroup — all group types", () => {
+    it("should explain non-capturing group (?:...)", () => {
+      const result = explainRegex("(?:abc)");
+      const group = result.tokens.find((t) => t.type === "group");
+      expect(group).toBeDefined();
+      expect(group!.description).toContain("Non-capturing group");
+    });
+
+    it("should explain positive lookahead (?=...)", () => {
+      const result = explainRegex("(?=abc)");
+      const group = result.tokens.find((t) => t.type === "group");
+      expect(group).toBeDefined();
+      expect(group!.description).toContain("Positive lookahead");
+    });
+
+    it("should explain negative lookahead (?!...)", () => {
+      const result = explainRegex("(?!abc)");
+      const group = result.tokens.find((t) => t.type === "group");
+      expect(group).toBeDefined();
+      expect(group!.description).toContain("Negative lookahead");
+    });
+
+    it("should explain positive lookbehind (?<=...)", () => {
+      const result = explainRegex("(?<=abc)");
+      const group = result.tokens.find((t) => t.type === "group");
+      expect(group).toBeDefined();
+      expect(group!.description).toContain("Positive lookbehind");
+    });
+
+    it("should explain negative lookbehind (?<!...)", () => {
+      const result = explainRegex("(?<!abc)");
+      const group = result.tokens.find((t) => t.type === "group");
+      expect(group).toBeDefined();
+      expect(group!.description).toContain("Negative lookbehind");
+    });
+
+    it("should explain non-capturing group in Spanish", () => {
+      const result = explainRegex("(?:abc)", "javascript", "es");
+      const group = result.tokens.find((t) => t.type === "group");
+      expect(group).toBeDefined();
+      expect(group!.description).toContain("Grupo no capturador");
+    });
+
+    it("should explain positive lookahead in Spanish", () => {
+      const result = explainRegex("(?=abc)", "javascript", "es");
+      const group = result.tokens.find((t) => t.type === "group");
+      expect(group!.description).toContain("Lookahead positivo");
+    });
+
+    it("should explain negative lookbehind in Spanish", () => {
+      const result = explainRegex("(?<!abc)", "javascript", "es");
+      const group = result.tokens.find((t) => t.type === "group");
+      expect(group!.description).toContain("Lookbehind negativo");
+    });
+  });
+
+  describe("explainQuantifier — all forms", () => {
+    it("should explain exact quantifier {3}", () => {
+      const result = explainRegex("a{3}");
+      const quantifier = result.tokens.find((t) => t.type === "quantifier" && t.value === "{3}");
+      expect(quantifier).toBeDefined();
+      expect(quantifier!.description).toContain("Exactly 3");
+    });
+
+    it("should explain min-only quantifier {3,}", () => {
+      const result = explainRegex("a{3,}");
+      const quantifier = result.tokens.find((t) => t.type === "quantifier" && t.value === "{3,}");
+      expect(quantifier).toBeDefined();
+      expect(quantifier!.description).toContain("3 or more");
+    });
+
+    it("should explain range quantifier {3,5}", () => {
+      const result = explainRegex("a{3,5}");
+      const quantifier = result.tokens.find((t) => t.type === "quantifier" && t.value === "{3,5}");
+      expect(quantifier).toBeDefined();
+      expect(quantifier!.description).toContain("Between 3 and 5");
+    });
+
+    it("should fallback for invalid quantifier {abc}", () => {
+      // {abc} won't match the \d+ regex, so it returns the fallback label
+      const result = explainRegex("a{abc}");
+      const quantifier = result.tokens.find((t) => t.type === "quantifier" && t.value === "{abc}");
+      expect(quantifier).toBeDefined();
+      expect(quantifier!.description).toContain("Quantifier");
+    });
+
+    it("should explain exact quantifier in Spanish", () => {
+      const result = explainRegex("a{3}", "javascript", "es");
+      const quantifier = result.tokens.find((t) => t.type === "quantifier" && t.value === "{3}");
+      expect(quantifier!.description).toContain("Exactamente 3");
+    });
+
+    it("should explain min-only quantifier in Spanish", () => {
+      const result = explainRegex("a{3,}", "javascript", "es");
+      const quantifier = result.tokens.find((t) => t.type === "quantifier" && t.value === "{3,}");
+      expect(quantifier!.description).toContain("3 o más");
+    });
+
+    it("should explain range quantifier in Spanish", () => {
+      const result = explainRegex("a{3,5}", "javascript", "es");
+      const quantifier = result.tokens.find((t) => t.type === "quantifier" && t.value === "{3,5}");
+      expect(quantifier!.description).toContain("Entre 3 y 5");
+    });
+  });
+
+  describe("findMatchingBracket — edge cases", () => {
+    it("should handle escaped brackets inside groups", () => {
+      // Pattern with escaped parens — should not confuse bracket matching
+      const result = explainRegex("(\\(literal\\))");
+      const group = result.tokens.find((t) => t.type === "group");
+      expect(group).toBeDefined();
+      expect(group!.value).toBe("(\\(literal\\))");
+    });
+
+    it("should handle unmatched bracket gracefully", () => {
+      // Unmatched opening bracket — findMatchingBracket returns str.length - 1
+      const result = explainRegex("(unclosed");
+      // Should not crash; the group token should still be created
+      const group = result.tokens.find((t) => t.type === "group");
+      expect(group).toBeDefined();
+    });
+
+    it("should handle escaped brackets inside character class", () => {
+      const result = explainRegex("[\\[\\]]");
+      const charClass = result.tokens.find((t) => t.type === "charClass");
+      expect(charClass).toBeDefined();
+    });
+  });
+
+  describe("extractGroups — capturing vs non-capturing", () => {
+    it("should skip non-capturing groups in numbering", () => {
+      // Mix of non-capturing and capturing groups
+      const result = explainRegex("(?:abc)(def)(ghi)");
+      // Only 2 capture groups (not 3)
+      expect(result.groups.length).toBe(2);
+      expect(result.groups[0]!.index).toBe(1);
+      expect(result.groups[0]!.pattern).toBe("(def)");
+      expect(result.groups[1]!.index).toBe(2);
+      expect(result.groups[1]!.pattern).toBe("(ghi)");
+    });
+
+    it("should handle pattern with only non-capturing groups", () => {
+      const result = explainRegex("(?:abc)(?:def)");
+      expect(result.groups.length).toBe(0);
+    });
+
+    it("should skip lookahead groups from capture numbering", () => {
+      const result = explainRegex("(?=abc)(def)");
+      // Lookahead starts with ? so is skipped; only (def) is captured
+      expect(result.groups.length).toBe(1);
+      expect(result.groups[0]!.index).toBe(1);
+      expect(result.groups[0]!.pattern).toBe("(def)");
+    });
+  });
+
+  describe("buildExplanation — all flags", () => {
+    it("should explain multiline flag m", () => {
+      const result = explainRegex("/test/m");
+      expect(result.flags).toContain("m");
+      expect(result.explanation).toContain("Multiline");
+    });
+
+    it("should explain dotall flag s", () => {
+      const result = explainRegex("/test/s");
+      expect(result.flags).toContain("s");
+      expect(result.explanation).toContain("Dotall");
+    });
+
+    it("should explain unicode flag u", () => {
+      const result = explainRegex("/test/u");
+      expect(result.flags).toContain("u");
+      expect(result.explanation).toContain("Unicode");
+    });
+
+    it("should explain sticky flag y", () => {
+      const result = explainRegex("/test/y");
+      expect(result.flags).toContain("y");
+      expect(result.explanation).toContain("Sticky");
+    });
+
+    it("should explain all flags combined", () => {
+      const result = explainRegex("/test/gimsuy");
+      expect(result.explanation).toContain("Global");
+      expect(result.explanation).toContain("Case insensitive");
+      expect(result.explanation).toContain("Multiline");
+      expect(result.explanation).toContain("Dotall");
+      expect(result.explanation).toContain("Unicode");
+      expect(result.explanation).toContain("Sticky");
+    });
+
+    it("should explain flags m, s, u, y in Spanish", () => {
+      const result = explainRegex("/test/msuy", "javascript", "es");
+      expect(result.explanation).toContain("Multilínea");
+      expect(result.explanation).toContain("Dotall");
+      expect(result.explanation).toContain("Unicode");
+      expect(result.explanation).toContain("Sticky");
+    });
+  });
+
+  describe("detectCommonPattern — partial matches", () => {
+    it("should detect URL pattern with https? in custom regex", () => {
+      const result = explainRegex("https?://[\\w.-]+\\.com");
+      expect(result.commonPattern).toBe("URL");
+    });
+
+    it("should detect email pattern with @ and \\. in custom regex", () => {
+      const result = explainRegex("[a-z]+@[a-z]+\\.[a-z]+");
+      expect(result.commonPattern).toBe("Email");
+    });
+
+    it("should return null for unrecognized pattern", () => {
+      const result = explainRegex("^\\d{5}$");
+      expect(result.commonPattern).toBeNull();
+    });
+  });
+
+  describe("tokenizeRegex — alternation and dot tokens", () => {
+    it("should tokenize alternation operator |", () => {
+      const result = explainRegex("cat|dog");
+      const alt = result.tokens.find((t) => t.type === "alternation");
+      expect(alt).toBeDefined();
+      expect(alt!.description).toContain("OR");
+    });
+
+    it("should tokenize dot as any character", () => {
+      const result = explainRegex(".+");
+      const dot = result.tokens.find((t) => t.value === ".");
+      expect(dot).toBeDefined();
+      expect(dot!.description).toContain("Any character");
+    });
+  });
 });

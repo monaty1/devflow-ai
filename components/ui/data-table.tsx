@@ -255,10 +255,10 @@ export function DataTable<T extends { id: string | number }>({
       bottomContent={bottomContent}
       bottomContentPlacement="outside"
       classNames={{
-        wrapper: "max-h-[500px] bg-transparent shadow-none",
+        wrapper: "max-h-[500px] bg-content1 shadow-small rounded-large",
         th: "bg-default-100 text-default-500 text-xs font-semibold uppercase tracking-wider py-3 first:rounded-tl-lg last:rounded-tr-lg",
-        td: "py-3",
-        tr: "border-b border-divider/10 last:border-b-0 hover:bg-default-50 transition-colors",
+        td: "py-3 text-small",
+        tr: "border-b border-divider/10 last:border-b-0 hover:bg-default-50 transition-colors data-[selected=true]:bg-default-100",
       }}
       selectedKeys={selectedKeys}
       selectionMode="multiple"
