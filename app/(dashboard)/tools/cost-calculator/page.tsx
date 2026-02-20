@@ -145,7 +145,7 @@ export default function CostCalculatorPage() {
               aria-label={t("costCalc.copyConfig")}
               onPress={() => {
                 const configStr = JSON.stringify({ model: result.model.id, provider: result.model.provider, inputTokens, outputTokens, dailyRequests, totalCost: result.totalCost }, null, 2);
-                navigator.clipboard.writeText(configStr);
+                void navigator.clipboard.writeText(configStr);
               }}
             >
               <Copy className="size-4 text-muted-foreground" />
@@ -538,7 +538,7 @@ export default function CostCalculatorPage() {
                       totalCost: detailModel.totalCost,
                       monthlyCost: monthlyCostModel,
                     }, null, 2);
-                    navigator.clipboard.writeText(configStr);
+                    void navigator.clipboard.writeText(configStr);
                   }}
                   className="gap-2"
                 >

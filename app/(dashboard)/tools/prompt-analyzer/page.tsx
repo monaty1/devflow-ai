@@ -168,7 +168,7 @@ export default function PromptAnalyzerPage() {
   const [prompt, setPrompt] = useState("");
   const [compareItem, setCompareItem] = useState<PromptAnalysisResult | null>(null);
 
-  const ISSUE_LABELS: Record<PromptIssue["type"], string> = {
+  const ISSUE_LABELS: Record<PromptIssue["type"], string> = useMemo(() => ({
     vague_instruction: t("promptAnalyzer.issueVague"),
     missing_context: t("promptAnalyzer.issueMissingContext"),
     no_output_format: t("promptAnalyzer.issueNoOutput"),
@@ -185,7 +185,7 @@ export default function PromptAnalyzerPage() {
     poor_structure: t("promptAnalyzer.issuePoorStructure"),
     payload_splitting_risk: t("promptAnalyzer.issuePayloadSplitting"),
     virtualization_risk: t("promptAnalyzer.issueVirtualization"),
-  };
+  }), [t]);
   const [showHistory, setShowHistory] = useState(false);
   const { result, history, isAnalyzing, analyze, clearHistory, removeFromHistory } =
     usePromptAnalyzer();

@@ -16,6 +16,7 @@ import {
 } from "@/lib/application/dto-matic";
 import { useToolHistory } from "@/hooks/use-tool-history";
 import { useSmartNavigation } from "@/hooks/use-smart-navigation";
+import { useTranslation } from "@/hooks/use-translation";
 import { useEffect } from "react";
 
 interface HistoryItem {
@@ -27,6 +28,7 @@ interface HistoryItem {
 }
 
 export function useDtoMatic() {
+  const { t } = useTranslation();
   const [jsonInput, setJsonInput] = useState("");
   const [config, setConfig] = useState<DtoMaticConfig>({
     mode: "clean-arch",
@@ -75,17 +77,17 @@ export function useDtoMatic() {
 
   const generate = useCallback(() => {
     if (!jsonInput.trim()) {
-      setError("Por favor, introduce un JSON válido");
+      setError(t("dtoMatic.errorEmptyJson"));
       return;
     }
 
     if (!isValidJson(jsonInput)) {
-      setError("El JSON no es válido. Verifica la sintaxis.");
+      setError(t("dtoMatic.errorInvalidJson"));
       return;
     }
 
     if (!config.rootName.trim()) {
-      setError("Por favor, introduce un nombre para el tipo raíz");
+      setError(t("dtoMatic.errorNoRootName"));
       return;
     }
 
@@ -99,7 +101,7 @@ export function useDtoMatic() {
       setSelectedFileId(genResult.files[0]?.id ?? null);
       addToHistory(genResult);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error al generar el código");
+      setError(e instanceof Error ? e.message : t("dtoMatic.errorGeneration"));
     } finally {
       setIsGenerating(false);
     }
@@ -121,7 +123,7 @@ export function useDtoMatic() {
       setJsonInput(formatJson(jsonInput));
       setError(null);
     } else {
-      setError("El JSON no es válido. No se puede formatear.");
+      setError(t("dtoMatic.errorCannotFormat"));
     }
   }, [jsonInput]);
 

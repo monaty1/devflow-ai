@@ -49,22 +49,22 @@ export function useTailwindSorter(): UseTailwindSorterReturn {
     return () => clearTimeout(timer);
   }, [input, config, sort]);
 
-  const updateConfig = <K extends keyof SorterConfig>(key: K, value: SorterConfig[K]) => {
+  const updateConfig = useCallback(<K extends keyof SorterConfig>(key: K, value: SorterConfig[K]) => {
     setConfig((prev) => ({ ...prev, [key]: value }));
-  };
+  }, []);
 
-  const reset = () => {
+  const reset = useCallback(() => {
     setInput("");
     setResult(null);
-  };
+  }, []);
 
-  const loadExample = (type: "clean" | "messy") => {
+  const loadExample = useCallback((type: "clean" | "messy") => {
     const examples = {
       clean: "flex items-center justify-between p-4 bg-white rounded-lg shadow-md",
       messy: "hover:bg-blue-500 flex p-4 text-white bg-blue-600 items-center flex rounded-lg hover:bg-blue-500 shadow-md p-4"
     };
     setInput(examples[type]);
-  };
+  }, []);
 
   return {
     input,

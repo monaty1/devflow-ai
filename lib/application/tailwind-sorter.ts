@@ -304,7 +304,7 @@ function performAudit(classes: string[]): TailwindAuditItem[] {
       });
     }
 
-    if (base === "inline" && (base.includes("p-") || base.includes("m-"))) {
+    if (base === "inline" && [...classSet].some(c => /^[pm]-/.test(c) || /^p[ytb]-/.test(c) || /^m[ytb]-/.test(c))) {
       audit.push({
         class: cls,
         reason: "Vertical padding/margin may not work as expected on 'inline' elements",

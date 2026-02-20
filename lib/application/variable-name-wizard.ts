@@ -12,6 +12,49 @@ import type {
 } from "@/types/variable-name-wizard";
 import { TYPE_CONVENTIONS } from "@/types/variable-name-wizard";
 
+// --- Locale type (pure, no React) ---
+
+type Locale = "en" | "es";
+
+const WIZARD_STRINGS = {
+  en: {
+    reasoning: {
+      recommendedConvention: (type: string) => `Recommended convention for ${type}`,
+      optimalLength: "Optimal length",
+      reactHookPattern: "Follows React hooks pattern",
+      descriptiveActionPrefix: "Descriptive action prefix",
+      standardConstantConvention: "Standard convention for constants",
+      descriptiveName: "Descriptive name",
+    },
+    audit: {
+      tooGeneric: (word: string) => `Too generic name: "${word}" does not describe the content.`,
+      tooShort: "Name too short, may be unclear.",
+      tooLong: "Excessively long name, consider simplifying.",
+      booleanPrefix: "Boolean states should start with a verb (is, has, can...).",
+      avoidNumbers: "Avoid numbers in names unless strictly necessary.",
+      hungarianNotation: "Avoid Hungarian notation (strName, intCount); the type is already defined by the language.",
+    },
+  },
+  es: {
+    reasoning: {
+      recommendedConvention: (type: string) => `Convención recomendada para ${type}`,
+      optimalLength: "Longitud óptima",
+      reactHookPattern: "Sigue el patrón de hooks de React",
+      descriptiveActionPrefix: "Prefijo de acción descriptivo",
+      standardConstantConvention: "Convención estándar para constantes",
+      descriptiveName: "Nombre descriptivo",
+    },
+    audit: {
+      tooGeneric: (word: string) => `Nombre demasiado genérico: "${word}" no describe el contenido.`,
+      tooShort: "Nombre demasiado corto, puede ser poco claro.",
+      tooLong: "Nombre excesivamente largo, considera simplificar.",
+      booleanPrefix: "Los estados booleanos deberían empezar por un verbo (is, has, can...).",
+      avoidNumbers: "Evita usar números en los nombres a menos que sea estrictamente necesario.",
+      hungarianNotation: "Evita la notación húngara (strName, intCount); el tipo ya lo define el lenguaje.",
+    },
+  },
+} as const;
+
 // --- Detection Patterns ---
 
 const CONVENTION_PATTERNS: Record<NamingConvention, RegExp> = {
@@ -297,38 +340,41 @@ function scoreSuggestion(
 function generateReasoning(
   words: string[],
   type: VariableType,
-  convention: NamingConvention
+  convention: NamingConvention,
+  locale: Locale = "en"
 ): string {
+  const s = WIZARD_STRINGS[locale].reasoning;
   const parts: string[] = [];
 
   const preferredConventions = TYPE_CONVENTIONS[type];
   if (preferredConventions.includes(convention)) {
-    parts.push(`Convención recomendada para ${type}`);
+    parts.push(s.recommendedConvention(type));
   }
 
   if (words.length >= 2 && words.length <= 3) {
-    parts.push("Longitud óptima");
+    parts.push(s.optimalLength);
   }
 
   const firstWord = words[0]?.toLowerCase() ?? "";
   if (type === "hook" && firstWord === "use") {
-    parts.push("Sigue el patrón de hooks de React");
+    parts.push(s.reactHookPattern);
   }
 
   if (type === "function" && PREFIXES.getter.includes(firstWord)) {
-    parts.push("Prefijo de acción descriptivo");
+    parts.push(s.descriptiveActionPrefix);
   }
 
   if (type === "constant" && convention === "SCREAMING_SNAKE_CASE") {
-    parts.push("Convención estándar para constantes");
+    parts.push(s.standardConstantConvention);
   }
 
-  return parts.length > 0 ? parts.join(". ") : "Nombre descriptivo";
+  return parts.length > 0 ? parts.join(". ") : s.descriptiveName;
 }
 
 // --- Auditing ---
 
-function performAudit(name: string, _type: VariableType): NameAudit {
+function performAudit(name: string, _type: VariableType, locale: Locale = "en"): NameAudit {
+  const a = WIZARD_STRINGS[locale].audit;
   const findings: string[] = [];
   const words = splitIntoWords(name);
   const lowerName = name.toLowerCase();
@@ -336,30 +382,30 @@ function performAudit(name: string, _type: VariableType): NameAudit {
   // 1. Generic names
   const genericTerms = ["data", "info", "item", "value", "obj", "object", "thing", "process"];
   if (words.length === 1 && genericTerms.includes(words[0]!)) {
-    findings.push(`Nombre demasiado genérico: "${words[0]}" no describe el contenido.`);
+    findings.push(a.tooGeneric(words[0]!));
   }
 
   // 2. Length issues
   if (name.length < 3 && !["i", "j", "x", "y"].includes(name)) {
-    findings.push("Nombre demasiado corto, puede ser poco claro.");
+    findings.push(a.tooShort);
   }
   if (name.length > 35) {
-    findings.push("Nombre excesivamente largo, considera simplificar.");
+    findings.push(a.tooLong);
   }
 
   // 3. Boolean prefixing
   if (lowerName.includes("loading") && !/^(is|has|should|can|will)/.test(lowerName)) {
-    findings.push('Los estados booleanos deberían empezar por un verbo (is, has, can...).');
+    findings.push(a.booleanPrefix);
   }
 
   // 4. Numbers in names
   if (/\d/.test(name)) {
-    findings.push("Evita usar números en los nombres a menos que sea estrictamente necesario.");
+    findings.push(a.avoidNumbers);
   }
 
   // 5. Hungarian notation detection
   if (/^(str|int|arr|obj|bool|fn)[A-Z]/.test(name)) {
-    findings.push("Evita la notación húngara (strName, intCount); el tipo ya lo define el lenguaje.");
+    findings.push(a.hungarianNotation);
   }
 
   let status: NameAudit["status"] = "good";
@@ -375,7 +421,8 @@ function performAudit(name: string, _type: VariableType): NameAudit {
 export function generateSuggestions(
   context: string,
   type: VariableType,
-  config: WizardConfig
+  config: WizardConfig,
+  locale: Locale = "en"
 ): GenerationResult {
   const words = splitIntoWords(context);
   if (words.length === 0) {
@@ -411,8 +458,8 @@ export function generateSuggestions(
       seenNames.add(name);
 
       const score = scoreSuggestion(variation, type, convention);
-      const reasoning = generateReasoning(variation, type, convention);
-      const audit = performAudit(name, type);
+      const reasoning = generateReasoning(variation, type, convention, locale);
+      const audit = performAudit(name, type, locale);
 
       suggestions.push({
         id: crypto.randomUUID(),

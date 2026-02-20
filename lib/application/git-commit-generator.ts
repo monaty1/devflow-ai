@@ -10,19 +10,90 @@ import type {
   DiffAnalysis,
 } from "@/types/git-commit-generator";
 
-export const COMMIT_TYPES: CommitTypeInfo[] = [
-  { type: "feat", label: "Feature", description: "Nueva funcionalidad", emoji: "✨" },
-  { type: "fix", label: "Fix", description: "Corrección de bug", emoji: "🐛" },
-  { type: "docs", label: "Docs", description: "Documentación", emoji: "📝" },
-  { type: "style", label: "Style", description: "Formato, sin cambios de lógica", emoji: "💎" },
-  { type: "refactor", label: "Refactor", description: "Refactorización de código", emoji: "♻️" },
-  { type: "perf", label: "Perf", description: "Mejora de rendimiento", emoji: "⚡" },
-  { type: "test", label: "Test", description: "Tests nuevos o corregidos", emoji: "🧪" },
-  { type: "chore", label: "Chore", description: "Tareas de mantenimiento", emoji: "🔧" },
-  { type: "ci", label: "CI", description: "Cambios en CI/CD", emoji: "👷" },
-  { type: "build", label: "Build", description: "Sistema de build o deps", emoji: "📦" },
-  { type: "revert", label: "Revert", description: "Revertir commit anterior", emoji: "⏪" },
+// --- Locale type (pure, no React) ---
+
+type Locale = "en" | "es";
+
+// --- i18n Strings ---
+
+const COMMIT_STRINGS = {
+  en: {
+    typeDescriptions: {
+      feat: "New feature",
+      fix: "Bug fix",
+      docs: "Documentation",
+      style: "Formatting, no logic changes",
+      refactor: "Code refactoring",
+      perf: "Performance improvement",
+      test: "New or fixed tests",
+      chore: "Maintenance tasks",
+      ci: "CI/CD changes",
+      build: "Build system or dependencies",
+      revert: "Revert previous commit",
+    } as Record<CommitType, string>,
+    validation: {
+      emptyMessage: "Message is empty",
+      invalidHeader: "Header does not follow format: type(scope): description",
+      headerTooLong: (len: number) => `Header has ${len} characters (max 72)`,
+      emptyDescription: "Description is empty",
+      blankSecondLine: "Second line must be blank (separator between header and body)",
+      noUppercase: "Description should not start with uppercase",
+      noTrailingDot: "Description should not end with a period",
+    },
+  },
+  es: {
+    typeDescriptions: {
+      feat: "Nueva funcionalidad",
+      fix: "Corrección de bug",
+      docs: "Documentación",
+      style: "Formato, sin cambios de lógica",
+      refactor: "Refactorización de código",
+      perf: "Mejora de rendimiento",
+      test: "Tests nuevos o corregidos",
+      chore: "Tareas de mantenimiento",
+      ci: "Cambios en CI/CD",
+      build: "Sistema de build o deps",
+      revert: "Revertir commit anterior",
+    } as Record<CommitType, string>,
+    validation: {
+      emptyMessage: "El mensaje está vacío",
+      invalidHeader: "El encabezado no sigue el formato: type(scope): description",
+      headerTooLong: (len: number) => `El encabezado tiene ${len} caracteres (máximo 72)`,
+      emptyDescription: "La descripción está vacía",
+      blankSecondLine: "La segunda línea debe estar vacía (separador entre encabezado y cuerpo)",
+      noUppercase: "La descripción no debe empezar con mayúscula",
+      noTrailingDot: "La descripción no debe terminar con punto",
+    },
+  },
+} as const;
+
+// --- Commit Types (base data, locale-independent) ---
+
+const COMMIT_TYPES_BASE: Omit<CommitTypeInfo, "description">[] = [
+  { type: "feat", label: "Feature", emoji: "✨" },
+  { type: "fix", label: "Fix", emoji: "🐛" },
+  { type: "docs", label: "Docs", emoji: "📝" },
+  { type: "style", label: "Style", emoji: "💎" },
+  { type: "refactor", label: "Refactor", emoji: "♻️" },
+  { type: "perf", label: "Perf", emoji: "⚡" },
+  { type: "test", label: "Test", emoji: "🧪" },
+  { type: "chore", label: "Chore", emoji: "🔧" },
+  { type: "ci", label: "CI", emoji: "👷" },
+  { type: "build", label: "Build", emoji: "📦" },
+  { type: "revert", label: "Revert", emoji: "⏪" },
 ];
+
+/** Get locale-aware commit types */
+export function getCommitTypes(locale: Locale = "en"): CommitTypeInfo[] {
+  const descs = COMMIT_STRINGS[locale].typeDescriptions;
+  return COMMIT_TYPES_BASE.map((base) => ({
+    ...base,
+    description: descs[base.type],
+  }));
+}
+
+/** Legacy static export (English defaults) for backward compatibility */
+export const COMMIT_TYPES: CommitTypeInfo[] = getCommitTypes("en");
 
 const VALID_TYPES = new Set<string>(COMMIT_TYPES.map((ct) => ct.type));
 
@@ -178,11 +249,12 @@ export function generateCommitMessage(config: CommitConfig): CommitResult {
 /**
  * Validates a conventional commit message string
  */
-export function validateCommitMessage(message: string, config?: CommitConfig): CommitValidation {
+export function validateCommitMessage(message: string, config?: CommitConfig, locale: Locale = "en"): CommitValidation {
   const errors: string[] = [];
+  const v = COMMIT_STRINGS[locale].validation;
 
   if (!message.trim()) {
-    return { isValid: false, errors: ["El mensaje está vacío"] };
+    return { isValid: false, errors: [v.emptyMessage] };
   }
 
   const lines = message.split("\n");
@@ -191,7 +263,7 @@ export function validateCommitMessage(message: string, config?: CommitConfig): C
   // Check header format: type(scope)?: description
   const headerRegex = /^(feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert)(\(.+\))?!?:\s.+$/;
   if (!headerRegex.test(header)) {
-    errors.push("El encabezado no sigue el formato: type(scope): description");
+    errors.push(v.invalidHeader);
   }
 
   // Check mandatory issue if config allows
@@ -201,31 +273,31 @@ export function validateCommitMessage(message: string, config?: CommitConfig): C
 
   // Check header length
   if (header.length > 72) {
-    errors.push(`El encabezado tiene ${header.length} caracteres (máximo 72)`);
+    errors.push(v.headerTooLong(header.length));
   }
 
   // Check for empty description
   const descMatch = header.match(/:\s*(.*)$/);
   if (descMatch && !descMatch[1]?.trim()) {
-    errors.push("La descripción está vacía");
+    errors.push(v.emptyDescription);
   }
 
   // Check second line is blank (if there are more lines)
   if (lines.length > 1 && lines[1]?.trim() !== "") {
-    errors.push("La segunda línea debe estar vacía (separador entre encabezado y cuerpo)");
+    errors.push(v.blankSecondLine);
   }
 
   // Check description doesn't start with uppercase
   if (descMatch && descMatch[1]) {
     const desc = descMatch[1].trim();
     if (desc.length > 0 && desc[0] === desc[0]?.toUpperCase() && desc[0] !== desc[0]?.toLowerCase()) {
-      errors.push("La descripción no debe empezar con mayúscula");
+      errors.push(v.noUppercase);
     }
   }
 
   // Check description doesn't end with period
   if (descMatch && descMatch[1]?.trim().endsWith(".")) {
-    errors.push("La descripción no debe terminar con punto");
+    errors.push(v.noTrailingDot);
   }
 
   return {

@@ -5,6 +5,52 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.0] - 2026-02-20
+
+### Full Project Audit: 8 Bug Fixes, DataTable Upgrade, i18n for 6 Libs, 1025 Tests
+
+#### Phase 1: P0 Critical Bugs (8 fixes)
+- **Cron Builder** — fixed locale check using string matching; now uses `!explanation` (null when invalid)
+- **Git Commit Generator** — fixed variable shadowing (`t` clashed with translation hook)
+- **DTO-Matic** — error state was never displayed; added error banner + replaced 5 hardcoded Spanish strings with `t()` keys
+- **HTTP Status Finder** — removed CORS-blocked "Test Live" fetch; replaced with simulated local response
+- **Base64** — JSON preview crashed on invalid JSON; wrapped `JSON.parse` in try/catch
+- **Tailwind Sorter** — dead audit check: condition checked single class instead of full class set
+- **Cron Builder AWS** — invalid JSON template with inline `# Note:` comment inside JSON string
+- **Tailwind Sorter** — Ctrl+Enter was no-op; wired to `sort()`, renamed `setActiveTab` → `setActiveView`
+
+#### Phase 2: DataTable Visual Upgrade (12 tools affected)
+- **Polished classNames** — styled header row (`bg-default-100`), hover transitions, lighter dividers
+- **Search bar** — `bg-default-100`, `sm:max-w-[300px]`
+- **Rows per page** — styled selector with `bg-default-100 rounded-lg`
+- **Pagination** — added `showControls`, `variant="outline"` buttons
+
+#### Phase 3: Pattern Consistency (12 files)
+- **useCallback wrappers** — added to 3 hooks (tailwind-sorter, variable-name-wizard, token-visualizer) + 2 renderCell callbacks
+- **5-layer extractions** — `checkCollisions()` → `lib/application/uuid-generator.ts`, `generateBatch()` → `useGitCommitGenerator` hook
+- **DOM leak fix** — Base64 file input cleanup (`fileInput.onchange = null`)
+- **Hardcoded strings** — 6 aria-labels + toasts → `t()` keys
+- **Import consistency** — moved Card/Button imports to `@/components/ui`
+- **prompt-analyzer** — wrapped `ISSUE_LABELS` in `useMemo([t])`
+
+#### Phase 4: i18n Systematic Fix (~300+ strings across 6 libs)
+- **Cron Builder** — `CRON_STRINGS` en/es (~200 strings: presets, field labels, month/day names, validation errors, explanation templates, relative time). All functions accept `locale` param. 111 tests.
+- **Git Commit Generator** — `COMMIT_STRINGS` en/es (type descriptions + 7 validation messages). `getCommitTypes(locale)` + `validateCommitMessage` locale-aware. 79 tests.
+- **HTTP Status Finder** — 63 status codes × 3 fields × 2 languages + 5 category descriptions. Bilingual search (both locales). `statusCodesCache` for performance. 64 tests.
+- **Regex Humanizer** — ~120 strings: token explanations, character classes, groups, quantifiers, flags, 8 common patterns. English + Spanish keyword detection for `generateRegex`. 92 tests.
+- **Variable Name Wizard** — `WIZARD_STRINGS` en/es for `generateReasoning` + `performAudit` (12 strings). LocalStorage persistence added.
+- **Cost Calculator** — `formatCost` accepts locale, uses `es-ES`/`en-US` for `toLocaleString`
+
+#### Phase 5: Per-Tool UX Improvements
+- **Context Manager** — native `<select>` replaced with HeroUI Dropdown component
+- **JSON Formatter** — removed `| string` type widening for exhaustiveness checking
+- **Variable Name Wizard** — added localStorage persistence for config (read/write)
+- **Regex Humanizer** — fixed `DANGEROUS_PATTERNS[2]` false positives (`|\+` matched any `+`)
+
+#### Testing
+- **1025 tests passing** (up from 942, +83 new tests)
+- **37 files modified**, +2307/-852 lines
+
 ## [3.4.1] - 2026-02-19
 
 ### UX Polish: Cost Calculator Detail Modal, Navbar Redesign & i18n Fixes

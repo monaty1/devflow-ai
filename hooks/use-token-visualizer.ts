@@ -69,12 +69,12 @@ export function useTokenVisualizer(): UseTokenVisualizerReturn {
     }
   }, []);
 
-  const reset = () => {
+  const reset = useCallback(() => {
     setInput("");
     setProvider("openai");
     setVisualization(null);
     setAllProviderResults([]);
-  };
+  }, []);
 
   return {
     input,

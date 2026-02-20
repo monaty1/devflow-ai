@@ -260,21 +260,32 @@ export default function ContextManagerPage() {
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Cpu className="size-3 opacity-60" />
-                    <select
-                      value={MODEL_PRESETS.find(m => m.maxTokens === activeWindow.maxTokens)?.id || "custom"}
-                      onChange={(e) => {
-                        const preset = MODEL_PRESETS.find(m => m.id === e.target.value);
-                        if (preset) setMaxTokens(preset.maxTokens);
-                      }}
-                      className="bg-white/10 border border-white/20 rounded-lg text-[10px] font-bold px-2 py-1 outline-none cursor-pointer appearance-none"
-                      aria-label={t("ctxMgr.modelPreset")}
-                    >
-                      {MODEL_PRESETS.filter(m => m.id !== "custom").map(m => (
-                        <option key={m.id} value={m.id} className="bg-indigo-900 text-white">
-                          {m.name} ({(m.maxTokens / 1000).toFixed(0)}K)
-                        </option>
-                      ))}
-                    </select>
+                    <Dropdown>
+                      <DropdownTrigger>
+                        <button
+                          type="button"
+                          className="bg-white/10 border border-white/20 rounded-lg text-[10px] font-bold px-2 py-1 outline-none cursor-pointer hover:bg-white/20 transition-colors"
+                          aria-label={t("ctxMgr.modelPreset")}
+                        >
+                          {MODEL_PRESETS.find(m => m.maxTokens === activeWindow.maxTokens)?.name ?? t("ctxMgr.modelPreset")}
+                        </button>
+                      </DropdownTrigger>
+                      <DropdownMenu
+                        selectionMode="single"
+                        selectedKeys={new Set([MODEL_PRESETS.find(m => m.maxTokens === activeWindow.maxTokens)?.id ?? ""])}
+                        onSelectionChange={(keys) => {
+                          const id = Array.from(keys)[0] as string;
+                          const preset = MODEL_PRESETS.find(m => m.id === id);
+                          if (preset) setMaxTokens(preset.maxTokens);
+                        }}
+                      >
+                        {MODEL_PRESETS.filter(m => m.id !== "custom").map(m => (
+                          <DropdownItem key={m.id}>
+                            {m.name} ({(m.maxTokens / 1000).toFixed(0)}K)
+                          </DropdownItem>
+                        ))}
+                      </DropdownMenu>
+                    </Dropdown>
                   </div>
                 </Card>
 
@@ -461,7 +472,7 @@ export default function ContextManagerPage() {
                       e.preventDefault();
                       if (docTitle && docContent) {
                         addDocument(docTitle, docContent, docType, docPriority, [], docPath);
-                        addToast(`"${docTitle}" added to context`, "success");
+                        addToast(t("ctxMgr.addedToContext", { title: docTitle }), "success");
                         resetDocForm();
                         setShowAddDoc(false);
                       }
@@ -480,7 +491,7 @@ export default function ContextManagerPage() {
                   isDisabled={!docTitle.trim() || !docContent.trim()}
                   onPress={() => {
                     addDocument(docTitle, docContent, docType, docPriority, [], docPath);
-                    addToast(`"${docTitle}" added to context`, "success");
+                    addToast(t("ctxMgr.addedToContext", { title: docTitle }), "success");
                     resetDocForm();
                     setShowAddDoc(false);
                   }}

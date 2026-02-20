@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { generateCommitMessage } from "@/lib/application/git-commit-generator";
 import {
   Tabs,
   Chip,
@@ -37,7 +36,7 @@ import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { StatusBadge } from "@/components/shared/status-badge";
 import type { CommitType, CommitResult } from "@/types/git-commit-generator";
-import { COMMIT_TYPES, getCommitTypeInfo } from "@/lib/application/git-commit-generator";
+import { getCommitTypeInfo } from "@/lib/application/git-commit-generator";
 
 export default function GitCommitGeneratorPage() {
   const { t } = useTranslation();
@@ -47,10 +46,12 @@ export default function GitCommitGeneratorPage() {
     message,
     validation,
     history,
+    commitTypes,
     diffInput,
     setDiffInput,
     updateConfig,
     generate,
+    generateBatch,
     analyze,
     reset,
     clearHistory,
@@ -60,20 +61,8 @@ export default function GitCommitGeneratorPage() {
   const [batchInput, setBatchInput] = useState("");
   const batchMessages = useMemo(() => {
     if (!batchInput.trim()) return [];
-    return batchInput.split("\n").filter(l => l.trim()).map(line => {
-      const result = generateCommitMessage({
-        type: config.type,
-        scope: config.scope,
-        description: line.trim(),
-        body: "",
-        breakingChange: "",
-        issueRef: "",
-        useEmojis: config.useEmojis,
-        requireIssue: false,
-      });
-      return result.message.split("\n")[0] ?? "";
-    });
-  }, [batchInput, config.type, config.scope, config.useEmojis]);
+    return generateBatch(batchInput.split("\n"));
+  }, [batchInput, generateBatch]);
 
   const historyColumns: ColumnConfig[] = [
     { name: t("table.colMessage"), uid: "message", sortable: true },
@@ -169,13 +158,13 @@ export default function GitCommitGeneratorPage() {
                       onSelectionChange={(k) => updateConfig("type", Array.from(k)[0] as CommitType)}
                       className="max-h-64 overflow-auto"
                     >
-                      {COMMIT_TYPES.map(t => (
-                        <DropdownItem key={t.type}>
+                      {commitTypes.map(commitType => (
+                        <DropdownItem key={commitType.type}>
                           <div className="flex items-center gap-2">
-                            <span className="mr-2">{t.emoji}</span>
+                            <span className="mr-2">{commitType.emoji}</span>
                             <div className="flex flex-col">
-                              <span className="font-bold">{t.label}</span>
-                              <span className="text-[10px] opacity-60">{t.description}</span>
+                              <span className="font-bold">{commitType.label}</span>
+                              <span className="text-[10px] opacity-60">{commitType.description}</span>
                             </div>
                           </div>
                         </DropdownItem>

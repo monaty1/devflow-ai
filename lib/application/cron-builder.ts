@@ -13,7 +13,196 @@ import type {
   ConfigFormat,
   CronConfig,
 } from "@/types/cron-builder";
-import { CRON_FIELD_RANGES, CRON_FIELD_LABELS } from "@/types/cron-builder";
+import { CRON_FIELD_RANGES } from "@/types/cron-builder";
+
+// --- Locale type (pure, no React) ---
+
+type Locale = "en" | "es";
+
+// --- i18n Strings Lookup ---
+
+const CRON_STRINGS = {
+  en: {
+    // Field labels
+    fieldLabels: {
+      minute: "Minute",
+      hour: "Hour",
+      dayOfMonth: "Day of month",
+      month: "Month",
+      dayOfWeek: "Day of week",
+    } satisfies Record<CronField, string>,
+
+    // Field units (plural)
+    fieldUnits: {
+      minute: "minutes",
+      hour: "hours",
+      dayOfMonth: "days",
+      month: "months",
+      dayOfWeek: "days",
+    } satisfies Record<CronField, string>,
+
+    // Month abbreviations (index 0-11)
+    monthNames: ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"],
+
+    // Day-of-week abbreviations (index 0=Sun .. 6=Sat)
+    dayNames: ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
+
+    // Parse / validation messages
+    parseError: "Cron expression must have 5 fields",
+    invalidExpression: "Invalid expression",
+    invalidStep: (label: string, step: string | undefined) => `${label}: invalid step "${step}"`,
+    invalidRange: (label: string) => `${label}: invalid range`,
+    rangeStartGreaterThanEnd: (label: string) => `${label}: range start is greater than end`,
+    invalidRangeInList: (label: string) => `${label}: invalid range in list`,
+    notAValidNumber: (label: string, value: string) => `${label}: "${value}" is not a valid number`,
+    outOfRange: (label: string, num: number, min: number, max: number) =>
+      `${label}: ${num} out of range (${min}-${max})`,
+
+    // Explanation templates
+    every: (unit: string) => `Every ${unit}`,
+    everyN: (step: string | undefined, unit: string) => `Every ${step} ${unit}`,
+    everyNStartingAt: (step: string | undefined, unit: string, base: string | undefined) =>
+      `Every ${step} ${unit} starting at ${base}`,
+    fromTo: (start: string, end: string) => `From ${start} to ${end}`,
+
+    // buildHumanReadable templates
+    everyMinute: "Every minute",
+    everyNMinutes: (step: string | undefined) => `Every ${step} minutes`,
+    atMinuteOfEveryHour: (minute: string) => `At minute ${minute} of every hour`,
+    atTime: (h: string, m: string) => `At ${h}:${m}`,
+    atMinuteFromTo: (m: string, start: string | undefined, end: string | undefined) =>
+      `At minute ${m}, from ${start}:00 to ${end}:00`,
+    minuteFallback: (minute: string) => `minute ${minute}`,
+    hourFallback: (hour: string) => `hour ${hour}`,
+    onDay: (day: string) => `on day ${day}`,
+    days: (dayOfMonth: string) => `days ${dayOfMonth}`,
+    inMonth: (monthName: string) => `in ${monthName}`,
+    months: (month: string) => `months ${month}`,
+    onDayOfWeek: (dayName: string) => `on ${dayName}`,
+    mondayToFriday: "Monday to Friday",
+    saturdaysAndSundays: "Saturdays and Sundays",
+    weekdays: (dayOfWeek: string) => `weekdays ${dayOfWeek}`,
+
+    // formatRelative templates
+    inMinutes: (n: number) => `in ${n} minute${n !== 1 ? "s" : ""}`,
+    inHoursAndMinutes: (h: number, m: number) => `in ${h}h ${m}m`,
+    inHours: (n: number) => `in ${n} hour${n !== 1 ? "s" : ""}`,
+    inDays: (n: number) => `in ${n} day${n !== 1 ? "s" : ""}`,
+    inWeeks: (n: number) => `in ${n} week${n !== 1 ? "s" : ""}`,
+
+    // Intl locale code for date formatting
+    intlLocale: "en-US",
+
+    // Preset names and descriptions
+    presets: {
+      "every-minute": { name: "Every minute", description: "Runs every minute" },
+      "every-5-minutes": { name: "Every 5 minutes", description: "Runs every 5 minutes" },
+      "every-15-minutes": { name: "Every 15 minutes", description: "Runs every 15 minutes" },
+      "every-30-minutes": { name: "Every 30 minutes", description: "Runs every half hour" },
+      "hourly": { name: "Hourly", description: "Runs at the start of every hour" },
+      "daily-midnight": { name: "Daily (midnight)", description: "Runs at 00:00 every day" },
+      "daily-noon": { name: "Daily (noon)", description: "Runs at 12:00 every day" },
+      "weekly-monday": { name: "Weekly (Monday)", description: "Runs every Monday at 00:00" },
+      "monthly": { name: "Monthly", description: "Runs on the 1st of every month at 00:00" },
+      "weekdays": { name: "Weekdays", description: "Runs Monday to Friday at 09:00" },
+      "weekends": { name: "Weekends", description: "Runs Saturdays and Sundays at 10:00" },
+      "yearly": { name: "Yearly", description: "Runs on January 1st at 00:00" },
+    } as Record<string, { name: string; description: string }>,
+  },
+
+  es: {
+    // Field labels
+    fieldLabels: {
+      minute: "Minuto",
+      hour: "Hora",
+      dayOfMonth: "Día del mes",
+      month: "Mes",
+      dayOfWeek: "Día de la semana",
+    } satisfies Record<CronField, string>,
+
+    // Field units (plural)
+    fieldUnits: {
+      minute: "minutos",
+      hour: "horas",
+      dayOfMonth: "días",
+      month: "meses",
+      dayOfWeek: "días",
+    } satisfies Record<CronField, string>,
+
+    // Month abbreviations (index 0-11)
+    monthNames: ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"],
+
+    // Day-of-week abbreviations (index 0=Sun .. 6=Sat)
+    dayNames: ["DOM", "LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB"],
+
+    // Parse / validation messages
+    parseError: "La expresión cron debe tener 5 campos",
+    invalidExpression: "Expresión inválida",
+    invalidStep: (label: string, step: string | undefined) => `${label}: paso inválido "${step}"`,
+    invalidRange: (label: string) => `${label}: rango inválido`,
+    rangeStartGreaterThanEnd: (label: string) => `${label}: el inicio del rango es mayor que el fin`,
+    invalidRangeInList: (label: string) => `${label}: rango inválido en lista`,
+    notAValidNumber: (label: string, value: string) => `${label}: "${value}" no es un número válido`,
+    outOfRange: (label: string, num: number, min: number, max: number) =>
+      `${label}: ${num} fuera de rango (${min}-${max})`,
+
+    // Explanation templates
+    every: (unit: string) => `Cada ${unit}`,
+    everyN: (step: string | undefined, unit: string) => `Cada ${step} ${unit}`,
+    everyNStartingAt: (step: string | undefined, unit: string, base: string | undefined) =>
+      `Cada ${step} ${unit} empezando en ${base}`,
+    fromTo: (start: string, end: string) => `Del ${start} al ${end}`,
+
+    // buildHumanReadable templates
+    everyMinute: "Cada minuto",
+    everyNMinutes: (step: string | undefined) => `Cada ${step} minutos`,
+    atMinuteOfEveryHour: (minute: string) => `En el minuto ${minute} de cada hora`,
+    atTime: (h: string, m: string) => `A las ${h}:${m}`,
+    atMinuteFromTo: (m: string, start: string | undefined, end: string | undefined) =>
+      `En el minuto ${m}, de ${start}:00 a ${end}:00`,
+    minuteFallback: (minute: string) => `minuto ${minute}`,
+    hourFallback: (hour: string) => `hora ${hour}`,
+    onDay: (day: string) => `el día ${day}`,
+    days: (dayOfMonth: string) => `días ${dayOfMonth}`,
+    inMonth: (monthName: string) => `en ${monthName}`,
+    months: (month: string) => `meses ${month}`,
+    onDayOfWeek: (dayName: string) => `los ${dayName}`,
+    mondayToFriday: "de lunes a viernes",
+    saturdaysAndSundays: "sábados y domingos",
+    weekdays: (dayOfWeek: string) => `días de semana ${dayOfWeek}`,
+
+    // formatRelative templates
+    inMinutes: (n: number) => `en ${n} minuto${n !== 1 ? "s" : ""}`,
+    inHoursAndMinutes: (h: number, m: number) => `en ${h}h ${m}m`,
+    inHours: (n: number) => `en ${n} hora${n !== 1 ? "s" : ""}`,
+    inDays: (n: number) => `en ${n} día${n !== 1 ? "s" : ""}`,
+    inWeeks: (n: number) => `en ${n} semana${n !== 1 ? "s" : ""}`,
+
+    // Intl locale code for date formatting
+    intlLocale: "es-ES",
+
+    // Preset names and descriptions
+    presets: {
+      "every-minute": { name: "Cada minuto", description: "Se ejecuta cada minuto" },
+      "every-5-minutes": { name: "Cada 5 minutos", description: "Se ejecuta cada 5 minutos" },
+      "every-15-minutes": { name: "Cada 15 minutos", description: "Se ejecuta cada 15 minutos" },
+      "every-30-minutes": { name: "Cada 30 minutos", description: "Se ejecuta cada media hora" },
+      "hourly": { name: "Cada hora", description: "Se ejecuta al inicio de cada hora" },
+      "daily-midnight": { name: "Diario (medianoche)", description: "Se ejecuta a las 00:00 cada día" },
+      "daily-noon": { name: "Diario (mediodía)", description: "Se ejecuta a las 12:00 cada día" },
+      "weekly-monday": { name: "Semanal (lunes)", description: "Se ejecuta cada lunes a las 00:00" },
+      "monthly": { name: "Mensual", description: "Se ejecuta el día 1 de cada mes a las 00:00" },
+      "weekdays": { name: "Días laborables", description: "Se ejecuta de lunes a viernes a las 09:00" },
+      "weekends": { name: "Fines de semana", description: "Se ejecuta sábados y domingos a las 10:00" },
+      "yearly": { name: "Anual", description: "Se ejecuta el 1 de enero a las 00:00" },
+    } as Record<string, { name: string; description: string }>,
+  },
+} as const;
+
+/** Helper to get the locale-aware strings object */
+function t(locale: Locale) {
+  return CRON_STRINGS[locale];
+}
 
 // --- IaC Generators ---
 
@@ -61,9 +250,10 @@ jobs:
         format,
         label: "AWS EventBridge",
         language: "json",
+        // Note: AWS uses ? for wildcards sometimes
         code: `{
   "Name": "my-scheduled-rule",
-  "ScheduleExpression": "cron(${expression.replace(/\*/g, "?")})", # Note: AWS uses ? for wildcards sometimes
+  "ScheduleExpression": "cron(${expression.replace(/\*/g, "?")})",
   "State": "ENABLED"
 }`,
       };
@@ -78,102 +268,49 @@ jobs:
   }
 }
 
-// --- Common Presets ---
+// --- Common Presets (base data, locale-independent) ---
 
-export const CRON_PRESETS: CronPreset[] = [
-  {
-    id: "every-minute",
-    name: "Cada minuto",
-    description: "Se ejecuta cada minuto",
-    expression: "* * * * *",
-    icon: "Zap",
-  },
-  {
-    id: "every-5-minutes",
-    name: "Cada 5 minutos",
-    description: "Se ejecuta cada 5 minutos",
-    expression: "*/5 * * * *",
-    icon: "Clock",
-  },
-  {
-    id: "every-15-minutes",
-    name: "Cada 15 minutos",
-    description: "Se ejecuta cada 15 minutos",
-    expression: "*/15 * * * *",
-    icon: "Clock",
-  },
-  {
-    id: "every-30-minutes",
-    name: "Cada 30 minutos",
-    description: "Se ejecuta cada media hora",
-    expression: "*/30 * * * *",
-    icon: "Clock",
-  },
-  {
-    id: "hourly",
-    name: "Cada hora",
-    description: "Se ejecuta al inicio de cada hora",
-    expression: "0 * * * *",
-    icon: "Clock",
-  },
-  {
-    id: "daily-midnight",
-    name: "Diario (medianoche)",
-    description: "Se ejecuta a las 00:00 cada día",
-    expression: "0 0 * * *",
-    icon: "Calendar",
-  },
-  {
-    id: "daily-noon",
-    name: "Diario (mediodía)",
-    description: "Se ejecuta a las 12:00 cada día",
-    expression: "0 12 * * *",
-    icon: "Sun",
-  },
-  {
-    id: "weekly-monday",
-    name: "Semanal (lunes)",
-    description: "Se ejecuta cada lunes a las 00:00",
-    expression: "0 0 * * 1",
-    icon: "Calendar",
-  },
-  {
-    id: "monthly",
-    name: "Mensual",
-    description: "Se ejecuta el día 1 de cada mes a las 00:00",
-    expression: "0 0 1 * *",
-    icon: "Calendar",
-  },
-  {
-    id: "weekdays",
-    name: "Días laborables",
-    description: "Se ejecuta de lunes a viernes a las 09:00",
-    expression: "0 9 * * 1-5",
-    icon: "Briefcase",
-  },
-  {
-    id: "weekends",
-    name: "Fines de semana",
-    description: "Se ejecuta sábados y domingos a las 10:00",
-    expression: "0 10 * * 0,6",
-    icon: "Coffee",
-  },
-  {
-    id: "yearly",
-    name: "Anual",
-    description: "Se ejecuta el 1 de enero a las 00:00",
-    expression: "0 0 1 1 *",
-    icon: "Gift",
-  },
+const CRON_PRESETS_BASE: Omit<CronPreset, "name" | "description">[] = [
+  { id: "every-minute", expression: "* * * * *", icon: "Zap" },
+  { id: "every-5-minutes", expression: "*/5 * * * *", icon: "Clock" },
+  { id: "every-15-minutes", expression: "*/15 * * * *", icon: "Clock" },
+  { id: "every-30-minutes", expression: "*/30 * * * *", icon: "Clock" },
+  { id: "hourly", expression: "0 * * * *", icon: "Clock" },
+  { id: "daily-midnight", expression: "0 0 * * *", icon: "Calendar" },
+  { id: "daily-noon", expression: "0 12 * * *", icon: "Sun" },
+  { id: "weekly-monday", expression: "0 0 * * 1", icon: "Calendar" },
+  { id: "monthly", expression: "0 0 1 * *", icon: "Calendar" },
+  { id: "weekdays", expression: "0 9 * * 1-5", icon: "Briefcase" },
+  { id: "weekends", expression: "0 10 * * 0,6", icon: "Coffee" },
+  { id: "yearly", expression: "0 0 1 1 *", icon: "Gift" },
 ];
+
+/** Get locale-aware presets. Defaults to English. */
+export function getCronPresets(locale: Locale = "en"): CronPreset[] {
+  const strings = t(locale);
+  return CRON_PRESETS_BASE.map((base) => {
+    const presetStrings = strings.presets[base.id];
+    return {
+      ...base,
+      name: presetStrings?.name ?? base.id,
+      description: presetStrings?.description ?? "",
+    };
+  });
+}
+
+/**
+ * Legacy static export for backward-compatibility.
+ * New callers should prefer `getCronPresets(locale)`.
+ */
+export const CRON_PRESETS: CronPreset[] = getCronPresets("en");
 
 // --- Parse Expression ---
 
-export function parseExpression(expression: string): CronExpression {
+export function parseExpression(expression: string, locale: Locale = "en"): CronExpression {
   const parts = expression.trim().split(/\s+/);
 
   if (parts.length !== 5) {
-    throw new Error("La expresión cron debe tener 5 campos");
+    throw new Error(t(locale).parseError);
   }
 
   return {
@@ -191,16 +328,16 @@ export function buildExpression(cron: CronExpression): string {
 
 // --- Validation ---
 
-export function validateExpression(expression: string): CronValidation {
+export function validateExpression(expression: string, locale: Locale = "en"): CronValidation {
   const errors: CronFieldError[] = [];
 
   try {
-    const cron = parseExpression(expression);
+    const cron = parseExpression(expression, locale);
     const fields: CronField[] = ["minute", "hour", "dayOfMonth", "month", "dayOfWeek"];
 
     for (const field of fields) {
       const value = cron[field];
-      const fieldError = validateField(field, value);
+      const fieldError = validateField(field, value, locale);
       if (fieldError) {
         errors.push(fieldError);
       }
@@ -208,7 +345,7 @@ export function validateExpression(expression: string): CronValidation {
   } catch (e) {
     errors.push({
       field: "minute",
-      message: e instanceof Error ? e.message : "Expresión inválida",
+      message: e instanceof Error ? e.message : t(locale).invalidExpression,
     });
   }
 
@@ -218,8 +355,10 @@ export function validateExpression(expression: string): CronValidation {
   };
 }
 
-function validateField(field: CronField, value: string): CronFieldError | null {
+function validateField(field: CronField, value: string, locale: Locale): CronFieldError | null {
   const range = CRON_FIELD_RANGES[field];
+  const strings = t(locale);
+  const label = strings.fieldLabels[field];
 
   // Wildcard
   if (value === "*") return null;
@@ -228,11 +367,11 @@ function validateField(field: CronField, value: string): CronFieldError | null {
   if (value.includes("/")) {
     const [base, step] = value.split("/");
     if (base !== "*" && base !== undefined) {
-      const baseError = validateFieldValue(field, base, range);
+      const baseError = validateFieldValue(field, base, range, locale);
       if (baseError) return baseError;
     }
     if (step === undefined || !/^\d+$/.test(step) || parseInt(step) < 1) {
-      return { field, message: `${CRON_FIELD_LABELS[field]}: paso inválido "${step}"` };
+      return { field, message: strings.invalidStep(label, step) };
     }
     return null;
   }
@@ -241,15 +380,15 @@ function validateField(field: CronField, value: string): CronFieldError | null {
   if (value.includes("-") && !value.includes(",")) {
     const [start, end] = value.split("-");
     if (start === undefined || end === undefined) {
-      return { field, message: `${CRON_FIELD_LABELS[field]}: rango inválido` };
+      return { field, message: strings.invalidRange(label) };
     }
-    const startError = validateFieldValue(field, start, range);
+    const startError = validateFieldValue(field, start, range, locale);
     if (startError) return startError;
-    const endError = validateFieldValue(field, end, range);
+    const endError = validateFieldValue(field, end, range, locale);
     if (endError) return endError;
 
     if (parseInt(start) > parseInt(end)) {
-      return { field, message: `${CRON_FIELD_LABELS[field]}: el inicio del rango es mayor que el fin` };
+      return { field, message: strings.rangeStartGreaterThanEnd(label) };
     }
     return null;
   }
@@ -262,14 +401,14 @@ function validateField(field: CronField, value: string): CronFieldError | null {
       if (item.includes("-")) {
         const [start, end] = item.split("-");
         if (start === undefined || end === undefined) {
-          return { field, message: `${CRON_FIELD_LABELS[field]}: rango inválido en lista` };
+          return { field, message: strings.invalidRangeInList(label) };
         }
-        const startError = validateFieldValue(field, start, range);
+        const startError = validateFieldValue(field, start, range, locale);
         if (startError) return startError;
-        const endError = validateFieldValue(field, end, range);
+        const endError = validateFieldValue(field, end, range, locale);
         if (endError) return endError;
       } else {
-        const itemError = validateFieldValue(field, item, range);
+        const itemError = validateFieldValue(field, item, range, locale);
         if (itemError) return itemError;
       }
     }
@@ -277,24 +416,27 @@ function validateField(field: CronField, value: string): CronFieldError | null {
   }
 
   // Single value
-  return validateFieldValue(field, value, range);
+  return validateFieldValue(field, value, range, locale);
 }
 
 function validateFieldValue(
   field: CronField,
   value: string,
-  range: { min: number; max: number }
+  range: { min: number; max: number },
+  locale: Locale
 ): CronFieldError | null {
   const num = parseInt(value);
+  const strings = t(locale);
+  const label = strings.fieldLabels[field];
 
   if (isNaN(num)) {
-    return { field, message: `${CRON_FIELD_LABELS[field]}: "${value}" no es un número válido` };
+    return { field, message: strings.notAValidNumber(label, value) };
   }
 
   if (num < range.min || num > range.max) {
     return {
       field,
-      message: `${CRON_FIELD_LABELS[field]}: ${num} fuera de rango (${range.min}-${range.max})`,
+      message: strings.outOfRange(label, num, range.min, range.max),
     };
   }
 
@@ -303,26 +445,26 @@ function validateFieldValue(
 
 // --- Explanation ---
 
-export function explainExpression(expression: string): CronExplanation {
-  const validation = validateExpression(expression);
+export function explainExpression(expression: string, locale: Locale = "en"): CronExplanation {
+  const validation = validateExpression(expression, locale);
   if (!validation.isValid) {
     return {
-      summary: "Expresión inválida",
+      summary: t(locale).invalidExpression,
       details: [],
       humanReadable: validation.errors.map((e) => e.message).join(". "),
     };
   }
 
-  const cron = parseExpression(expression);
+  const cron = parseExpression(expression, locale);
   const details: CronFieldExplanation[] = [
-    { field: "minute", value: cron.minute, explanation: explainField("minute", cron.minute) },
-    { field: "hour", value: cron.hour, explanation: explainField("hour", cron.hour) },
-    { field: "dayOfMonth", value: cron.dayOfMonth, explanation: explainField("dayOfMonth", cron.dayOfMonth) },
-    { field: "month", value: cron.month, explanation: explainField("month", cron.month) },
-    { field: "dayOfWeek", value: cron.dayOfWeek, explanation: explainField("dayOfWeek", cron.dayOfWeek) },
+    { field: "minute", value: cron.minute, explanation: explainField("minute", cron.minute, locale) },
+    { field: "hour", value: cron.hour, explanation: explainField("hour", cron.hour, locale) },
+    { field: "dayOfMonth", value: cron.dayOfMonth, explanation: explainField("dayOfMonth", cron.dayOfMonth, locale) },
+    { field: "month", value: cron.month, explanation: explainField("month", cron.month, locale) },
+    { field: "dayOfWeek", value: cron.dayOfWeek, explanation: explainField("dayOfWeek", cron.dayOfWeek, locale) },
   ];
 
-  const humanReadable = buildHumanReadable(cron);
+  const humanReadable = buildHumanReadable(cron, locale);
 
   return {
     summary: humanReadable,
@@ -331,25 +473,30 @@ export function explainExpression(expression: string): CronExplanation {
   };
 }
 
-function explainField(field: CronField, value: string): string {
-  const label = CRON_FIELD_LABELS[field];
+function explainField(field: CronField, value: string, locale: Locale): string {
+  const strings = t(locale);
+  const label = strings.fieldLabels[field];
   const range = CRON_FIELD_RANGES[field];
 
   if (value === "*") {
-    return `Cada ${label.toLowerCase()}`;
+    return strings.every(label.toLowerCase());
   }
 
   if (value.includes("/")) {
     const [base, step] = value.split("/");
+    const unit = strings.fieldUnits[field];
     if (base === "*") {
-      return `Cada ${step} ${getFieldUnit(field)}`;
+      return strings.everyN(step, unit);
     }
-    return `Cada ${step} ${getFieldUnit(field)} empezando en ${base}`;
+    return strings.everyNStartingAt(step, unit, base);
   }
 
   if (value.includes("-") && !value.includes(",")) {
     const [start, end] = value.split("-");
-    return `Del ${formatFieldValue(field, start!, range)} al ${formatFieldValue(field, end!, range)}`;
+    return strings.fromTo(
+      formatFieldValue(field, start!, range, locale),
+      formatFieldValue(field, end!, range, locale)
+    );
   }
 
   if (value.includes(",")) {
@@ -357,35 +504,35 @@ function explainField(field: CronField, value: string): string {
     const formatted = items.map((item) => {
       if (item.includes("-")) {
         const [start, end] = item.split("-");
-        return `${formatFieldValue(field, start!, range)}-${formatFieldValue(field, end!, range)}`;
+        return `${formatFieldValue(field, start!, range, locale)}-${formatFieldValue(field, end!, range, locale)}`;
       }
-      return formatFieldValue(field, item, range);
+      return formatFieldValue(field, item, range, locale);
     });
     return formatted.join(", ");
   }
 
-  return `${label}: ${formatFieldValue(field, value, range)}`;
-}
-
-function getFieldUnit(field: CronField): string {
-  const units: Record<CronField, string> = {
-    minute: "minutos",
-    hour: "horas",
-    dayOfMonth: "días",
-    month: "meses",
-    dayOfWeek: "días",
-  };
-  return units[field];
+  return `${label}: ${formatFieldValue(field, value, range, locale)}`;
 }
 
 function formatFieldValue(
   field: CronField,
   value: string,
-  range: { min: number; max: number; names?: string[] }
+  range: { min: number; max: number; names?: string[] },
+  locale: Locale
 ): string {
   const num = parseInt(value);
   if (isNaN(num)) return value;
 
+  // Use locale-aware names for months and days
+  const strings = t(locale);
+  if (field === "month" && num >= range.min && num <= range.max) {
+    return strings.monthNames[num - 1] ?? value;
+  }
+  if (field === "dayOfWeek" && num >= range.min && num <= range.max) {
+    return strings.dayNames[num] ?? value;
+  }
+
+  // For other fields with names from the types file, fall back to range.names
   if (range.names && num >= range.min && num <= range.max) {
     const index = field === "month" ? num - 1 : num;
     return range.names[index] ?? value;
@@ -398,7 +545,8 @@ function formatFieldValue(
   return value;
 }
 
-function buildHumanReadable(cron: CronExpression): string {
+function buildHumanReadable(cron: CronExpression, locale: Locale): string {
+  const strings = t(locale);
   const parts: string[] = [];
 
   // Time
@@ -406,61 +554,59 @@ function buildHumanReadable(cron: CronExpression): string {
   const hour = cron.hour;
 
   if (minute === "*" && hour === "*") {
-    parts.push("Cada minuto");
+    parts.push(strings.everyMinute);
   } else if (minute.startsWith("*/")) {
     const step = minute.split("/")[1];
-    parts.push(`Cada ${step} minutos`);
+    parts.push(strings.everyNMinutes(step));
   } else if (hour === "*" && /^\d+$/.test(minute)) {
-    parts.push(`En el minuto ${minute} de cada hora`);
+    parts.push(strings.atMinuteOfEveryHour(minute));
   } else if (/^\d+$/.test(minute) && /^\d+$/.test(hour)) {
     const h = parseInt(hour).toString().padStart(2, "0");
     const m = parseInt(minute).toString().padStart(2, "0");
-    parts.push(`A las ${h}:${m}`);
+    parts.push(strings.atTime(h, m));
   } else if (/^\d+$/.test(minute) && hour.includes("-")) {
     const [start, end] = hour.split("-");
     const m = parseInt(minute).toString().padStart(2, "0");
-    parts.push(`En el minuto ${m}, de ${start}:00 a ${end}:00`);
+    parts.push(strings.atMinuteFromTo(m, start, end));
   } else {
-    if (minute !== "*") parts.push(`minuto ${minute}`);
-    if (hour !== "*") parts.push(`hora ${hour}`);
+    if (minute !== "*") parts.push(strings.minuteFallback(minute));
+    if (hour !== "*") parts.push(strings.hourFallback(hour));
   }
 
   // Day of month
   if (cron.dayOfMonth !== "*") {
     if (/^\d+$/.test(cron.dayOfMonth)) {
-      parts.push(`el día ${cron.dayOfMonth}`);
+      parts.push(strings.onDay(cron.dayOfMonth));
     } else {
-      parts.push(`días ${cron.dayOfMonth}`);
+      parts.push(strings.days(cron.dayOfMonth));
     }
   }
 
   // Month
   if (cron.month !== "*") {
-    const monthNames = CRON_FIELD_RANGES.month.names!;
     if (/^\d+$/.test(cron.month)) {
       const idx = parseInt(cron.month) - 1;
-      parts.push(`en ${monthNames[idx] ?? cron.month}`);
+      parts.push(strings.inMonth(strings.monthNames[idx] ?? cron.month));
     } else {
-      parts.push(`meses ${cron.month}`);
+      parts.push(strings.months(cron.month));
     }
   }
 
   // Day of week
   if (cron.dayOfWeek !== "*") {
-    const dayNames = CRON_FIELD_RANGES.dayOfWeek.names!;
     if (/^\d+$/.test(cron.dayOfWeek)) {
       const idx = parseInt(cron.dayOfWeek);
-      parts.push(`los ${dayNames[idx] ?? cron.dayOfWeek}`);
+      parts.push(strings.onDayOfWeek(strings.dayNames[idx] ?? cron.dayOfWeek));
     } else if (cron.dayOfWeek === "1-5") {
-      parts.push("de lunes a viernes");
+      parts.push(strings.mondayToFriday);
     } else if (cron.dayOfWeek === "0,6") {
-      parts.push("sábados y domingos");
+      parts.push(strings.saturdaysAndSundays);
     } else {
-      parts.push(`días de semana ${cron.dayOfWeek}`);
+      parts.push(strings.weekdays(cron.dayOfWeek));
     }
   }
 
-  return parts.join(" ") || "Cada minuto";
+  return parts.join(" ") || strings.everyMinute;
 }
 
 // --- Timezones ---
@@ -516,13 +662,18 @@ function getDateInTimezone(date: Date, timezone: string): { minute: number; hour
 
 // --- Next Executions ---
 
-export function calculateNextExecutions(expression: string, count: number = 5, timezone?: string): NextExecution[] {
-  const validation = validateExpression(expression);
+export function calculateNextExecutions(
+  expression: string,
+  count: number = 5,
+  timezone?: string,
+  locale: Locale = "en"
+): NextExecution[] {
+  const validation = validateExpression(expression, locale);
   if (!validation.isValid) {
     return [];
   }
 
-  const cron = parseExpression(expression);
+  const cron = parseExpression(expression, locale);
   const executions: NextExecution[] = [];
   const now = new Date();
   const current = new Date(now);
@@ -545,8 +696,10 @@ export function calculateNextExecutions(expression: string, count: number = 5, t
     if (matches) {
       executions.push({
         date: new Date(current),
-        formatted: timezone ? formatDateWithTimezone(current, timezone) : formatDate(current),
-        relative: formatRelative(current, now),
+        formatted: timezone
+          ? formatDateWithTimezone(current, timezone, locale)
+          : formatDate(current, locale),
+        relative: formatRelative(current, now, locale),
       });
     }
 
@@ -618,7 +771,7 @@ function matchesField(value: number, pattern: string, min: number): boolean {
   return value === parseInt(pattern);
 }
 
-function formatDate(date: Date): string {
+function formatDate(date: Date, locale: Locale = "en"): string {
   const options: Intl.DateTimeFormatOptions = {
     weekday: "short",
     year: "numeric",
@@ -627,10 +780,10 @@ function formatDate(date: Date): string {
     hour: "2-digit",
     minute: "2-digit",
   };
-  return date.toLocaleDateString("es-ES", options);
+  return date.toLocaleDateString(t(locale).intlLocale, options);
 }
 
-function formatDateWithTimezone(date: Date, timezone: string): string {
+function formatDateWithTimezone(date: Date, timezone: string, locale: Locale = "en"): string {
   const options: Intl.DateTimeFormatOptions = {
     weekday: "short",
     year: "numeric",
@@ -641,33 +794,34 @@ function formatDateWithTimezone(date: Date, timezone: string): string {
     timeZone: timezone,
     timeZoneName: "short",
   };
-  return date.toLocaleDateString("es-ES", options);
+  return date.toLocaleDateString(t(locale).intlLocale, options);
 }
 
-function formatRelative(date: Date, now: Date): string {
+function formatRelative(date: Date, now: Date, locale: Locale = "en"): string {
+  const strings = t(locale);
   const diffMs = date.getTime() - now.getTime();
   const diffMinutes = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMinutes / 60);
   const diffDays = Math.floor(diffHours / 24);
 
   if (diffMinutes < 60) {
-    return `en ${diffMinutes} minuto${diffMinutes !== 1 ? "s" : ""}`;
+    return strings.inMinutes(diffMinutes);
   }
 
   if (diffHours < 24) {
     const mins = diffMinutes % 60;
     if (mins > 0) {
-      return `en ${diffHours}h ${mins}m`;
+      return strings.inHoursAndMinutes(diffHours, mins);
     }
-    return `en ${diffHours} hora${diffHours !== 1 ? "s" : ""}`;
+    return strings.inHours(diffHours);
   }
 
   if (diffDays < 7) {
-    return `en ${diffDays} día${diffDays !== 1 ? "s" : ""}`;
+    return strings.inDays(diffDays);
   }
 
   const diffWeeks = Math.floor(diffDays / 7);
-  return `en ${diffWeeks} semana${diffWeeks !== 1 ? "s" : ""}`;
+  return strings.inWeeks(diffWeeks);
 }
 
 // --- Utility ---

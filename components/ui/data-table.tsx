@@ -137,10 +137,10 @@ export function DataTable<T extends { id: string | number }>({
     return (
       <div className="flex flex-col gap-4">
         <div className="flex justify-between gap-3 items-end">
-          <div className="relative w-full sm:max-w-[44%]">
+          <div className="relative w-full sm:max-w-[300px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-default-400 pointer-events-none" />
             <Input
-              className="w-full pl-9"
+              className="w-full pl-9 bg-default-100"
               placeholder={placeholder ?? t("tools.search")}
               value={filterValue}
               onChange={(e) => onSearchChange(e.target.value)}
@@ -202,10 +202,10 @@ export function DataTable<T extends { id: string | number }>({
         </div>
         <div className="flex justify-between items-center">
           <span className="text-default-400 text-small">{t("table.totalItems", { count: data.length })}</span>
-          <label className="flex items-center text-default-400 text-small">
+          <label className="flex items-center text-default-400 text-small gap-1.5">
             {t("table.rowsPerPage")}
             <select
-              className="bg-transparent outline-none text-default-400 text-small cursor-pointer ml-1"
+              className="bg-default-100 outline-none text-default-500 text-xs font-medium cursor-pointer rounded-lg px-2 py-1"
               onChange={(e) => setRowsPerPage(Number(e.target.value))}
               value={rowsPerPage}
             >
@@ -228,16 +228,17 @@ export function DataTable<T extends { id: string | number }>({
             : t("table.selectedOf", { selected: (selectedKeys as Set<string>).size, total: filteredItems.length })}
         </span>
         <Pagination
+          showControls
           color="primary"
           page={page}
           total={pages}
           onChange={setPage}
         />
         <div className="hidden sm:flex w-[30%] justify-end gap-2">
-          <Button isDisabled={pages === 1} size="sm" variant="ghost" onPress={() => setPage(p => Math.max(1, p - 1))}>
+          <Button isDisabled={pages === 1} size="sm" variant="outline" onPress={() => setPage(p => Math.max(1, p - 1))}>
             {t("table.previous")}
           </Button>
-          <Button isDisabled={pages === 1} size="sm" variant="ghost" onPress={() => setPage(p => Math.min(pages, p + 1))}>
+          <Button isDisabled={pages === 1} size="sm" variant="outline" onPress={() => setPage(p => Math.min(pages, p + 1))}>
             {t("table.next")}
           </Button>
         </div>
@@ -254,10 +255,10 @@ export function DataTable<T extends { id: string | number }>({
       bottomContent={bottomContent}
       bottomContentPlacement="outside"
       classNames={{
-        wrapper: "max-h-[500px]",
-        th: "uppercase tracking-wider",
-        td: "py-3.5",
-        tr: "border-b border-divider/20 last:border-b-0",
+        wrapper: "max-h-[500px] bg-transparent shadow-none",
+        th: "bg-default-100 text-default-500 text-xs font-semibold uppercase tracking-wider py-3 first:rounded-tl-lg last:rounded-tr-lg",
+        td: "py-3",
+        tr: "border-b border-divider/10 last:border-b-0 hover:bg-default-50 transition-colors",
       }}
       selectedKeys={selectedKeys}
       selectionMode="multiple"

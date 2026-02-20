@@ -14,9 +14,10 @@ import {
   explainExpression,
   calculateNextExecutions,
   generateConfig,
-  CRON_PRESETS,
+  getCronPresets,
 } from "@/lib/application/cron-builder";
 import { useToolHistory } from "@/hooks/use-tool-history";
+import { useLocaleStore } from "@/lib/stores/locale-store";
 
 interface HistoryItem {
   id: string;
@@ -26,6 +27,7 @@ interface HistoryItem {
 }
 
 export function useCronBuilder() {
+  const locale = useLocaleStore((s) => s.locale);
   const [expression, setExpressionState] = useState<CronExpression>(DEFAULT_CRON);
   const [rawExpression, setRawExpression] = useState(buildExpression(DEFAULT_CRON));
   const [configFormat, setConfigFormat] = useState<ConfigFormat>("kubernetes");
@@ -33,22 +35,25 @@ export function useCronBuilder() {
     useToolHistory<HistoryItem>("devflow-cron-history", 15);
   const [isManualMode, setIsManualMode] = useState(false);
 
+  // Locale-aware presets
+  const presets = useMemo(() => getCronPresets(locale), [locale]);
+
   // Compute derived state using useMemo (not useEffect + setState)
-  const validation = useMemo(() => validateExpression(rawExpression), [rawExpression]);
+  const validation = useMemo(() => validateExpression(rawExpression, locale), [rawExpression, locale]);
 
   const explanation = useMemo(() => {
     if (validation.isValid) {
-      return explainExpression(rawExpression);
+      return explainExpression(rawExpression, locale);
     }
     return null;
-  }, [rawExpression, validation.isValid]);
+  }, [rawExpression, validation.isValid, locale]);
 
   const nextExecutions = useMemo(() => {
     if (validation.isValid) {
-      return calculateNextExecutions(rawExpression, 5);
+      return calculateNextExecutions(rawExpression, 5, undefined, locale);
     }
     return [];
-  }, [rawExpression, validation.isValid]);
+  }, [rawExpression, validation.isValid, locale]);
 
   const config = useMemo(() => {
     if (validation.isValid) {
@@ -80,24 +85,25 @@ export function useCronBuilder() {
 
     // Try to sync the visual editor
     try {
-      const parsed = parseExpression(raw);
+      const parsed = parseExpression(raw, locale);
       setExpressionState(parsed);
     } catch {
       // Invalid expression, keep visual editor as-is
     }
-  }, []);
+  }, [locale]);
 
   const loadPreset = useCallback((presetId: string) => {
-    const preset = CRON_PRESETS.find((p) => p.id === presetId);
+    const localePresets = getCronPresets(locale);
+    const preset = localePresets.find((p) => p.id === presetId);
     if (preset) {
       try {
-        const parsed = parseExpression(preset.expression);
+        const parsed = parseExpression(preset.expression, locale);
         setExpression(parsed);
       } catch {
         // Should not happen with valid presets
       }
     }
-  }, [setExpression]);
+  }, [setExpression, locale]);
 
   const addToHistory = useCallback((expr: string, desc: string) => {
     const newItem: HistoryItem = {
@@ -117,12 +123,12 @@ export function useCronBuilder() {
 
   const loadFromHistory = useCallback((item: HistoryItem) => {
     try {
-      const parsed = parseExpression(item.expression);
+      const parsed = parseExpression(item.expression, locale);
       setExpression(parsed);
     } catch {
       setRawExpressionManual(item.expression);
     }
-  }, [setExpression, setRawExpressionManual]);
+  }, [setExpression, setRawExpressionManual, locale]);
 
   const reset = useCallback(() => {
     setExpression(DEFAULT_CRON);
@@ -139,7 +145,7 @@ export function useCronBuilder() {
     config,
     configFormat,
     isManualMode,
-    presets: CRON_PRESETS,
+    presets,
 
     // Setters
     setExpression,

@@ -10,6 +10,7 @@ import {
   getCommonCodes,
 } from "@/lib/application/http-status-finder";
 import { useToolHistory } from "@/hooks/use-tool-history";
+import { useLocaleStore } from "@/lib/stores/locale-store";
 
 interface HistoryItem {
   id: string;
@@ -18,6 +19,7 @@ interface HistoryItem {
 }
 
 export function useHttpStatusFinder() {
+  const locale = useLocaleStore((s) => s.locale);
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<HttpStatusCategory | null>(null);
   const [selectedCode, setSelectedCode] = useState<HttpStatusCode | null>(null);
@@ -25,10 +27,10 @@ export function useHttpStatusFinder() {
     useToolHistory<HistoryItem>("devflow-http-status-finder-history", 10);
 
   const results = useMemo(() => {
-    return processSearch(query, categoryFilter ?? undefined);
-  }, [query, categoryFilter]);
+    return processSearch(query, categoryFilter ?? undefined, locale);
+  }, [query, categoryFilter, locale]);
 
-  const commonCodes = useMemo(() => getCommonCodes(), []);
+  const commonCodes = useMemo(() => getCommonCodes(locale), [locale]);
 
   const search = useCallback((searchQuery: string) => {
     setQuery(searchQuery);

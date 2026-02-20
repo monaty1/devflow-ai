@@ -128,7 +128,7 @@ export default function Base64Page() {
                   fileInput.type = "file";
                   fileInput.onchange = (e) => {
                     const file = (e.target as HTMLInputElement).files?.[0];
-                    if (!file) return;
+                    if (!file) { fileInput.onchange = null; return; }
                     const reader = new FileReader();
                     if (mode === "encode") {
                       reader.onload = () => {
@@ -140,11 +140,12 @@ export default function Base64Page() {
                       reader.onload = () => setInput(reader.result as string);
                       reader.readAsText(file);
                     }
+                    fileInput.onchange = null;
                   };
                   fileInput.click();
                 }} aria-label={t("base64.uploadFile")}><Upload className="size-3.5 mr-1" />{t("base64.uploadFile")}</Button>
                 <Button size="sm" variant="ghost" onPress={() => loadExample("json")}>{t("base64.exampleBtn")}</Button>
-                <Button size="sm" variant="ghost" onPress={() => setInput("")} isIconOnly aria-label="Clear input"><Trash2 className="size-3.5 text-danger" /></Button>
+                <Button size="sm" variant="ghost" onPress={() => setInput("")} isIconOnly aria-label={t("common.clearInput")}><Trash2 className="size-3.5 text-danger" /></Button>
               </div>
             </div>
 
@@ -288,7 +289,14 @@ export default function Base64Page() {
                         </Button>
                       </div>
                       <pre className="text-xs font-mono text-emerald-700 dark:text-emerald-300 overflow-auto leading-relaxed">
-                        {mode === "decode" ? JSON.stringify(JSON.parse(result.output), null, 2) : JSON.stringify(JSON.parse(result.input), null, 2)}
+                        {(() => {
+                          try {
+                            const raw = mode === "decode" ? result.output : result.input;
+                            return JSON.stringify(JSON.parse(raw), null, 2);
+                          } catch {
+                            return mode === "decode" ? result.output : result.input;
+                          }
+                        })()}
                       </pre>
                     </Card>
                   )}

@@ -18,7 +18,8 @@ import {
   Info,
   Server,
   History,
-  Database,
+  LayoutGrid,
+  List,
 } from "lucide-react";
 import { useHttpStatusFinder } from "@/hooks/use-http-status-finder";
 import { useTranslation } from "@/hooks/use-translation";
@@ -93,19 +94,24 @@ export default function HttpStatusFinderPage() {
     }
   }, []);
 
-  const runMockTest = async (code: number) => {
+  const runMockTest = (code: number) => {
     setIsTesting(true);
     const start = Date.now();
-    try {
-      const res = await fetch(`https://httpstat.us/${code}`);
-      const headers: Record<string, string> = {};
-      res.headers.forEach((v, k) => { headers[k] = v; });
-      setTestResult({ headers, time: Date.now() - start, ok: res.ok });
-    } catch {
-      setTestResult({ headers: { error: "CORS or network error — external API may block browser requests. Try testing from a server-side context." }, time: Date.now() - start, ok: false });
-    } finally {
+    // Simulate response using local data (avoids CORS issues with external APIs)
+    setTimeout(() => {
+      const ok = code >= 200 && code < 400;
+      const headers: Record<string, string> = {
+        "content-type": "application/json; charset=utf-8",
+        "x-status-code": String(code),
+        "x-simulated": "true",
+        "cache-control": code === 200 ? "public, max-age=3600" : "no-cache",
+        ...(code === 301 || code === 302 ? { location: "https://example.com/redirected" } : {}),
+        ...(code === 401 ? { "www-authenticate": "Bearer realm=\"api\"" } : {}),
+        ...(code === 429 ? { "retry-after": "60" } : {}),
+      };
+      setTestResult({ headers, time: Date.now() - start, ok });
       setIsTesting(false);
-    }
+    }, 150 + Math.random() * 200);
   };
 
   const displayCodes = useMemo(() => 
@@ -123,8 +129,8 @@ export default function HttpStatusFinderPage() {
         actions={
           <div className="flex gap-2">
             <div className="flex bg-muted p-1 rounded-xl">
-              <Button isIconOnly size="sm" variant={activeView === "grid" ? "primary" : "ghost"} onPress={() => setActiveView("grid")} aria-label="Grid view"><History className="size-3.5" /></Button>
-              <Button isIconOnly size="sm" variant={activeView === "table" ? "primary" : "ghost"} onPress={() => setActiveView("table")} aria-label="Table view"><Database className="size-3.5" /></Button>
+              <Button isIconOnly size="sm" variant={activeView === "grid" ? "primary" : "ghost"} onPress={() => setActiveView("grid")} aria-label="Grid view"><LayoutGrid className="size-3.5" /></Button>
+              <Button isIconOnly size="sm" variant={activeView === "table" ? "primary" : "ghost"} onPress={() => setActiveView("table")} aria-label="Table view"><List className="size-3.5" /></Button>
             </div>
             <Button variant="outline" size="sm" onPress={clearSearch} className="gap-2 font-bold">
               <RotateCcw className="size-4" /> {t("httpStatus.resetBtn")}
@@ -150,7 +156,7 @@ export default function HttpStatusFinderPage() {
               variant="primary"
               className="font-bold text-sm"
             />
-            <div className="grid grid-cols-3 gap-2 mt-6">
+            <div className="grid grid-cols-5 gap-2 mt-6">
               {["1xx", "2xx", "3xx", "4xx", "5xx"].map((cat) => (
                 <button
                   key={cat}

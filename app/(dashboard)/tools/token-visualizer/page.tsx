@@ -97,7 +97,7 @@ export default function TokenVisualizerPage() {
                     size="sm"
                     variant={!isCompareMode ? "primary" : "ghost"}
                     onPress={() => setIsCompareMode(false)}
-                    aria-label="Single provider view"
+                    aria-label={t("tokenViz.singleProviderView")}
                   >
                     <ListIcon className="size-3.5" />
                   </Button>
@@ -106,7 +106,7 @@ export default function TokenVisualizerPage() {
                     size="sm"
                     variant={isCompareMode ? "primary" : "ghost"}
                     onPress={() => setIsCompareMode(true)}
-                    aria-label="Compare providers"
+                    aria-label={t("tokenViz.compareProviders")}
                   >
                     <LayoutGrid className="size-3.5" />
                   </Button>
@@ -226,8 +226,8 @@ export default function TokenVisualizerPage() {
               {realTokenResult && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">Model: <strong>{realTokenResult.model}</strong></span>
-                    <StatusBadge variant="info">{realTokenResult.totalTokens} real tokens</StatusBadge>
+                    <span className="text-muted-foreground">{t("tokenViz.modelLabel")}: <strong>{realTokenResult.model}</strong></span>
+                    <StatusBadge variant="info">{realTokenResult.totalTokens} {t("tokenViz.realTokens")}</StatusBadge>
                   </div>
                   <div className="flex flex-wrap gap-1 p-3 bg-background/50 rounded-xl border border-violet-500/10 max-h-[150px] overflow-auto">
                     {realTokenResult.segments.map((s, i) => (

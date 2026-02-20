@@ -57,7 +57,7 @@ export default function JsonFormatterPage() {
     fix,
   } = useJsonFormatter();
 
-  const [activeTab, setActiveTab] = useState<"output" | "paths" | "typescript" | "compare" | string>("output");
+  const [activeTab, setActiveTab] = useState<"output" | "paths" | "typescript" | "compare">("output");
   const [copiedPath, setCopiedPath] = useState<string | null>(null);
 
   const copyPath = useCallback((path: string) => {
@@ -239,7 +239,7 @@ export default function JsonFormatterPage() {
         <div className="lg:col-span-8 space-y-6">
           <Tabs
             selectedKey={activeTab as string}
-            onSelectionChange={(k) => setActiveTab(k as string)}
+            onSelectionChange={(k) => setActiveTab(k as typeof activeTab)}
             variant="primary"
           >
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

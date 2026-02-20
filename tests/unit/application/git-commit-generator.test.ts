@@ -226,12 +226,12 @@ describe("Git Commit Message Generator", () => {
 
     it("should warn about uppercase description", () => {
       const result = validateCommitMessage("feat: Add new feature");
-      expect(result.errors.some((e) => e.includes("mayúscula"))).toBe(true);
+      expect(result.errors.some((e) => e.includes("uppercase"))).toBe(true);
     });
 
     it("should warn about trailing period", () => {
       const result = validateCommitMessage("feat: add new feature.");
-      expect(result.errors.some((e) => e.includes("punto"))).toBe(true);
+      expect(result.errors.some((e) => e.includes("period"))).toBe(true);
     });
 
     it("should validate multi-line message with blank separator", () => {
@@ -243,7 +243,7 @@ describe("Git Commit Message Generator", () => {
     it("should warn about missing blank line after header", () => {
       const msg = "feat: add login\nExtra line without blank separator";
       const result = validateCommitMessage(msg);
-      expect(result.errors.some((e) => e.includes("segunda línea"))).toBe(true);
+      expect(result.errors.some((e) => e.includes("Second line"))).toBe(true);
     });
   });
 
@@ -613,7 +613,7 @@ describe("Git Commit Message Generator", () => {
     it("should detect empty description after colon", () => {
       const result = validateCommitMessage("feat: ");
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.includes("descripción"))).toBe(true);
+      expect(result.errors.some(e => e.includes("Description is empty"))).toBe(true);
     });
   });
 

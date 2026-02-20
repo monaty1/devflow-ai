@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   Input,
   Tabs,
@@ -95,7 +95,7 @@ export default function CronBuilderPage() {
     { name: t("table.colRelative"), uid: "relative", sortable: true },
   ];
 
-  const renderExecutionCell = (exec: NextExecution, columnKey: React.Key) => {
+  const renderExecutionCell = useCallback((exec: NextExecution, columnKey: React.Key) => {
     const key = columnKey.toString();
     switch (key) {
       case "formatted":
@@ -120,7 +120,7 @@ export default function CronBuilderPage() {
       default:
         return String(exec[key as keyof typeof exec] ?? "");
     }
-  };
+  }, []);
 
   const INFRA_FORMATS: { id: ConfigFormat; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: "kubernetes", label: "Kubernetes CronJob", icon: Cloud },
@@ -316,7 +316,7 @@ export default function CronBuilderPage() {
               </div>
             </div>
             
-            {explanation?.humanReadable.includes("inválida") ? (
+            {!explanation ? (
               <div className="p-12 text-center border-2 border-dashed border-divider rounded-xl">
                 <AlertTriangle className="size-8 text-amber-500 mx-auto mb-3" />
                 <p className="text-sm font-medium text-muted-foreground">{t("cron.invalidExpression")}</p>

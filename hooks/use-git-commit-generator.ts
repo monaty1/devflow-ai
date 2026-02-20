@@ -15,13 +15,16 @@ import {
   analyzeDiff,
   EXAMPLE_COMMITS,
   validateCommitMessage,
+  getCommitTypes,
 } from "@/lib/application/git-commit-generator";
 import { useToolHistory } from "@/hooks/use-tool-history";
 import { useMemo } from "react";
+import { useLocaleStore } from "@/lib/stores/locale-store";
 
 export type HistoryItem = CommitResult;
 
 export function useGitCommitGenerator() {
+  const locale = useLocaleStore((s) => s.locale);
   const [config, setConfig] = useState<CommitConfig>(DEFAULT_COMMIT_CONFIG);
   const [result, setResult] = useState<CommitResult | null>(null);
   const [parseInput, setParseInput] = useState("");
@@ -29,6 +32,8 @@ export function useGitCommitGenerator() {
   const [parsedCommit, setParsedCommit] = useState<ParsedCommit | null>(null);
   const { history, addToHistory: addItemToHistory, clearHistory } =
     useToolHistory<HistoryItem>("devflow-git-commit-generator-history", 20);
+
+  const commitTypes = useMemo(() => getCommitTypes(locale), [locale]);
 
   const addToHistory = useCallback((commitResult: CommitResult) => {
     addItemToHistory(commitResult);
@@ -39,8 +44,8 @@ export function useGitCommitGenerator() {
   }, [config]);
 
   const validation = useMemo(() => {
-    return validateCommitMessage(message, config);
-  }, [message, config]);
+    return validateCommitMessage(message, config, locale);
+  }, [message, config, locale]);
 
   const generate = useCallback(() => {
     if (!config.description.trim()) return;
@@ -103,6 +108,22 @@ export function useGitCommitGenerator() {
     setParsedCommit(parsed);
   }, []);
 
+  const generateBatch = useCallback((lines: string[]): string[] => {
+    return lines.filter(l => l.trim()).map(line => {
+      const result = generateCommitMessage({
+        type: config.type,
+        scope: config.scope,
+        description: line.trim(),
+        body: "",
+        breakingChange: "",
+        issueRef: "",
+        useEmojis: config.useEmojis,
+        requireIssue: false,
+      });
+      return result.message.split("\n")[0] ?? "";
+    });
+  }, [config.type, config.scope, config.useEmojis]);
+
   return {
     // State
     config,
@@ -113,6 +134,7 @@ export function useGitCommitGenerator() {
     diffInput,
     parsedCommit,
     history,
+    commitTypes,
 
     // Setters
     setParseInput,
@@ -121,6 +143,7 @@ export function useGitCommitGenerator() {
 
     // Actions
     generate,
+    generateBatch,
     parse,
     analyze,
     loadExample,

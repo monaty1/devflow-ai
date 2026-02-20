@@ -35,6 +35,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { Button, Card } from "@/components/ui";
 import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { cn } from "@/lib/utils";
+import { checkCollisions } from "@/lib/application/uuid-generator";
 import type { UuidVersion, UuidFormat } from "@/types/uuid-generator";
 
 export default function UuidGeneratorPage() {
@@ -55,17 +56,7 @@ export default function UuidGeneratorPage() {
   const [analyzeInput, setAnalyzeInput] = useState("");
   const [exportFormat, setExportFormat] = useState<"text" | "json" | "csv" | "sql">("text");
   const [collisionInput, setCollisionInput] = useState("");
-  const collisionResult = useMemo(() => {
-    if (!collisionInput.trim()) return null;
-    const lines = collisionInput.split("\n").map(l => l.trim().toLowerCase()).filter(Boolean);
-    const seen = new Map<string, number[]>();
-    lines.forEach((uuid, i) => {
-      const existing = seen.get(uuid);
-      if (existing) { existing.push(i + 1); } else { seen.set(uuid, [i + 1]); }
-    });
-    const duplicates = [...seen.entries()].filter(([, indices]) => indices.length > 1);
-    return { total: lines.length, unique: seen.size, duplicates };
-  }, [collisionInput]);
+  const collisionResult = useMemo(() => checkCollisions(collisionInput), [collisionInput]);
 
   const uuids = result?.uuids;
   const exportedContent = useMemo(() => {

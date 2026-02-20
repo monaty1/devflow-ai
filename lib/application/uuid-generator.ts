@@ -233,3 +233,21 @@ export function formatBulkExport(uuids: string[], format: "text" | "json" | "csv
     default: return uuids.join("\n");
   }
 }
+
+export interface CollisionResult {
+  total: number;
+  unique: number;
+  duplicates: [string, number[]][];
+}
+
+export function checkCollisions(input: string): CollisionResult | null {
+  if (!input.trim()) return null;
+  const lines = input.split("\n").map(l => l.trim().toLowerCase()).filter(Boolean);
+  const seen = new Map<string, number[]>();
+  for (const [i, uuid] of lines.entries()) {
+    const existing = seen.get(uuid);
+    if (existing) { existing.push(i + 1); } else { seen.set(uuid, [i + 1]); }
+  }
+  const duplicates = [...seen.entries()].filter(([, indices]) => indices.length > 1);
+  return { total: lines.length, unique: seen.size, duplicates };
+}

@@ -17,7 +17,8 @@ import {
   Bot,
 } from "lucide-react";
 import { useRegexHumanizer } from "@/hooks/use-regex-humanizer";
-import { COMMON_PATTERNS } from "@/lib/application/regex-humanizer";
+import { getCommonPatterns } from "@/lib/application/regex-humanizer";
+import { useLocaleStore } from "@/lib/stores/locale-store";
 import { useAISuggest } from "@/hooks/use-ai-suggest";
 import { useAISettingsStore } from "@/lib/stores/ai-settings-store";
 import { useToast } from "@/hooks/use-toast";
@@ -32,6 +33,8 @@ import type { RegexGroup } from "@/types/regex-humanizer";
 
 export default function RegexHumanizerPage() {
   const { t } = useTranslation();
+  const locale = useLocaleStore((s) => s.locale);
+  const commonPatterns = useMemo(() => getCommonPatterns(locale), [locale]);
   const {
     pattern,
     explanation,
@@ -158,7 +161,7 @@ export default function RegexHumanizerPage() {
                 <div className="space-y-1.5">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t("regex.presets")}</p>
                   <div className="flex flex-wrap gap-1.5">
-                    {COMMON_PATTERNS.slice(0, 8).map((cp) => (
+                    {commonPatterns.slice(0, 8).map((cp) => (
                       <button
                         key={cp.id}
                         type="button"

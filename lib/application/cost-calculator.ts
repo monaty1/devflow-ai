@@ -80,14 +80,15 @@ export function convertCost(cost: number, currency: Currency): number {
   return cost * EXCHANGE_RATES[currency];
 }
 
-export function formatCost(cost: number, currency: Currency = "USD"): string {
+export function formatCost(cost: number, currency: Currency = "USD", locale: "en" | "es" = "en"): string {
   const converted = convertCost(cost, currency);
   const symbol = CURRENCY_SYMBOLS[currency];
   if (converted < 0.0001) return `${symbol}0.00`;
   if (converted < 0.01) return `${symbol}${converted.toFixed(4)}`;
   if (converted < 1) return `${symbol}${converted.toFixed(3)}`;
   if (converted < 100) return `${symbol}${converted.toFixed(2)}`;
-  return `${symbol}${converted.toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
+  const loc = locale === "es" ? "es-ES" : "en-US";
+  return `${symbol}${converted.toLocaleString(loc, { minimumFractionDigits: 2 })}`;
 }
 
 export function exportComparisonCsv(comparison: CostComparison, currency: Currency = "USD"): string {

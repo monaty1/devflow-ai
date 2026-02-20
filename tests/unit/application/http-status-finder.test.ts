@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   HTTP_STATUS_CODES,
+  getStatusCodes,
   searchByCode,
   searchByKeyword,
   getByCategory,
@@ -70,6 +71,42 @@ describe("HTTP Status Code Finder", () => {
     });
   });
 
+  describe("getStatusCodes", () => {
+    it("should return English codes by default", () => {
+      const codes = getStatusCodes();
+      expect(codes.length).toBeGreaterThanOrEqual(30);
+      const ok = codes.find((c) => c.code === 200);
+      expect(ok?.description).toContain("successful");
+    });
+
+    it("should return English codes with locale 'en'", () => {
+      const codes = getStatusCodes("en");
+      const notFound = codes.find((c) => c.code === 404);
+      expect(notFound?.description).toContain("does not exist");
+    });
+
+    it("should return Spanish codes with locale 'es'", () => {
+      const codes = getStatusCodes("es");
+      const notFound = codes.find((c) => c.code === 404);
+      expect(notFound?.description).toContain("no existe");
+    });
+
+    it("should have the same number of codes for both locales", () => {
+      expect(getStatusCodes("en").length).toBe(getStatusCodes("es").length);
+    });
+
+    it("should preserve code, name, and category across locales", () => {
+      const en = getStatusCodes("en");
+      const es = getStatusCodes("es");
+      for (let i = 0; i < en.length; i++) {
+        expect(en[i]?.code).toBe(es[i]?.code);
+        expect(en[i]?.name).toBe(es[i]?.name);
+        expect(en[i]?.category).toBe(es[i]?.category);
+        expect(en[i]?.isCommon).toBe(es[i]?.isCommon);
+      }
+    });
+  });
+
   describe("searchByCode", () => {
     it("should find 200 OK", () => {
       const result = searchByCode(200);
@@ -103,6 +140,16 @@ describe("HTTP Status Code Finder", () => {
       const result = searchByCode(-1);
       expect(result).toBeNull();
     });
+
+    it("should return English description by default", () => {
+      const result = searchByCode(200);
+      expect(result?.description).toContain("successful");
+    });
+
+    it("should return Spanish description with locale 'es'", () => {
+      const result = searchByCode(200, "es");
+      expect(result?.description).toContain("exitosa");
+    });
   });
 
   describe("searchByKeyword", () => {
@@ -112,8 +159,13 @@ describe("HTTP Status Code Finder", () => {
       expect(results.some((r) => r.code === 404)).toBe(true);
     });
 
-    it("should find codes by description keyword", () => {
-      const results = searchByKeyword("autenticación");
+    it("should find codes by English description keyword", () => {
+      const results = searchByKeyword("authentication");
+      expect(results.length).toBeGreaterThan(0);
+    });
+
+    it("should find codes by Spanish description keyword (bilingual search)", () => {
+      const results = searchByKeyword("autenticacion");
       expect(results.length).toBeGreaterThan(0);
     });
 
@@ -136,6 +188,13 @@ describe("HTTP Status Code Finder", () => {
     it("should find partial matches", () => {
       const results = searchByKeyword("redirect");
       expect(results.length).toBeGreaterThan(0);
+    });
+
+    it("should return Spanish descriptions when locale is 'es'", () => {
+      const results = searchByKeyword("Not Found", "es");
+      const notFound = results.find((r) => r.code === 404);
+      expect(notFound).toBeDefined();
+      expect(notFound?.description).toContain("no existe");
     });
   });
 
@@ -177,6 +236,12 @@ describe("HTTP Status Code Finder", () => {
         results.forEach((r) => expect(r.category).toBe(cat));
       });
     });
+
+    it("should return Spanish descriptions with locale 'es'", () => {
+      const results = getByCategory("2xx", "es");
+      const ok = results.find((r) => r.code === 200);
+      expect(ok?.description).toContain("exitosa");
+    });
   });
 
   describe("getCommonCodes", () => {
@@ -203,6 +268,12 @@ describe("HTTP Status Code Finder", () => {
     it("should have at least 15 common codes", () => {
       const results = getCommonCodes();
       expect(results.length).toBeGreaterThanOrEqual(15);
+    });
+
+    it("should return Spanish descriptions with locale 'es'", () => {
+      const results = getCommonCodes("es");
+      const ok = results.find((r) => r.code === 200);
+      expect(ok?.description).toContain("exitosa");
     });
   });
 
@@ -255,6 +326,15 @@ describe("HTTP Status Code Finder", () => {
       expect(getCategoryInfo("4xx").color).toBe("orange");
       expect(getCategoryInfo("5xx").color).toBe("red");
     });
+
+    it("should return English descriptions by default", () => {
+      expect(getCategoryInfo("2xx").description).toBe("Successful responses");
+    });
+
+    it("should return Spanish descriptions with locale 'es'", () => {
+      expect(getCategoryInfo("2xx", "es").description).toBe("Respuestas exitosas");
+      expect(getCategoryInfo("4xx", "es").description).toBe("Errores del cliente");
+    });
   });
 
   describe("processSearch", () => {
@@ -304,6 +384,24 @@ describe("HTTP Status Code Finder", () => {
     it("should return empty when no matches", () => {
       const result = processSearch("zzzznonexistent");
       expect(result.codes).toHaveLength(0);
+    });
+
+    it("should return English descriptions by default", () => {
+      const result = processSearch("200");
+      expect(result.codes[0]?.description).toContain("successful");
+    });
+
+    it("should return Spanish descriptions with locale 'es'", () => {
+      const result = processSearch("200", undefined, "es");
+      expect(result.codes[0]?.description).toContain("exitosa");
+    });
+
+    it("should filter by category with Spanish locale", () => {
+      const result = processSearch("", "5xx", "es");
+      expect(result.codes.length).toBeGreaterThan(0);
+      result.codes.forEach((c) => expect(c.category).toBe("5xx"));
+      const err500 = result.codes.find((c) => c.code === 500);
+      expect(err500?.description).toContain("generico");
     });
   });
 });

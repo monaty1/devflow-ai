@@ -43,6 +43,7 @@ export default function DtoMaticPage() {
     selectedFile,
     selectedFileId,
     isGenerating,
+    error,
     setJsonInput,
     setSelectedFileId,
     updateConfig,
@@ -131,6 +132,13 @@ export default function DtoMaticPage() {
       />
 
       <ToolSuggestions toolId="dto-matic" input={jsonInput} output={selectedFile?.content || ""} />
+
+      {error && (
+        <Card className="p-4 border-danger/30 bg-danger/5 flex items-center gap-3">
+          <AlertCircle className="size-4 text-danger shrink-0" />
+          <p className="text-sm font-medium text-danger">{error}</p>
+        </Card>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Input & Config Column */}

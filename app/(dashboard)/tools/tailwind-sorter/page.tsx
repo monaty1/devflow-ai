@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   Tabs,
   Chip,
@@ -38,11 +38,12 @@ export default function TailwindSorterPage() {
     isSorting,
     setInput,
     updateConfig,
+    sort,
     reset,
     loadExample,
   } = useTailwindSorter();
 
-  const [activeView, setActiveTab] = useState<"result" | "audit" | "diff" | "breakpoints" | string>("result");
+  const [activeView, setActiveView] = useState<"result" | "audit" | "diff" | "breakpoints" | string>("result");
 
   const diffClasses = useMemo(() => {
     if (!result || !input.trim()) return { removed: [] as string[], added: [] as string[], kept: [] as string[] };
@@ -60,7 +61,7 @@ export default function TailwindSorterPage() {
     { name: t("table.colSeverity"), uid: "severity", sortable: true },
   ];
 
-  const renderAuditCell = (item: TailwindAuditItem, columnKey: React.Key) => {
+  const renderAuditCell = useCallback((item: TailwindAuditItem, columnKey: React.Key) => {
     const key = columnKey.toString();
     switch (key) {
       case "class":
@@ -76,7 +77,7 @@ export default function TailwindSorterPage() {
       default:
         return String(item[key as keyof typeof item] ?? "");
     }
-  };
+  }, []);
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -117,7 +118,7 @@ export default function TailwindSorterPage() {
               onKeyDown={(e) => {
                 if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
                   e.preventDefault();
-                  if (input.trim()) setInput(input); // trigger auto-sort via reactive effect
+                  if (input.trim()) sort();
                 }
               }}
               className="h-48 w-full resize-none rounded-xl border border-divider bg-background p-4 font-mono text-sm focus:ring-2 focus:ring-sky-500/20 shadow-inner"
@@ -195,7 +196,7 @@ export default function TailwindSorterPage() {
               <Card className="p-0 overflow-hidden shadow-xl">
                 <Tabs
                   selectedKey={activeView as string}
-                  onSelectionChange={(k) => setActiveTab(k as string)}
+                  onSelectionChange={(k) => setActiveView(k as string)}
                   variant="primary"
                 >
                   <Tabs.ListContainer>

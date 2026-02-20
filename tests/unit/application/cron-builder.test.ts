@@ -8,6 +8,7 @@ import {
   isValidExpression,
   generateConfig,
   CRON_PRESETS,
+  getCronPresets,
 } from "@/lib/application/cron-builder";
 
 describe("Cron Builder", () => {
@@ -40,9 +41,14 @@ describe("Cron Builder", () => {
       expect(result.dayOfWeek).toBe("1,3,5");
     });
 
-    it("should throw error for invalid expression format", () => {
-      expect(() => parseExpression("0 12 *")).toThrow("5 campos");
-      expect(() => parseExpression("0 12 * * * *")).toThrow("5 campos");
+    it("should throw error for invalid expression format (en)", () => {
+      expect(() => parseExpression("0 12 *")).toThrow("5 fields");
+      expect(() => parseExpression("0 12 * * * *")).toThrow("5 fields");
+    });
+
+    it("should throw error for invalid expression format (es)", () => {
+      expect(() => parseExpression("0 12 *", "es")).toThrow("5 campos");
+      expect(() => parseExpression("0 12 * * * *", "es")).toThrow("5 campos");
     });
 
     it("should handle extra whitespace", () => {
@@ -141,13 +147,29 @@ describe("Cron Builder", () => {
       expect(validateExpression("0 9-17 * * 1-5").isValid).toBe(true);
       expect(validateExpression("*/15 8-18 1,15 * *").isValid).toBe(true);
     });
+
+    it("should produce English error messages by default", () => {
+      const result = validateExpression("60 12 * * *");
+      expect(result.errors[0]!.message).toContain("out of range");
+    });
+
+    it("should produce Spanish error messages with es locale", () => {
+      const result = validateExpression("60 12 * * *", "es");
+      expect(result.errors[0]!.message).toContain("fuera de rango");
+    });
   });
 
   describe("explainExpression", () => {
-    it("should explain every minute", () => {
+    it("should explain every minute (en)", () => {
       const result = explainExpression("* * * * *");
 
-      expect(result.humanReadable).toContain("minuto");
+      expect(result.humanReadable).toContain("Every minute");
+    });
+
+    it("should explain every minute (es)", () => {
+      const result = explainExpression("* * * * *", "es");
+
+      expect(result.humanReadable).toContain("Cada minuto");
     });
 
     it("should explain daily at specific time", () => {
@@ -156,14 +178,26 @@ describe("Cron Builder", () => {
       expect(result.humanReadable).toContain("12:00");
     });
 
-    it("should explain step values", () => {
+    it("should explain step values (en)", () => {
       const result = explainExpression("*/5 * * * *");
+
+      expect(result.humanReadable).toContain("5 minutes");
+    });
+
+    it("should explain step values (es)", () => {
+      const result = explainExpression("*/5 * * * *", "es");
 
       expect(result.humanReadable).toContain("5 minutos");
     });
 
-    it("should explain weekdays", () => {
+    it("should explain weekdays (en)", () => {
       const result = explainExpression("0 9 * * 1-5");
+
+      expect(result.humanReadable).toContain("Monday to Friday");
+    });
+
+    it("should explain weekdays (es)", () => {
+      const result = explainExpression("0 9 * * 1-5", "es");
 
       expect(result.humanReadable).toContain("lunes a viernes");
     });
@@ -176,10 +210,16 @@ describe("Cron Builder", () => {
       expect(result.details[0]!.value).toBe("30");
     });
 
-    it("should handle invalid expression", () => {
+    it("should handle invalid expression (en)", () => {
       const result = explainExpression("invalid");
 
-      expect(result.summary).toContain("inválida");
+      expect(result.summary).toContain("Invalid expression");
+    });
+
+    it("should handle invalid expression (es)", () => {
+      const result = explainExpression("invalid", "es");
+
+      expect(result.summary).toContain("Expresión inválida");
     });
   });
 
@@ -214,8 +254,14 @@ describe("Cron Builder", () => {
       expect(result[0]!.formatted.length).toBeGreaterThan(0);
     });
 
-    it("should include relative time", () => {
+    it("should include relative time (en)", () => {
       const result = calculateNextExecutions("* * * * *", 1);
+
+      expect(result[0]!.relative).toContain("in");
+    });
+
+    it("should include relative time (es)", () => {
+      const result = calculateNextExecutions("* * * * *", 1, undefined, "es");
 
       expect(result[0]!.relative).toContain("en");
     });
@@ -259,6 +305,39 @@ describe("Cron Builder", () => {
       expect(ids).toContain("daily-midnight");
       expect(ids).toContain("weekly-monday");
       expect(ids).toContain("monthly");
+    });
+  });
+
+  describe("getCronPresets (locale-aware)", () => {
+    it("should return English preset names by default", () => {
+      const presets = getCronPresets();
+      const first = presets.find((p) => p.id === "every-minute");
+      expect(first?.name).toBe("Every minute");
+      expect(first?.description).toBe("Runs every minute");
+    });
+
+    it("should return English preset names for en locale", () => {
+      const presets = getCronPresets("en");
+      const hourly = presets.find((p) => p.id === "hourly");
+      expect(hourly?.name).toBe("Hourly");
+      expect(hourly?.description).toContain("start of every hour");
+    });
+
+    it("should return Spanish preset names for es locale", () => {
+      const presets = getCronPresets("es");
+      const first = presets.find((p) => p.id === "every-minute");
+      expect(first?.name).toBe("Cada minuto");
+      expect(first?.description).toBe("Se ejecuta cada minuto");
+    });
+
+    it("should have same number of presets for both locales", () => {
+      expect(getCronPresets("en").length).toBe(getCronPresets("es").length);
+    });
+
+    it("should have valid expressions for all locale presets", () => {
+      for (const preset of getCronPresets("es")) {
+        expect(isValidExpression(preset.expression)).toBe(true);
+      }
     });
   });
 
@@ -310,23 +389,44 @@ describe("Cron Builder", () => {
   });
 
   describe("formatRelative exact-hours branch", () => {
-    it("should format exact whole hours", () => {
+    it("should format exact whole hours (en)", () => {
       vi.useFakeTimers();
       const now = new Date("2025-06-01T10:00:00Z");
       vi.setSystemTime(now);
       const targetHour = (now.getHours() + 2) % 24;
       const executions = calculateNextExecutions(`0 ${targetHour} * * *`, 1);
       expect(executions.length).toBe(1);
+      expect(executions[0]!.relative).toContain("in 2 hour");
+      vi.useRealTimers();
+    });
+
+    it("should format exact whole hours (es)", () => {
+      vi.useFakeTimers();
+      const now = new Date("2025-06-01T10:00:00Z");
+      vi.setSystemTime(now);
+      const targetHour = (now.getHours() + 2) % 24;
+      const executions = calculateNextExecutions(`0 ${targetHour} * * *`, 1, undefined, "es");
+      expect(executions.length).toBe(1);
       expect(executions[0]!.relative).toContain("en 2 horas");
       vi.useRealTimers();
     });
 
-    it("should use singular hora for exactly 1 hour", () => {
+    it("should use singular hour for exactly 1 hour (en)", () => {
       vi.useFakeTimers();
       const now = new Date("2025-06-01T10:00:00Z");
       vi.setSystemTime(now);
       const targetHour = (now.getHours() + 1) % 24;
       const executions = calculateNextExecutions(`0 ${targetHour} * * *`, 1);
+      expect(executions[0]!.relative).toBe("in 1 hour");
+      vi.useRealTimers();
+    });
+
+    it("should use singular hora for exactly 1 hour (es)", () => {
+      vi.useFakeTimers();
+      const now = new Date("2025-06-01T10:00:00Z");
+      vi.setSystemTime(now);
+      const targetHour = (now.getHours() + 1) % 24;
+      const executions = calculateNextExecutions(`0 ${targetHour} * * *`, 1, undefined, "es");
       expect(executions[0]!.relative).toBe("en 1 hora");
       vi.useRealTimers();
     });
@@ -350,56 +450,56 @@ describe("Cron Builder", () => {
     });
   });
 
-  describe("buildHumanReadable (via explainExpression)", () => {
+  describe("buildHumanReadable (via explainExpression) — en", () => {
     it("should explain specific dayOfMonth", () => {
       const result = explainExpression("0 12 15 * *");
-      expect(result.humanReadable).toContain("día 15");
+      expect(result.humanReadable).toContain("day 15");
     });
 
     it("should explain non-specific dayOfMonth pattern", () => {
       const result = explainExpression("0 12 1-15 * *");
-      expect(result.humanReadable).toContain("días 1-15");
+      expect(result.humanReadable).toContain("days 1-15");
     });
 
     it("should explain specific month number", () => {
       const result = explainExpression("0 12 1 6 *");
-      expect(result.humanReadable).toContain("en ");
+      expect(result.humanReadable).toContain("in ");
     });
 
     it("should explain non-specific month pattern", () => {
       const result = explainExpression("0 12 1 1-6 *");
-      expect(result.humanReadable).toContain("meses 1-6");
+      expect(result.humanReadable).toContain("months 1-6");
     });
 
     it("should explain specific weekday number", () => {
       const result = explainExpression("0 12 * * 1");
-      expect(result.humanReadable).toContain("los ");
+      expect(result.humanReadable).toContain("on ");
     });
 
     it("should explain weekdays 1-5", () => {
       const result = explainExpression("0 12 * * 1-5");
-      expect(result.humanReadable).toContain("de lunes a viernes");
+      expect(result.humanReadable).toContain("Monday to Friday");
     });
 
     it("should explain weekends 0,6", () => {
       const result = explainExpression("0 12 * * 0,6");
-      expect(result.humanReadable).toContain("sábados y domingos");
+      expect(result.humanReadable).toContain("Saturdays and Sundays");
     });
 
     it("should explain non-specific weekday pattern", () => {
       const result = explainExpression("0 12 * * 2-4");
-      expect(result.humanReadable).toContain("días de semana 2-4");
+      expect(result.humanReadable).toContain("weekdays 2-4");
     });
 
     it("should explain minute with hour range", () => {
       const result = explainExpression("30 8-18 * * *");
-      expect(result.humanReadable).toContain("minuto 30");
+      expect(result.humanReadable).toContain("minute 30");
       expect(result.humanReadable).toContain("8");
     });
 
     it("should explain each minute (wildcard minute and hour)", () => {
       const result = explainExpression("* * * * *");
-      expect(result.humanReadable).toContain("Cada minuto");
+      expect(result.humanReadable).toContain("Every minute");
     });
 
     it("should explain minute at specific hour (single minute, single hour)", () => {
@@ -409,11 +509,59 @@ describe("Cron Builder", () => {
 
     it("should explain step minutes", () => {
       const result = explainExpression("*/15 * * * *");
-      expect(result.humanReadable).toContain("Cada 15 minutos");
+      expect(result.humanReadable).toContain("Every 15 minutes");
     });
 
     it("should explain single minute every hour", () => {
       const result = explainExpression("30 * * * *");
+      expect(result.humanReadable).toContain("minute 30");
+      expect(result.humanReadable).toContain("every hour");
+    });
+  });
+
+  describe("buildHumanReadable (via explainExpression) — es", () => {
+    it("should explain specific dayOfMonth (es)", () => {
+      const result = explainExpression("0 12 15 * *", "es");
+      expect(result.humanReadable).toContain("día 15");
+    });
+
+    it("should explain non-specific dayOfMonth pattern (es)", () => {
+      const result = explainExpression("0 12 1-15 * *", "es");
+      expect(result.humanReadable).toContain("días 1-15");
+    });
+
+    it("should explain non-specific month pattern (es)", () => {
+      const result = explainExpression("0 12 1 1-6 *", "es");
+      expect(result.humanReadable).toContain("meses 1-6");
+    });
+
+    it("should explain weekdays 1-5 (es)", () => {
+      const result = explainExpression("0 12 * * 1-5", "es");
+      expect(result.humanReadable).toContain("de lunes a viernes");
+    });
+
+    it("should explain weekends 0,6 (es)", () => {
+      const result = explainExpression("0 12 * * 0,6", "es");
+      expect(result.humanReadable).toContain("sábados y domingos");
+    });
+
+    it("should explain non-specific weekday pattern (es)", () => {
+      const result = explainExpression("0 12 * * 2-4", "es");
+      expect(result.humanReadable).toContain("días de semana 2-4");
+    });
+
+    it("should explain each minute (es)", () => {
+      const result = explainExpression("* * * * *", "es");
+      expect(result.humanReadable).toContain("Cada minuto");
+    });
+
+    it("should explain step minutes (es)", () => {
+      const result = explainExpression("*/15 * * * *", "es");
+      expect(result.humanReadable).toContain("Cada 15 minutos");
+    });
+
+    it("should explain single minute every hour (es)", () => {
+      const result = explainExpression("30 * * * *", "es");
       expect(result.humanReadable).toContain("minuto 30");
       expect(result.humanReadable).toContain("cada hora");
     });
@@ -466,32 +614,31 @@ describe("Cron Builder", () => {
     });
   });
 
-  describe("explainExpression – uncovered branches", () => {
-    it("should explain cron with step value */5 mentioning 'Cada 5 minutos'", () => {
+  describe("explainExpression – uncovered branches (en)", () => {
+    it("should explain cron with step value */5 mentioning 'Every 5 minutes'", () => {
       const result = explainExpression("*/5 * * * *");
 
-      expect(result.humanReadable).toContain("Cada 5 minutos");
-      // The minute field explanation should mention "Cada 5 minutos"
+      expect(result.humanReadable).toContain("Every 5 minutes");
       const minuteDetail = result.details.find((d) => d.field === "minute");
       expect(minuteDetail).toBeDefined();
-      expect(minuteDetail!.explanation).toContain("Cada 5 minutos");
+      expect(minuteDetail!.explanation).toContain("Every 5 minutes");
     });
 
-    it("should explain cron with step on non-star base 10/5 mentioning 'empezando en 10'", () => {
+    it("should explain cron with step on non-star base 10/5 mentioning 'starting at 10'", () => {
       const result = explainExpression("10/5 * * * *");
 
       const minuteDetail = result.details.find((d) => d.field === "minute");
       expect(minuteDetail).toBeDefined();
-      expect(minuteDetail!.explanation).toContain("Cada 5");
-      expect(minuteDetail!.explanation).toContain("empezando en 10");
+      expect(minuteDetail!.explanation).toContain("Every 5");
+      expect(minuteDetail!.explanation).toContain("starting at 10");
     });
 
-    it("should explain range value 1-5 in minute field with 'Del 1 al 5'", () => {
+    it("should explain range value 1-5 in minute field with 'From 1 to 5'", () => {
       const result = explainExpression("1-5 * * * *");
 
       const minuteDetail = result.details.find((d) => d.field === "minute");
       expect(minuteDetail).toBeDefined();
-      expect(minuteDetail!.explanation).toContain("Del 1 al 5");
+      expect(minuteDetail!.explanation).toContain("From 1 to 5");
     });
 
     it("should explain comma-separated with range '1,3-5' formatting both items", () => {
@@ -499,71 +646,139 @@ describe("Cron Builder", () => {
 
       const minuteDetail = result.details.find((d) => d.field === "minute");
       expect(minuteDetail).toBeDefined();
-      // Should contain both the single value "1" and the range "3-5"
       expect(minuteDetail!.explanation).toContain("1");
       expect(minuteDetail!.explanation).toContain("3");
       expect(minuteDetail!.explanation).toContain("5");
     });
 
-    it("should explain specific minute + wildcard hour '30 * * * *' as 'En el minuto 30 de cada hora'", () => {
+    it("should explain specific minute + wildcard hour '30 * * * *' as 'At minute 30 of every hour'", () => {
       const result = explainExpression("30 * * * *");
 
-      expect(result.humanReadable).toContain("En el minuto 30 de cada hora");
+      expect(result.humanReadable).toContain("At minute 30 of every hour");
     });
 
     it("should explain specific minute + hour range '0 9-17 * * *' mentioning the range", () => {
       const result = explainExpression("0 9-17 * * *");
+
+      expect(result.humanReadable).toContain("minute 00");
+      expect(result.humanReadable).toContain("9:00");
+      expect(result.humanReadable).toContain("17:00");
+    });
+
+    it("should explain day of month as number '0 0 15 * *' with 'on day 15'", () => {
+      const result = explainExpression("0 0 15 * *");
+
+      expect(result.humanReadable).toContain("on day 15");
+    });
+
+    it("should explain day of month as pattern '0 0 1,15 * *' with 'days 1,15'", () => {
+      const result = explainExpression("0 0 1,15 * *");
+
+      expect(result.humanReadable).toContain("days 1,15");
+    });
+
+    it("should handle else branch for non-star minute and hour like '1-5 2-4 * * *'", () => {
+      const result = explainExpression("1-5 2-4 * * *");
+
+      expect(result.humanReadable).toContain("minute 1-5");
+      expect(result.humanReadable).toContain("hour 2-4");
+    });
+  });
+
+  describe("explainExpression – uncovered branches (es)", () => {
+    it("should explain cron with step value */5 in Spanish", () => {
+      const result = explainExpression("*/5 * * * *", "es");
+
+      expect(result.humanReadable).toContain("Cada 5 minutos");
+      const minuteDetail = result.details.find((d) => d.field === "minute");
+      expect(minuteDetail).toBeDefined();
+      expect(minuteDetail!.explanation).toContain("Cada 5 minutos");
+    });
+
+    it("should explain cron with step on non-star base 10/5 in Spanish", () => {
+      const result = explainExpression("10/5 * * * *", "es");
+
+      const minuteDetail = result.details.find((d) => d.field === "minute");
+      expect(minuteDetail).toBeDefined();
+      expect(minuteDetail!.explanation).toContain("Cada 5");
+      expect(minuteDetail!.explanation).toContain("empezando en 10");
+    });
+
+    it("should explain range value 1-5 in minute field in Spanish", () => {
+      const result = explainExpression("1-5 * * * *", "es");
+
+      const minuteDetail = result.details.find((d) => d.field === "minute");
+      expect(minuteDetail).toBeDefined();
+      expect(minuteDetail!.explanation).toContain("Del 1 al 5");
+    });
+
+    it("should explain specific minute + wildcard hour in Spanish", () => {
+      const result = explainExpression("30 * * * *", "es");
+
+      expect(result.humanReadable).toContain("En el minuto 30 de cada hora");
+    });
+
+    it("should explain specific minute + hour range in Spanish", () => {
+      const result = explainExpression("0 9-17 * * *", "es");
 
       expect(result.humanReadable).toContain("minuto 00");
       expect(result.humanReadable).toContain("9:00");
       expect(result.humanReadable).toContain("17:00");
     });
 
-    it("should explain day of month as number '0 0 15 * *' with 'el día 15'", () => {
-      const result = explainExpression("0 0 15 * *");
+    it("should explain day of month as number in Spanish", () => {
+      const result = explainExpression("0 0 15 * *", "es");
 
       expect(result.humanReadable).toContain("el día 15");
     });
 
-    it("should explain day of month as pattern '0 0 1,15 * *' with 'días 1,15'", () => {
-      const result = explainExpression("0 0 1,15 * *");
+    it("should explain day of month as pattern in Spanish", () => {
+      const result = explainExpression("0 0 1,15 * *", "es");
 
       expect(result.humanReadable).toContain("días 1,15");
     });
 
-    it("should handle else branch for non-star minute and hour like '1-5 2-4 * * *'", () => {
-      const result = explainExpression("1-5 2-4 * * *");
+    it("should handle else branch for non-star minute and hour in Spanish", () => {
+      const result = explainExpression("1-5 2-4 * * *", "es");
 
-      // This hits the else branch in buildHumanReadable: minute != "*" and hour != "*"
-      // but neither matches the step, single-digit-minute-wildcard-hour, or specific-minute-hour-range patterns
       expect(result.humanReadable).toContain("minuto 1-5");
       expect(result.humanReadable).toContain("hora 2-4");
     });
   });
 
   describe("formatRelative branches (via calculateNextExecutions)", () => {
-    it("should produce relative strings for next executions", () => {
+    it("should produce relative strings for next executions (en)", () => {
       const executions = calculateNextExecutions("* * * * *", 1);
+      expect(executions.length).toBe(1);
+      expect(executions[0]!.relative).toContain("in ");
+    });
+
+    it("should produce relative strings for next executions (es)", () => {
+      const executions = calculateNextExecutions("* * * * *", 1, undefined, "es");
       expect(executions.length).toBe(1);
       expect(executions[0]!.relative).toContain("en ");
     });
 
-    it("should handle execution within minutes", () => {
+    it("should handle execution within minutes (en)", () => {
       const executions = calculateNextExecutions("* * * * *", 1);
+      expect(executions[0]!.relative).toMatch(/in \d+ minute/);
+    });
+
+    it("should handle execution within minutes (es)", () => {
+      const executions = calculateNextExecutions("* * * * *", 1, undefined, "es");
       expect(executions[0]!.relative).toMatch(/en \d+ minuto/);
     });
 
     it("should handle execution in hours", () => {
-      // Execution at a specific time hours from now
       const executions = calculateNextExecutions("0 0 * * *", 1);
-      expect(executions[0]!.relative).toMatch(/en \d/);
+      expect(executions[0]!.relative).toMatch(/in \d/);
     });
 
     it("should handle execution days away", () => {
-      // Weekly cron - next execution could be days away
+      // Yearly cron - next execution could be days/weeks away
       const executions = calculateNextExecutions("0 0 1 1 *", 1);
       expect(executions.length).toBe(1);
-      expect(executions[0]!.relative).toContain("en ");
+      expect(executions[0]!.relative).toContain("in ");
     });
   });
 });

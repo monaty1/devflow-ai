@@ -221,7 +221,7 @@ describe("Variable Name Wizard", () => {
       }
 
       // Reasoning for hook with "use" prefix should mention React hooks pattern
-      const useHookSuggestion = usePrefixed.find((s) => s.reasoning.includes("hooks de React"));
+      const useHookSuggestion = usePrefixed.find((s) => s.reasoning.includes("React hooks pattern"));
       expect(useHookSuggestion).toBeDefined();
     });
 
@@ -252,7 +252,7 @@ describe("Variable Name Wizard", () => {
 
       // Should include reasoning about standard convention for constants
       const withReasoning = screamingSuggestions.find((s) =>
-        s.reasoning.includes("Convención estándar para constantes")
+        s.reasoning.includes("Standard convention for constants")
       );
       expect(withReasoning).toBeDefined();
     });
@@ -287,7 +287,7 @@ describe("Variable Name Wizard", () => {
 
       // Should include reasoning about descriptive prefix
       const withReasoning = getterSuggestions.find((s) =>
-        s.reasoning.includes("Prefijo de acción descriptivo")
+        s.reasoning.includes("Descriptive action prefix")
       );
       expect(withReasoning).toBeDefined();
     });
