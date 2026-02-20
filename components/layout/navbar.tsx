@@ -31,7 +31,7 @@ export function Navbar() {
         {t("nav.skipToContent")}
       </a>
 
-      <nav className="container mx-auto flex h-16 items-center px-4 relative" aria-label="Main navigation">
+      <nav className="container mx-auto flex h-16 items-center px-4 relative" aria-label={t("common.mainNavigation")}>
         {/* Logo */}
         <NextLink
           href="/"
@@ -83,7 +83,7 @@ export function Navbar() {
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex size-9 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-            aria-label="GitHub"
+            aria-label={t("common.github")}
           >
             <Github className="size-5" />
           </NextLink>
@@ -141,7 +141,7 @@ export function Navbar() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                aria-label="GitHub"
+                aria-label={t("common.github")}
               >
                 <Github className="size-5" />
               </NextLink>

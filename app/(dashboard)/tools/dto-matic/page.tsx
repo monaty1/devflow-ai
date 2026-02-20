@@ -150,8 +150,8 @@ export default function DtoMaticPage() {
                 {t("dtoMatic.payloadSource")}
               </h3>
               <div className="flex gap-1">
-                <Button isIconOnly size="sm" variant="ghost" onPress={loadExample} aria-label="Load example"><Wand2 className="size-3.5" /></Button>
-                <Button isIconOnly size="sm" variant="ghost" onPress={formatInput} aria-label="Format JSON"><Braces className="size-3.5" /></Button>
+                <Button isIconOnly size="sm" variant="ghost" onPress={loadExample} aria-label={t("dtoMatic.ariaLoadExample")}><Wand2 className="size-3.5" /></Button>
+                <Button isIconOnly size="sm" variant="ghost" onPress={formatInput} aria-label={t("dtoMatic.ariaFormatJson")}><Braces className="size-3.5" /></Button>
               </div>
             </div>
             
@@ -203,7 +203,7 @@ export default function DtoMaticPage() {
                   variant="primary"
                   value={config.rootName} 
                   onChange={(e) => updateConfig("rootName", e.target.value)}
-                  placeholder="e.g. UserResponse"
+                  placeholder={t("dtoMatic.placeholderRootName")}
                   className="font-bold"
                 />
               </div>
@@ -307,7 +307,7 @@ export default function DtoMaticPage() {
               >
                 <div className="flex justify-between items-end">
                   <Tabs.ListContainer>
-                    <Tabs.List aria-label="Output view">
+                    <Tabs.List aria-label={t("dtoMatic.ariaOutputView")}>
                       <Tabs.Tab id="code">
                         <div className="flex items-center gap-2">
                           <Code2 className="size-4" />
@@ -329,7 +329,7 @@ export default function DtoMaticPage() {
                         value={String(mockCount)}
                         onChange={(value) => { if (value) setMockCount(parseInt(String(value))); }}
                         className="w-28"
-                        aria-label="Mock data count"
+                        aria-label={t("dtoMatic.ariaMockCount")}
                       >
                         <Select.Trigger className="h-8 rounded-lg border border-divider bg-background px-2 text-xs font-bold">
                           <Select.Value />

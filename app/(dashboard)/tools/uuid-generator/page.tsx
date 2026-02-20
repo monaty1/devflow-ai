@@ -121,7 +121,7 @@ export default function UuidGeneratorPage() {
               variant="primary"
             >
               <Tabs.ListContainer>
-                <Tabs.List aria-label="UUID mode">
+                <Tabs.List aria-label={t("uuid.ariaUuidMode")}>
                   <Tabs.Tab id="generate">{t("uuid.generatorTab")}</Tabs.Tab>
                   <Tabs.Tab id="analyze">{t("uuid.analyzerTab")}</Tabs.Tab>
                 </Tabs.List>
@@ -154,7 +154,7 @@ export default function UuidGeneratorPage() {
                     <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("uuid.customPrefix")}</label>
                     <Input
                       variant="primary"
-                      placeholder="e.g. deadbeef"
+                      placeholder={t("uuid.placeholderHexPrefix")}
                       value={config.prefix}
                       onChange={(e) => {
                         const filtered = e.target.value.replace(/[^0-9a-fA-F]/g, "");

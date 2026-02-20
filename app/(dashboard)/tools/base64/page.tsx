@@ -217,7 +217,7 @@ export default function Base64Page() {
           >
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <Tabs.ListContainer>
-                <Tabs.List aria-label="View mode">
+                <Tabs.List aria-label={t("base64.ariaViewMode")}>
                   <Tabs.Tab id="text">{t("base64.textView")}</Tabs.Tab>
                   <Tabs.Tab id="preview">{t("base64.smartPreview")}</Tabs.Tab>
                   <Tabs.Tab id="inspector">{t("base64.byteInspector")}</Tabs.Tab>

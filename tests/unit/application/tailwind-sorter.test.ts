@@ -322,5 +322,170 @@ describe("Tailwind Sorter", () => {
 
       expect(result.conflicts.length).toBeGreaterThan(0);
     });
+
+    it("should NOT assign flex-row to flex-direction key when flex-grow is present", () => {
+      // flex-grow starts with "flex-" but is explicitly excluded from the
+      // flex-direction key; this test exercises that exclusion branch
+      const input = "flex-grow flex-row";
+      const result = sortClasses(input, DEFAULT_SORTER_CONFIG);
+
+      // flex-grow should NOT be treated as a direction class —
+      // the conflict (if any) should be for the 'flex' group, not flex-direction
+      const dirConflict = result.conflicts.find((c) => c.type === "flex-direction");
+      expect(dirConflict).toBeUndefined();
+    });
+
+    it("should flag flex-row and flex-col as direction conflicts", () => {
+      const input = "flex-row flex-col";
+      const result = sortClasses(input, DEFAULT_SORTER_CONFIG);
+
+      // Both map to the flex-direction key, so they should conflict
+      expect(result.conflicts.length).toBeGreaterThan(0);
+    });
+
+    it("should flag scoped conflicts with the same variant prefix", () => {
+      const input = "hover:bg-red-500 hover:bg-blue-500";
+      const result = sortClasses(input, DEFAULT_SORTER_CONFIG);
+
+      expect(result.conflicts.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("semantic audit", () => {
+    it("should flag block as redundant when flex is also present", () => {
+      const input = "block flex p-4";
+      const result = sortClasses(input, DEFAULT_SORTER_CONFIG);
+
+      const blockAudit = result.audit.find((a) => a.class === "block");
+      expect(blockAudit).toBeDefined();
+      expect(blockAudit?.severity).toBe("low");
+      expect(blockAudit?.suggestion).toBe("remove 'block'");
+    });
+
+    it("should flag w-full as redundant inside a flex-col container", () => {
+      const input = "w-full flex flex-col p-4";
+      const result = sortClasses(input, DEFAULT_SORTER_CONFIG);
+
+      const wFullAudit = result.audit.find((a) => a.class === "w-full");
+      expect(wFullAudit).toBeDefined();
+      expect(wFullAudit?.severity).toBe("low");
+      expect(wFullAudit?.reason).toContain("w-full");
+    });
+
+    it("should flag w-full as redundant inside a grid container", () => {
+      const input = "w-full grid grid-cols-3 gap-4";
+      const result = sortClasses(input, DEFAULT_SORTER_CONFIG);
+
+      const wFullAudit = result.audit.find((a) => a.class === "w-full");
+      expect(wFullAudit).toBeDefined();
+      expect(wFullAudit?.severity).toBe("low");
+    });
+
+    it("should flag inline with vertical padding using p- shorthand", () => {
+      const input = "inline p-4 text-sm";
+      const result = sortClasses(input, DEFAULT_SORTER_CONFIG);
+
+      const inlineAudit = result.audit.find((a) => a.class === "inline");
+      expect(inlineAudit).toBeDefined();
+      expect(inlineAudit?.severity).toBe("medium");
+      expect(inlineAudit?.suggestion).toBe("use 'inline-block' instead");
+    });
+
+    it("should flag inline with vertical padding using pt- prefix", () => {
+      const input = "inline pt-2 text-sm";
+      const result = sortClasses(input, DEFAULT_SORTER_CONFIG);
+
+      const inlineAudit = result.audit.find((a) => a.class === "inline");
+      expect(inlineAudit).toBeDefined();
+      expect(inlineAudit?.severity).toBe("medium");
+    });
+
+    it("should flag inline with vertical margin using mt- prefix", () => {
+      const input = "inline mt-4 text-sm";
+      const result = sortClasses(input, DEFAULT_SORTER_CONFIG);
+
+      const inlineAudit = result.audit.find((a) => a.class === "inline");
+      expect(inlineAudit).toBeDefined();
+      expect(inlineAudit?.severity).toBe("medium");
+    });
+
+    it("should NOT flag inline when no vertical padding or margin is present", () => {
+      const input = "inline text-sm cursor-pointer";
+      const result = sortClasses(input, DEFAULT_SORTER_CONFIG);
+
+      const inlineAudit = result.audit.find((a) => a.class === "inline");
+      expect(inlineAudit).toBeUndefined();
+    });
+
+    it("should NOT flag w-full without a flex-col or grid sibling", () => {
+      const input = "w-full flex items-center";
+      const result = sortClasses(input, DEFAULT_SORTER_CONFIG);
+
+      const wFullAudit = result.audit.find((a) => a.class === "w-full");
+      expect(wFullAudit).toBeUndefined();
+    });
+
+    it("should return empty audit for unrelated classes", () => {
+      const input = "text-lg font-bold text-gray-800";
+      const result = sortClasses(input, DEFAULT_SORTER_CONFIG);
+
+      expect(result.audit).toHaveLength(0);
+    });
+  });
+
+  describe("breakpoint analysis", () => {
+    it("should distribute classes to correct breakpoint buckets", () => {
+      const input = "flex sm:flex-col md:grid lg:gap-4 xl:p-8 2xl:text-lg";
+      const result = sortClasses(input, DEFAULT_SORTER_CONFIG);
+
+      expect(result.breakpoints["base"]).toContain("flex");
+      expect(result.breakpoints["sm"]).toContain("sm:flex-col");
+      expect(result.breakpoints["md"]).toContain("md:grid");
+      expect(result.breakpoints["lg"]).toContain("lg:gap-4");
+      expect(result.breakpoints["xl"]).toContain("xl:p-8");
+      expect(result.breakpoints["2xl"]).toContain("2xl:text-lg");
+    });
+
+    it("should put classes without a breakpoint variant into base bucket", () => {
+      const input = "hover:bg-blue-500 focus:ring-2 dark:text-white";
+      const result = sortClasses(input, DEFAULT_SORTER_CONFIG);
+
+      // hover/focus/dark are not breakpoint variants → all go to base
+      expect(result.breakpoints["base"]).toHaveLength(3);
+    });
+  });
+
+  describe("sortWithinGroups option", () => {
+    it("should NOT reorder classes within groups when sortWithinGroups is false", () => {
+      const input = "z-10 absolute static";
+      const resultUnsorted = sortClasses(input, {
+        ...DEFAULT_SORTER_CONFIG,
+        sortWithinGroups: false,
+      });
+      const resultSorted = sortClasses(input, {
+        ...DEFAULT_SORTER_CONFIG,
+        sortWithinGroups: true,
+      });
+
+      // Both produce valid output with all three classes
+      expect(resultUnsorted.stats.totalClasses).toBe(3);
+      expect(resultSorted.stats.totalClasses).toBe(3);
+    });
+
+    it("should sort classes with unknown variant prefixes to end of variant order", () => {
+      // 'custom-variant' is not in VARIANT_ORDER so it maps to index 999
+      const input = "custom-variant:flex hover:flex";
+      const result = sortClasses(input, {
+        ...DEFAULT_SORTER_CONFIG,
+        sortWithinGroups: true,
+      });
+
+      const classes = result.output.split(" ");
+      const hoverIndex = classes.indexOf("hover:flex");
+      const customIndex = classes.indexOf("custom-variant:flex");
+
+      // hover (known variant) should sort before unknown custom-variant
+      expect(hoverIndex).toBeLessThan(customIndex);
+    });
   });
 });

@@ -117,7 +117,7 @@ export default function RegexHumanizerPage() {
             variant="primary"
           >
             <Tabs.ListContainer>
-              <Tabs.List aria-label="Input mode">
+              <Tabs.List aria-label={t("regex.ariaInputMode")}>
                 <Tabs.Tab id="explain">
                   <div className="flex items-center gap-2">
                     <Search className="size-4" />
@@ -148,7 +148,7 @@ export default function RegexHumanizerPage() {
                         if (isValidRegex && pattern.trim()) explain(pattern);
                       }
                     }}
-                    placeholder="/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi"
+                    placeholder={t("regex.placeholderRegex")}
                     className="h-32 w-full resize-none rounded-xl border border-border bg-background p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-inner transition-all"
                     aria-label={t("regex.regexPattern")}
                   />
@@ -194,7 +194,7 @@ export default function RegexHumanizerPage() {
                   <TextArea
                     value={generateDesc}
                     onChange={(e) => setGenerateDesc(e.target.value)}
-                    placeholder="E.g.: A valid email address with optional plus signs"
+                    placeholder={t("regex.placeholderDescNeed")}
                     className="h-32 w-full resize-none rounded-xl border border-border bg-background p-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-inner transition-all"
                     onKeyDown={(e) => {
                       if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
@@ -341,13 +341,13 @@ export default function RegexHumanizerPage() {
               {/* Dynamic Tabs for Analysis/Test */}
               <Card className="p-0 overflow-hidden">
                 <Tabs
-                  aria-label="Result Tabs"
+                  aria-label={t("regex.ariaResultTabs")}
                   variant="primary"
                   selectedKey={resultTab}
                   onSelectionChange={(k) => setResultTab(k as string)}
                 >
                   <Tabs.ListContainer>
-                    <Tabs.List aria-label="Result analysis">
+                    <Tabs.List aria-label={t("regex.ariaResultAnalysis")}>
                       <Tabs.Tab id="explanation">{t("regex.explanationTab")}</Tabs.Tab>
                       <Tabs.Tab id="groups">{t("regex.groupsTab", { count: String(explanation.groups.length) })}</Tabs.Tab>
                       <Tabs.Tab id="test">{t("regex.interactiveTest")}</Tabs.Tab>

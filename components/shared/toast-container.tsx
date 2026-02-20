@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircle, XCircle, AlertTriangle, Info, X } from "lucide-react";
+import { useTranslation } from "@/hooks/use-translation";
 import {
   ToastContext,
   useToastState,
@@ -40,6 +41,7 @@ interface ToastItemProps {
 }
 
 function ToastItem({ toast, onRemove }: ToastItemProps) {
+  const { t } = useTranslation();
   const styles = TOAST_STYLES[toast.type];
   const Icon = styles.icon;
 
@@ -54,7 +56,7 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
         type="button"
         onClick={() => onRemove(toast.id)}
         className="shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        aria-label="Dismiss"
+        aria-label={t("common.dismiss")}
       >
         <X className="size-4" />
       </button>

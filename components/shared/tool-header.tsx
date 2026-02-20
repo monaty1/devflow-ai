@@ -34,7 +34,7 @@ export function ToolHeader({
   const { t } = useTranslation();
 
   const breadcrumbNav = breadcrumb ? (
-    <nav aria-label="Breadcrumb" className="mb-2 flex items-center gap-1 text-sm text-muted-foreground">
+    <nav aria-label={t("common.breadcrumb")} className="mb-2 flex items-center gap-1 text-sm text-muted-foreground">
       <Link href="/tools" className="transition-colors hover:text-foreground">
         {t("common.tools")}
       </Link>

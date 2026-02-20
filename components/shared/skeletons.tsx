@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslation } from "@/hooks/use-translation";
+
 interface SkeletonProps {
   className?: string;
 }
@@ -68,8 +72,9 @@ export function CodeReviewSkeleton() {
 }
 
 export function AISectionSkeleton() {
+  const { t } = useTranslation();
   return (
-    <div className="rounded-lg border border-violet-500/20 bg-violet-500/5 p-6 space-y-4" role="status" aria-label="Loading AI analysis">
+    <div className="rounded-lg border border-violet-500/20 bg-violet-500/5 p-6 space-y-4" role="status" aria-label={t("common.loadingAI")}>
       <div className="flex items-center gap-2">
         <Skeleton className="size-5 rounded" />
         <SkeletonText className="w-1/3" />

@@ -12,6 +12,7 @@ import {
   generateUlid,
   generateNanoId,
   formatBulkExport,
+  checkCollisions,
 } from "@/lib/application/uuid-generator";
 import { DEFAULT_UUID_CONFIG } from "@/types/uuid-generator";
 
@@ -424,6 +425,222 @@ describe("UUID Generator", () => {
       // Note: parseUuid doesn't strip URN prefix before hex extraction,
       // so the uuid field may not match the canonical form.
       // validateUuid handles it correctly though.
+    });
+  });
+
+  describe("validateUuid - unknown version", () => {
+    it("should return unknown version for version 3 UUID", () => {
+      // version nibble at position 12 of hex is '3'
+      const v3uuid = "550e8400-e29b-31d4-a716-446655440000";
+      const result = validateUuid(v3uuid);
+      expect(result.isValid).toBe(true);
+      expect(result.version).toBe("unknown");
+      expect(result.variant).toBe("RFC 4122");
+    });
+
+    it("should return unknown version for version 5 UUID", () => {
+      const v5uuid = "550e8400-e29b-51d4-a716-446655440000";
+      const result = validateUuid(v5uuid);
+      expect(result.isValid).toBe(true);
+      expect(result.version).toBe("unknown");
+    });
+
+    it("should return unknown version for version 6 UUID", () => {
+      const v6uuid = "1ec9414c-232a-6b00-b3c0-9e6bdeced846";
+      const result = validateUuid(v6uuid);
+      expect(result.isValid).toBe(true);
+      expect(result.version).toBe("unknown");
+    });
+
+    it("should return unknown version for version 2 UUID", () => {
+      const v2uuid = "000003e8-92d0-21ed-8100-3fdb0085247e";
+      const result = validateUuid(v2uuid);
+      expect(result.isValid).toBe(true);
+      expect(result.version).toBe("unknown");
+    });
+  });
+
+  describe("parseUuid - entropy scores and isExposed flag", () => {
+    it("should assign entropyScore 45 for nil UUID", () => {
+      const info = parseUuid("00000000-0000-0000-0000-000000000000");
+      expect(info.entropyScore).toBe(45);
+      expect(info.isExposed).toBe(false);
+    });
+
+    it("should assign entropyScore 45 for max UUID", () => {
+      const info = parseUuid("ffffffff-ffff-ffff-ffff-ffffffffffff");
+      expect(info.entropyScore).toBe(45);
+      expect(info.isExposed).toBe(false);
+    });
+
+    it("should assign entropyScore 99 for v4 UUID", () => {
+      const info = parseUuid("550e8400-e29b-41d4-a716-446655440000");
+      expect(info.entropyScore).toBe(99);
+      expect(info.isExposed).toBe(false);
+    });
+
+    it("should assign entropyScore 75 for v7 UUID", () => {
+      const v7 = generateUuidV7();
+      const info = parseUuid(v7);
+      expect(info.entropyScore).toBe(75);
+      expect(info.isExposed).toBe(true);
+    });
+
+    it("should assign entropyScore 45 for unknown version UUID", () => {
+      // version 3 UUID — falls into the else branch (45)
+      const info = parseUuid("550e8400-e29b-31d4-a716-446655440000");
+      expect(info.entropyScore).toBe(45);
+      expect(info.isExposed).toBe(false);
+    });
+
+    it("should mark v1 as isExposed", () => {
+      const info = parseUuid("6ba7b810-9dad-11d1-80b4-00c04fd430c8");
+      expect(info.isExposed).toBe(true);
+      expect(info.entropyScore).toBe(45);
+    });
+
+    it("should parse max UUID and expose correct version", () => {
+      const info = parseUuid("ffffffff-ffff-ffff-ffff-ffffffffffff");
+      expect(info.isValid).toBe(true);
+      expect(info.version).toBe("max");
+      expect(info.variant).toBe("max");
+    });
+
+    it("should include binaryView with correct number of parts", () => {
+      const info = parseUuid("550e8400-e29b-41d4-a716-446655440000");
+      expect(info.binaryView).toHaveLength(6);
+      expect(info.binaryView?.[0]?.label).toBe("Time Low");
+      expect(info.binaryView?.[5]?.label).toBe("Clock/Node");
+    });
+
+    it("should not set timestamp for v4 UUID", () => {
+      const info = parseUuid("550e8400-e29b-41d4-a716-446655440000");
+      expect(info.timestamp).toBeUndefined();
+    });
+
+    it("should not set timestamp for nil UUID", () => {
+      const info = parseUuid("00000000-0000-0000-0000-000000000000");
+      expect(info.timestamp).toBeUndefined();
+    });
+  });
+
+  describe("processUuidGeneration - collision stats", () => {
+    it("should show time-ordered collision probability for v1", () => {
+      const config = { ...DEFAULT_UUID_CONFIG, version: "v1" as const };
+      const result = processUuidGeneration(config);
+      expect(result.collisionStats!.probability).toBe("0% (time-ordered)");
+    });
+
+    it("should show time-ordered collision probability for v7", () => {
+      const config = { ...DEFAULT_UUID_CONFIG, version: "v7" as const };
+      const result = processUuidGeneration(config);
+      expect(result.collisionStats!.probability).toBe("0% (time-ordered)");
+    });
+
+    it("should show time-ordered collision probability for nil", () => {
+      const config = { ...DEFAULT_UUID_CONFIG, version: "nil" as const };
+      const result = processUuidGeneration(config);
+      expect(result.collisionStats!.probability).toBe("0% (time-ordered)");
+    });
+
+    it("should show tiny probability for v4", () => {
+      const config = { ...DEFAULT_UUID_CONFIG, version: "v4" as const };
+      const result = processUuidGeneration(config);
+      expect(result.collisionStats!.probability).toBe("< 0.000000000001%");
+    });
+
+    it("should include correct attempts count in collisionStats", () => {
+      const config = { ...DEFAULT_UUID_CONFIG, quantity: 7 };
+      const result = processUuidGeneration(config);
+      expect(result.collisionStats!.attempts).toBe(7);
+      expect(result.collisionStats!.collisions).toBe(0);
+    });
+  });
+
+  describe("checkCollisions", () => {
+    it("should return null for empty input", () => {
+      expect(checkCollisions("")).toBeNull();
+      expect(checkCollisions("   ")).toBeNull();
+    });
+
+    it("should return null for whitespace-only input", () => {
+      expect(checkCollisions("\n\n\n")).toBeNull();
+    });
+
+    it("should detect no duplicates when all UUIDs are unique", () => {
+      const uuids = [
+        "550e8400-e29b-41d4-a716-446655440000",
+        "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+        "ffffffff-ffff-ffff-ffff-ffffffffffff",
+      ];
+      const result = checkCollisions(uuids.join("\n"));
+      expect(result).not.toBeNull();
+      expect(result!.total).toBe(3);
+      expect(result!.unique).toBe(3);
+      expect(result!.duplicates).toHaveLength(0);
+    });
+
+    it("should detect duplicates when same UUID appears multiple times", () => {
+      const dup = "550e8400-e29b-41d4-a716-446655440000";
+      const other = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
+      const input = [dup, other, dup].join("\n");
+      const result = checkCollisions(input);
+      expect(result).not.toBeNull();
+      expect(result!.total).toBe(3);
+      expect(result!.unique).toBe(2);
+      expect(result!.duplicates).toHaveLength(1);
+      expect(result!.duplicates[0]![0]).toBe(dup);
+      // The duplicate appears on lines 1 and 3
+      expect(result!.duplicates[0]![1]).toContain(1);
+      expect(result!.duplicates[0]![1]).toContain(3);
+    });
+
+    it("should be case-insensitive when detecting duplicates", () => {
+      const input = [
+        "550E8400-E29B-41D4-A716-446655440000",
+        "550e8400-e29b-41d4-a716-446655440000",
+      ].join("\n");
+      const result = checkCollisions(input);
+      expect(result).not.toBeNull();
+      expect(result!.total).toBe(2);
+      expect(result!.unique).toBe(1);
+      expect(result!.duplicates).toHaveLength(1);
+    });
+
+    it("should ignore blank lines", () => {
+      const input = "550e8400-e29b-41d4-a716-446655440000\n\n6ba7b810-9dad-11d1-80b4-00c04fd430c8\n";
+      const result = checkCollisions(input);
+      expect(result).not.toBeNull();
+      expect(result!.total).toBe(2);
+      expect(result!.unique).toBe(2);
+    });
+
+    it("should handle a single UUID with no duplicates", () => {
+      const result = checkCollisions("550e8400-e29b-41d4-a716-446655440000");
+      expect(result).not.toBeNull();
+      expect(result!.total).toBe(1);
+      expect(result!.unique).toBe(1);
+      expect(result!.duplicates).toHaveLength(0);
+    });
+
+    it("should detect three or more occurrences of the same UUID", () => {
+      const dup = "550e8400-e29b-41d4-a716-446655440000";
+      const input = [dup, dup, dup].join("\n");
+      const result = checkCollisions(input);
+      expect(result).not.toBeNull();
+      expect(result!.total).toBe(3);
+      expect(result!.unique).toBe(1);
+      expect(result!.duplicates).toHaveLength(1);
+      expect(result!.duplicates[0]![1]).toHaveLength(3);
+    });
+
+    it("should trim whitespace from each line", () => {
+      const input = "  550e8400-e29b-41d4-a716-446655440000  \n  550e8400-e29b-41d4-a716-446655440000  ";
+      const result = checkCollisions(input);
+      expect(result).not.toBeNull();
+      expect(result!.total).toBe(2);
+      expect(result!.unique).toBe(1);
+      expect(result!.duplicates).toHaveLength(1);
     });
   });
 });

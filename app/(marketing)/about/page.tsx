@@ -129,7 +129,7 @@ export default function AboutPage() {
             target="_blank"
             rel="noopener noreferrer"
             className="rounded-full bg-muted p-3 transition-colors hover:bg-muted/80"
-            aria-label="GitHub"
+            aria-label={t("common.github")}
           >
             <Github className="size-5 text-foreground" />
           </a>
@@ -138,7 +138,7 @@ export default function AboutPage() {
             target="_blank"
             rel="noopener noreferrer"
             className="rounded-full bg-blue-50 p-3 transition-colors hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50"
-            aria-label="LinkedIn"
+            aria-label={t("common.linkedin")}
           >
             <Linkedin className="size-5 text-blue-600 dark:text-blue-400" />
           </a>

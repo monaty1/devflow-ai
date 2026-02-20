@@ -5,7 +5,6 @@
   "nav.openDashboard": "Open dashboard",
   "nav.toggleMenu": "Toggle navigation menu",
   "nav.skipToContent": "Skip to main content",
-
   "sidebar.dashboard": "Dashboard",
   "sidebar.tools": "Tools",
   "sidebar.favorites": "Favorites",
@@ -18,7 +17,6 @@
   "sidebar.navLabel": "Dashboard navigation",
   "sidebar.sidebarLabel": "Dashboard sidebar",
   "sidebar.switchLocale": "Switch language",
-
   "dashboard.welcome": "Welcome to DevFlow AI",
   "dashboard.subtitle": "Select a tool to get started with your AI development workflow.",
   "dashboard.availableTools": "Available tools",
@@ -26,7 +24,6 @@
   "dashboard.noApiKeys": "No API keys required",
   "dashboard.yourTools": "Your tools",
   "dashboard.openTool": "Open tool",
-
   "tools.title": "Developer tools",
   "tools.subtitle": "Browse and discover AI-powered tools for your development workflow",
   "tools.search": "Search tools...",
@@ -42,7 +39,6 @@
   "tools.generation": "Generation",
   "tools.formatting": "Formatting",
   "tools.suggestions": "Next steps",
-
   "settings.title": "Settings",
   "settings.subtitle": "Manage your preferences",
   "settings.preferences": "Preferences",
@@ -70,7 +66,6 @@
   "settings.ai.keyCleared": "API key cleared",
   "settings.ai.memoryOnly": "Stored in memory only — cleared when you close the tab.",
   "settings.ai.freeNote": "Free providers (Pollinations / OpenRouter) are always available, no key required.",
-
   "history.title": "History",
   "history.items": "{count} items in your history",
   "history.clearAll": "Clear All",
@@ -82,7 +77,6 @@
   "history.cleared": "History cleared",
   "history.searchLabel": "Search history",
   "history.filterAll": "All",
-
   "home.badge": "AI-Powered · Free · Open Source",
   "home.title1": "The developer toolkit",
   "home.title2": "for AI development",
@@ -109,9 +103,8 @@
   "home.startUsing": "Start using now",
   "home.starGithub": "Star on GitHub",
   "home.footerFreeOS": "Free and open source",
-  "home.footer": "\u00a9 2026 DevFlow AI \u00b7 Free & Open Source \u00b7 Built with Next.js 16 \u00b7",
+  "home.footer": "© 2026 DevFlow AI · Free & Open Source · Built with Next.js 16 ·",
   "home.viewOnGithub": "View on GitHub",
-
   "about.title": "About DevFlow AI",
   "about.description": "Built by a developer who got tired of juggling 10 different tools every time he worked with AI APIs. DevFlow AI centralizes everything into one clean, fast, developer-first platform.",
   "about.builtForDevs": "Built for Developers",
@@ -132,7 +125,6 @@
   "about.connect": "Let's Connect",
   "about.connectDesc": "Have questions, feedback or just want to say hi?",
   "about.email": "Send email",
-
   "common.tools": "Tools",
   "common.help": "Help",
   "common.helpDocs": "View documentation and help",
@@ -158,14 +150,12 @@
   "common.options": "Options",
   "common.result": "Result",
   "common.copyToClipboard": "Copy to clipboard",
-
   "theme.lightMode": "Light mode",
   "theme.darkMode": "Dark mode",
   "theme.systemTheme": "System theme",
-
   "cron.title": "Cron Builder",
   "cron.description": "Build cron expressions visually, no syntax memorization needed",
-  "cron.commonPresets": "Common presets",
+  "cron.commonPresets": "Common Presets",
   "cron.visualBuilder": "Visual Builder",
   "cron.syntax": "Syntax:",
   "cron.syntaxEveryValue": "every value",
@@ -197,7 +187,6 @@
   "cron.fmtGHA": "GitHub Actions",
   "cron.fmtAWS": "AWS EventBridge",
   "cron.fmtLinux": "Linux Crontab",
-
   "gitCommit.title": "Git Commit Generator",
   "gitCommit.description": "Generate commit messages following Conventional Commits",
   "gitCommit.tabGenerate": "Generate",
@@ -239,7 +228,6 @@
   "gitCommit.issuesPlaceholder": "#123, #456",
   "gitCommit.parseInputLabel": "Commit message to parse",
   "gitCommit.breakingYes": "Yes",
-
   "uuid.title": "UUID Generator",
   "uuid.description": "Generate, validate, and analyze UUIDs in all formats",
   "uuid.tabGenerate": "Generate",
@@ -286,7 +274,6 @@
   "uuid.collisionProb": "Collision Probability: Negligible (~1 in 10^30)",
   "uuid.exportFormat": "Export Format",
   "uuid.parseInputLabel": "UUID to parse",
-
   "httpStatus.title": "HTTP Status Finder",
   "httpStatus.description": "Search and learn about HTTP status codes",
   "httpStatus.searchLabel": "Search HTTP status codes",
@@ -305,7 +292,6 @@
   "httpStatus.mostCommon": "Most common codes",
   "httpStatus.noResults": "No codes found for \"{query}\"",
   "httpStatus.noResultsHint": "Try a number (404) or a keyword (not found)",
-
   "dtoMatic.title": "DTO-Matic",
   "dtoMatic.description": "JSON to TypeScript: Interface + Entity + Mapper in seconds",
   "dtoMatic.modeQuickDesc": "Interface DTO only",
@@ -350,7 +336,6 @@
   "dtoMatic.copyMock": "Copy Mock",
   "dtoMatic.jsonInputLabel": "JSON input for DTO generation",
   "dtoMatic.jsonPlaceholder": "{\"id\": 1, \"name\": \"John Doe\", \"email\": \"john@example.com\"}",
-
   "base64.title": "Base64 Encoder/Decoder",
   "base64.description": "Encode and decode Base64 with URL-safe variant support",
   "base64.encode": "Encode",
@@ -377,14 +362,13 @@
   "base64.dataUrl": "Data URL",
   "base64.emptyState": "Enter text and press Encode or Decode",
   "base64.emptyStateHint": "Supports Unicode, URL-safe variant, and data URLs",
-  "base64.uploadFile": "Upload File",
+  "base64.uploadFile": "Upload",
   "base64.fileEncoded": "File detected and encoded",
   "base64.preview": "Preview",
   "base64.detectedType": "Detected Type: {type}",
   "base64.overhead": "Size overhead: ~33%",
   "base64.jsonView": "Structured JSON View",
   "base64.jwtView": "JWT View (Header/Payload)",
-
   "tokenViz.title": "Token Visualizer",
   "tokenViz.description": "See how AI models tokenize your text in real-time",
   "tokenViz.inputText": "Input Text",
@@ -403,7 +387,6 @@
   "tokenViz.tokenDescription": "Each colored block = 1 token (approximate)",
   "tokenViz.legend": "Tokens are approximate. Real tokenization varies by model (BPE algorithm). Common words = 1 token. Rare/long words may split into multiple tokens.",
   "tokenViz.emptyState": "Start typing to see tokenization in real-time",
-
   "codeReview.title": "Code Review Assistant",
   "codeReview.description": "Automated code quality and security analysis",
   "codeReview.codeInput": "Code Input",
@@ -432,12 +415,11 @@
   "codeReview.copyRefactored": "Copy Refactored",
   "codeReview.useRefactored": "Use this version",
   "codeReview.toastRefactoredApplied": "Refactored code applied to editor",
-
   "promptAnalyzer.title": "Prompt Analyzer",
   "promptAnalyzer.description": "Analyze your prompts for quality, clarity, and security issues",
   "promptAnalyzer.enterPrompt": "Enter your prompt",
   "promptAnalyzer.placeholder": "Paste your prompt here to analyze its quality and check for potential issues...",
-  "promptAnalyzer.stats": "{chars} characters \u00b7 ~{tokens} tokens",
+  "promptAnalyzer.stats": "{chars} characters · ~{tokens} tokens",
   "promptAnalyzer.analyzePrompt": "Analyze Prompt",
   "promptAnalyzer.analysisHistory": "Analysis History",
   "promptAnalyzer.noAnalysisHistory": "No analysis history yet",
@@ -480,7 +462,6 @@
   "promptAnalyzer.useRefined": "Use this Prompt",
   "promptAnalyzer.beforeAfter": "Compare Changes",
   "promptAnalyzer.toastApplied": "Refined prompt applied to editor",
-
   "jsonFmt.title": "JSON Formatter",
   "jsonFmt.description": "Format, minify, validate, and transform JSON instantly",
   "jsonFmt.modeFormat": "Format",
@@ -519,7 +500,6 @@
   "jsonFmt.jsonDifferent": "JSON documents are different",
   "jsonFmt.jsonPlaceholder": "{\"name\": \"John\", \"age\": 30, \"email\": \"john@example.com\"}",
   "jsonFmt.syntaxError": "Line {line}, Col {col}:",
-
   "tailwind.title": "Tailwind Sorter",
   "tailwind.description": "Sort and organize your Tailwind CSS classes automatically",
   "tailwind.cleanExample": "Clean example",
@@ -536,7 +516,7 @@
   "tailwind.duplicates": "{count} duplicates",
   "tailwind.removeDuplicates": "Remove duplicates",
   "tailwind.groupByCategory": "Group by category",
-  "tailwind.sortVariants": "Sort variants (sm \u2192 xl)",
+  "tailwind.sortVariants": "Sort variants (sm → xl)",
   "tailwind.sortClasses": "Sort classes",
   "tailwind.sortedResult": "Sorted result",
   "tailwind.total": "Total",
@@ -552,7 +532,6 @@
   "tailwind.breakpoints": "Responsive Distribution",
   "tailwind.noIssues": "No conflicts or redundancies detected.",
   "tailwind.redundant": "Redundant",
-
   "ctxMgr.title": "Context Manager",
   "ctxMgr.description": "Organize and export your LLM context windows",
   "ctxMgr.newWindow": "New Window",
@@ -561,7 +540,7 @@
   "ctxMgr.create": "Create",
   "ctxMgr.windows": "Windows",
   "ctxMgr.noWindows": "No windows",
-  "ctxMgr.documents": "{count} documents \u00b7 {tokens} tokens",
+  "ctxMgr.documents": "{count} documents · {tokens} tokens",
   "ctxMgr.addDocument": "Add Document",
   "ctxMgr.newDocument": "New Document",
   "ctxMgr.docTitle": "Title",
@@ -578,9 +557,9 @@
   "ctxMgr.typeApi": "API",
   "ctxMgr.typeNotes": "Notes",
   "ctxMgr.typeOther": "Other",
-  "ctxMgr.priorityHigh": "High Priority",
-  "ctxMgr.priorityMedium": "Medium Priority",
-  "ctxMgr.priorityLow": "Low Priority",
+  "ctxMgr.priorityHigh": "High",
+  "ctxMgr.priorityMedium": "Medium",
+  "ctxMgr.priorityLow": "Low",
   "ctxMgr.priorityHighShort": "High",
   "ctxMgr.priorityMediumShort": "Medium",
   "ctxMgr.priorityLowShort": "Low",
@@ -605,7 +584,6 @@
   "ctxMgr.formatXml": "XML",
   "ctxMgr.formatJson": "JSON",
   "ctxMgr.formatMd": "MD",
-
   "varName.title": "Variable Name Wizard",
   "varName.description": "Generate and convert variable names between conventions",
   "varName.convert": "Convert",
@@ -649,7 +627,6 @@
   "varName.langJava": "Java",
   "varName.langCSharp": "C# / .NET",
   "varName.language": "Target Language",
-
   "regex.title": "Regex Humanizer",
   "regex.description": "Explain regex in plain language, generate patterns from descriptions",
   "regex.tabExplain": "Explain",
@@ -692,7 +669,6 @@
   "regex.dangerous": "DANGER!",
   "regex.secure": "Secure",
   "regex.groupBreakdown": "Group Breakdown",
-
   "costCalc.title": "API Cost Calculator",
   "costCalc.description": "Compare costs across AI providers",
   "costCalc.perRequest": "Per Request",
@@ -735,7 +711,6 @@
   "costCalc.catReasoning": "Reasoning",
   "costCalc.catCoding": "Coding",
   "costCalc.catLightweight": "Lightweight",
-
   "docs.title": "Documentation",
   "docs.subtitle": "Complete guide to all 15 developer tools",
   "docs.search": "Search documentation...",
@@ -743,7 +718,6 @@
   "docs.openTool": "Open tool",
   "docs.noResults": "No tools found",
   "docs.noResultsHint": "Try adjusting your search or filters",
-
   "tool.prompt-analyzer.name": "Prompt Analyzer",
   "tool.prompt-analyzer.description": "Analyze prompt quality, detect vulnerabilities, and optimize.",
   "tool.code-review.name": "Code Review Assistant",
@@ -774,42 +748,36 @@
   "tool.git-commit-generator.description": "Generate conventional commit messages with type, scope, and validation.",
   "tool.http-status-finder.name": "HTTP Status Finder",
   "tool.http-status-finder.description": "Search and learn about HTTP status codes with examples and tips.",
-
   "tool.prompt-analyzer.longDescription": "Prompt Analyzer is an advanced tool that evaluates the quality and security of your AI prompts. It detects potential prompt injection attacks, identifies areas for improvement, and provides a comprehensive score based on clarity, specificity, and safety. Perfect for developers working with LLM APIs who want to maximize prompt effectiveness.",
   "tool.prompt-analyzer.feature.0": "Quality scoring (1-10)",
   "tool.prompt-analyzer.feature.1": "Prompt injection detection",
   "tool.prompt-analyzer.feature.2": "Optimization suggestions",
   "tool.prompt-analyzer.feature.3": "Best practices comparison",
   "tool.prompt-analyzer.feature.4": "Real-time analysis",
-
   "tool.code-review.longDescription": "Code Review Assistant analyzes your code snippets for common issues, anti-patterns, and potential bugs. It provides detailed feedback on code quality, suggests refactoring opportunities, and calculates cyclomatic complexity. Supports TypeScript, JavaScript, Python, and more.",
   "tool.code-review.feature.0": "Code smell detection",
   "tool.code-review.feature.1": "Refactor suggestions",
   "tool.code-review.feature.2": "Complexity analysis",
   "tool.code-review.feature.3": "Multi-language support",
   "tool.code-review.feature.4": "Inline annotations",
-
   "tool.cost-calculator.longDescription": "API Cost Calculator helps you understand and optimize your AI API spending. Input your usage patterns and see a detailed breakdown of costs across OpenAI, Anthropic, Google, and other providers. Get recommendations on the most cost-effective models for your specific use cases.",
   "tool.cost-calculator.feature.0": "Multi-provider comparison",
   "tool.cost-calculator.feature.1": "Monthly cost projection",
   "tool.cost-calculator.feature.2": "Usage pattern analysis",
   "tool.cost-calculator.feature.3": "Cost optimization tips",
   "tool.cost-calculator.feature.4": "Export reports",
-
   "tool.token-visualizer.longDescription": "Token Visualizer shows exactly how AI models tokenize your text. See tokens highlighted in real-time as you type, understand token boundaries, and optimize your prompts for token efficiency. Supports GPT and Claude tokenization algorithms.",
   "tool.token-visualizer.feature.0": "Real-time tokenization",
   "tool.token-visualizer.feature.1": "Color-coded token types",
   "tool.token-visualizer.feature.2": "Token count estimation",
   "tool.token-visualizer.feature.3": "Cost estimation per token",
   "tool.token-visualizer.feature.4": "Multi-model support",
-
   "tool.context-manager.longDescription": "Context Manager helps you build and optimize context windows for LLMs. Upload files, organize them by relevance, and see exactly how your context will look when sent to the API. Includes intelligent chunking and prioritization features.",
   "tool.context-manager.feature.0": "Drag & drop organization",
   "tool.context-manager.feature.1": "Intelligent chunking",
   "tool.context-manager.feature.2": "Context preview",
   "tool.context-manager.feature.3": "Relevance scoring",
   "tool.context-manager.feature.4": "XML/JSON export",
-
   "tool.regex-humanizer.longDescription": "Regex Humanizer makes regular expressions accessible. Paste any regex to get a detailed explanation in plain language, or describe what you need and get the pattern generated for you. Includes a real-time tester with syntax highlighting and capture group visualization.",
   "tool.regex-humanizer.feature.0": "Regex explanation in plain language",
   "tool.regex-humanizer.feature.1": "Pattern generation from text",
@@ -817,7 +785,6 @@
   "tool.regex-humanizer.feature.3": "Syntax highlighting",
   "tool.regex-humanizer.feature.4": "Capture group detection",
   "tool.regex-humanizer.feature.5": "Common pattern presets",
-
   "tool.dto-matic.longDescription": "DTO-Matic transforms raw JSON API responses into production-ready TypeScript code. Generate clean interfaces, domain entities, and mapper functions following Clean Architecture principles. Supports date detection, Zod schemas, and multiple naming conventions. Save 20+ minutes of boilerplate per endpoint.",
   "tool.dto-matic.feature.0": "JSON to TypeScript Interface",
   "tool.dto-matic.feature.1": "Domain Entity generation",
@@ -826,7 +793,6 @@
   "tool.dto-matic.feature.4": "Date field detection",
   "tool.dto-matic.feature.5": "Multiple naming conventions",
   "tool.dto-matic.feature.6": "Clean Architecture ready",
-
   "tool.cron-builder.longDescription": "Cron Builder makes scheduling easy. Build cron expressions visually without memorizing cryptic syntax. See human-readable explanations, preview next execution times, and choose from common presets. Perfect for DevOps, backend developers, and anyone working with scheduled tasks.",
   "tool.cron-builder.feature.0": "Visual cron builder",
   "tool.cron-builder.feature.1": "Human-readable explanations",
@@ -834,7 +800,6 @@
   "tool.cron-builder.feature.3": "Common presets (hourly, daily, weekly)",
   "tool.cron-builder.feature.4": "Real-time validation",
   "tool.cron-builder.feature.5": "Copy to clipboard",
-
   "tool.tailwind-sorter.longDescription": "Tailwind Sorter brings order to your CSS classes. Paste any string of Tailwind classes and get them sorted by category (layout, spacing, typography, etc.), with duplicates removed and variants properly ordered. Choose between single-line, multi-line, or grouped output formats. Essential for maintaining consistent, readable Tailwind code.",
   "tool.tailwind-sorter.feature.0": "Sort by category (layout, spacing, typography...)",
   "tool.tailwind-sorter.feature.1": "Remove duplicate classes",
@@ -843,7 +808,6 @@
   "tool.tailwind-sorter.feature.4": "Group visualization",
   "tool.tailwind-sorter.feature.5": "Copy sorted output",
   "tool.tailwind-sorter.feature.6": "Real-time preview",
-
   "tool.variable-name-wizard.longDescription": "Variable Name Wizard helps you name things right the first time. Describe what you need and get contextual suggestions following best practices for your language. Convert existing names between camelCase, PascalCase, snake_case, kebab-case, and more. Includes abbreviation expansion/compression and type-specific recommendations.",
   "tool.variable-name-wizard.feature.0": "Generate names from descriptions",
   "tool.variable-name-wizard.feature.1": "Convert between 8 naming conventions",
@@ -852,7 +816,6 @@
   "tool.variable-name-wizard.feature.4": "Automatic convention detection",
   "tool.variable-name-wizard.feature.5": "Copy any format instantly",
   "tool.variable-name-wizard.feature.6": "Language-specific recommendations",
-
   "tool.json-formatter.longDescription": "JSON Formatter is your all-in-one JSON toolkit. Format with customizable indentation, minify for production, validate with detailed error messages, extract JSON paths, compare two JSON documents, and generate TypeScript interfaces. Includes real-time statistics showing keys, values, depth, and size metrics.",
   "tool.json-formatter.feature.0": "Format with 2 or 4 space indentation",
   "tool.json-formatter.feature.1": "Minify to single line",
@@ -862,7 +825,6 @@
   "tool.json-formatter.feature.5": "Generate TypeScript interfaces",
   "tool.json-formatter.feature.6": "Sort keys alphabetically",
   "tool.json-formatter.feature.7": "Real-time size statistics",
-
   "tool.base64.longDescription": "Base64 Encoder/Decoder handles all your Base64 encoding and decoding needs. Supports standard and URL-safe variants, handles Unicode text correctly, can generate and parse data URLs, and provides detailed statistics about input/output sizes. Perfect for working with APIs, embedding data, and debugging encoded content.",
   "tool.base64.feature.0": "Encode text to Base64",
   "tool.base64.feature.1": "Decode Base64 to text",
@@ -872,7 +834,6 @@
   "tool.base64.feature.5": "Size statistics",
   "tool.base64.feature.6": "Line break formatting",
   "tool.base64.feature.7": "Copy to clipboard",
-
   "tool.uuid-generator.longDescription": "UUID Generator creates universally unique identifiers in all major versions (v1, v4, v7, nil, max). Generate single or bulk UUIDs with multiple format options (standard, uppercase, no hyphens, braces, URN). Validate any UUID string and parse it to extract version, variant, timestamp, and node information. Essential for developers working with databases, APIs, and distributed systems.",
   "tool.uuid-generator.feature.0": "Generate UUID v1, v4, v7, nil, max",
   "tool.uuid-generator.feature.1": "Multiple formats (standard, uppercase, URN, braces)",
@@ -880,7 +841,6 @@
   "tool.uuid-generator.feature.3": "Validate UUID strings",
   "tool.uuid-generator.feature.4": "Parse and extract UUID metadata",
   "tool.uuid-generator.feature.5": "Copy to clipboard",
-
   "tool.git-commit-generator.longDescription": "Git Commit Generator helps you write perfect commit messages following the Conventional Commits specification. Select from 11 commit types with emoji indicators, add optional scope with smart suggestions, include body and footer sections, and get real-time validation. Parse existing commits to extract their components. Never write a malformed commit message again.",
   "tool.git-commit-generator.feature.0": "11 commit types with emojis",
   "tool.git-commit-generator.feature.1": "Smart scope suggestions",
@@ -889,7 +849,6 @@
   "tool.git-commit-generator.feature.4": "Issue reference linking",
   "tool.git-commit-generator.feature.5": "Parse existing commits",
   "tool.git-commit-generator.feature.6": "Real-time validation",
-
   "tool.http-status-finder.longDescription": "HTTP Status Finder is your comprehensive reference for HTTP status codes. Search by code number or keyword, filter by category (1xx-5xx), and get detailed information including description, when to use, and real-world examples. Features 55+ status codes with detailed descriptions, color-coded categories, and quick access to the most common codes. Perfect for API developers and backend engineers.",
   "tool.http-status-finder.feature.0": "55+ HTTP status codes",
   "tool.http-status-finder.feature.1": "Search by code or keyword",
@@ -898,9 +857,7 @@
   "tool.http-status-finder.feature.4": "When to use guidelines",
   "tool.http-status-finder.feature.5": "Real-world examples",
   "tool.http-status-finder.feature.6": "Color-coded categories",
-
   "tools.users": "{count} users",
-
   "guide.ai.title": "Set up AI",
   "guide.ai.subtitle": "Get AI-powered features in 3 easy steps",
   "guide.ai.step1.title": "Choose your provider",
@@ -935,7 +892,6 @@
   "guide.ai.close": "Close",
   "guide.ai.activated": "AI activated with {provider}!",
   "guide.ai.setupAI": "Setup AI",
-
   "costCalc.syncPrices": "Sync Prices",
   "costCalc.syncing": "Syncing...",
   "costCalc.cheapestLabel": "Cheapest",
@@ -962,7 +918,6 @@
   "costCalc.detailMTokens": "/1M tokens",
   "costCalc.detailTokens": "tokens",
   "costCalc.close": "Close",
-
   "tailwind.rawClasses": "Raw Classes",
   "tailwind.example": "Example",
   "tailwind.sortingOptions": "Sorting Options",
@@ -991,7 +946,6 @@
   "tailwind.sampleElement": "Sample Element",
   "tailwind.sandboxNote": "Note: Classes are applied to this element in real-time from the Web Worker.",
   "tailwind.inputPlaceholder": "Paste your messy tailwind classes here...",
-
   "gitCommit.commitArchitect": "Commit Architect",
   "gitCommit.typeLabel": "Type",
   "gitCommit.scopeLabel": "Scope",
@@ -1026,7 +980,6 @@
   "gitCommit.wipeCache": "WIPE CACHE",
   "gitCommit.registryEmpty": "Registry empty.",
   "gitCommit.diffAnalyzed": "Diff analyzed! Suggestions applied to composer.",
-
   "jsonFmt.rawPayload": "Raw Payload",
   "jsonFmt.example": "Example",
   "jsonFmt.pasteJson": "Paste JSON here...",
@@ -1062,7 +1015,6 @@
   "jsonFmt.diffAdded": "added",
   "jsonFmt.diffRemoved": "removed",
   "jsonFmt.lineDiff": "Line-by-line diff",
-
   "tokenViz.sourceText": "Source Text",
   "tokenViz.typePaste": "Type or paste text to visualize tokenization...",
   "tokenViz.analyzePrompt": "Analyze Prompt",
@@ -1080,7 +1032,6 @@
   "tokenViz.compareProviders": "Compare providers",
   "tokenViz.modelLabel": "Model",
   "tokenViz.realTokens": "real tokens",
-
   "ctxMgr.newWindowPlaceholder": "New window name...",
   "ctxMgr.createWindowBtn": "Create Window",
   "ctxMgr.projectContexts": "Project Contexts",
@@ -1116,7 +1067,6 @@
   "ctxMgr.pasteContentPlaceholder": "Paste context content here...",
   "ctxMgr.ingestToContext": "Ingest to Context",
   "ctxMgr.addedToContext": "\"{title}\" added to context",
-
   "base64.encodeBtn": "Encode",
   "base64.decodeBtn": "Decode",
   "base64.exampleBtn": "Example",
@@ -1144,10 +1094,8 @@
   "base64.noPreview": "No Smart Preview Available",
   "base64.noPreviewDesc": "Content identified as raw string or unknown binary. Use the Text View or Byte Inspector for analysis.",
   "base64.byteAnalysis": "Low-Level Byte Analysis",
-  "base64.uploadFile": "Upload",
   "base64.processContent": "Process content to see byte breakdown.",
   "base64.downloadResource": "Download Resource",
-
   "codeReview.linesLabel": "Lines",
   "codeReview.high": "High",
   "codeReview.optimal": "Optimal",
@@ -1163,7 +1111,6 @@
   "codeReview.applyChanges": "Apply Changes",
   "codeReview.improveNames": "Improve Names",
   "codeReview.issueActions": "Issue actions",
-
   "promptAnalyzer.checkTokens": "Check Tokens",
   "promptAnalyzer.estimateCost": "Estimate Cost",
   "promptAnalyzer.anatomy.title": "Prompt Anatomy",
@@ -1187,7 +1134,6 @@
   "promptAnalyzer.anatomy.missing": "Missing",
   "promptAnalyzer.anatomy.partial": "Partial",
   "promptAnalyzer.suggestions.title": "How to Improve",
-
   "dtoMatic.payloadSource": "Payload Source",
   "dtoMatic.invalidJsonBadge": "Invalid JSON",
   "dtoMatic.generateArch": "Generate Architecture",
@@ -1219,7 +1165,6 @@
   "dtoMatic.errorNoRootName": "Please enter a root type name",
   "dtoMatic.errorGeneration": "Error generating code",
   "dtoMatic.errorCannotFormat": "The JSON is not valid. Cannot format.",
-
   "uuid.generatorTab": "Generator",
   "uuid.analyzerTab": "Analyzer",
   "uuid.v4Label": "Version 4 (Random)",
@@ -1273,7 +1218,6 @@
   "uuid.onLines": "on lines",
   "uuid.controlCenterDesc": "Generate secure unique identifiers or perform bit-level analysis on existing ones to detect privacy leaks and version data.",
   "uuid.exportedAs": "Exported as {format}",
-
   "cron.expressionBuilder": "Expression Builder",
   "cron.infrastructureTab": "Infrastructure",
   "cron.minuteLabel": "Minute",
@@ -1294,7 +1238,6 @@
   "cron.invalidExpression": "Invalid cron expression",
   "cron.executionCalendar": "Execution Calendar",
   "cron.noUpcomingExecutions": "No upcoming executions found.",
-
   "regex.regexPattern": "Regex Pattern",
   "regex.invalidSyntax": "Invalid regex syntax",
   "regex.presets": "Quick presets",
@@ -1319,7 +1262,6 @@
   "regex.noMatchesLabel": "No Matches",
   "regex.readyToDecode": "Ready to Decode",
   "regex.readyToDecodeDesc": "Paste a complex regex pattern or describe what you need to get a human-friendly analysis.",
-
   "varName.wizardSetup": "Wizard Setup",
   "varName.exampleBtn": "Example",
   "varName.contextDescLabel": "Context / Description",
@@ -1348,7 +1290,6 @@
   "varName.noSuggestionsAvail": "No suggestions available.",
   "varName.readyToMagic": "Ready to Magic Name",
   "varName.readyToMagicDesc": "Describe the purpose of your variable or paste a name to transform it into professional naming conventions for any language.",
-
   "httpStatus.resetBtn": "Reset",
   "httpStatus.smartNavigator": "Smart Navigator",
   "httpStatus.searchHint": "Code (404) or Keyword (not found)...",
@@ -1377,7 +1318,6 @@
   "httpStatus.decisionQ4": "Request body too large?",
   "httpStatus.decisionQ5": "External API down?",
   "httpStatus.trySearching": "Try searching by numeric code (e.g. 404) or name (e.g. \"auth\").",
-
   "ai.deepAnalysis": "AI Deep Analysis",
   "ai.analyzing": "Analyzing...",
   "ai.unavailable": "AI unavailable",
@@ -1397,12 +1337,9 @@
   "ai.refinedApplied": "AI refined prompt applied",
   "ai.codeApplied": "AI refactored code applied",
   "ai.tokenizerUnavailable": "Real tokenizer unavailable",
-
   "uuid.ulid": "ULID",
   "uuid.nanoid": "NanoID",
-
   "gitCommit.copyCommand": "Copy git command",
-
   "error.title": "Something went wrong",
   "error.defaultMessage": "An unexpected error occurred",
   "error.stackTrace": "Stack trace",
@@ -1411,7 +1348,6 @@
   "error.dashboardTitle": "Something went wrong",
   "error.dashboardDesc": "An unexpected error occurred",
   "error.errorId": "Error ID",
-
   "table.noItems": "No items found",
   "table.status": "Status",
   "table.columns": "Columns",
@@ -1423,41 +1359,29 @@
   "table.previous": "Previous",
   "table.next": "Next",
   "table.ariaLabel": "Data table",
-
   "favorites.add": "Add to favorites",
   "favorites.remove": "Remove from favorites",
-
-  "cron.expressionBuilder": "Expression Builder",
   "cron.infrastructure": "Infrastructure",
-  "cron.commonPresets": "Common Presets",
-  "cron.every1m": "Every 1m",
   "cron.hourly": "Hourly",
   "cron.daily": "Daily",
   "cron.weekly": "Weekly",
   "cron.monthly": "Monthly",
   "cron.weekdays": "Weekdays",
-  "cron.humanReadable": "Human Readable",
-  "cron.scheduleForecast": "Schedule Forecast",
-  "cron.utcVsLocal": "UTC vs Local",
-  "cron.invalidExpression": "Invalid cron expression",
   "cron.noUpcoming": "No upcoming executions found.",
   "cron.fieldMinute": "Minute",
   "cron.fieldHour": "Hour",
   "cron.fieldDay": "Day",
   "cron.fieldMonth": "Month",
   "cron.fieldWeekday": "Weekday",
-
   "notFound.title": "Page not found",
   "notFound.subtitle": "You've ventured off the map.",
   "notFound.hint": "For you, developers.",
   "notFound.backToTools": "Back to tools",
-
   "favorites.title": "Favorites",
   "favorites.count": "{count} tool saved",
   "favorites.countPlural": "{count} tools saved",
   "favorites.empty": "No favorites yet",
   "favorites.emptyHint": "Click the heart icon on any tool to add it here",
-
   "magic.placeholder": "Paste anything here... JSON, Cron, JWT, Code, etc.",
   "magic.ariaLabel": "Paste anything to auto-detect and route to a tool",
   "magic.formatJson": "Format JSON",
@@ -1469,7 +1393,6 @@
   "magic.explainRegex": "Explain Regex",
   "magic.reviewCode": "Review Code",
   "magic.detected": "Detected",
-
   "table.colPath": "PATH",
   "table.colType": "TYPE",
   "table.colValue": "VALUE",
@@ -1501,7 +1424,6 @@
   "table.colIndex": "INDEX",
   "table.colPattern": "PATTERN",
   "table.colExplanation": "EXPLANATION",
-
   "cron.daySu": "Su",
   "cron.dayMo": "Mo",
   "cron.dayTu": "Tu",
@@ -1514,15 +1436,43 @@
   "cron.fieldDy": "day",
   "cron.fieldMo": "month",
   "cron.fieldWk": "week",
-
   "varName.typeVariable": "Variable",
   "varName.typeFunction": "Function",
   "varName.typeConstant": "Constant",
   "varName.typeClass": "Class/Type",
   "varName.typeHook": "React Hook",
   "varName.typeComponent": "Component",
-
-  "ctxMgr.priorityHigh": "High",
-  "ctxMgr.priorityMedium": "Medium",
-  "ctxMgr.priorityLow": "Low"
+  "common.github": "GitHub",
+  "common.linkedin": "LinkedIn",
+  "common.close": "Close",
+  "common.dismiss": "Dismiss",
+  "common.mainNavigation": "Main navigation",
+  "common.breadcrumb": "Breadcrumb",
+  "common.loadingAI": "Loading AI analysis",
+  "dtoMatic.ariaLoadExample": "Load example",
+  "dtoMatic.ariaFormatJson": "Format JSON",
+  "dtoMatic.ariaOutputView": "Output view",
+  "dtoMatic.ariaMockCount": "Mock data count",
+  "dtoMatic.placeholderRootName": "e.g. UserResponse",
+  "cron.ariaBuilderMode": "Builder mode",
+  "base64.ariaViewMode": "View mode",
+  "codeReview.ariaIssueActions": "Issue Actions",
+  "httpStatus.ariaGridView": "Grid view",
+  "httpStatus.ariaTableView": "Table view",
+  "httpStatus.ariaClose": "Close",
+  "gitCommit.ariaOutputView": "Output view",
+  "regex.ariaInputMode": "Input mode",
+  "regex.ariaResultTabs": "Result Tabs",
+  "regex.ariaResultAnalysis": "Result analysis",
+  "regex.placeholderRegex": "/[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,}/gi",
+  "regex.placeholderDescNeed": "E.g.: A valid email address with optional plus signs",
+  "jsonFmt.ariaJsonViews": "JSON views",
+  "tailwind.ariaAnalysisTabs": "Analysis tabs",
+  "uuid.ariaUuidMode": "UUID mode",
+  "uuid.placeholderHexPrefix": "e.g. deadbeef",
+  "varName.ariaWizardMode": "Wizard mode",
+  "share.shareOnX": "Share on X (Twitter)",
+  "share.shareOnLinkedIn": "Share on LinkedIn",
+  "ctxMgr.placeholderFilename": "e.g. user-service.ts",
+  "ctxMgr.placeholderFilePath": "src/services/user-service.ts"
 }

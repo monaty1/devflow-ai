@@ -129,8 +129,8 @@ export default function HttpStatusFinderPage() {
         actions={
           <div className="flex gap-2">
             <div className="flex bg-muted p-1 rounded-xl">
-              <Button isIconOnly size="sm" variant={activeView === "grid" ? "primary" : "ghost"} onPress={() => setActiveView("grid")} aria-label="Grid view"><LayoutGrid className="size-3.5" /></Button>
-              <Button isIconOnly size="sm" variant={activeView === "table" ? "primary" : "ghost"} onPress={() => setActiveView("table")} aria-label="Table view"><List className="size-3.5" /></Button>
+              <Button isIconOnly size="sm" variant={activeView === "grid" ? "primary" : "ghost"} onPress={() => setActiveView("grid")} aria-label={t("httpStatus.ariaGridView")}><LayoutGrid className="size-3.5" /></Button>
+              <Button isIconOnly size="sm" variant={activeView === "table" ? "primary" : "ghost"} onPress={() => setActiveView("table")} aria-label={t("httpStatus.ariaTableView")}><List className="size-3.5" /></Button>
             </div>
             <Button variant="outline" size="sm" onPress={clearSearch} className="gap-2 font-bold">
               <RotateCcw className="size-4" /> {t("httpStatus.resetBtn")}
@@ -224,7 +224,7 @@ export default function HttpStatusFinderPage() {
                       </div>
                     </div>
                   </div>
-                  <Button isIconOnly variant="ghost" onPress={() => setSelectedCode(null)} className="shadow-lg rounded-full h-10 w-10 min-w-0" aria-label="Close"><X className="size-5 text-danger" /></Button>
+                  <Button isIconOnly variant="ghost" onPress={() => setSelectedCode(null)} className="shadow-lg rounded-full h-10 w-10 min-w-0" aria-label={t("httpStatus.ariaClose")}><X className="size-5 text-danger" /></Button>
                 </div>
 
                 <div className="mt-12 grid gap-10 sm:grid-cols-2 border-t border-divider pt-10">

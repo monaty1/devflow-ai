@@ -169,7 +169,7 @@ export default function CodeReviewPage() {
                 <MoreVertical className="size-4 text-default-300" />
               </Button>
             </DropdownTrigger>
-            <DropdownMenu aria-label="Issue Actions">
+            <DropdownMenu aria-label={t("codeReview.ariaIssueActions")}>
               <DropdownItem 
                 key="wizard" 
                 onPress={() => navigateTo("variable-name-wizard" as ToolRoute, issue.message)}
@@ -384,7 +384,7 @@ export default function CodeReviewPage() {
                 </div>
                 <DataTable
                   columns={issueColumns}
-                  data={filteredIssues.map((issue, id) => ({ ...issue, id }))}
+                  data={filteredIssues.map((issue, idx) => ({ ...issue, id: `${issue.line}-${issue.column}-${idx}` }))}
                   filterField="message"
                   renderCell={renderIssueCell}
                   emptyContent={t("codeReview.noIssues")}

@@ -108,7 +108,7 @@ export default function TailwindSorterPage() {
               </h3>
               <div className="flex gap-1">
                 <Button size="sm" variant="ghost" onPress={() => loadExample("messy")}>{t("tailwind.example")}</Button>
-                <Button size="sm" variant="ghost" onPress={() => setInput("")} isIconOnly aria-label="Clear input"><Trash2 className="size-3 text-danger" /></Button>
+                <Button size="sm" variant="ghost" onPress={() => setInput("")} isIconOnly aria-label={t("common.clearInput")}><Trash2 className="size-3 text-danger" /></Button>
               </div>
             </div>
             <TextArea
@@ -200,7 +200,7 @@ export default function TailwindSorterPage() {
                   variant="primary"
                 >
                   <Tabs.ListContainer>
-                    <Tabs.List aria-label="Analysis tabs">
+                    <Tabs.List aria-label={t("tailwind.ariaAnalysisTabs")}>
                       <Tabs.Tab id="result">
                         <div className="flex items-center gap-2 font-bold">
                           <CheckCircle2 className="size-4 text-emerald-500" />
@@ -256,7 +256,7 @@ export default function TailwindSorterPage() {
                       )}
                       <DataTable
                         columns={auditColumns}
-                        data={result.audit.map((a, id) => ({ ...a, id }))}
+                        data={result.audit.map((a, idx) => ({ ...a, id: `${a.class}-${idx}` }))}
                         filterField="class"
                         renderCell={renderAuditCell}
                         initialVisibleColumns={["class", "reason", "severity"]}

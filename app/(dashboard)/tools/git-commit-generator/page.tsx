@@ -299,7 +299,7 @@ export default function GitCommitGeneratorPage() {
             variant="primary"
           >
             <Tabs.ListContainer>
-              <Tabs.List aria-label="Output view">
+              <Tabs.List aria-label={t("gitCommit.ariaOutputView")}>
                 <Tabs.Tab id="composer">
                   <div className="flex items-center gap-2">
                     <MessageSquare className="size-4" /> <span>{t("gitCommit.resultTab")}</span>

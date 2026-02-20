@@ -54,7 +54,7 @@ export function useDtoMatic() {
   const { history, addToHistory: addItemToHistory, clearHistory } =
     useToolHistory<HistoryItem>("devflow-dto-matic-history", 10);
   
-  const { getSharedData, clearSharedData: _clearSharedData } = useSmartNavigation();
+  const { getSharedData } = useSmartNavigation();
 
   useEffect(() => {
     const shared = getSharedData();
@@ -105,7 +105,7 @@ export function useDtoMatic() {
     } finally {
       setIsGenerating(false);
     }
-  }, [jsonInput, config, addToHistory]);
+  }, [jsonInput, config, addToHistory, t]);
 
   const generateMock = useCallback((count: number = 5) => {
     if (!isValidJson(jsonInput)) return;
@@ -125,7 +125,7 @@ export function useDtoMatic() {
     } else {
       setError(t("dtoMatic.errorCannotFormat"));
     }
-  }, [jsonInput]);
+  }, [jsonInput, t]);
 
   const loadExample = useCallback(() => {
     setJsonInput(EXAMPLE_JSON);

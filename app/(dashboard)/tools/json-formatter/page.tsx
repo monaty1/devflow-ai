@@ -244,7 +244,7 @@ export default function JsonFormatterPage() {
           >
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <Tabs.ListContainer>
-                <Tabs.List aria-label="JSON views">
+                <Tabs.List aria-label={t("jsonFmt.ariaJsonViews")}>
                   <Tabs.Tab id="output">{t("jsonFmt.outputTab")}</Tabs.Tab>
                   <Tabs.Tab id="paths">{t("jsonFmt.pathExplorer")}</Tabs.Tab>
                   <Tabs.Tab id="typescript">{t("jsonFmt.schemaTab")}</Tabs.Tab>
@@ -314,7 +314,7 @@ export default function JsonFormatterPage() {
                 </div>
                 <DataTable
                   columns={pathColumns}
-                  data={paths.map((p, id) => ({ ...p, id }))}
+                  data={paths.map((p) => ({ ...p, id: p.path }))}
                   filterField="path"
                   renderCell={renderPathCell}
                   initialVisibleColumns={["path", "type", "value"]}

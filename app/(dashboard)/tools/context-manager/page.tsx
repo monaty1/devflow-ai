@@ -412,8 +412,8 @@ export default function ContextManagerPage() {
 
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
-                <Input placeholder="e.g. user-service.ts" value={docTitle} onChange={(e) => setDocTitle(e.target.value)} variant="primary" className="font-bold" />
-                <Input placeholder="src/services/user-service.ts" value={docPath} onChange={(e) => setDocPath(e.target.value)} variant="primary" />
+                <Input placeholder={t("ctxMgr.placeholderFilename")} value={docTitle} onChange={(e) => setDocTitle(e.target.value)} variant="primary" className="font-bold" />
+                <Input placeholder={t("ctxMgr.placeholderFilePath")} value={docPath} onChange={(e) => setDocPath(e.target.value)} variant="primary" />
               </div>
 
               <div className="grid grid-cols-2 gap-4">

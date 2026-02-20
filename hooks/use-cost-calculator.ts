@@ -28,7 +28,7 @@ export function useCostCalculator() {
   const [dailyRequests, setDailyRequests] = useState(100);
   const [selectedModelId, setSelectedModelId] = useState("gpt-4o");
   
-  const { data: latestModels, error: _error, isValidating, mutate } = useSWR(
+  const { data: latestModels, isValidating, mutate } = useSWR(
     PRICING_CACHE_KEY,
     fetchLatestPrices,
     {

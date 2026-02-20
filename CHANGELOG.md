@@ -5,6 +5,37 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.0] - 2026-02-20
+
+### Quality Sprint: Full i18n, Coverage Boost, Performance & Dependency Updates
+
+#### Phase 1: Bug Fixes (3 fixes)
+- **DataTable duplicate keys** — replaced array-index IDs with content-based keys in 4 tool pages (json-formatter, cron-builder, code-review, tailwind-sorter), eliminating React key warnings during sort/filter
+- **DataTable a11y** — added `aria-label` to search input for screen reader compatibility
+- **Hook exhaustive-deps** — fixed missing `t` dependency in `use-dto-matic.ts` callbacks (`generate`, `formatInput`); removed unused `_error` variable in `use-cost-calculator.ts`
+
+#### Phase 2: Full i18n (33 new keys, 18 files updated)
+- **33 new i18n keys** added to both `en.json` and `es.json` (1443 → 1476 keys)
+- **29 hardcoded aria-labels** replaced with `t()` calls across 18 component/page files — Tabs, Dropdowns, buttons, navigation, breadcrumbs, share buttons, toast dismiss, skeleton loading
+- **6 hardcoded placeholders** replaced with `t()` calls — context-manager filenames, regex examples, DTO root name, UUID hex prefix
+- Components updated: share-buttons, toast-container, skeletons (converted to client component), navbar, tool-header, about page, + 11 tool pages
+
+#### Phase 3: Coverage Boost (+123 tests)
+- **tailwind-sorter.ts** — 16 new tests (37 → 53), branch coverage 77.64% → **88.23%** (conflict detection, semantic audit, breakpoint analysis, sortWithinGroups)
+- **tool-recommendations.ts** — 79 new tests (22 → 101), statements 83% → **98.52%** (all 10 detectors, all 14 rules, edge cases)
+- **uuid-generator.ts** — 28 new tests (64 → 92), functions 85% → **100%** (checkCollisions, parseUuid entropy, collision stats)
+
+#### Phase 4: Performance
+- **React.memo** — wrapped `ToolCard` component to prevent unnecessary re-renders when parent (tool grid) updates
+
+#### Phase 5: Dependencies
+- **npm update** — updated all packages within semver ranges (Tailwind v4.2, framer-motion 12.34, HeroUI table 2.2.31, ESLint 9.39.3, jsdom 28.1, tailwind-merge 3.5, types updates)
+
+#### Stats
+- **1190 tests passing** (up from 1067, +123 new tests)
+- **1476 i18n keys** per locale (up from 1443)
+- **0 type errors**, **0 lint errors**, production build verified
+
 ## [3.5.1] - 2026-02-20
 
 ### DataTable v3 Migration, Coverage & i18n Fixes

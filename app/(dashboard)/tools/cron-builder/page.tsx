@@ -157,7 +157,7 @@ export default function CronBuilderPage() {
               variant="primary"
             >
               <Tabs.ListContainer>
-                <Tabs.List aria-label="Builder mode">
+                <Tabs.List aria-label={t("cron.ariaBuilderMode")}>
                   <Tabs.Tab id="builder">{t("cron.expressionBuilder")}</Tabs.Tab>
                   <Tabs.Tab id="infra">{t("cron.infrastructureTab")}</Tabs.Tab>
                 </Tabs.List>
@@ -324,7 +324,7 @@ export default function CronBuilderPage() {
             ) : (
               <DataTable
                 columns={executionColumns}
-                data={nextExecutions.map((e, id) => ({ ...e, id }))}
+                data={nextExecutions.map((e) => ({ ...e, id: e.formatted }))}
                 filterField="formatted"
                 renderCell={renderExecutionCell}
                 initialVisibleColumns={["formatted", "utc", "relative"]}

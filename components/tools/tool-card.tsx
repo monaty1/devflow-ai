@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import NextLink from "next/link";
 import { Card, Button } from "@heroui/react";
 import { Heart } from "lucide-react";
@@ -13,7 +14,7 @@ interface ToolCardProps {
   tool: Tool;
 }
 
-export function ToolCard({ tool }: ToolCardProps) {
+export const ToolCard = React.memo(function ToolCard({ tool }: ToolCardProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const { t } = useTranslation();
   const favorited = isFavorite(tool.id);
@@ -93,4 +94,4 @@ export function ToolCard({ tool }: ToolCardProps) {
       />
     </Card>
   );
-}
+});

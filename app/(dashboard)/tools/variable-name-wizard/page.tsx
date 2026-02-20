@@ -307,7 +307,7 @@ export default function VariableNameWizardPage() {
             variant="primary"
           >
             <Tabs.ListContainer>
-              <Tabs.List aria-label="Wizard mode">
+              <Tabs.List aria-label={t("varName.ariaWizardMode")}>
                 <Tabs.Tab id="generate">{t("varName.smartSuggestions")}</Tabs.Tab>
                 <Tabs.Tab id="convert">{t("varName.caseTransformer")}</Tabs.Tab>
               </Tabs.List>

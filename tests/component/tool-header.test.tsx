@@ -9,6 +9,7 @@ vi.mock("@/hooks/use-translation", () => ({
     t: (key: string) => {
       const map: Record<string, string> = {
         "common.tools": "Tools",
+        "common.breadcrumb": "Breadcrumb",
       };
       return map[key] ?? key;
     },

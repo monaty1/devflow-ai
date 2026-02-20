@@ -137,6 +137,7 @@ export function DataTable<T extends { id: string | number }>({
           <div className="relative w-full sm:max-w-[44%]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-default-400 pointer-events-none z-10" />
             <input
+              aria-label={placeholder ?? t("tools.search")}
               className="w-full h-10 pl-10 pr-3 rounded-xl bg-default-100 text-sm text-foreground placeholder:text-default-400 outline-none border-none focus:ring-2 focus:ring-primary/40 transition-shadow"
               placeholder={placeholder ?? t("tools.search")}
               value={filterValue}
