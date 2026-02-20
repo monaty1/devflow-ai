@@ -24,7 +24,7 @@ export function HomeContent({ stars }: HomeContentProps) {
     <div className="flex min-h-screen flex-col">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(0,0,0,0))]" />
 
         <div className="container mx-auto px-4 py-16 md:py-24">
           <div className="mx-auto max-w-4xl space-y-6 text-center">
@@ -35,7 +35,7 @@ export function HomeContent({ stars }: HomeContentProps) {
 
             <h1 className="text-5xl font-bold leading-tight text-foreground md:text-7xl">
               {t("home.title1")}
-              <span className="block text-foreground bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
                 {t("home.title2")}
               </span>
             </h1>

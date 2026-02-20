@@ -274,20 +274,20 @@ export default function UuidGeneratorPage() {
           </Card>
 
           {activeTab === "generate" && result && (
-            <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl border-none">
-              <h3 className="text-xs font-black uppercase opacity-60 mb-6 tracking-widest flex items-center gap-2">
-                <Activity className="size-3 text-emerald-400" /> {t("uuid.collisionHealth")}
+            <Card className="p-6 bg-gradient-to-br from-emerald-500/10 to-blue-500/10 dark:from-emerald-500/15 dark:to-blue-500/15 shadow-xl shadow-primary/5 border border-default-200 dark:border-default-100">
+              <h3 className="text-xs font-black uppercase text-muted-foreground mb-6 tracking-widest flex items-center gap-2">
+                <Activity className="size-3 text-emerald-500 dark:text-emerald-400" /> {t("uuid.collisionHealth")}
               </h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-end">
-                  <span className="text-[10px] font-bold uppercase opacity-40">{t("uuid.probabilityLabel")}</span>
-                  <span className="text-sm font-black text-emerald-400">{result.collisionStats?.probability}</span>
+                  <span className="text-[10px] font-bold uppercase text-muted-foreground/60">{t("uuid.probabilityLabel")}</span>
+                  <span className="text-sm font-black text-emerald-500 dark:text-emerald-400">{result.collisionStats?.probability}</span>
                 </div>
                 <div className="flex justify-between items-end">
-                  <span className="text-[10px] font-bold uppercase opacity-40">{t("uuid.uniquenessLabel")}</span>
-                  <span className="text-sm font-black text-blue-400">{t("uuid.guaranteed")}</span>
+                  <span className="text-[10px] font-bold uppercase text-muted-foreground/60">{t("uuid.uniquenessLabel")}</span>
+                  <span className="text-sm font-black text-blue-500 dark:text-blue-400">{t("uuid.guaranteed")}</span>
                 </div>
-                <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-[10px] opacity-60 italic">
+                <div className="p-3 bg-muted/50 rounded-xl border border-default-200 text-[10px] text-muted-foreground italic">
                   {t("uuid.collisionNote")}
                 </div>
               </div>

@@ -179,28 +179,28 @@ export default function Base64Page() {
           </Card>
 
           {result && (
-            <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl shadow-slate-500/20">
-              <h3 className="text-xs font-black uppercase opacity-60 mb-6 tracking-widest flex items-center gap-2">
-                <FileDigit className="size-3 text-cyan-400" /> {t("base64.forensicMetrics")}
+            <Card className="p-6 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 dark:from-cyan-500/15 dark:to-blue-500/15 shadow-xl shadow-primary/5 border border-default-200 dark:border-default-100">
+              <h3 className="text-xs font-black uppercase text-muted-foreground mb-6 tracking-widest flex items-center gap-2">
+                <FileDigit className="size-3 text-cyan-500 dark:text-cyan-400" /> {t("base64.forensicMetrics")}
               </h3>
               <div className="space-y-6">
                 <div className="flex justify-between items-end">
-                  <span className="text-[10px] font-bold uppercase opacity-40">{t("base64.outputSize")}</span>
-                  <span className="text-2xl font-black text-cyan-400">{result.stats.outputBytes} bytes</span>
+                  <span className="text-[10px] font-bold uppercase text-muted-foreground/60">{t("base64.outputSize")}</span>
+                  <span className="text-2xl font-black text-cyan-500 dark:text-cyan-400">{result.stats.outputBytes} bytes</span>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex justify-between text-[9px] font-black uppercase opacity-40">
+                  <div className="flex justify-between text-[9px] font-black uppercase text-muted-foreground/60">
                     <span>{t("base64.byteOverhead")}</span>
                     <span>{Math.round(result.stats.compressionRatio * 100)}%</span>
                   </div>
-                  <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-cyan-400" 
-                      style={{ width: `${Math.min(100, result.stats.compressionRatio * 100)}%` }} 
+                  <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-cyan-500 dark:bg-cyan-400"
+                      style={{ width: `${Math.min(100, result.stats.compressionRatio * 100)}%` }}
                     />
                   </div>
                 </div>
-                <div className="flex items-center gap-2 pt-4 border-t border-white/5">
+                <div className="flex items-center gap-2 pt-4 border-t border-default-200">
                   <StatusBadge variant="info">{t("base64.detectedBadge", { type: result.detectedType?.toUpperCase() || "" })}</StatusBadge>
                 </div>
               </div>

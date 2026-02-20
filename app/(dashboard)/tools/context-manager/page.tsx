@@ -240,31 +240,31 @@ export default function ContextManagerPage() {
             <>
               {/* Dashboard Row */}
               <div className="grid gap-4 sm:grid-cols-3">
-                <Card className="p-6 bg-gradient-to-br from-indigo-600 to-blue-700 text-white shadow-lg shadow-indigo-500/20 border-none">
+                <Card className="p-6 bg-gradient-to-br from-indigo-500/10 to-blue-500/10 dark:from-indigo-500/15 dark:to-blue-500/15 shadow-lg shadow-primary/5 border border-default-200 dark:border-default-100">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-[10px] font-bold uppercase opacity-80">{t("ctxMgr.utilization")}</p>
+                    <p className="text-[10px] font-bold uppercase text-muted-foreground">{t("ctxMgr.utilization")}</p>
                     <StatusBadge variant="info">{activeWindow.totalTokens.toLocaleString()} / {activeWindow.maxTokens.toLocaleString()}</StatusBadge>
                   </div>
                   <p className={cn(
                     "text-4xl font-black mb-2",
-                    activeWindow.utilizationPercentage > 90 ? "text-red-300" : activeWindow.utilizationPercentage > 60 ? "text-amber-300" : "text-white"
+                    activeWindow.utilizationPercentage > 90 ? "text-red-500 dark:text-red-400" : activeWindow.utilizationPercentage > 60 ? "text-amber-500 dark:text-amber-400" : "text-indigo-600 dark:text-indigo-400"
                   )}>{activeWindow.utilizationPercentage}%</p>
-                  <div className="h-2 w-full bg-white/20 rounded-full overflow-hidden mb-3">
+                  <div className="h-2 w-full bg-muted rounded-full overflow-hidden mb-3">
                     <div
                       className={cn(
                         "h-full rounded-full transition-all",
-                        activeWindow.utilizationPercentage > 90 ? "bg-red-400" : activeWindow.utilizationPercentage > 60 ? "bg-amber-400" : "bg-emerald-400"
+                        activeWindow.utilizationPercentage > 90 ? "bg-red-500 dark:bg-red-400" : activeWindow.utilizationPercentage > 60 ? "bg-amber-500 dark:bg-amber-400" : "bg-emerald-500 dark:bg-emerald-400"
                       )}
                       style={{ width: `${Math.min(100, activeWindow.utilizationPercentage)}%` }}
                     />
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <Cpu className="size-3 opacity-60" />
+                    <Cpu className="size-3 text-muted-foreground" />
                     <Dropdown>
                       <DropdownTrigger>
                         <button
                           type="button"
-                          className="bg-white/10 border border-white/20 rounded-lg text-[10px] font-bold px-2 py-1 outline-none cursor-pointer hover:bg-white/20 transition-colors"
+                          className="bg-muted/50 border border-default-200 rounded-lg text-[10px] font-bold px-2 py-1 outline-none cursor-pointer hover:bg-muted transition-colors"
                           aria-label={t("ctxMgr.modelPreset")}
                         >
                           {MODEL_PRESETS.find(m => m.maxTokens === activeWindow.maxTokens)?.name ?? t("ctxMgr.modelPreset")}

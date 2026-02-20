@@ -268,29 +268,29 @@ export default function VariableNameWizardPage() {
 
           {/* Luxury Score Summary */}
           {generationResult && (
-            <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl shadow-slate-500/20 border-none">
-              <h3 className="text-xs font-black uppercase opacity-60 mb-6 flex items-center gap-2 tracking-widest">
-                <Activity className="size-3 text-emerald-400" /> {t("varName.semanticAnalysis")}
+            <Card className="p-6 bg-gradient-to-br from-emerald-500/10 to-blue-500/10 dark:from-emerald-500/15 dark:to-blue-500/15 shadow-xl shadow-primary/5 border border-default-200 dark:border-default-100">
+              <h3 className="text-xs font-black uppercase text-muted-foreground mb-6 flex items-center gap-2 tracking-widest">
+                <Activity className="size-3 text-emerald-500 dark:text-emerald-400" /> {t("varName.semanticAnalysis")}
               </h3>
               <div className="space-y-6">
                 <div className="flex justify-around items-center">
                   <div className="text-center">
-                    <p className="text-[10px] font-bold uppercase opacity-40 mb-1">{t("varName.clarityLabel")}</p>
+                    <p className="text-[10px] font-bold uppercase text-muted-foreground/60 mb-1">{t("varName.clarityLabel")}</p>
                     <p className={cn("text-xl font-black", (generationResult.suggestions[0]?.score ?? 0) >= 80 ? "text-emerald-400" : (generationResult.suggestions[0]?.score ?? 0) >= 50 ? "text-amber-400" : "text-red-400")}>
                       {(generationResult.suggestions[0]?.score ?? 0) >= 80 ? t("varName.highLabel") : (generationResult.suggestions[0]?.score ?? 0) >= 50 ? t("varName.mediumLabel") : t("varName.lowLabel")}
                     </p>
                   </div>
-                  <div className="size-px h-8 bg-white/10" />
+                  <div className="size-px h-8 bg-default-200" />
                   <div className="text-center">
-                    <p className="text-[10px] font-bold uppercase opacity-40 mb-1">{t("varName.avgScore")}</p>
-                    <p className="text-xl font-black text-blue-400">
+                    <p className="text-[10px] font-bold uppercase text-muted-foreground/60 mb-1">{t("varName.avgScore")}</p>
+                    <p className="text-xl font-black text-blue-500 dark:text-blue-400">
                       {Math.round(generationResult.suggestions.reduce((sum, s) => sum + s.score, 0) / generationResult.suggestions.length)}%
                     </p>
                   </div>
                 </div>
-                <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
-                  <p className="text-[10px] text-primary-400 font-bold mb-2 uppercase">{t("varName.proTip")}</p>
-                  <p className="text-xs opacity-70 leading-relaxed italic">
+                <div className="p-4 bg-muted/50 rounded-2xl border border-default-200">
+                  <p className="text-[10px] text-primary font-bold mb-2 uppercase">{t("varName.proTip")}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed italic">
                     {t("varName.proTipQuote")}
                   </p>
                 </div>

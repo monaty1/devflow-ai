@@ -323,8 +323,8 @@ export default function GitCommitGeneratorPage() {
                 <Card className="p-0 border-divider shadow-xl overflow-hidden bg-background">
                   <div className="p-4 border-b border-divider bg-muted/20 flex justify-between items-center">
                     <div className="flex items-center gap-3">
-                      <div className="size-8 bg-zinc-900 rounded-full flex items-center justify-center border border-white/10 shadow-lg">
-                        <Github className="size-4 text-white" />
+                      <div className="size-8 bg-foreground rounded-full flex items-center justify-center border border-default-200 shadow-lg">
+                        <Github className="size-4 text-background" />
                       </div>
                       <div className="flex flex-col">
                         <span className="text-xs font-bold">git-preview</span>

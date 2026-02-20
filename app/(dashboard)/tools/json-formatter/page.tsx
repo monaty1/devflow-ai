@@ -197,38 +197,38 @@ export default function JsonFormatterPage() {
           </Card>
 
           {/* Luxury Analytics Card */}
-          <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl shadow-slate-500/20 border-none">
-            <h3 className="text-xs font-black uppercase opacity-60 mb-6 flex items-center gap-2 tracking-widest">
-              <Fingerprint className="size-3 text-orange-400" />
+          <Card className="p-6 bg-gradient-to-br from-orange-500/10 to-blue-500/10 dark:from-orange-500/15 dark:to-blue-500/15 shadow-xl shadow-primary/5 border border-default-200 dark:border-default-100">
+            <h3 className="text-xs font-black uppercase text-muted-foreground mb-6 flex items-center gap-2 tracking-widest">
+              <Fingerprint className="size-3 text-orange-500 dark:text-orange-400" />
               {t("jsonFmt.fingerprint")}
             </h3>
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-1">
-                <p className="text-[10px] font-bold uppercase opacity-40">{t("jsonFmt.uniqueKeys")}</p>
-                <p className="text-2xl font-black text-orange-400">{result?.stats.keys || 0}</p>
+                <p className="text-[10px] font-bold uppercase text-muted-foreground/60">{t("jsonFmt.uniqueKeys")}</p>
+                <p className="text-2xl font-black text-orange-500 dark:text-orange-400">{result?.stats.keys || 0}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-[10px] font-bold uppercase opacity-40">{t("jsonFmt.depthLevel")}</p>
-                <p className="text-2xl font-black text-blue-400">{result?.stats.depth || 0}</p>
+                <p className="text-[10px] font-bold uppercase text-muted-foreground/60">{t("jsonFmt.depthLevel")}</p>
+                <p className="text-2xl font-black text-blue-500 dark:text-blue-400">{result?.stats.depth || 0}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-[10px] font-bold uppercase opacity-40">{t("jsonFmt.byteSize")}</p>
+                <p className="text-[10px] font-bold uppercase text-muted-foreground/60">{t("jsonFmt.byteSize")}</p>
                 <p className="text-sm font-black uppercase">{((result?.stats.sizeBytes || 0) / 1024).toFixed(2)} KB</p>
               </div>
               <div className="space-y-1">
-                <p className="text-[10px] font-bold uppercase opacity-40">{t("jsonFmt.nodeDensity")}</p>
+                <p className="text-[10px] font-bold uppercase text-muted-foreground/60">{t("jsonFmt.nodeDensity")}</p>
                 <p className="text-sm font-black uppercase">{result?.stats.values || 0} items</p>
               </div>
             </div>
-            <div className="mt-6 pt-6 border-t border-white/5 space-y-3">
-               <div className="flex justify-between text-[9px] font-black uppercase opacity-40">
+            <div className="mt-6 pt-6 border-t border-default-200 space-y-3">
+               <div className="flex justify-between text-[9px] font-black uppercase text-muted-foreground/60">
                   <span>{t("jsonFmt.formattingEfficiency")}</span>
                   <span>{Math.round(((result?.stats.minifiedSize || 0) / (result?.stats.sizeBytes || 1)) * 100)}%</span>
                </div>
-               <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-orange-400" 
-                    style={{ width: `${Math.min(100, ((result?.stats.minifiedSize || 0) / (result?.stats.sizeBytes || 1)) * 100)}%` }} 
+               <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-orange-500 dark:bg-orange-400"
+                    style={{ width: `${Math.min(100, ((result?.stats.minifiedSize || 0) / (result?.stats.sizeBytes || 1)) * 100)}%` }}
                   />
                </div>
             </div>
@@ -329,7 +329,7 @@ export default function JsonFormatterPage() {
                   <span className="text-[10px] font-black text-primary uppercase tracking-widest ml-2">{t("jsonFmt.tsDefinition")}</span>
                   <CopyButton text={tsOutput} />
                 </div>
-                <div className="flex-1 bg-muted/30 dark:bg-zinc-900 p-8 overflow-auto">
+                <div className="flex-1 bg-muted/30 dark:bg-muted/50 p-8 overflow-auto">
                   <pre className="font-mono text-xs leading-relaxed text-primary">
                     <code>{tsOutput}</code>
                   </pre>

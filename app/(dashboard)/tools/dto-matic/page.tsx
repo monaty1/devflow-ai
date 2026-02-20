@@ -226,19 +226,19 @@ export default function DtoMaticPage() {
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
               {/* Quick Stats */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <Card className="p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/20 text-center">
-                  <p className="text-[10px] font-black uppercase text-green-600 mb-1">{t("dtoMatic.totalTypes")}</p>
+                <Card className="p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20 dark:border-green-500/10 text-center">
+                  <p className="text-[10px] font-black uppercase text-green-600 dark:text-green-400 mb-1">{t("dtoMatic.totalTypes")}</p>
                   <p className="text-2xl font-black text-green-700 dark:text-green-400">{result.stats.totalTypes}</p>
                 </Card>
-                <Card className="p-4 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border-blue-500/20 text-center">
+                <Card className="p-4 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-500/20 dark:border-blue-500/10 text-center">
                   <p className="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 mb-1">{t("dtoMatic.nestedObjects")}</p>
                   <p className="text-2xl font-black text-blue-700 dark:text-blue-400">{result.stats.nestedObjects}</p>
                 </Card>
-                <Card className="p-4 bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/20 text-center">
+                <Card className="p-4 bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 dark:border-amber-500/10 text-center">
                   <p className="text-[10px] font-black uppercase text-amber-600 dark:text-amber-400 mb-1">{t("dtoMatic.arraysLabel")}</p>
                   <p className="text-2xl font-black text-amber-700 dark:text-amber-400">{result.stats.arrays}</p>
                 </Card>
-                <Card className="p-4 bg-gradient-to-br from-purple-500/10 to-violet-500/10 border-purple-500/20 text-center">
+                <Card className="p-4 bg-gradient-to-br from-purple-500/10 to-violet-500/10 border border-purple-500/20 dark:border-purple-500/10 text-center">
                   <p className="text-[10px] font-black uppercase text-purple-600 dark:text-purple-400 mb-1">{t("dtoMatic.filesLabel")}</p>
                   <p className="text-2xl font-black text-purple-700 dark:text-purple-400">{result.files.length}</p>
                 </Card>
@@ -338,8 +338,8 @@ export default function DtoMaticPage() {
                     </div>
 
                     <div className="lg:col-span-8 h-full">
-                      <Card className="h-full p-0 border-primary/20 shadow-lg overflow-hidden bg-muted/30 dark:bg-zinc-900 flex flex-col border-none">
-                        <div className="p-3 bg-muted/50 dark:bg-white/5 border-b border-divider dark:border-white/10 flex justify-between items-center">
+                      <Card className="h-full p-0 border-primary/20 shadow-lg overflow-hidden bg-muted/30 dark:bg-muted/50 flex flex-col border-none">
+                        <div className="p-3 bg-muted/50 border-b border-divider flex justify-between items-center">
                           <span className="text-xs font-mono font-bold text-primary ml-2">{selectedFile?.name}</span>
                           <div className="flex gap-1">
                             <Button

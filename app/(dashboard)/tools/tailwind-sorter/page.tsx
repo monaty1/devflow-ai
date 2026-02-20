@@ -150,15 +150,15 @@ export default function TailwindSorterPage() {
           </Card>
 
           {/* Live Preview Card */}
-          <Card className="p-6 overflow-hidden bg-slate-900 text-white relative border-none">
+          <Card className="p-6 overflow-hidden bg-gradient-to-br from-sky-500/10 to-violet-500/10 dark:from-sky-500/15 dark:to-violet-500/15 relative border border-default-200 dark:border-default-100">
             <div className="absolute top-0 right-0 p-4 opacity-10">
               <Zap className="size-20" />
             </div>
-            <h3 className="text-xs font-black uppercase opacity-60 mb-6 flex items-center gap-2 tracking-widest relative z-10">
+            <h3 className="text-xs font-black uppercase text-muted-foreground mb-6 flex items-center gap-2 tracking-widest relative z-10">
               <Eye className="size-3" />
               {t("tailwind.instantSandbox")}
             </h3>
-            <div className="flex items-center justify-center p-8 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm min-h-[150px] relative z-10">
+            <div className="flex items-center justify-center p-8 bg-muted/50 rounded-2xl border border-default-200 backdrop-blur-sm min-h-[150px] relative z-10">
               <div className={cn("transition-all duration-500 p-4 rounded", result?.output || "bg-sky-500 text-white")}>
                 <span className="text-sm font-bold">{result?.output ? t("tailwind.styledElement") : t("tailwind.sampleElement")}</span>
                 {result?.output && (
@@ -166,7 +166,7 @@ export default function TailwindSorterPage() {
                 )}
               </div>
             </div>
-            <p className="text-[10px] text-center mt-4 opacity-40 italic relative z-10">{t("tailwind.sandboxNote")}</p>
+            <p className="text-[10px] text-center mt-4 text-muted-foreground/60 italic relative z-10">{t("tailwind.sandboxNote")}</p>
           </Card>
         </div>
 

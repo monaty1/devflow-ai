@@ -175,9 +175,9 @@ export default function HttpStatusFinderPage() {
           </Card>
 
           {/* Decision Wizard Card */}
-          <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-2xl border-none">
-            <h3 className="text-xs font-black uppercase opacity-60 mb-6 flex items-center gap-2 tracking-widest">
-              <HelpCircle className="size-3 text-cyan-400" /> {t("httpStatus.decisionPipeline")}
+          <Card className="p-6 bg-gradient-to-br from-cyan-500/10 to-violet-500/10 dark:from-cyan-500/15 dark:to-violet-500/15 shadow-2xl shadow-primary/5 border border-default-200 dark:border-default-100">
+            <h3 className="text-xs font-black uppercase text-muted-foreground mb-6 flex items-center gap-2 tracking-widest">
+              <HelpCircle className="size-3 text-cyan-500 dark:text-cyan-400" /> {t("httpStatus.decisionPipeline")}
             </h3>
             <div className="space-y-4">
               {[
@@ -190,11 +190,11 @@ export default function HttpStatusFinderPage() {
                 <button
                   key={i}
                   onClick={() => setSearchInput(item.a)}
-                  className="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5 group hover:bg-white/10 transition-colors cursor-pointer w-full"
+                  className="flex justify-between items-center bg-muted/50 p-3 rounded-xl border border-default-200 group hover:bg-muted transition-colors cursor-pointer w-full"
                 >
-                  <span className="text-[10px] font-bold opacity-80">{item.q}</span>
-                  <ChevronRight className="size-3 opacity-20 group-hover:translate-x-1 transition-transform" />
-                  <span className="text-[10px] font-black uppercase text-cyan-400">{item.a}</span>
+                  <span className="text-[10px] font-bold text-foreground/80">{item.q}</span>
+                  <ChevronRight className="size-3 text-muted-foreground/30 group-hover:translate-x-1 transition-transform" />
+                  <span className="text-[10px] font-black uppercase text-cyan-500 dark:text-cyan-400">{item.a}</span>
                 </button>
               ))}
             </div>
@@ -266,11 +266,11 @@ export default function HttpStatusFinderPage() {
                   </div>
                 </Card>
 
-                <Card className="p-6 bg-slate-900 text-white shadow-xl overflow-hidden relative border-none">
+                <Card className="p-6 bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 dark:from-emerald-500/15 dark:to-cyan-500/15 shadow-xl overflow-hidden relative border border-default-200 dark:border-default-100">
                   <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none"><Server className="size-20" /></div>
                   <div className="flex items-center justify-between mb-6 relative z-10">
-                    <h3 className="text-xs font-black uppercase opacity-60 tracking-widest flex items-center gap-2">
-                      <Activity className="size-4 text-emerald-400" />
+                    <h3 className="text-xs font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2">
+                      <Activity className="size-4 text-emerald-500 dark:text-emerald-400" />
                       {t("httpStatus.liveSimulation")}
                     </h3>
                     <Button size="sm" variant="primary" className="font-black h-8 bg-emerald-500 hover:bg-emerald-600 border-none shadow-lg shadow-emerald-500/20" onPress={() => runMockTest(selectedCode.code)} isLoading={isTesting}>
@@ -283,20 +283,20 @@ export default function HttpStatusFinderPage() {
                         <span className={cn("text-[10px] font-black uppercase px-2 py-0.5 rounded", testResponse.ok ? "bg-emerald-500/20 text-emerald-400" : "bg-rose-500/20 text-rose-400")}>
                           {testResponse.ok ? t("httpStatus.httpOk") : t("httpStatus.errorSignal")}
                         </span>
-                        <span className="text-[10px] font-mono opacity-40">{testResponse.time}ms</span>
+                        <span className="text-[10px] font-mono text-muted-foreground/60">{testResponse.time}ms</span>
                       </div>
-                      <div className="p-4 bg-black/40 rounded-2xl font-mono text-[10px] h-40 overflow-auto border border-white/5 scrollbar-hide">
+                      <div className="p-4 bg-muted/80 dark:bg-muted rounded-2xl font-mono text-[10px] h-40 overflow-auto border border-default-200 scrollbar-hide">
                         {Object.entries(testResponse.headers).map(([k, v]) => (
                           <div key={k} className="mb-1.5 flex gap-2">
-                            <span className="text-white/30 shrink-0 capitalize">{k}:</span>
-                            <span className="text-emerald-400/80 break-all">{v}</span>
+                            <span className="text-muted-foreground/50 shrink-0 capitalize">{k}:</span>
+                            <span className="text-emerald-600 dark:text-emerald-400/80 break-all">{v}</span>
                           </div>
                         ))}
                       </div>
                     </div>
                   ) : (
-                    <div className="h-40 flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-2xl text-center p-6 relative z-10">
-                      <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest">{t("httpStatus.awaitingExecution")}</p>
+                    <div className="h-40 flex flex-col items-center justify-center border-2 border-dashed border-default-200 rounded-2xl text-center p-6 relative z-10">
+                      <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">{t("httpStatus.awaitingExecution")}</p>
                     </div>
                   )}
                 </Card>

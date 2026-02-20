@@ -243,19 +243,19 @@ export default function TokenVisualizerPage() {
 
           {/* Efficiency Audit Card */}
           {visualization && (
-            <Card className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl shadow-slate-500/20 border-none">
-              <h3 className="text-xs font-black uppercase opacity-60 mb-4 tracking-widest flex items-center gap-2">
+            <Card className="p-6 bg-gradient-to-br from-violet-500/10 to-amber-500/10 dark:from-violet-500/15 dark:to-amber-500/15 shadow-xl shadow-primary/5 border border-default-200 dark:border-default-100">
+              <h3 className="text-xs font-black uppercase text-muted-foreground mb-4 tracking-widest flex items-center gap-2">
                 <ShieldAlert className="size-3" /> {t("tokenViz.tokenAudit")}
               </h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-end">
-                  <span className="text-[10px] font-bold uppercase opacity-60">{t("tokenViz.optimization")}</span>
+                  <span className="text-[10px] font-bold uppercase text-muted-foreground/60">{t("tokenViz.optimization")}</span>
                   <span className={cn("text-xl font-black", visualization.efficiencyScore > 80 ? "text-emerald-400" : "text-amber-400")}>
                     {visualization.efficiencyScore}%
                   </span>
                 </div>
                 <div className="space-y-1.5">
-                  <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                  <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
                     <div 
                       className="h-full bg-primary" 
                       style={{ width: `${Math.min(100, visualization.efficiencyScore)}%` }} 
@@ -263,9 +263,9 @@ export default function TokenVisualizerPage() {
                   </div>
                 </div>
                 {visualization.wasteCount > 0 && (
-                  <div className="p-3 bg-white/5 rounded-xl border border-white/10">
-                    <p className="text-[10px] text-amber-300 font-bold mb-1 uppercase tracking-tighter">{t("tokenViz.wastedDetected")}</p>
-                    <p className="text-xs opacity-70 italic">{t("tokenViz.wastedFound", { count: String(visualization.wasteCount) })}</p>
+                  <div className="p-3 bg-muted/50 rounded-xl border border-default-200">
+                    <p className="text-[10px] text-amber-600 dark:text-amber-300 font-bold mb-1 uppercase tracking-tighter">{t("tokenViz.wastedDetected")}</p>
+                    <p className="text-xs text-muted-foreground italic">{t("tokenViz.wastedFound", { count: String(visualization.wasteCount) })}</p>
                   </div>
                 )}
               </div>

@@ -150,14 +150,14 @@ function AnatomyRadar({ dimensions, compareDimensions }: { dimensions: PromptDim
       })}
       {/* Compare fill (if present) */}
       {compareDimensions && (
-        <path d={toPath(compareDimensions)} fill="rgb(168 85 247 / 0.12)" stroke="rgb(168 85 247)" strokeWidth={1} strokeDasharray="3 2" />
+        <path d={toPath(compareDimensions)} className="fill-violet-500/12 stroke-violet-500 dark:fill-violet-400/12 dark:stroke-violet-400" strokeWidth={1} strokeDasharray="3 2" />
       )}
       {/* Main fill */}
-      <path d={toPath(dimensions)} fill="rgb(59 130 246 / 0.15)" stroke="rgb(59 130 246)" strokeWidth={1.5} />
+      <path d={toPath(dimensions)} className="fill-blue-500/15 stroke-blue-500 dark:fill-blue-400/15 dark:stroke-blue-400" strokeWidth={1.5} />
       {/* Dots */}
       {dimensions.map((d, i) => {
         const p = getPoint(i, d.score);
-        return <circle key={i} cx={p.x} cy={p.y} r={2.5} fill="rgb(59 130 246)" />;
+        return <circle key={i} cx={p.x} cy={p.y} r={2.5} className="fill-blue-500 dark:fill-blue-400" />;
       })}
     </svg>
   );
