@@ -23,6 +23,7 @@ import {
   ChevronDown,
   Plus,
   Columns,
+  Search,
 } from "lucide-react";
 import { Button } from "./button";
 import { useTranslation } from "@/hooks/use-translation";
@@ -136,13 +137,16 @@ export function DataTable<T extends { id: string | number }>({
     return (
       <div className="flex flex-col gap-4">
         <div className="flex justify-between gap-3 items-end">
-          <Input
-            className="w-full sm:max-w-[44%]"
-            placeholder={placeholder ?? t("tools.search")}
-            value={filterValue}
-            onChange={(e) => onSearchChange(e.target.value)}
-            variant="primary"
-          />
+          <div className="relative w-full sm:max-w-[44%]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-default-400 pointer-events-none" />
+            <Input
+              className="w-full pl-9"
+              placeholder={placeholder ?? t("tools.search")}
+              value={filterValue}
+              onChange={(e) => onSearchChange(e.target.value)}
+              variant="primary"
+            />
+          </div>
           <div className="flex gap-3">
             {statusOptions && (
               <Dropdown>
@@ -244,13 +248,16 @@ export function DataTable<T extends { id: string | number }>({
   return (
     <Table
       isHeaderSticky
+      shadow="md"
+      radius="lg"
       aria-label={ariaLabel ?? t("table.ariaLabel")}
       bottomContent={bottomContent}
       bottomContentPlacement="outside"
       classNames={{
-        wrapper: "max-h-[500px] border border-divider shadow-sm rounded-2xl bg-content1",
-        th: "bg-default-100 text-default-600 font-bold text-tiny uppercase border-b border-divider",
-        td: "py-3 border-b border-divider/50 last:border-none",
+        wrapper: "max-h-[500px]",
+        th: "uppercase tracking-wider",
+        td: "py-3.5",
+        tr: "border-b border-divider/20 last:border-b-0",
       }}
       selectedKeys={selectedKeys}
       selectionMode="multiple"
