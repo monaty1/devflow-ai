@@ -11,7 +11,6 @@ import {
   SortDescriptor,
 } from "@heroui/table";
 import {
-  Input,
   DropdownTrigger,
   Dropdown,
   DropdownMenu,
@@ -70,7 +69,7 @@ export function DataTable<T extends { id: string | number }>({
     new Set(initialVisibleColumns || columns.map(c => c.uid))
   );
   const [statusFilter, setStatusFilter] = useState<Selection>("all");
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
     column: columns[0]?.uid ?? "",
     direction: "ascending",
@@ -137,14 +136,13 @@ export function DataTable<T extends { id: string | number }>({
     return (
       <div className="flex flex-col gap-4">
         <div className="flex justify-between gap-3 items-end">
-          <div className="relative w-full sm:max-w-[300px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-default-400 pointer-events-none" />
-            <Input
-              className="w-full pl-9 bg-default-100"
+          <div className="relative w-full sm:max-w-[44%]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-default-400 pointer-events-none z-10" />
+            <input
+              className="w-full h-10 pl-10 pr-3 rounded-xl bg-default-100 text-sm text-foreground placeholder:text-default-400 outline-none border-none focus:ring-2 focus:ring-primary/40 transition-shadow"
               placeholder={placeholder ?? t("tools.search")}
               value={filterValue}
               onChange={(e) => onSearchChange(e.target.value)}
-              variant="primary"
             />
           </div>
           <div className="flex gap-3">
@@ -153,7 +151,7 @@ export function DataTable<T extends { id: string | number }>({
                 <DropdownTrigger className="hidden sm:flex">
                   <Button variant="ghost" className="gap-2">
                     {statusLabel ?? t("table.status")}
-                    <ChevronDown className="text-small" aria-hidden="true" />
+                    <ChevronDown className="size-4" aria-hidden="true" />
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu
@@ -205,8 +203,8 @@ export function DataTable<T extends { id: string | number }>({
           <label className="flex items-center text-default-400 text-small gap-1.5">
             {t("table.rowsPerPage")}
             <select
-              className="bg-default-100 outline-none text-default-500 text-xs font-medium cursor-pointer rounded-lg px-2 py-1"
-              onChange={(e) => setRowsPerPage(Number(e.target.value))}
+              className="bg-default-100 outline-none text-default-400 text-small font-medium cursor-pointer rounded-lg px-2 py-1 border-none"
+              onChange={(e) => { setRowsPerPage(Number(e.target.value)); setPage(1); }}
               value={rowsPerPage}
             >
               <option value="5">5</option>
@@ -249,16 +247,18 @@ export function DataTable<T extends { id: string | number }>({
   return (
     <Table
       isHeaderSticky
-      shadow="md"
-      radius="lg"
       aria-label={ariaLabel ?? t("table.ariaLabel")}
       bottomContent={bottomContent}
       bottomContentPlacement="outside"
       classNames={{
-        wrapper: "max-h-[500px] bg-content1 shadow-small rounded-large",
-        th: "bg-default-100 text-default-500 text-xs font-semibold uppercase tracking-wider py-3 first:rounded-tl-lg last:rounded-tr-lg",
-        td: "py-3 text-small",
-        tr: "border-b border-divider/10 last:border-b-0 hover:bg-default-50 transition-colors data-[selected=true]:bg-default-100",
+        base: "devflow-table",
+        wrapper: "max-h-[500px] bg-content1 shadow-small rounded-large p-0 overflow-auto",
+        table: "min-w-full",
+        thead: "[&>tr]:first-of-type:rounded-lg",
+        th: "bg-default-100 text-foreground-500 text-tiny font-semibold uppercase tracking-wider h-10 px-3 first:rounded-tl-lg last:rounded-tr-lg",
+        td: "py-2 px-3 align-middle text-small whitespace-nowrap",
+        tr: "border-b border-divider last:border-b-0 transition-colors hover:bg-default-50 data-[selected=true]:bg-default-100 outline-none cursor-default",
+        emptyWrapper: "h-40",
       }}
       selectedKeys={selectedKeys}
       selectionMode="multiple"
