@@ -5,6 +5,27 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.1] - 2026-02-20
+
+### DataTable v3 Migration, Coverage & i18n Fixes
+
+#### DataTable — HeroUI v3 Migration
+- **Dropdown popover fix** — migrated from v2-style API (`DropdownTrigger`, `DropdownMenu`, `DropdownItem`) to v3 compound pattern (`Dropdown.Popover`, `Dropdown.Menu`, `Dropdown.Item` with `ItemIndicator` + `Label`). Menus now render in proper floating popovers instead of inline
+- **Pagination horizontal fix** — added `@source "../node_modules/@heroui/theme/dist"` so Tailwind v4 scans HeroUI v2 utility classes (`flex-nowrap`, `h-fit`, `max-w-fit`, etc.). Fixed CSS child combinator to prevent `data-slot="wrapper"` matching both table wrapper and pagination `<ul>`
+- **Duplicate key fix** — removed `Date.now()` suffix from `calculateCost()` IDs; `model.id` is already unique (LiteLLM JSON keys). Eliminates React "two children with same key" warnings
+- **Button nesting fix** — replaced `Dropdown.Trigger > Button` (button-in-button) with Button as direct child of Dropdown, fixing hydration warnings
+
+#### Coverage — regex-humanizer.ts (CI blocker)
+- **42 new tests** (92 → 134 total) covering `performSafetyAnalysis`, `explainCharClass`, `explainGroup`, `explainQuantifier`, `findMatchingBracket`, `extractGroups`, `buildExplanation`, `detectCommonPattern`
+- Function coverage: 67.46% → 94%+, unblocking CI
+
+#### i18n
+- **5 Spanish translations** — "open source" → "codigo abierto" in `dashboard.allFree`, `home.openSource`, `home.powerfulToolsDesc`, `home.ctaTitle`, `home.footerFreeOS`
+
+#### Housekeeping
+- **.gitignore** — added `playwright-report/`, `test-results/`, reference screenshots, `audit_report.md`
+- **1067 tests passing** (up from 1025, +42 new tests)
+
 ## [3.5.0] - 2026-02-20
 
 ### Full Project Audit: 8 Bug Fixes, DataTable Upgrade, i18n for 6 Libs, 1025 Tests

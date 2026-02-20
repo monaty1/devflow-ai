@@ -75,3 +75,15 @@ EBOOK_200_PROMPTS_MDEV1.pdf
 
 free-llm-api-resources-main
 audit-report.md
+audit_report.md
+
+# Playwright artifacts
+/playwright-report/
+/test-results/
+
+# Reference screenshots (local only)
+tabla1.png
+tabla2.png
+APICostCalculator.png
+codereview.png
+hero.png

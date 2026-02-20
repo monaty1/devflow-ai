@@ -21,7 +21,7 @@ export function calculateCost(
     : undefined;
 
   return {
-    id: `${model.id}-${Date.now()}`,
+    id: model.id,
     model,
     inputTokens,
     outputTokens,
