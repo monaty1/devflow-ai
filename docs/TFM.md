@@ -20,10 +20,10 @@ DevFlow AI es una plataforma open-source que centraliza **15 herramientas** esen
 
 - 15 herramientas funcionales end-to-end
 - 100% ejecucion local (sin APIs externas para procesamiento)
-- 644 tests con coverage estrategico 100/80/0 per-file
+- 942+ tests con coverage estrategico 100/80/0 per-file
 - Lighthouse score **100/100/100/100** en Desktop
 - Homepage optimizada con Server Components (RSC) para rendimiento movil
-- Internacionalizacion completa (English/Castellano, 559 claves)
+- Internacionalizacion completa (English/Castellano, ~1374 claves)
 - Deploy en produccion con CI/CD y error tracking (Sentry)
 
 ---
@@ -47,7 +47,7 @@ Ademas, los desarrolladores frontend enfrentan tareas repetitivas diarias: forma
 
 - Aplicar React 19 y Next.js 16 con App Router y Server Components
 - Implementar Clean Architecture en un proyecto real de 15 herramientas
-- Crear una suite de tests comprehensiva (644 tests) con Vitest
+- Crear una suite de tests comprehensiva (942+ tests) con Vitest
 - Utilizar IA generativa (Claude Code) como herramienta de desarrollo
 - Demostrar dominio de TypeScript 5 en modo maximo estricto
 
@@ -55,7 +55,7 @@ Ademas, los desarrolladores frontend enfrentan tareas repetitivas diarias: forma
 
 - Construir 15 herramientas funcionales con patron arquitectonico consistente
 - Lograr coverage estrategico 100/80/0 con enforcement per-file
-- Deploy en produccion con CI/CD completo (lint, type-check, tests, build)
+- Deploy en produccion con CI/CD completo (7 jobs: lint, type-check, tests, security, build, e2e, SAST)
 - Lighthouse score 100 en todas las metricas (Desktop)
 - Internacionalizacion completa (EN/ES)
 - Seguridad enterprise: CSP, HSTS, prototype pollution protection
@@ -190,7 +190,7 @@ La calidad de un prompt impacta directamente en la respuesta del LLM. Tecnicas c
 
 **RF-18: Internacionalizacion**
 
-- 559 claves traducidas en English y Castellano
+- ~1374 claves traducidas en English y Castellano
 - Cambio de idioma en tiempo real sin recarga
 
 ### 3.2 Requisitos No Funcionales
@@ -399,7 +399,7 @@ page.tsx (Server Component - async)
 
 **Sistema custom ligero** (sin dependencia de i18next):
 
-- 559 claves de traduccion en `locales/en.json` y `locales/es.json`
+- ~1374 claves de traduccion en `locales/en.json` y `locales/es.json`
 - Hook `useTranslation()` con interpolacion `{key}`
 - Funcion server-side `t()` para Server Components
 - Cambio de idioma instantaneo via Zustand
@@ -445,9 +445,9 @@ Modelo de coverage estrategico con enforcement per-file:
 ### 5.2 Resultados de Tests
 
 ```
-Test Files  20 passed (20)
-Tests       644 passed (644)
-Duration    ~9s
+Test Files  25 passed (25)
+Tests       942 passed (942)
+Duration    ~26s
 ```
 
 **Distribucion por herramienta:**
@@ -469,7 +469,7 @@ Duration    ~9s
 | cost-calculator      | 17    | 146    | Bueno     |
 | token-visualizer     | 19    | ~180   | Bueno     |
 | context-manager      | 16    | ~150   | Bueno     |
-| + 4 component tests  | 41    | ~380   | Bueno     |
+| + 5 component tests  | 55    | ~480   | Bueno     |
 | + 1 domain test      | 4     | 44     | Basico    |
 
 ### 5.3 Tipos de Tests Implementados
@@ -547,7 +547,7 @@ GitHub Actions ejecuta en cada push a `main`/`develop` y todas las PRs:
 │  Job 1: QUALITY (paralelo)                          │
 │  ├─ npm run lint           (ESLint 9)               │
 │  ├─ npm run type-check     (tsc --noEmit strict)    │
-│  ├─ npm run test:coverage  (644 tests + thresholds) │
+│  ├─ npm run test:coverage  (942+ tests + thresholds)│
 │  └─ Upload coverage artifacts (14 dias)             │
 │                                                      │
 │  Job 2: SECURITY (paralelo)                         │
@@ -584,9 +584,9 @@ GitHub Actions ejecuta en cada push a `main`/`develop` y todas las PRs:
 | Archivos fuente (.ts/.tsx) | 147              |
 | Componentes React          | 21               |
 | Custom hooks               | 20               |
-| Tests                      | 644              |
+| Tests                      | 942+             |
 | Paginas (routes)           | 24               |
-| Claves i18n                | 559 (x2 idiomas) |
+| Claves i18n                | ~1374 (x2 idiomas)|
 | Commits                    | 28+              |
 | Dependencias produccion    | 18               |
 
@@ -616,7 +616,7 @@ GitHub Actions ejecuta en cada push a `main`/`develop` y todas las PRs:
 - TypeScript strict mode ✓
 - Dark/Light mode con deteccion automatica ✓
 - i18n completo (EN/ES) ✓
-- Tests (644 passing) ✓
+- Tests (942+ passing) ✓
 - CI/CD pipeline ✓
 - Deploy en produccion ✓
 
@@ -644,7 +644,7 @@ GitHub Actions ejecuta en cada push a `main`/`develop` y todas las PRs:
 1. **Producto funcional end-to-end:** 15 herramientas reales desplegadas en produccion con 24 rutas navegables
 2. **Arquitectura ejemplar:** Clean Architecture con patron 5-capas replicado sin excepciones en las 15 herramientas
 3. **Performance maxima:** Lighthouse 100/100/100/100, Server Components, ISR
-4. **Testing robusto:** 644 tests reales con aserciones significativas, coverage per-file
+4. **Testing robusto:** 942+ tests reales con aserciones significativas, coverage per-file
 5. **Seguridad enterprise:** CSP sin unsafe-eval, HSTS 2 anos, prototype pollution protection, Dependabot
 6. **Developer Experience:** TypeScript strict, ESLint, CI/CD con 3 quality gates
 
@@ -747,7 +747,7 @@ Archivos clave:
 - `lib/application/*.ts` - Logica pura de las 15 herramientas
 - `hooks/use-*.ts` - 20 custom hooks
 - `app/(dashboard)/tools/*/page.tsx` - UI de cada herramienta
-- `tests/unit/application/*.test.ts` - Suite de 644 tests
+- `tests/unit/application/*.test.ts` - Suite de 942+ tests
 
 ### Anexo C: Demo en Produccion
 

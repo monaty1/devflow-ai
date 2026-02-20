@@ -60,8 +60,8 @@ export function Navbar() {
                   "relative inline-flex cursor-pointer items-center gap-2 px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-md",
                   "after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:h-0.5 after:rounded-full after:bg-primary after:transition-all after:duration-300",
                   isActive
-                    ? "text-foreground after:w-3/4"
-                    : "text-muted-foreground hover:text-foreground after:w-0 hover:after:w-1/2"
+                    ? "text-foreground after:w-full"
+                    : "text-muted-foreground hover:text-foreground after:w-0 hover:after:w-full"
                 )}
               >
                 <link.icon className="size-4" />

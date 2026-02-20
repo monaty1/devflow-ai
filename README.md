@@ -15,7 +15,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Tailwind](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 
-**[English](#-what-is-this)** &middot; **[Castellano](#-para-que-sirve)** &middot; **[TFM Documento](./docs/TFM.md)** &middot; **[TFM Slides (PDF)](./docs/TFM-Slides.pdf)**
+**[English](#what-is-this)** &middot; **[Castellano](#para-que-sirve)** &middot; **[TFM Documento](./docs/TFM.md)** &middot; **[TFM Slides (PDF)](./docs/TFM-Slides.pdf)**
 
 </div>
 
