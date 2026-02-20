@@ -4,6 +4,11 @@
 /* HeroUI v2 theme plugin — required for v2 components (Table, Pagination) */
 @plugin "../heroui-v2-plugin.js";
 
+/* Tell Tailwind v4 to scan HeroUI v2 theme dist for utility class names.
+   Without this, classes like flex-nowrap, gap-1, etc. used internally by
+   HeroUI v2 components (Table, Pagination) won't be generated. */
+@source "../node_modules/@heroui/theme/dist";
+
 /* ============================================
    DevFlow AI - Design System
    Tailwind CSS v4 - CSS-first configuration
@@ -188,24 +193,19 @@
 
 /* =============================================
    HeroUI v2 Table & Pagination — full component
-   CSS for reliable rendering under Tailwind v4
+   CSS for reliable rendering under Tailwind v4.
+   Key: Use > (child combinator) for table wrapper
+   to avoid styling the Pagination wrapper too.
    ============================================= */
 
-/* --- Table structural layout --- */
+/* --- Table base container --- */
 .devflow-table {
   width: 100%;
   position: relative;
 }
 
-.devflow-table [data-slot="base"] {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  gap: 1rem;
-  width: 100%;
-}
-
-.devflow-table [data-slot="wrapper"] {
+/* Table wrapper — DIRECT child only (not Pagination's [data-slot="wrapper"]) */
+.devflow-table > [data-slot="wrapper"] {
   display: flex;
   flex-direction: column;
   position: relative;
@@ -215,7 +215,7 @@
   border-radius: 14px;
 }
 
-.dark .devflow-table [data-slot="wrapper"] {
+.dark .devflow-table > [data-slot="wrapper"] {
   box-shadow: 0 0 5px 0 rgb(0 0 0 / 0.05), 0 2px 10px 0 rgb(0 0 0 / 0.2), inset 0 0 1px 0 rgb(255 255 255 / 0.15);
 }
 
@@ -225,8 +225,8 @@
   table-layout: auto;
 }
 
-/* --- Header row --- */
-.devflow-table [data-slot="thead"] {
+/* --- Header --- */
+.devflow-table thead {
   position: sticky;
   top: 0;
   z-index: 20;
@@ -254,21 +254,21 @@
 }
 
 /* --- Body rows --- */
-.devflow-table [data-slot="tbody"] tr {
+.devflow-table tbody tr {
   border-bottom: 1px solid var(--color-divider);
   outline: none;
   transition: background-color 0.15s ease;
 }
 
-.devflow-table [data-slot="tbody"] tr:last-child {
+.devflow-table tbody tr:last-child {
   border-bottom: none;
 }
 
-.devflow-table [data-slot="tbody"] tr:hover {
+.devflow-table tbody tr:hover {
   background-color: var(--color-default-50);
 }
 
-.devflow-table [data-slot="tbody"] tr[data-selected="true"] {
+.devflow-table tbody tr[data-selected="true"] {
   background-color: var(--color-default-100);
 }
 
@@ -278,6 +278,7 @@
   vertical-align: middle;
   font-size: 0.875rem;
   line-height: 1.25rem;
+  white-space: nowrap;
 }
 
 /* --- Sort icon --- */
@@ -296,21 +297,6 @@
   transform: rotate(180deg);
 }
 
-/* --- Selection checkboxes --- */
-.devflow-table th:first-child,
-.devflow-table td:first-child {
-  width: 2.5rem;
-  max-width: 2.5rem;
-  text-align: center;
-}
-
-.devflow-table th:first-child [data-slot="wrapper"],
-.devflow-table td:first-child [data-slot="wrapper"] {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 /* --- Empty state --- */
 .devflow-table [data-slot="emptyWrapper"] {
   display: flex;
@@ -320,15 +306,56 @@
   color: var(--color-default-400);
 }
 
-/* --- Pagination --- */
-.devflow-table + div [data-slot="pagination"],
-[data-slot="pagination"] {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
+/* =============================================
+   HeroUI v2 Pagination component CSS
+   DOM: <nav data-slot="base">
+          <ul data-slot="wrapper">
+            <span data-slot="cursor">  (animated indicator)
+            <li data-slot="prev">
+            <li data-slot="item">      (page numbers)
+            <li data-slot="next">
+   ============================================= */
+
+nav[data-slot="base"] {
+  padding: 0.625rem;
+  overflow-x: auto;
 }
 
-[data-slot="pagination"] [data-slot="item"] {
+nav[data-slot="base"] > ul[data-slot="wrapper"] {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center;
+  gap: 0.25rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  position: relative;
+  height: fit-content;
+  max-width: fit-content;
+}
+
+/* Pagination cursor (animated active page indicator) */
+nav[data-slot="base"] [data-slot="cursor"] {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  border-radius: 0.625rem;
+  background-color: var(--color-primary);
+  color: var(--color-primary-foreground);
+  font-weight: 600;
+  font-size: 0.875rem;
+  z-index: 20;
+  pointer-events: none;
+  user-select: none;
+  transition: transform 0.3s ease;
+}
+
+/* Page number items */
+nav[data-slot="base"] li[data-slot="item"] {
   min-width: 2rem;
   height: 2rem;
   display: inline-flex;
@@ -342,18 +369,19 @@
   color: var(--color-foreground);
 }
 
-[data-slot="pagination"] [data-slot="item"]:hover {
+nav[data-slot="base"] li[data-slot="item"]:hover {
   background-color: var(--color-default-100);
 }
 
-[data-slot="pagination"] [data-slot="item"][data-active="true"] {
+nav[data-slot="base"] li[data-slot="item"][data-active="true"] {
   background-color: var(--color-primary);
   color: var(--color-primary-foreground);
   font-weight: 600;
 }
 
-[data-slot="pagination"] [data-slot="prev"],
-[data-slot="pagination"] [data-slot="next"] {
+/* Prev / Next buttons */
+nav[data-slot="base"] li[data-slot="prev"],
+nav[data-slot="base"] li[data-slot="next"] {
   min-width: 2rem;
   height: 2rem;
   display: inline-flex;
@@ -365,15 +393,16 @@
   color: var(--color-foreground);
 }
 
-[data-slot="pagination"] [data-slot="prev"]:hover,
-[data-slot="pagination"] [data-slot="next"]:hover {
+nav[data-slot="base"] li[data-slot="prev"]:hover,
+nav[data-slot="base"] li[data-slot="next"]:hover {
   background-color: var(--color-default-100);
 }
 
-[data-slot="pagination"] [data-slot="prev"][data-disabled="true"],
-[data-slot="pagination"] [data-slot="next"][data-disabled="true"] {
+nav[data-slot="base"] li[data-slot="prev"][data-disabled="true"],
+nav[data-slot="base"] li[data-slot="next"][data-disabled="true"] {
   opacity: 0.4;
   cursor: not-allowed;
+  pointer-events: none;
 }
 
 /* Base Styles */
