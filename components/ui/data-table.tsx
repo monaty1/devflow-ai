@@ -11,10 +11,8 @@ import {
   SortDescriptor,
 } from "@heroui/table";
 import {
-  DropdownTrigger,
   Dropdown,
-  DropdownMenu,
-  DropdownItem,
+  Label,
 } from "@heroui/react";
 import { Pagination } from "@heroui/pagination";
 import type { Selection } from "@heroui/react";
@@ -148,47 +146,49 @@ export function DataTable<T extends { id: string | number }>({
           <div className="flex gap-3">
             {statusOptions && (
               <Dropdown>
-                <DropdownTrigger className="hidden sm:flex">
-                  <Button variant="ghost" className="gap-2">
-                    {statusLabel ?? t("table.status")}
-                    <ChevronDown className="size-4" aria-hidden="true" />
-                  </Button>
-                </DropdownTrigger>
-                <DropdownMenu
-                  disallowEmptySelection
-                  aria-label={statusLabel ?? t("table.status")}
-                  selectedKeys={statusFilter}
-                  selectionMode="multiple"
-                  onSelectionChange={setStatusFilter}
-                >
-                  {statusOptions.map((status) => (
-                    <DropdownItem key={status.uid} className="capitalize">
-                      {status.name}
-                    </DropdownItem>
-                  ))}
-                </DropdownMenu>
+                <Button variant="ghost" className="hidden sm:flex gap-2" aria-label={statusLabel ?? t("table.status")}>
+                  {statusLabel ?? t("table.status")}
+                  <ChevronDown className="size-4" aria-hidden="true" />
+                </Button>
+                <Dropdown.Popover>
+                  <Dropdown.Menu
+                    disallowEmptySelection
+                    aria-label={statusLabel ?? t("table.status")}
+                    selectedKeys={statusFilter}
+                    selectionMode="multiple"
+                    onSelectionChange={setStatusFilter}
+                  >
+                    {statusOptions.map((status) => (
+                      <Dropdown.Item key={status.uid} id={status.uid} textValue={status.name} className="capitalize">
+                        <Dropdown.ItemIndicator />
+                        <Label>{status.name}</Label>
+                      </Dropdown.Item>
+                    ))}
+                  </Dropdown.Menu>
+                </Dropdown.Popover>
               </Dropdown>
             )}
             <Dropdown>
-              <DropdownTrigger className="hidden sm:flex">
-                <Button variant="ghost" className="gap-2">
-                  {t("table.columns")}
-                  <Columns className="size-4" aria-hidden="true" />
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                disallowEmptySelection
-                aria-label={t("table.columns")}
-                selectedKeys={visibleColumns}
-                selectionMode="multiple"
-                onSelectionChange={setVisibleColumns}
-              >
-                {columns.map((column) => (
-                  <DropdownItem key={column.uid} className="capitalize">
-                    {column.name}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
+              <Button variant="ghost" className="hidden sm:flex gap-2" aria-label={t("table.columns")}>
+                {t("table.columns")}
+                <Columns className="size-4" aria-hidden="true" />
+              </Button>
+              <Dropdown.Popover>
+                <Dropdown.Menu
+                  disallowEmptySelection
+                  aria-label={t("table.columns")}
+                  selectedKeys={visibleColumns}
+                  selectionMode="multiple"
+                  onSelectionChange={setVisibleColumns}
+                >
+                  {columns.map((column) => (
+                    <Dropdown.Item key={column.uid} id={column.uid} textValue={column.name} className="capitalize">
+                      <Dropdown.ItemIndicator />
+                      <Label>{column.name}</Label>
+                    </Dropdown.Item>
+                  ))}
+                </Dropdown.Menu>
+              </Dropdown.Popover>
             </Dropdown>
             {onAdd && (
               <Button variant="primary" className="gap-2" onPress={onAdd}>
