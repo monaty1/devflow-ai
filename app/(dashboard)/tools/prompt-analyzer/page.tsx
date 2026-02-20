@@ -265,7 +265,7 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="mx-auto max-w-5xl space-y-6">
       {/* Header */}
       <ToolHeader
         icon={ScanSearch}
@@ -420,16 +420,14 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
         <div className="space-y-6">
           {/* Score Card */}
           <Card className="p-6">
-            <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
-              <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+              {/* Zone 1: Score badge + delta */}
+              <div className="flex flex-col items-center gap-2 shrink-0">
                 <ScoreBadge
                   score={result.score}
                   category={result.category}
                   size="lg"
                 />
-                <div className="size-[140px]">
-                  <AnatomyRadar dimensions={result.dimensions} compareDimensions={compareItem?.dimensions} />
-                </div>
                 {compareItem && scoreDelta && (
                   <div className="flex items-center gap-1 text-xs">
                     {scoreDelta.overall > 0 ? (
@@ -446,6 +444,15 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
                   </div>
                 )}
               </div>
+
+              {/* Zone 2: Radar chart - centered, larger */}
+              <div className="flex-1 flex justify-center">
+                <div className="size-[220px]">
+                  <AnatomyRadar dimensions={result.dimensions} compareDimensions={compareItem?.dimensions} />
+                </div>
+              </div>
+
+              {/* Zone 3: Text info */}
               <div className="flex-1 text-center sm:text-left">
                 <div className="flex items-start justify-between">
                   <h2 className="text-xl font-semibold text-foreground">
@@ -472,11 +479,11 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
                     <span>{t("promptAnalyzer.securityFlags", { count: result.securityFlags.length })}</span>
                   </div>
                 </div>
-                
+
                 <div className="mt-4 flex gap-2">
-                  <Button 
-                    size="sm" 
-                    variant="ghost" 
+                  <Button
+                    size="sm"
+                    variant="ghost"
                     onPress={() => navigateTo("token-visualizer", result.prompt)}
                   >
                     <ScanSearch className="mr-1.5 size-3.5" />
@@ -553,7 +560,7 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
                             })()}
                           </div>
                         </div>
-                        <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                        <div className="mt-1.5 h-2.5 w-full overflow-hidden rounded-full bg-muted">
                           <div
                             className={`h-full rounded-full transition-all duration-500 ${barColor}`}
                             style={{ width: `${dim.score}%` }}

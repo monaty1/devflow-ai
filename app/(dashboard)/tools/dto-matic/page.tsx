@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import {
   Tabs,
   Chip,
@@ -28,10 +28,10 @@ import { ToolHeader } from "@/components/shared/tool-header";
 import { useDtoMatic } from "@/hooks/use-dto-matic";
 import { useTranslation } from "@/hooks/use-translation";
 import { CopyButton } from "@/components/shared/copy-button";
-import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
+import { Button, Card } from "@/components/ui";
 import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { cn } from "@/lib/utils";
-import type { TargetLanguage, GeneratedFile } from "@/types/dto-matic";
+import type { TargetLanguage } from "@/types/dto-matic";
 
 export default function DtoMaticPage() {
   const { t } = useTranslation();
@@ -59,61 +59,6 @@ export default function DtoMaticPage() {
   const [view, setView] = useState<"code" | "schema" | "mock" | string>("code");
   const [mockCount, setMockCount] = useState(5);
 
-  const fileColumns: ColumnConfig[] = [
-    { name: t("table.colFileName"), uid: "name", sortable: true },
-    { name: t("table.colType"), uid: "type", sortable: true },
-    { name: t("table.colLang"), uid: "language" },
-    { name: t("table.colActions"), uid: "actions" },
-  ];
-
-  const renderFileCell = useCallback((file: GeneratedFile, columnKey: React.Key) => {
-    const key = columnKey.toString();
-    switch (key) {
-      case "name":
-        return (
-          <div
-            role="button"
-            tabIndex={0}
-            className="flex items-center gap-3 cursor-pointer group"
-            onClick={() => setSelectedFileId(file.id)}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedFileId(file.id); } }}
-            aria-label={file.name}
-            aria-pressed={selectedFileId === file.id}
-          >
-            <div className={cn("p-1.5 rounded-lg transition-colors group-hover:bg-primary/10", selectedFileId === file.id ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground")}>
-              <FileCode className="size-4" aria-hidden="true" />
-            </div>
-            <span className={cn("text-sm font-medium transition-colors", selectedFileId === file.id ? "text-primary font-bold" : "group-hover:text-foreground")}>
-              {file.name}
-            </span>
-          </div>
-        );
-      case "type":
-        const typeColors: Record<string, string> = {
-          interface: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-200",
-          entity: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200",
-          mapper: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-200",
-          zod: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200",
-          struct: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-200",
-          class: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-200",
-        };
-        return (
-          <Chip size="sm" variant="primary" className={cn("capitalize text-[10px] font-black h-6", typeColors[file.type] || "bg-gray-100")}>
-            {file.type}
-          </Chip>
-        );
-      case "language":
-        return <span className="text-[10px] uppercase font-bold text-muted-foreground">{file.language}</span>;
-      case "actions":
-        return (
-          <div className="flex gap-1">
-            <CopyButton text={file.content} variant="ghost" size="sm" />
-          </div>
-        );
-      default:
-        return String(file[key as keyof typeof file] ?? "");
-    }
-  }, [selectedFileId, setSelectedFileId]);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
@@ -285,17 +230,17 @@ export default function DtoMaticPage() {
                   <p className="text-[10px] font-black uppercase text-green-600 mb-1">{t("dtoMatic.totalTypes")}</p>
                   <p className="text-2xl font-black text-green-700 dark:text-green-400">{result.stats.totalTypes}</p>
                 </Card>
-                <Card className="p-4 bg-muted/30 text-center">
-                  <p className="text-[10px] font-black uppercase text-muted-foreground mb-1">{t("dtoMatic.nestedObjects")}</p>
-                  <p className="text-2xl font-black">{result.stats.nestedObjects}</p>
+                <Card className="p-4 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border-blue-500/20 text-center">
+                  <p className="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 mb-1">{t("dtoMatic.nestedObjects")}</p>
+                  <p className="text-2xl font-black text-blue-700 dark:text-blue-400">{result.stats.nestedObjects}</p>
                 </Card>
-                <Card className="p-4 bg-muted/30 text-center">
-                  <p className="text-[10px] font-black uppercase text-muted-foreground mb-1">{t("dtoMatic.arraysLabel")}</p>
-                  <p className="text-2xl font-black">{result.stats.arrays}</p>
+                <Card className="p-4 bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/20 text-center">
+                  <p className="text-[10px] font-black uppercase text-amber-600 dark:text-amber-400 mb-1">{t("dtoMatic.arraysLabel")}</p>
+                  <p className="text-2xl font-black text-amber-700 dark:text-amber-400">{result.stats.arrays}</p>
                 </Card>
-                <Card className="p-4 bg-muted/30 text-center">
-                  <p className="text-[10px] font-black uppercase text-muted-foreground mb-1">{t("dtoMatic.filesLabel")}</p>
-                  <p className="text-2xl font-black">{result.files.length}</p>
+                <Card className="p-4 bg-gradient-to-br from-purple-500/10 to-violet-500/10 border-purple-500/20 text-center">
+                  <p className="text-[10px] font-black uppercase text-purple-600 dark:text-purple-400 mb-1">{t("dtoMatic.filesLabel")}</p>
+                  <p className="text-2xl font-black text-purple-700 dark:text-purple-400">{result.files.length}</p>
                 </Card>
               </div>
 
@@ -354,21 +299,45 @@ export default function DtoMaticPage() {
                 </div>
 
                 <Tabs.Panel id="code">
-                  <div className="grid gap-6 lg:grid-cols-5 h-[600px]">
-                    <div className="lg:col-span-2 flex flex-col gap-4 h-full">
-                      <Card className="flex-1 p-0 overflow-hidden border-divider">
-                        <DataTable
-                          columns={fileColumns}
-                          data={result.files}
-                          filterField="name"
-                          renderCell={renderFileCell}
-                          initialVisibleColumns={["name", "type"]}
-                          emptyContent={t("dtoMatic.noFiles")}
-                        />
-                      </Card>
+                  <div className="grid gap-6 lg:grid-cols-12 h-[600px]">
+                    <div className="lg:col-span-4 flex flex-col gap-4 h-full">
+                      <div className="flex flex-col gap-1.5 overflow-y-auto max-h-[560px] pr-1">
+                        {result.files.map((file) => {
+                          const isActive = selectedFileId === file.id;
+                          const typeColors: Record<string, string> = {
+                            interface: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-200",
+                            entity: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200",
+                            mapper: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-200",
+                            zod: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200",
+                            struct: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-200",
+                            class: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-200",
+                          };
+                          return (
+                            <button
+                              key={file.id}
+                              onClick={() => setSelectedFileId(file.id)}
+                              className={cn(
+                                "flex items-center gap-3 p-3 rounded-xl text-left transition-all border",
+                                isActive
+                                  ? "bg-primary/10 border-primary/30 shadow-sm"
+                                  : "bg-transparent border-transparent hover:bg-muted/50"
+                              )}
+                            >
+                              <FileCode className={cn("size-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
+                              <div className="min-w-0 flex-1">
+                                <span className={cn("text-sm font-medium block truncate", isActive && "text-primary font-bold")}>{file.name}</span>
+                                <span className="text-[10px] text-muted-foreground uppercase">{file.language}</span>
+                              </div>
+                              <Chip size="sm" className={cn("capitalize text-[10px] font-bold shrink-0", typeColors[file.type] || "bg-gray-100")}>
+                                {file.type}
+                              </Chip>
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
 
-                    <div className="lg:col-span-3 h-full">
+                    <div className="lg:col-span-8 h-full">
                       <Card className="h-full p-0 border-primary/20 shadow-lg overflow-hidden bg-muted/30 dark:bg-zinc-900 flex flex-col border-none">
                         <div className="p-3 bg-muted/50 dark:bg-white/5 border-b border-divider dark:border-white/10 flex justify-between items-center">
                           <span className="text-xs font-mono font-bold text-primary ml-2">{selectedFile?.name}</span>

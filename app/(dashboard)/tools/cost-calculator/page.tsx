@@ -92,7 +92,9 @@ export default function CostCalculatorPage() {
         return (
           <div className="flex flex-col">
             <span className="font-bold text-sm">{result.model.displayName}</span>
-            <span className="text-[10px] text-muted-foreground font-mono">{result.model.id}</span>
+            {result.model.id !== result.model.displayName && (
+              <span className="text-[10px] text-muted-foreground font-mono truncate max-w-[200px]">{result.model.id}</span>
+            )}
           </div>
         );
       case "provider":
@@ -114,14 +116,22 @@ export default function CostCalculatorPage() {
             <span className={cn("font-bold", isCheapest ? "text-success" : "text-foreground")}>
               {formatCost(result.totalCost, currency)}
             </span>
-            {isCheapest && <span className="text-[10px] text-success font-bold uppercase tracking-tighter">{t("costCalc.cheapestLabel")}</span>}
+            {isCheapest && (
+              <span className="text-[10px] text-success font-bold uppercase tracking-tighter flex items-center gap-0.5">
+                <TrendingDown className="size-3" />
+                {t("costCalc.cheapestLabel")}
+              </span>
+            )}
           </div>
         );
       case "value":
         return (
           <div className="flex flex-col">
             <span className={cn("font-medium", isBestValue ? "text-secondary" : "text-foreground")}>
-              {result.valueScore ? (result.valueScore / 1000000).toFixed(2) : "N/A"}
+              {result.valueScore
+                ? (result.valueScore / 1000000).toFixed(2)
+                : <span className="text-muted-foreground/50">&mdash;</span>
+              }
             </span>
             {isBestValue && <span className="text-[10px] text-secondary font-bold uppercase tracking-tighter">{t("costCalc.bestValueLabel")}</span>}
           </div>

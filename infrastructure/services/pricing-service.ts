@@ -74,6 +74,42 @@ function isPopularModel(id: string): boolean {
   return popular.some(p => id.toLowerCase().includes(p));
 }
 
+const KNOWN_MODEL_NAMES: Record<string, string> = {
+  "gpt-4o-mini": "GPT-4o Mini",
+  "gpt-4o": "GPT-4o",
+  "gpt-4-turbo": "GPT-4 Turbo",
+  "gpt-4": "GPT-4",
+  "gpt-3.5-turbo": "GPT-3.5 Turbo",
+  "o1-mini": "o1 Mini",
+  "o1-preview": "o1 Preview",
+  "o3-mini": "o3 Mini",
+  "o1": "o1",
+  "claude-3-5-sonnet": "Claude 3.5 Sonnet",
+  "claude-3-5-haiku": "Claude 3.5 Haiku",
+  "claude-3-opus": "Claude 3 Opus",
+  "claude-3-sonnet": "Claude 3 Sonnet",
+  "claude-3-haiku": "Claude 3 Haiku",
+  "gemini-2.0-flash": "Gemini 2.0 Flash",
+  "gemini-1.5-pro": "Gemini 1.5 Pro",
+  "gemini-1.5-flash": "Gemini 1.5 Flash",
+  "deepseek-chat": "DeepSeek V3",
+  "deepseek-reasoner": "DeepSeek R1",
+  "mistral-large": "Mistral Large",
+  "mistral-small": "Mistral Small",
+  "mixtral-8x7b": "Mixtral 8x7B",
+  "llama-3.1-70b": "Llama 3.1 70B",
+  "llama-3.1-8b": "Llama 3.1 8B",
+};
+
 function formatDisplayName(id: string): string {
-  return id.split("/").pop() || id;
+  const baseName = id.split("/").pop() || id;
+
+  for (const [key, display] of Object.entries(KNOWN_MODEL_NAMES)) {
+    if (baseName.startsWith(key)) return display;
+  }
+
+  return baseName
+    .replace(/-\d{6,}$/, "")
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
