@@ -70,10 +70,15 @@ const nextConfig: NextConfig = {
     ],
   } as NextConfig["experimental"] & { viewTransition: boolean },
   async headers() {
+    // CSP blocks Turbopack dev scripts — only apply in production
+    const headers = process.env.NODE_ENV === "production"
+      ? securityHeaders
+      : securityHeaders.filter((h) => h.key !== "Content-Security-Policy");
+
     return [
       {
         source: "/(.*)",
-        headers: securityHeaders,
+        headers,
       },
     ];
   },
