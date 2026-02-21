@@ -5,10 +5,6 @@ import {
   AlertDialog,
   Chip,
   Input,
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
   Checkbox,
   TextArea,
   Select,
@@ -29,7 +25,6 @@ import {
   Copy,
   FilePlus2,
   ClipboardPaste,
-  ChevronDown,
 } from "lucide-react";
 import { useContextManager } from "@/hooks/use-context-manager";
 import { useToast } from "@/hooks/use-toast";
@@ -82,16 +77,6 @@ export default function ContextManagerPage() {
     setDocPriority("medium");
     setDocContent("");
   };
-
-  // Priority translation map
-  const priorityLabel = useCallback((p: Priority): string => {
-    const map: Record<Priority, string> = {
-      high: t("ctxMgr.priorityHigh"),
-      medium: t("ctxMgr.priorityMedium"),
-      low: t("ctxMgr.priorityLow"),
-    };
-    return map[p];
-  }, [t]);
 
   // Auto-incremental window name
   const getNextWindowName = useCallback((): string => {
@@ -256,19 +241,16 @@ export default function ContextManagerPage() {
         );
       case "priority":
         return (
-          <Dropdown>
-            <DropdownTrigger>
-              <Button size="sm" variant="ghost" className="font-bold h-6 text-xs gap-1 px-2">
-                {priorityLabel(doc.priority)}
-                <ChevronDown className="size-3 opacity-50" />
-              </Button>
-            </DropdownTrigger>
-            <DropdownMenu onAction={(key) => changePriority(doc.id, key as Priority)}>
-              <DropdownItem key="high">{t("ctxMgr.priorityHigh")}</DropdownItem>
-              <DropdownItem key="medium">{t("ctxMgr.priorityMedium")}</DropdownItem>
-              <DropdownItem key="low">{t("ctxMgr.priorityLow")}</DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
+          <select
+            value={doc.priority}
+            onChange={(e) => changePriority(doc.id, e.target.value as Priority)}
+            className="bg-transparent text-xs font-bold text-foreground border-none outline-none cursor-pointer"
+            aria-label={t("ctxMgr.priorityLabel")}
+          >
+            <option value="high">{t("ctxMgr.priorityHigh")}</option>
+            <option value="medium">{t("ctxMgr.priorityMedium")}</option>
+            <option value="low">{t("ctxMgr.priorityLow")}</option>
+          </select>
         );
       case "actions":
         return (
@@ -279,7 +261,7 @@ export default function ContextManagerPage() {
       default:
         return String(doc[key as keyof typeof doc] ?? "");
     }
-  }, [changePriority, priorityLabel, t]);
+  }, [changePriority, t]);
 
   // Hidden file input
   const fileInputElement = (
