@@ -360,7 +360,7 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
                 >
                   <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
                     <span
-                      className={`text-sm font-bold ${item.score >= 7 ? "text-emerald-500" : item.score >= 5 ? "text-amber-500" : "text-red-500"}`}
+                      className={`text-sm font-bold ${item.score >= 7 ? "text-emerald-500 dark:text-emerald-400" : item.score >= 5 ? "text-amber-500 dark:text-amber-400" : "text-red-500 dark:text-red-400"}`}
                     >
                       {item.score}
                     </span>
@@ -530,7 +530,7 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
                 const barColor = DIMENSION_COLORS[dim.id];
                 const status = dim.score >= 60 ? "detected" : dim.score >= 30 ? "partial" : "missing";
                 const StatusIcon = status === "detected" ? CheckCircle2 : status === "partial" ? CircleDot : XCircle;
-                const statusColor = status === "detected" ? "text-emerald-500" : status === "partial" ? "text-amber-500" : "text-red-400";
+                const statusColor = status === "detected" ? "text-emerald-500 dark:text-emerald-400" : status === "partial" ? "text-amber-500 dark:text-amber-400" : "text-red-400";
 
                 return (
                   <div key={dim.id} className="group rounded-lg border border-border p-3 transition-colors hover:bg-muted/30">

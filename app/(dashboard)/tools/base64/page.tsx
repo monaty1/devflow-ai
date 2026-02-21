@@ -251,11 +251,11 @@ export default function Base64Page() {
                   {result?.detectedType === "jwt" && jwtParts && (
                     <div className="grid gap-4">
                       <Card className="p-6 border-blue-500/20 bg-blue-500/5">
-                        <p className="text-[10px] font-black text-blue-500 uppercase mb-3 tracking-widest">{t("base64.jwtHeader")}</p>
+                        <p className="text-[10px] font-black text-blue-500 dark:text-blue-400 uppercase mb-3 tracking-widest">{t("base64.jwtHeader")}</p>
                         <pre className="text-xs font-mono text-blue-700 dark:text-blue-300">{jwtParts.header}</pre>
                       </Card>
                       <Card className="p-6 border-purple-500/20 bg-purple-500/5">
-                        <p className="text-[10px] font-black text-purple-500 uppercase mb-3 tracking-widest">{t("base64.jwtPayload")}</p>
+                        <p className="text-[10px] font-black text-purple-500 dark:text-purple-400 uppercase mb-3 tracking-widest">{t("base64.jwtPayload")}</p>
                         <pre className="text-xs font-mono text-purple-700 dark:text-purple-300">{jwtParts.payload}</pre>
                       </Card>
                       <Card className="p-6 border-divider bg-muted/5">
@@ -281,7 +281,7 @@ export default function Base64Page() {
                   {result?.detectedType === "json" && (
                     <Card className="p-8 border-emerald-500/20 bg-emerald-500/5 h-full">
                       <div className="flex items-center justify-between mb-6">
-                        <h3 className="font-black text-emerald-600 flex items-center gap-2 text-md italic">
+                        <h3 className="font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-2 text-md italic">
                           <Database className="size-5" /> {t("base64.structuredObject")}
                         </h3>
                         <Button size="sm" variant="ghost" className="font-black text-success" onPress={() => navigateTo("json-formatter", mode === "decode" ? result.output : result.input)}>

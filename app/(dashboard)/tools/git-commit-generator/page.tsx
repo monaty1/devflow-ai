@@ -269,7 +269,7 @@ export default function GitCommitGeneratorPage() {
 
           {/* Quick Diff Analysis */}
           <Card className="p-6 border-indigo-500/20 bg-indigo-500/5">
-            <h3 className="text-xs font-black uppercase text-indigo-600 mb-4 flex items-center gap-2 tracking-widest">
+            <h3 className="text-xs font-black uppercase text-indigo-600 dark:text-indigo-400 mb-4 flex items-center gap-2 tracking-widest">
               <FileDiff className="size-4" /> {t("gitCommit.aiDiffAuditor")}
             </h3>
             <TextArea
@@ -351,7 +351,7 @@ export default function GitCommitGeneratorPage() {
                 {/* Validation Audit */}
                 <Card className="p-6">
                   <h3 className="text-[10px] font-black uppercase text-muted-foreground mb-4 tracking-widest flex items-center gap-2">
-                    <ShieldCheck className="size-3 text-emerald-500" /> {t("gitCommit.compliance")}
+                    <ShieldCheck className="size-3 text-emerald-500 dark:text-emerald-400" /> {t("gitCommit.compliance")}
                   </h3>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center text-xs">
@@ -392,7 +392,7 @@ export default function GitCommitGeneratorPage() {
 
                 {/* Batch Generation */}
                 <Card className="p-6 border-indigo-500/20 bg-indigo-500/5">
-                  <h3 className="text-xs font-black uppercase text-indigo-600 mb-4 flex items-center gap-2 tracking-widest">
+                  <h3 className="text-xs font-black uppercase text-indigo-600 dark:text-indigo-400 mb-4 flex items-center gap-2 tracking-widest">
                     <ListPlus className="size-3" /> {t("gitCommit.batchGenerate")}
                   </h3>
                   <TextArea

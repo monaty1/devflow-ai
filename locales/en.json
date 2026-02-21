@@ -1027,6 +1027,7 @@
   "tokenViz.laboratoryDesc": "Analyze how different AI models (GPT-4, Claude, Llama) see your text. Optimize your prompts by reducing wasted tokens.",
   "tokenViz.providerSelection": "Select tokenizer provider",
   "tokenViz.tokenInfo": "Each box represents a token. Red highlights indicate waste (extra spaces/redundancy).",
+  "tokenViz.tokenizeWith": "Tokenize with",
   "tokenViz.contextBudget": "Context Budget",
   "tokenViz.singleProviderView": "Single provider view",
   "tokenViz.compareProviders": "Compare providers",

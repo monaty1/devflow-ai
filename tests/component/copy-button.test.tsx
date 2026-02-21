@@ -41,7 +41,7 @@ describe("CopyButton", () => {
     await user.click(screen.getByTestId("copy-btn"));
 
     await waitFor(() => {
-      expect(screen.getByTestId("copy-btn").innerHTML).toContain("text-green-500");
+      expect(screen.getByTestId("copy-btn").innerHTML).toContain("text-success");
     });
   });
 

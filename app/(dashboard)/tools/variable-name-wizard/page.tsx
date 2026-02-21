@@ -99,7 +99,7 @@ export default function VariableNameWizardPage() {
               <div 
                 className={cn(
                   "h-full transition-all duration-1000",
-                  suggestion.score > 80 ? "bg-emerald-500" : suggestion.score > 50 ? "bg-amber-500" : "bg-danger"
+                  suggestion.score > 80 ? "bg-emerald-500 dark:bg-emerald-400" : suggestion.score > 50 ? "bg-amber-500 dark:bg-amber-400" : "bg-danger"
                 )}
                 style={{ width: `${suggestion.score}%` }}
               />
@@ -114,7 +114,7 @@ export default function VariableNameWizardPage() {
           <div className="flex items-center gap-2">
             <Icon className={cn(
               "size-4",
-              audit?.status === "good" ? "text-emerald-500" : audit?.status === "warning" ? "text-amber-500" : "text-danger"
+              audit?.status === "good" ? "text-emerald-500 dark:text-emerald-400" : audit?.status === "warning" ? "text-amber-500 dark:text-amber-400" : "text-danger"
             )} />
             {audit?.findings?.length ? (
               <span className="text-[9px] text-muted-foreground max-w-[120px] truncate">{audit.findings[0]}</span>
@@ -276,7 +276,7 @@ export default function VariableNameWizardPage() {
                 <div className="flex justify-around items-center">
                   <div className="text-center">
                     <p className="text-[10px] font-bold uppercase text-muted-foreground/60 mb-1">{t("varName.clarityLabel")}</p>
-                    <p className={cn("text-xl font-black", (generationResult.suggestions[0]?.score ?? 0) >= 80 ? "text-emerald-400" : (generationResult.suggestions[0]?.score ?? 0) >= 50 ? "text-amber-400" : "text-red-400")}>
+                    <p className={cn("text-xl font-black", (generationResult.suggestions[0]?.score ?? 0) >= 80 ? "text-emerald-600 dark:text-emerald-400" : (generationResult.suggestions[0]?.score ?? 0) >= 50 ? "text-amber-600 dark:text-amber-400" : "text-red-600 dark:text-red-400")}>
                       {(generationResult.suggestions[0]?.score ?? 0) >= 80 ? t("varName.highLabel") : (generationResult.suggestions[0]?.score ?? 0) >= 50 ? t("varName.mediumLabel") : t("varName.lowLabel")}
                     </p>
                   </div>

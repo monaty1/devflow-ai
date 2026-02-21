@@ -48,9 +48,9 @@ export default function TokenVisualizerPage() {
   const [isCompareMode, setIsCompareMode] = useState(false);
 
   const PROVIDERS = [
-    { id: "openai", label: t("tokenViz.modelOpenAI"), color: "text-emerald-500" },
-    { id: "anthropic", label: t("tokenViz.modelAnthropic"), color: "text-orange-500" },
-    { id: "llama", label: t("tokenViz.modelLlama"), color: "text-blue-500" },
+    { id: "openai", label: t("tokenViz.modelOpenAI"), color: "text-emerald-500 dark:text-emerald-400" },
+    { id: "anthropic", label: t("tokenViz.modelAnthropic"), color: "text-orange-500 dark:text-orange-400" },
+    { id: "llama", label: t("tokenViz.modelLlama"), color: "text-blue-500 dark:text-blue-400" },
   ] as const;
 
   // Auto-tokenize when input or provider changes
@@ -130,21 +130,16 @@ export default function TokenVisualizerPage() {
               {!isCompareMode && (
                 <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label={t("tokenViz.providerSelection")}>
                   {PROVIDERS.map((p) => (
-                    <button
+                    <Button
                       key={p.id}
-                      onClick={() => setProvider(p.id as TokenizerProvider)}
-                      role="radio"
-                      aria-checked={provider === p.id}
+                      size="sm"
+                      variant={provider === p.id ? "primary" : "ghost"}
+                      onPress={() => setProvider(p.id as TokenizerProvider)}
                       aria-label={p.label}
-                      className={cn(
-                        "px-2 py-2 rounded-lg border text-[10px] font-black uppercase transition-all",
-                        provider === p.id
-                          ? "bg-primary border-primary text-white shadow-md"
-                          : "bg-muted/30 border-transparent hover:bg-muted text-muted-foreground"
-                      )}
+                      className="font-black uppercase text-xs"
                     >
                       {p.label.split(" ")[0]}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               )}
@@ -188,7 +183,7 @@ export default function TokenVisualizerPage() {
                     <span className="text-[10px] font-bold text-muted-foreground w-8">{ctx.label}</span>
                     <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                       <div
-                        className={cn("h-full rounded-full transition-all", pct > 90 ? "bg-red-500" : pct > 60 ? "bg-amber-500" : "bg-emerald-500")}
+                        className={cn("h-full rounded-full transition-all", pct > 90 ? "bg-red-500 dark:bg-red-400" : pct > 60 ? "bg-amber-500 dark:bg-amber-400" : "bg-emerald-500 dark:bg-emerald-400")}
                         style={{ width: `${pct}%` }}
                       />
                     </div>
@@ -206,19 +201,23 @@ export default function TokenVisualizerPage() {
                 <h3 className="text-xs font-black uppercase flex items-center gap-2">
                   <Bot className="size-3 text-violet-500" aria-hidden="true" /> {t("ai.realBPE")}
                 </h3>
-                <div className="flex gap-2">
-                  {["gpt-4o", "gpt-4", "cl100k_base"].map((model) => (
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t("tokenViz.tokenizeWith")}</span>
+                  {[
+                    { id: "gpt-4o", label: "GPT-4o" },
+                    { id: "gpt-4", label: "GPT-4" },
+                    { id: "cl100k_base", label: "cl100k" },
+                  ].map((model) => (
                     <Button
-                      key={model}
+                      key={model.id}
                       size="sm"
                       variant="outline"
                       isLoading={isRealTokenizing}
-                      onPress={() => tokenizeReal(input, model).catch(() => {
+                      onPress={() => tokenizeReal(input, model.id).catch(() => {
                         addToast(t("ai.tokenizerUnavailable"), "info");
                       })}
-                      className="text-[10px] h-6 px-2"
                     >
-                      {model}
+                      {model.label}
                     </Button>
                   ))}
                 </div>
@@ -250,7 +249,7 @@ export default function TokenVisualizerPage() {
               <div className="space-y-4">
                 <div className="flex justify-between items-end">
                   <span className="text-[10px] font-bold uppercase text-muted-foreground/60">{t("tokenViz.optimization")}</span>
-                  <span className={cn("text-xl font-black", visualization.efficiencyScore > 80 ? "text-emerald-400" : "text-amber-400")}>
+                  <span className={cn("text-xl font-black", visualization.efficiencyScore > 80 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400")}>
                     {visualization.efficiencyScore}%
                   </span>
                 </div>

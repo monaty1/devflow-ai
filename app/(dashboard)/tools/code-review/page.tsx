@@ -306,7 +306,7 @@ export default function CodeReviewPage() {
                           strokeDashoffset={251.2 - (251.2 * result.overallScore) / 100}
                           className={cn(
                             "transition-all duration-1000",
-                            result.overallScore >= 80 ? "text-emerald-500" : result.overallScore >= 50 ? "text-amber-500" : "text-red-500"
+                            result.overallScore >= 80 ? "text-emerald-500 dark:text-emerald-400" : result.overallScore >= 50 ? "text-amber-500 dark:text-amber-400" : "text-red-500 dark:text-red-400"
                           )}
                         />
                       </svg>
@@ -329,7 +329,7 @@ export default function CodeReviewPage() {
                     </div>
                     <div className="space-y-1">
                       <p className="text-[10px] font-bold text-muted-foreground uppercase cursor-help" title="Maintainability Index (0–100): composite score based on complexity, lines of code, and documentation coverage. Higher is better.">{t("codeReview.maintainability")} ⓘ</p>
-                      <p className="text-xl font-bold text-emerald-500">{result.metrics.maintainabilityIndex}%</p>
+                      <p className="text-xl font-bold text-emerald-500 dark:text-emerald-400">{result.metrics.maintainabilityIndex}%</p>
                     </div>
                   </div>
                   <div className="mt-4 space-y-2">
@@ -410,7 +410,7 @@ export default function CodeReviewPage() {
                         <p className="text-[10px] font-bold text-muted-foreground uppercase">{t("ai.score")}</p>
                         <p className={cn(
                           "text-2xl font-black",
-                          aiResult.score >= 80 ? "text-emerald-500" : aiResult.score >= 50 ? "text-amber-500" : "text-red-500"
+                          aiResult.score >= 80 ? "text-emerald-500 dark:text-emerald-400" : aiResult.score >= 50 ? "text-amber-500 dark:text-amber-400" : "text-red-500 dark:text-red-400"
                         )}>{aiResult.score}</p>
                       </div>
                       <div className="flex-1">

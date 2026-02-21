@@ -163,21 +163,16 @@ export default function DtoMaticPage() {
                     { val: "go", label: "Go" },
                     { val: "csharp", label: "C# .NET" },
                   ].map(opt => (
-                    <button
+                    <Button
                       key={opt.val}
-                      onClick={() => updateConfig("targetLanguage", opt.val as TargetLanguage)}
-                      role="radio"
-                      aria-checked={config.targetLanguage === opt.val}
+                      size="sm"
+                      variant={config.targetLanguage === opt.val ? "primary" : "ghost"}
+                      onPress={() => updateConfig("targetLanguage", opt.val as TargetLanguage)}
                       aria-label={opt.label}
-                      className={cn(
-                        "px-3 py-2 rounded-xl text-xs font-bold transition-all border text-left",
-                        config.targetLanguage === opt.val
-                          ? "bg-primary text-white border-primary shadow-md"
-                          : "bg-muted/30 border-transparent hover:bg-muted text-muted-foreground hover:text-foreground"
-                      )}
+                      className="font-bold text-xs justify-start"
                     >
                       {opt.label}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
@@ -328,7 +323,7 @@ export default function DtoMaticPage() {
                                 <span className={cn("text-sm font-medium block truncate", isActive && "text-primary font-bold")}>{file.name}</span>
                                 <span className="text-[10px] text-muted-foreground uppercase">{file.language}</span>
                               </div>
-                              <Chip size="sm" className={cn("capitalize text-[10px] font-bold shrink-0", typeColors[file.type] || "bg-gray-100")}>
+                              <Chip size="sm" className={cn("capitalize text-[10px] font-bold shrink-0", typeColors[file.type] || "bg-muted text-muted-foreground")}>
                                 {file.type}
                               </Chip>
                             </button>

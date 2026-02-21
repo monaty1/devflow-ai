@@ -276,7 +276,7 @@ export default function CronBuilderPage() {
           {/* Natural Explanation */}
           {explanation && (
             <Card className="p-8 bg-gradient-to-br from-orange-500/10 to-amber-500/10 border-orange-500/20 shadow-lg">
-              <h3 className="text-xs font-black uppercase text-orange-600 mb-4 flex items-center gap-2 tracking-widest">
+              <h3 className="text-xs font-black uppercase text-orange-600 dark:text-orange-400 mb-4 flex items-center gap-2 tracking-widest">
                 <Sparkles className="size-4" aria-hidden="true" /> {t("cron.humanReadable")}
               </h3>
               <p className="text-2xl font-black leading-tight text-foreground">
@@ -295,7 +295,7 @@ export default function CronBuilderPage() {
           {/* Mini Calendar */}
           {nextExecutions.length > 0 && (
             <Card className="p-6">
-              <h3 className="font-bold flex items-center gap-2 text-orange-600 mb-4">
+              <h3 className="font-bold flex items-center gap-2 text-orange-600 dark:text-orange-400 mb-4">
                 <Calendar className="size-4" />
                 {t("cron.executionCalendar")}
               </h3>
@@ -306,7 +306,7 @@ export default function CronBuilderPage() {
           {/* Execution Timeline */}
           <Card className="p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="font-bold flex items-center gap-2 text-emerald-600">
+              <h3 className="font-bold flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
                 <Play className="size-4" />
                 {t("cron.scheduleForecast")}
               </h3>

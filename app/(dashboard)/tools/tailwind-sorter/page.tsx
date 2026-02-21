@@ -182,11 +182,11 @@ export default function TailwindSorterPage() {
                 </Card>
                 <Card className="p-4 text-center border-b-4 border-b-amber-500 rounded-b-none">
                   <p className="text-[10px] font-black text-muted-foreground uppercase">{t("tailwind.conflictsLabel")}</p>
-                  <p className="text-2xl font-black text-amber-600">{result.conflicts.length}</p>
+                  <p className="text-2xl font-black text-amber-600 dark:text-amber-400">{result.conflicts.length}</p>
                 </Card>
                 <Card className="p-4 text-center border-b-4 border-b-emerald-500 rounded-b-none">
                   <p className="text-[10px] font-black text-muted-foreground uppercase">{t("tailwind.efficiencyLabel")}</p>
-                  <p className="text-2xl font-black text-emerald-600">
+                  <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
                     {Math.round((result.stats.duplicatesRemoved / (result.stats.totalClasses || 1)) * 100)}%
                   </p>
                 </Card>
@@ -203,25 +203,25 @@ export default function TailwindSorterPage() {
                     <Tabs.List aria-label={t("tailwind.ariaAnalysisTabs")}>
                       <Tabs.Tab id="result">
                         <div className="flex items-center gap-2 font-bold">
-                          <CheckCircle2 className="size-4 text-emerald-500" />
+                          <CheckCircle2 className="size-4 text-emerald-500 dark:text-emerald-400" />
                           {t("tailwind.sortedList")}
                         </div>
                       </Tabs.Tab>
                       <Tabs.Tab id="audit">
                         <div className="flex items-center gap-2 font-bold">
-                          <AlertTriangle className="size-4 text-amber-500" />
+                          <AlertTriangle className="size-4 text-amber-500 dark:text-amber-400" />
                           {t("tailwind.issuesTab", { count: String(result.audit.length + result.conflicts.length) })}
                         </div>
                       </Tabs.Tab>
                       <Tabs.Tab id="diff">
                         <div className="flex items-center gap-2 font-bold">
-                          <GitCompareArrows className="size-4 text-purple-500" />
+                          <GitCompareArrows className="size-4 text-purple-500 dark:text-purple-400" />
                           {t("tailwind.beforeAfter")}
                         </div>
                       </Tabs.Tab>
                       <Tabs.Tab id="breakpoints">
                         <div className="flex items-center gap-2 font-bold">
-                          <Monitor className="size-4 text-blue-500" />
+                          <Monitor className="size-4 text-blue-500 dark:text-blue-400" />
                           {t("tailwind.responsive")}
                         </div>
                       </Tabs.Tab>
@@ -277,7 +277,7 @@ export default function TailwindSorterPage() {
                                 return (
                                   <span key={i} className={cn(
                                     "px-1.5 py-0.5 rounded font-mono text-[10px] border",
-                                    isRemoved ? "bg-red-500/20 border-red-500/40 text-red-600 line-through" : "bg-muted border-divider text-foreground/70"
+                                    isRemoved ? "bg-red-500/20 border-red-500/40 text-red-600 dark:text-red-400 line-through" : "bg-muted border-divider text-foreground/70"
                                   )}>
                                     {cls}
                                   </span>
@@ -300,8 +300,8 @@ export default function TailwindSorterPage() {
                         </div>
                       </div>
                       <div className="flex gap-4 text-[10px] font-bold">
-                        <span className="text-red-600">{diffClasses.removed.length} {t("tailwind.removedLabel")}</span>
-                        <span className="text-emerald-600">{diffClasses.kept.length} {t("tailwind.keptLabel")}</span>
+                        <span className="text-red-600 dark:text-red-400">{diffClasses.removed.length} {t("tailwind.removedLabel")}</span>
+                        <span className="text-emerald-600 dark:text-emerald-400">{diffClasses.kept.length} {t("tailwind.keptLabel")}</span>
                       </div>
                     </div>
                   </Tabs.Panel>

@@ -291,7 +291,7 @@ export default function ContextManagerPage() {
 
                 <Card className="p-6 flex flex-col justify-center border-2 border-transparent hover:border-indigo-500/20 transition-all">
                   <div className="flex items-center gap-3">
-                    <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl text-indigo-600">
+                    <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl text-indigo-600 dark:text-indigo-400">
                       <Coins className="size-6" />
                     </div>
                     <div>
@@ -304,7 +304,7 @@ export default function ContextManagerPage() {
                   <Button 
                     size="sm" 
                     variant="ghost" 
-                    className="mt-4 font-bold border-indigo-100 dark:border-indigo-900 text-indigo-600"
+                    className="mt-4 font-bold border-indigo-100 dark:border-indigo-900 text-indigo-600 dark:text-indigo-400"
                     onPress={() => {
                       const fullContent = activeWindow.documents.map(d => `--- ${d.title} ---\n${d.content}`).join("\n\n");
                       navigateTo("token-visualizer", fullContent);

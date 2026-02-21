@@ -72,7 +72,7 @@ export function CopyButton({
       {...(label ? {} : { "aria-label": resolvedAriaLabel })}
     >
       {copied ? (
-        <Check className={cn("size-4 text-green-500", label && "mr-1")} />
+        <Check className={cn("size-4 text-success", label && "mr-1")} />
       ) : (
         <Copy className={cn("size-4", label && "mr-1")} />
       )}

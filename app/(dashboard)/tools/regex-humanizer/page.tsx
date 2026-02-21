@@ -295,7 +295,7 @@ export default function RegexHumanizerPage() {
                         strokeDashoffset={201 - (201 * (explanation.safetyScore || 0)) / 100}
                         className={cn(
                           "transition-all duration-1000",
-                          explanation.isDangerous ? "text-danger" : "text-emerald-500"
+                          explanation.isDangerous ? "text-danger" : "text-emerald-500 dark:text-emerald-400"
                         )}
                       />
                     </svg>

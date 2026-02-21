@@ -258,14 +258,14 @@ export default function UuidGeneratorPage() {
               <div className="space-y-2">
                 <div className="flex gap-4 text-[10px] font-bold">
                   <span>{t("uuid.totalLabel")}: {collisionResult.total}</span>
-                  <span className="text-emerald-600">{t("uuid.uniqueLabel")}: {collisionResult.unique}</span>
-                  <span className={collisionResult.duplicates.length > 0 ? "text-red-600" : "text-emerald-600"}>
+                  <span className="text-emerald-600 dark:text-emerald-400">{t("uuid.uniqueLabel")}: {collisionResult.unique}</span>
+                  <span className={collisionResult.duplicates.length > 0 ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"}>
                     {t("uuid.duplicatesLabel")}: {collisionResult.duplicates.length}
                   </span>
                 </div>
                 {collisionResult.duplicates.map(([uuid, lines]) => (
                   <div key={uuid} className="p-2 bg-red-500/10 border border-red-500/20 rounded-lg text-[10px]">
-                    <span className="font-mono text-red-600 font-bold">{uuid}</span>
+                    <span className="font-mono text-red-600 dark:text-red-400 font-bold">{uuid}</span>
                     <span className="text-muted-foreground ml-2">{t("uuid.onLines")} {lines.join(", ")}</span>
                   </div>
                 ))}

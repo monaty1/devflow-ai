@@ -1070,6 +1070,7 @@
   "tokenViz.laboratoryDesc": "Analiza cómo diferentes modelos de IA (GPT-4, Claude, Llama) ven tu texto. Optimiza tus prompts reduciendo tokens desperdiciados.",
   "tokenViz.providerSelection": "Seleccionar proveedor de tokenización",
   "tokenViz.tokenInfo": "Cada caja representa un token. Los resaltados en rojo indican desperdicio (espacios extra/redundancia).",
+  "tokenViz.tokenizeWith": "Tokenizar con",
   "tokenViz.contextBudget": "Presupuesto de Contexto",
   "tokenViz.singleProviderView": "Vista de proveedor único",
   "tokenViz.compareProviders": "Comparar proveedores",
