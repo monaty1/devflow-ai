@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import {
+  AlertDialog,
   Chip,
   Input,
   Dropdown,
@@ -28,6 +29,7 @@ import {
   Copy,
   FilePlus2,
   ClipboardPaste,
+  ChevronDown,
 } from "lucide-react";
 import { useContextManager } from "@/hooks/use-context-manager";
 import { useToast } from "@/hooks/use-toast";
@@ -63,6 +65,7 @@ export default function ContextManagerPage() {
 
   const [showAddDoc, setShowAddDoc] = useState(false);
   const [newWindowName, setNewWindowName] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState<{ type: "document" | "window"; id: string; name: string } | null>(null);
   const [stripComments, setStripComments] = useState(true);
 
   // Controlled modal form state
@@ -79,6 +82,26 @@ export default function ContextManagerPage() {
     setDocPriority("medium");
     setDocContent("");
   };
+
+  // Priority translation map
+  const priorityLabel = useCallback((p: Priority): string => {
+    const map: Record<Priority, string> = {
+      high: t("ctxMgr.priorityHigh"),
+      medium: t("ctxMgr.priorityMedium"),
+      low: t("ctxMgr.priorityLow"),
+    };
+    return map[p];
+  }, [t]);
+
+  // Auto-incremental window name
+  const getNextWindowName = useCallback((): string => {
+    const base = t("ctxMgr.autoWindowName");
+    const existing = windows.map(w => w.name);
+    if (!existing.includes(base)) return base;
+    let i = 2;
+    while (existing.includes(`${base} ${i}`)) i++;
+    return `${base} ${i}`;
+  }, [windows, t]);
 
   // Drag-and-drop file support
   const [isDragging, setIsDragging] = useState(false);
@@ -102,7 +125,6 @@ export default function ContextManagerPage() {
   // Add files directly (skip modal)
   const addFilesDirectly = useCallback((files: { name: string; content: string; type: DocumentType }[]) => {
     if (!activeWindowId) {
-      // Window was just created but state not yet updated — queue files
       pendingFilesRef.current = files;
       return;
     }
@@ -160,24 +182,21 @@ export default function ContextManagerPage() {
       const valid = results.filter((r) => r.content.length > 0);
       if (valid.length === 0) return;
 
-      // Ensure window exists
       if (!activeWindowId) {
-        createWindow(t("ctxMgr.autoWindowName"));
+        createWindow(getNextWindowName());
         pendingFilesRef.current = valid;
       } else {
         addFilesDirectly(valid);
       }
     });
-  }, [activeWindowId, createWindow, addFilesDirectly, t]);
+  }, [activeWindowId, createWindow, getNextWindowName, addFilesDirectly]);
 
-  // Global drag handlers for the main content area
+  // Global drag handlers
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     dragCounter.current++;
-    if (e.dataTransfer.types.includes("Files")) {
-      setIsDragging(true);
-    }
+    if (e.dataTransfer.types.includes("Files")) setIsDragging(true);
   }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -189,10 +208,7 @@ export default function ContextManagerPage() {
     e.preventDefault();
     e.stopPropagation();
     dragCounter.current--;
-    if (dragCounter.current <= 0) {
-      dragCounter.current = 0;
-      setIsDragging(false);
-    }
+    if (dragCounter.current <= 0) { dragCounter.current = 0; setIsDragging(false); }
   }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -200,25 +216,18 @@ export default function ContextManagerPage() {
     e.stopPropagation();
     dragCounter.current = 0;
     setIsDragging(false);
-    if (e.dataTransfer.files.length > 0) {
-      handleFiles(e.dataTransfer.files);
-    }
+    if (e.dataTransfer.files.length > 0) handleFiles(e.dataTransfer.files);
   }, [handleFiles]);
 
   const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      handleFiles(e.target.files);
-    }
+    if (e.target.files && e.target.files.length > 0) handleFiles(e.target.files);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }, [handleFiles]);
 
-  const openFileBrowser = useCallback(() => {
-    fileInputRef.current?.click();
-  }, []);
+  const openFileBrowser = useCallback(() => { fileInputRef.current?.click(); }, []);
 
   const docColumns: ColumnConfig[] = [
     { name: t("table.colDocument"), uid: "title", sortable: true },
-    { name: t("table.colType"), uid: "type", sortable: true },
     { name: t("table.colTokens"), uid: "tokens", sortable: true },
     { name: t("table.colPriority"), uid: "priority", sortable: true },
     { name: t("table.colActions"), uid: "actions" },
@@ -229,47 +238,29 @@ export default function ContextManagerPage() {
     switch (key) {
       case "title":
         return (
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg text-primary">
-              {doc.type === "code" ? <FileCode className="size-4" /> : <FileText className="size-4" />}
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 bg-primary/10 rounded-md text-primary">
+              {doc.type === "code" ? <FileCode className="size-3.5" /> : <FileText className="size-3.5" />}
             </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-sm">{doc.title}</span>
-              <span className="text-[10px] text-muted-foreground font-mono truncate max-w-[150px]">
-                {doc.filePath || t("ctxMgr.noPathSet")}
-              </span>
+            <div className="flex flex-col min-w-0">
+              <span className="font-bold text-xs truncate">{doc.title}</span>
+              {doc.filePath && doc.filePath !== doc.title && (
+                <span className="text-[10px] text-muted-foreground font-mono truncate">{doc.filePath}</span>
+              )}
             </div>
           </div>
-        );
-      case "type":
-        return (
-          <Chip size="sm" variant="primary" className="capitalize text-[10px] font-bold">
-            {doc.type}
-          </Chip>
         );
       case "tokens":
         return (
-          <div className="flex flex-col gap-1 min-w-[100px]">
-            <span className="font-mono text-xs font-bold">{doc.tokenCount.toLocaleString()}</span>
-            <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary"
-                style={{ width: `${Math.min(100, (doc.tokenCount / (activeWindow?.maxTokens || 1)) * 100)}%` }}
-              />
-            </div>
-          </div>
+          <span className="font-mono text-xs font-bold tabular-nums">{doc.tokenCount.toLocaleString()}</span>
         );
       case "priority":
-        const priorityMap = {
-          high: "danger" as const,
-          medium: "warning" as const,
-          low: "primary" as const,
-        } as const;
         return (
           <Dropdown>
             <DropdownTrigger>
-              <Button size="sm" variant="ghost" className="capitalize font-bold h-6 text-[10px]" style={{ color: priorityMap[doc.priority as keyof typeof priorityMap] }}>
-                {doc.priority}
+              <Button size="sm" variant="ghost" className="font-bold h-6 text-xs gap-1 px-2">
+                {priorityLabel(doc.priority)}
+                <ChevronDown className="size-3 opacity-50" />
               </Button>
             </DropdownTrigger>
             <DropdownMenu onAction={(key) => changePriority(doc.id, key as Priority)}>
@@ -281,16 +272,16 @@ export default function ContextManagerPage() {
         );
       case "actions":
         return (
-          <Button isIconOnly size="sm" variant="ghost" onPress={() => removeDocument(doc.id)} aria-label={t("ctxMgr.removeDocLabel2")}>
-            <Trash2 className="size-4 text-danger" />
+          <Button isIconOnly size="sm" variant="ghost" onPress={() => setDeleteConfirm({ type: "document", id: doc.id, name: doc.title })} aria-label={t("ctxMgr.removeDocLabel2")}>
+            <Trash2 className="size-3.5 text-danger" />
           </Button>
         );
       default:
         return String(doc[key as keyof typeof doc] ?? "");
     }
-  }, [activeWindow, changePriority, removeDocument, t]);
+  }, [changePriority, priorityLabel, t]);
 
-  // Hidden file input — always in DOM, supports multiple
+  // Hidden file input
   const fileInputElement = (
     <input
       ref={fileInputRef}
@@ -319,7 +310,7 @@ export default function ContextManagerPage() {
 
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Sidebar: Windows List */}
-        <Card className="p-4 lg:col-span-3 flex flex-col gap-4">
+        <Card className="p-4 lg:col-span-3 flex flex-col gap-3">
           <div className="flex flex-col gap-2">
             <Input
               placeholder={t("ctxMgr.newWindowPlaceholder")}
@@ -343,13 +334,13 @@ export default function ContextManagerPage() {
                   setNewWindowName("");
                 }
               }}
-              className="font-bold text-primary"
+              className="font-bold text-primary text-xs"
             >
-              <Plus className="size-4 mr-1" /> {t("ctxMgr.createWindowBtn")}
+              <Plus className="size-3.5 mr-1" /> {t("ctxMgr.createWindowBtn")}
             </Button>
           </div>
 
-          <div className="space-y-2 mt-4 overflow-auto max-h-[600px] pr-2 scrollbar-hide">
+          <div className="space-y-1.5 overflow-auto max-h-[600px] pr-1 scrollbar-hide">
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-2">{t("ctxMgr.projectContexts")}</p>
             {windows.length === 0 && (
               <p className="text-xs text-muted-foreground/50 px-2 py-4 text-center italic">
@@ -364,27 +355,25 @@ export default function ContextManagerPage() {
                 onClick={() => setActiveWindowId(w.id)}
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActiveWindowId(w.id); } }}
                 className={cn(
-                  "group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all border border-transparent",
+                  "group flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-all border border-transparent",
                   activeWindowId === w.id
-                    ? "bg-primary/10 border-primary/20 text-primary shadow-sm"
+                    ? "bg-primary/10 border-primary/20 text-primary"
                     : "hover:bg-muted text-muted-foreground"
                 )}
                 aria-label={w.name}
                 aria-pressed={activeWindowId === w.id}
               >
                 <div className="flex flex-col min-w-0">
-                  <span className="text-sm font-bold truncate">{w.name}</span>
-                  <span className="text-[10px] opacity-60">{w.documents.length} docs · {w.totalTokens.toLocaleString()} tokens</span>
+                  <span className="text-xs font-bold truncate">{w.name}</span>
+                  <span className="text-[10px] opacity-60">{w.documents.length} docs · {w.totalTokens.toLocaleString()} tok</span>
                 </div>
                 <Button
                   isIconOnly
                   size="sm"
                   variant="ghost"
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity size-6"
                   aria-label={t("ctxMgr.deleteWorkspace")}
-                  onPress={() => {
-                    deleteWindow(w.id);
-                  }}
+                  onPress={() => setDeleteConfirm({ type: "window", id: w.id, name: w.name })}
                 >
                   <Trash2 className="size-3 text-danger" />
                 </Button>
@@ -395,7 +384,7 @@ export default function ContextManagerPage() {
 
         {/* Main Content — global drop zone */}
         <div
-          className="lg:col-span-9 space-y-6 relative"
+          className="lg:col-span-9 space-y-5 relative"
           onDragEnter={handleDragEnter}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -405,8 +394,8 @@ export default function ContextManagerPage() {
           {isDragging && (
             <div className="absolute inset-0 z-40 rounded-2xl border-2 border-dashed border-primary bg-primary/5 backdrop-blur-sm flex items-center justify-center pointer-events-none">
               <div className="flex flex-col items-center gap-3 p-8 rounded-2xl bg-background/80 shadow-xl">
-                <div className="size-16 bg-primary/10 rounded-2xl flex items-center justify-center">
-                  <Upload className="size-8 text-primary animate-bounce" />
+                <div className="size-14 bg-primary/10 rounded-2xl flex items-center justify-center">
+                  <Upload className="size-7 text-primary animate-bounce" />
                 </div>
                 <p className="text-lg font-black text-primary">{t("ctxMgr.dropFilesHere")}</p>
                 <p className="text-sm text-muted-foreground">{t("ctxMgr.dropOrBrowseHint")}</p>
@@ -416,108 +405,115 @@ export default function ContextManagerPage() {
 
           {activeWindow ? (
             <>
-              {/* Dashboard Row */}
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                {/* Model Target */}
-                <Card className="p-5">
-                  <p className="text-[10px] font-bold uppercase text-muted-foreground mb-2 flex items-center gap-1.5">
-                    <Cpu className="size-3" /> {t("ctxMgr.modelPreset")}
-                  </p>
-                  <select
-                    value={MODEL_PRESETS.find(m => m.maxTokens === activeWindow.maxTokens)?.id ?? "gpt-4o"}
-                    onChange={(e) => {
-                      const preset = MODEL_PRESETS.find(m => m.id === e.target.value);
-                      if (preset) setMaxTokens(preset.maxTokens);
-                    }}
-                    className="w-full bg-transparent text-sm font-black text-foreground border-none outline-none cursor-pointer appearance-none py-1"
-                    aria-label={t("ctxMgr.modelPreset")}
-                  >
-                    {MODEL_PRESETS.filter(m => m.id !== "custom").map(m => (
-                      <option key={m.id} value={m.id}>
-                        {m.name} ({(m.maxTokens / 1000).toFixed(0)}K)
-                      </option>
-                    ))}
-                  </select>
-                </Card>
-
-                {/* Utilization */}
-                <Card className="p-5">
-                  <p className="text-[10px] font-bold uppercase text-muted-foreground mb-2">{t("ctxMgr.utilization")}</p>
-                  <div className="flex items-baseline gap-2 mb-2">
-                    <span className={cn(
-                      "text-3xl font-black",
-                      activeWindow.utilizationPercentage > 90 ? "text-red-500 dark:text-red-400" : activeWindow.utilizationPercentage > 60 ? "text-amber-500 dark:text-amber-400" : "text-emerald-500 dark:text-emerald-400"
-                    )}>{activeWindow.utilizationPercentage}%</span>
-                    <span className="text-[10px] text-muted-foreground font-mono">{activeWindow.totalTokens.toLocaleString()}</span>
+              {/* Dashboard Row — compact stats bar */}
+              <Card className="p-4">
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                  {/* Model selector */}
+                  <div className="flex items-center gap-2">
+                    <Cpu className="size-3.5 text-muted-foreground shrink-0" />
+                    <select
+                      value={MODEL_PRESETS.find(m => m.maxTokens === activeWindow.maxTokens)?.id ?? "gpt-4o"}
+                      onChange={(e) => {
+                        const preset = MODEL_PRESETS.find(m => m.id === e.target.value);
+                        if (preset) setMaxTokens(preset.maxTokens);
+                      }}
+                      className="bg-transparent text-xs font-bold text-foreground border-none outline-none cursor-pointer"
+                      aria-label={t("ctxMgr.modelPreset")}
+                    >
+                      {MODEL_PRESETS.filter(m => m.id !== "custom").map(m => (
+                        <option key={m.id} value={m.id}>
+                          {m.name} ({(m.maxTokens / 1000).toFixed(0)}K)
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                  <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                    <div
-                      className={cn(
-                        "h-full rounded-full transition-all",
-                        activeWindow.utilizationPercentage > 90 ? "bg-red-500" : activeWindow.utilizationPercentage > 60 ? "bg-amber-500" : "bg-emerald-500"
-                      )}
-                      style={{ width: `${Math.min(100, activeWindow.utilizationPercentage)}%` }}
+
+                  {/* Divider */}
+                  <div className="h-5 w-px bg-divider hidden sm:block" />
+
+                  {/* Utilization */}
+                  <div className="flex items-center gap-2">
+                    <span className={cn(
+                      "text-lg font-black",
+                      activeWindow.utilizationPercentage > 90 ? "text-red-500" : activeWindow.utilizationPercentage > 60 ? "text-amber-500" : "text-emerald-500"
+                    )}>{activeWindow.utilizationPercentage}%</span>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[10px] text-muted-foreground font-mono leading-none">
+                        {activeWindow.totalTokens.toLocaleString()} / {activeWindow.maxTokens.toLocaleString()}
+                      </span>
+                      <div className="h-1 w-20 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className={cn(
+                            "h-full rounded-full transition-all",
+                            activeWindow.utilizationPercentage > 90 ? "bg-red-500" : activeWindow.utilizationPercentage > 60 ? "bg-amber-500" : "bg-emerald-500"
+                          )}
+                          style={{ width: `${Math.min(100, activeWindow.utilizationPercentage)}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="h-5 w-px bg-divider hidden sm:block" />
+
+                  {/* Cost */}
+                  <div className="flex items-center gap-1.5">
+                    <Coins className="size-3.5 text-muted-foreground shrink-0" />
+                    <span className="text-xs font-bold">
+                      {formatCost((activeWindow.totalTokens / 1_000_000) * (AI_MODELS.find(m => m.id === "gpt-4o")?.inputPricePerMToken || 2.5))}
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-[10px] font-bold text-primary px-1 h-5"
+                      onPress={() => {
+                        const fullContent = activeWindow.documents.map(d => `--- ${d.title} ---\n${d.content}`).join("\n\n");
+                        navigateTo("token-visualizer", fullContent);
+                      }}
+                    >
+                      {t("ctxMgr.deepTokenAudit")} →
+                    </Button>
+                  </div>
+
+                  {/* Spacer */}
+                  <div className="flex-1" />
+
+                  {/* Export controls */}
+                  <div className="flex items-center gap-3">
+                    <Checkbox
+                      isSelected={stripComments}
+                      onChange={() => setStripComments(!stripComments)}
+                    >
+                      <span className="text-[10px] font-bold text-muted-foreground">{t("ctxMgr.stripComments")}</span>
+                    </Checkbox>
+                    <CopyButton
+                      getText={() => exportForAI({ stripComments }) || ""}
+                      label={t("ctxMgr.copyAiReady")}
+                      className="font-bold h-9"
                     />
                   </div>
-                </Card>
+                </div>
+              </Card>
 
-                {/* Cost */}
-                <Card className="p-5">
-                  <p className="text-[10px] font-bold uppercase text-muted-foreground mb-2 flex items-center gap-1.5">
-                    <Coins className="size-3" /> {t("ctxMgr.estCost")}
-                  </p>
-                  <p className="text-2xl font-black text-foreground mb-1">
-                    {formatCost((activeWindow.totalTokens / 1_000_000) * (AI_MODELS.find(m => m.id === "gpt-4o")?.inputPricePerMToken || 2.5))}
-                  </p>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-[10px] font-bold text-primary px-0 h-auto"
-                    onPress={() => {
-                      const fullContent = activeWindow.documents.map(d => `--- ${d.title} ---\n${d.content}`).join("\n\n");
-                      navigateTo("token-visualizer", fullContent);
-                    }}
-                  >
-                    {t("ctxMgr.deepTokenAudit")} →
-                  </Button>
-                </Card>
-
-                {/* Export */}
-                <Card className="p-5 flex flex-col gap-3">
-                  <Checkbox
-                    isSelected={stripComments}
-                    onChange={() => setStripComments(!stripComments)}
-                  >
-                    <span className="text-[10px] font-bold uppercase text-muted-foreground">{t("ctxMgr.stripComments")}</span>
-                  </Checkbox>
-                  <CopyButton
-                    getText={() => exportForAI({ stripComments }) || ""}
-                    label={t("ctxMgr.copyAiReady")}
-                    className="font-bold shadow-lg shadow-primary/20 h-11 w-full"
-                  />
-                </Card>
-              </div>
-
-              {/* Hierarchy & Documents */}
-              <div className="grid gap-6 lg:grid-cols-5">
-                {/* Visual Tree */}
-                <Card className="p-6 lg:col-span-2 bg-muted/10">
-                  <h3 className="text-xs font-black uppercase text-muted-foreground mb-4 flex items-center gap-2 tracking-widest">
+              {/* Documents — full width table with compact tree sidebar */}
+              <div className="grid gap-5 lg:grid-cols-12">
+                {/* Visual Tree — compact */}
+                <Card className="p-4 lg:col-span-3 bg-muted/10">
+                  <h3 className="text-[10px] font-black uppercase text-muted-foreground mb-3 flex items-center gap-1.5 tracking-widest">
                     <FolderTree className="size-3 text-primary" /> {t("ctxMgr.projectHierarchy")}
                   </h3>
                   {activeWindow.documents.length > 0 ? (
-                    <div className="space-y-3">
-                      <div className="text-[10px] font-mono leading-tight overflow-auto max-h-[300px] text-primary/80 space-y-1">
+                    <div className="space-y-2">
+                      <div className="text-[11px] font-mono leading-relaxed overflow-auto max-h-[350px] text-foreground/70 space-y-0.5">
                         {activeWindow.documents.map(d => d.filePath || d.title).sort().map((p, i) => (
-                          <div key={i} className="flex items-center gap-1.5">
-                            <FileText className="size-3 shrink-0 opacity-60" />
-                            <span>{p}</span>
+                          <div key={i} className="flex items-center gap-1.5 py-0.5">
+                            <FileText className="size-3 shrink-0 text-primary/50" />
+                            <span className="truncate">{p}</span>
                           </div>
                         ))}
                       </div>
-                      {/* Mini drop zone below existing files */}
                       <div
-                        className="flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-default-200 hover:border-primary/30 cursor-pointer transition-all group"
+                        className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-dashed border-default-200 hover:border-primary/40 cursor-pointer transition-all group"
                         onClick={openFileBrowser}
                         role="button"
                         tabIndex={0}
@@ -532,36 +528,36 @@ export default function ContextManagerPage() {
                     </div>
                   ) : (
                     <div
-                      className="flex flex-col items-center justify-center py-8 rounded-xl border-2 border-dashed border-default-200 hover:border-primary/30 cursor-pointer transition-all group"
+                      className="flex flex-col items-center justify-center py-6 rounded-lg border border-dashed border-default-200 hover:border-primary/30 cursor-pointer transition-all group"
                       onClick={openFileBrowser}
                       role="button"
                       tabIndex={0}
                       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") openFileBrowser(); }}
                       aria-label={t("ctxMgr.dropFilesHere")}
                     >
-                      <Upload className="size-6 mb-2 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+                      <Upload className="size-5 mb-1.5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
                       <p className="text-[10px] font-bold text-muted-foreground group-hover:text-primary transition-colors">{t("ctxMgr.dropOrBrowse")}</p>
                       <p className="text-[10px] text-muted-foreground/60">{t("ctxMgr.dropOrBrowseHint")}</p>
                     </div>
                   )}
                 </Card>
 
-                {/* Documents Table */}
-                <Card className="p-0 lg:col-span-3 overflow-hidden border-divider shadow-sm">
-                  <div className="p-4 border-b border-divider flex items-center justify-between bg-muted/20">
-                    <h3 className="font-bold flex items-center gap-2 text-sm">
-                      <FileText className="size-4 text-primary" />
+                {/* Documents Table — wide */}
+                <Card className="p-0 lg:col-span-9 overflow-hidden border-divider">
+                  <div className="px-4 py-3 border-b border-divider flex items-center justify-between bg-muted/10">
+                    <h3 className="font-bold flex items-center gap-2 text-xs">
+                      <FileText className="size-3.5 text-primary" />
                       {t("ctxMgr.contextUnits")}
                       {activeWindow.documents.length > 0 && (
                         <Chip size="sm" variant="primary" className="text-[10px] font-bold">{activeWindow.documents.length}</Chip>
                       )}
                     </h3>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       <Button
                         size="sm"
                         variant="ghost"
                         onPress={openFileBrowser}
-                        className="font-bold text-[10px] uppercase h-7 px-3 text-primary gap-1"
+                        className="font-bold text-xs h-7 px-2 text-primary gap-1"
                       >
                         <Upload className="size-3" /> {t("ctxMgr.browseFiles")}
                       </Button>
@@ -569,9 +565,9 @@ export default function ContextManagerPage() {
                         variant="ghost"
                         size="sm"
                         onPress={() => setShowAddDoc(true)}
-                        className="font-black text-[10px] uppercase h-7 px-3 text-primary"
+                        className="font-bold text-xs h-7 px-2 text-primary gap-1"
                       >
-                        <ClipboardPaste className="size-3 mr-1" /> {t("ctxMgr.pasteCode")}
+                        <ClipboardPaste className="size-3" /> {t("ctxMgr.pasteCode")}
                       </Button>
                     </div>
                   </div>
@@ -586,27 +582,17 @@ export default function ContextManagerPage() {
                       emptyContent={t("ctxMgr.noDocsWindow")}
                     />
                   ) : (
-                    <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
-                      <div className="size-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
-                        <FilePlus2 className="size-8 text-primary/50" />
+                    <div className="flex flex-col items-center justify-center py-14 px-8 text-center">
+                      <div className="size-14 bg-primary/10 rounded-xl flex items-center justify-center mb-3">
+                        <FilePlus2 className="size-7 text-primary/50" />
                       </div>
                       <h4 className="text-sm font-bold text-foreground/60 mb-1">{t("ctxMgr.noDocsTitle")}</h4>
-                      <p className="text-xs text-muted-foreground mb-6 max-w-xs">{t("ctxMgr.noDocsDesc")}</p>
+                      <p className="text-xs text-muted-foreground mb-5 max-w-xs">{t("ctxMgr.noDocsDesc")}</p>
                       <div className="flex items-center gap-3">
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          onPress={openFileBrowser}
-                          className="font-bold gap-1"
-                        >
+                        <Button variant="primary" size="sm" onPress={openFileBrowser} className="font-bold gap-1">
                           <Upload className="size-3.5" /> {t("ctxMgr.browseFiles")}
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onPress={() => setShowAddDoc(true)}
-                          className="font-bold gap-1"
-                        >
+                        <Button variant="ghost" size="sm" onPress={() => setShowAddDoc(true)} className="font-bold gap-1">
                           <ClipboardPaste className="size-3.5" /> {t("ctxMgr.pasteCode")}
                         </Button>
                       </div>
@@ -626,7 +612,6 @@ export default function ContextManagerPage() {
                 {t("ctxMgr.selectCreateDesc")}
               </p>
 
-              {/* Step cards */}
               <div className="grid gap-4 sm:grid-cols-3 max-w-lg w-full mb-8">
                 {[
                   { icon: FolderPlus, label: t("ctxMgr.step1"), desc: t("ctxMgr.step1Desc") },
@@ -643,13 +628,8 @@ export default function ContextManagerPage() {
                 ))}
               </div>
 
-              {/* Quick actions */}
               <div className="flex items-center gap-3">
-                <Button
-                  variant="primary"
-                  onPress={openFileBrowser}
-                  className="font-bold gap-2"
-                >
+                <Button variant="primary" onPress={openFileBrowser} className="font-bold gap-2">
                   <Upload className="size-4" /> {t("ctxMgr.browseFiles")}
                 </Button>
                 <span className="text-xs text-muted-foreground">{t("ctxMgr.orDragFiles")}</span>
@@ -659,7 +639,50 @@ export default function ContextManagerPage() {
         </div>
       </div>
 
-      {/* Add Document Modal — for manual paste only */}
+      {/* Delete Confirmation Modal */}
+      <AlertDialog.Backdrop variant="blur" isOpen={!!deleteConfirm} onOpenChange={(open) => { if (!open) setDeleteConfirm(null); }}>
+        <AlertDialog.Container placement="center">
+          <AlertDialog.Dialog className="sm:max-w-[400px]">
+            <AlertDialog.CloseTrigger />
+            <AlertDialog.Header>
+              <AlertDialog.Icon status="danger">
+                <Trash2 className="size-5" />
+              </AlertDialog.Icon>
+              <AlertDialog.Heading>
+                {deleteConfirm?.type === "window"
+                  ? t("ctxMgr.confirmDeleteWindowTitle")
+                  : t("ctxMgr.confirmDeleteTitle")}
+              </AlertDialog.Heading>
+            </AlertDialog.Header>
+            <AlertDialog.Body>
+              <p>
+                {deleteConfirm?.type === "window"
+                  ? t("ctxMgr.confirmDeleteWindowDesc", { name: deleteConfirm.name })
+                  : t("ctxMgr.confirmDeleteDesc", { name: deleteConfirm?.name ?? "" })}
+              </p>
+            </AlertDialog.Body>
+            <AlertDialog.Footer>
+              <Button slot="close" variant="ghost">{t("common.cancel")}</Button>
+              <Button
+                variant="primary"
+                className="bg-danger text-white hover:bg-danger/90"
+                onPress={() => {
+                  if (deleteConfirm?.type === "window") {
+                    deleteWindow(deleteConfirm.id);
+                  } else if (deleteConfirm?.type === "document") {
+                    removeDocument(deleteConfirm.id);
+                  }
+                  setDeleteConfirm(null);
+                }}
+              >
+                {t("ctxMgr.confirmDelete")}
+              </Button>
+            </AlertDialog.Footer>
+          </AlertDialog.Dialog>
+        </AlertDialog.Container>
+      </AlertDialog.Backdrop>
+
+      {/* Add Document Modal */}
       {showAddDoc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="add-doc-title">
           <Card className="w-full max-w-2xl p-8 shadow-2xl border-indigo-500/20">
@@ -681,16 +704,10 @@ export default function ContextManagerPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <Select
-                    value={docType}
-                    onChange={(value) => { if (value) setDocType(value as DocumentType); }}
-                    className="w-full"
-                    aria-label={t("ctxMgr.documentTypeLabel")}
-                  >
+                  <Select value={docType} onChange={(value) => { if (value) setDocType(value as DocumentType); }} className="w-full" aria-label={t("ctxMgr.documentTypeLabel")}>
                     <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("ctxMgr.documentTypeLabel")}</Label>
                     <Select.Trigger className="h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm">
-                      <Select.Value />
-                      <Select.Indicator />
+                      <Select.Value /><Select.Indicator />
                     </Select.Trigger>
                     <Select.Popover>
                       <ListBox>
@@ -703,16 +720,10 @@ export default function ContextManagerPage() {
                   </Select>
                 </div>
                 <div className="space-y-1">
-                  <Select
-                    value={docPriority}
-                    onChange={(value) => { if (value) setDocPriority(value as Priority); }}
-                    className="w-full"
-                    aria-label={t("ctxMgr.priorityLabel")}
-                  >
+                  <Select value={docPriority} onChange={(value) => { if (value) setDocPriority(value as Priority); }} className="w-full" aria-label={t("ctxMgr.priorityLabel")}>
                     <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("ctxMgr.priorityLabel")}</Label>
                     <Select.Trigger className="h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm">
-                      <Select.Value />
-                      <Select.Indicator />
+                      <Select.Value /><Select.Indicator />
                     </Select.Trigger>
                     <Select.Popover>
                       <ListBox>
@@ -734,9 +745,7 @@ export default function ContextManagerPage() {
                     if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
                       e.preventDefault();
                       if (docTitle && docContent) {
-                        if (!activeWindowId) {
-                          createWindow(t("ctxMgr.autoWindowName"));
-                        }
+                        if (!activeWindowId) createWindow(getNextWindowName());
                         addDocument(docTitle, docContent, docType, docPriority, [], docPath);
                         addToast(t("ctxMgr.addedToContext", { title: docTitle }), "success");
                         resetDocForm();
@@ -753,12 +762,10 @@ export default function ContextManagerPage() {
               <div className="flex gap-3 pt-2">
                 <Button
                   variant="primary"
-                  className="flex-1 font-black h-12 text-md shadow-xl shadow-indigo-500/20"
+                  className="flex-1 font-black h-12 text-md"
                   isDisabled={!docTitle.trim() || !docContent.trim()}
                   onPress={() => {
-                    if (!activeWindowId) {
-                      createWindow(t("ctxMgr.autoWindowName"));
-                    }
+                    if (!activeWindowId) createWindow(getNextWindowName());
                     addDocument(docTitle, docContent, docType, docPriority, [], docPath);
                     addToast(t("ctxMgr.addedToContext", { title: docTitle }), "success");
                     resetDocForm();
