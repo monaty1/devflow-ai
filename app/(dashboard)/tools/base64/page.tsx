@@ -2,8 +2,6 @@
 
 import { useState, useCallback, useMemo } from "react";
 import {
-  Card,
-  Button,
   Tabs,
   TextArea,
 } from "@heroui/react";
@@ -29,7 +27,7 @@ import { CopyButton } from "@/components/shared/copy-button";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ToolSuggestions } from "@/components/shared/tool-suggestions";
-import { DataTable, type ColumnConfig } from "@/components/ui";
+import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 
 export default function Base64Page() {
   const { t } = useTranslation();

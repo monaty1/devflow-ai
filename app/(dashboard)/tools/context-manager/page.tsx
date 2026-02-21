@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import {
   Chip,
   Input,
@@ -24,6 +24,8 @@ import {
   FileText,
   FolderTree,
   Cpu,
+  Upload,
+  Copy,
 } from "lucide-react";
 import { useContextManager } from "@/hooks/use-context-manager";
 import { useToast } from "@/hooks/use-toast";
@@ -76,6 +78,62 @@ export default function ContextManagerPage() {
     setDocPriority("medium");
     setDocContent("");
   };
+
+  // Drag-and-drop file support
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const detectDocType = (filename: string): DocumentType => {
+    const ext = filename.split(".").pop()?.toLowerCase() ?? "";
+    const codeExts = ["ts", "tsx", "js", "jsx", "py", "java", "go", "rs", "c", "cpp", "h", "cs", "rb", "php", "swift", "kt", "vue", "svelte", "css", "scss", "html"];
+    const docExts = ["md", "mdx", "txt", "rst", "adoc"];
+    const apiExts = ["json", "yaml", "yml", "graphql", "proto", "openapi"];
+    if (codeExts.includes(ext)) return "code";
+    if (docExts.includes(ext)) return "documentation";
+    if (apiExts.includes(ext)) return "api";
+    return "notes";
+  };
+
+  const handleFileRead = useCallback((file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      if (content) {
+        setDocTitle(file.name);
+        setDocPath(file.name);
+        setDocType(detectDocType(file.name));
+        setDocContent(content);
+        setShowAddDoc(true);
+      }
+    };
+    reader.readAsText(file);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFileRead(file);
+  }, [handleFileRead]);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
+
+  const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleFileRead(file);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }, [handleFileRead]);
 
   const docColumns: ColumnConfig[] = [
     { name: t("table.colDocument"), uid: "title", sortable: true },
@@ -351,7 +409,24 @@ export default function ContextManagerPage() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-[10px] text-muted-foreground italic text-center py-10">{t("ctxMgr.addFilesHint")}</p>
+                    <div
+                      className={cn(
+                        "flex flex-col items-center justify-center py-8 rounded-xl border-2 border-dashed transition-all cursor-pointer",
+                        isDragging ? "border-primary bg-primary/5" : "border-default-200 hover:border-primary/30"
+                      )}
+                      onDrop={handleDrop}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onClick={() => fileInputRef.current?.click()}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") fileInputRef.current?.click(); }}
+                      aria-label={t("ctxMgr.dropFilesHere")}
+                    >
+                      <Upload className={cn("size-6 mb-2", isDragging ? "text-primary" : "text-muted-foreground/40")} />
+                      <p className="text-[10px] font-bold text-muted-foreground">{t("ctxMgr.dropOrBrowse")}</p>
+                      <p className="text-[10px] text-muted-foreground/60">{t("ctxMgr.dropOrBrowseHint")}</p>
+                    </div>
                   )}
                 </Card>
 
@@ -362,14 +437,34 @@ export default function ContextManagerPage() {
                       <FileText className="size-4 text-primary" />
                       {t("ctxMgr.contextUnits")}
                     </h3>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onPress={() => setShowAddDoc(true)}
-                      className="font-black text-[10px] uppercase h-7 px-3 text-primary"
-                    >
-                      <Plus className="size-3 mr-1" /> {t("ctxMgr.addSourceBtn")}
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".ts,.tsx,.js,.jsx,.py,.java,.go,.rs,.c,.cpp,.h,.cs,.rb,.php,.swift,.kt,.vue,.svelte,.css,.scss,.html,.md,.mdx,.txt,.json,.yaml,.yml,.graphql,.proto,.rst,.adoc"
+                        className="hidden"
+                        onChange={handleFileInput}
+                        aria-hidden="true"
+                      />
+                      <Button
+                        isIconOnly
+                        size="sm"
+                        variant="ghost"
+                        onPress={() => fileInputRef.current?.click()}
+                        aria-label={t("ctxMgr.uploadFile")}
+                        className="text-primary"
+                      >
+                        <Upload className="size-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onPress={() => setShowAddDoc(true)}
+                        className="font-black text-[10px] uppercase h-7 px-3 text-primary"
+                      >
+                        <Plus className="size-3 mr-1" /> {t("ctxMgr.addSourceBtn")}
+                      </Button>
+                    </div>
                   </div>
 
                   <DataTable
@@ -384,14 +479,29 @@ export default function ContextManagerPage() {
               </div>
             </>
           ) : (
-            <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center h-full">
-              <div className="size-24 bg-muted rounded-full flex items-center justify-center mb-6">
-                <FolderPlus className="size-12 text-muted-foreground/30" />
+            <Card className="p-12 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center h-full">
+              <div className="size-20 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-full flex items-center justify-center mb-6">
+                <BookOpen className="size-10 text-blue-500/50" />
               </div>
-              <h3 className="text-2xl font-black mb-2 opacity-80 text-foreground/50">{t("ctxMgr.selectCreateTitle")}</h3>
-              <p className="text-muted-foreground max-w-sm mx-auto font-medium">
+              <h3 className="text-2xl font-black mb-2 text-foreground/60">{t("ctxMgr.selectCreateTitle")}</h3>
+              <p className="text-muted-foreground max-w-md mx-auto font-medium mb-8">
                 {t("ctxMgr.selectCreateDesc")}
               </p>
+              <div className="grid gap-4 sm:grid-cols-3 max-w-lg w-full">
+                {[
+                  { icon: FolderPlus, label: t("ctxMgr.step1"), desc: t("ctxMgr.step1Desc") },
+                  { icon: Upload, label: t("ctxMgr.step2"), desc: t("ctxMgr.step2Desc") },
+                  { icon: Copy, label: t("ctxMgr.step3"), desc: t("ctxMgr.step3Desc") },
+                ].map((step, i) => (
+                  <div key={i} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-muted/30 border border-default-200">
+                    <div className="size-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                      <step.icon className="size-5 text-primary" />
+                    </div>
+                    <span className="text-xs font-black uppercase text-foreground/70">{step.label}</span>
+                    <span className="text-[10px] text-muted-foreground leading-tight">{step.desc}</span>
+                  </div>
+                ))}
+              </div>
             </Card>
           )}
         </div>
@@ -464,25 +574,56 @@ export default function ContextManagerPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("ctxMgr.contentLabel")}</label>
-                <TextArea
-                  value={docContent}
-                  onChange={(e) => setDocContent(e.target.value)}
-                  onKeyDown={(e) => {
-                    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-                      e.preventDefault();
-                      if (docTitle && docContent) {
-                        addDocument(docTitle, docContent, docType, docPriority, [], docPath);
-                        addToast(t("ctxMgr.addedToContext", { title: docTitle }), "success");
-                        resetDocForm();
-                        setShowAddDoc(false);
-                      }
-                    }
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("ctxMgr.contentLabel")}</label>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onPress={() => fileInputRef.current?.click()}
+                    className="text-[10px] font-bold text-primary gap-1 h-6"
+                  >
+                    <Upload className="size-3" /> {t("ctxMgr.uploadFile")}
+                  </Button>
+                </div>
+                <div
+                  className="relative"
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsDragging(false);
+                    const file = e.dataTransfer.files[0];
+                    if (file) handleFileRead(file);
                   }}
-                  placeholder={t("ctxMgr.pasteContentPlaceholder")}
-                  className="h-48 w-full resize-none rounded-2xl border-2 border-divider bg-background p-4 font-mono text-sm focus:border-indigo-500 outline-none transition-all shadow-inner"
-                  aria-label={t("ctxMgr.contentLabel")}
-                />
+                  onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                  onDragLeave={() => setIsDragging(false)}
+                >
+                  <TextArea
+                    value={docContent}
+                    onChange={(e) => setDocContent(e.target.value)}
+                    onKeyDown={(e) => {
+                      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                        e.preventDefault();
+                        if (docTitle && docContent) {
+                          addDocument(docTitle, docContent, docType, docPriority, [], docPath);
+                          addToast(t("ctxMgr.addedToContext", { title: docTitle }), "success");
+                          resetDocForm();
+                          setShowAddDoc(false);
+                        }
+                      }
+                    }}
+                    placeholder={t("ctxMgr.pasteContentPlaceholder")}
+                    className="h-48 w-full resize-none rounded-2xl border-2 border-divider bg-background p-4 font-mono text-sm focus:border-indigo-500 outline-none transition-all shadow-inner"
+                    aria-label={t("ctxMgr.contentLabel")}
+                  />
+                  {isDragging && (
+                    <div className="absolute inset-0 rounded-2xl border-2 border-dashed border-primary bg-primary/10 flex items-center justify-center pointer-events-none z-10">
+                      <div className="flex flex-col items-center gap-2">
+                        <Upload className="size-8 text-primary" />
+                        <span className="text-sm font-bold text-primary">{t("ctxMgr.dropFileHere")}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex gap-3 pt-2">
