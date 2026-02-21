@@ -131,7 +131,7 @@ export function MagicInput() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={t("magic.placeholder")}
-          className="w-full resize-none bg-transparent px-12 py-4 text-base placeholder:text-muted-foreground/50 focus:outline-none min-h-[60px]"
+          className="w-full resize-none bg-transparent px-12 py-4 text-base placeholder:text-muted-foreground/50 min-h-[60px] border-none shadow-none outline-none ring-0 focus:outline-none focus:ring-0 focus:border-none [&_textarea]:outline-none [&_textarea]:ring-0 [&_textarea]:focus:outline-none [&_textarea]:focus:ring-0"
           rows={Math.min(5, Math.max(2, input.split("\n").length))}
           aria-label={t("magic.ariaLabel")}
         />
