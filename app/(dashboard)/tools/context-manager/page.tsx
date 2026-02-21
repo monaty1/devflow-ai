@@ -41,7 +41,6 @@ import { AI_MODELS } from "@/config/ai-models";
 import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { cn } from "@/lib/utils";
-import { StatusBadge } from "@/components/shared/status-badge";
 import type { ContextDocument as Document, Priority, DocumentType } from "@/types/context-manager";
 
 export default function ContextManagerPage() {
@@ -418,97 +417,99 @@ export default function ContextManagerPage() {
           {activeWindow ? (
             <>
               {/* Dashboard Row */}
-              <div className="grid gap-4 sm:grid-cols-3">
-                <Card className="p-6 bg-gradient-to-br from-indigo-500/10 to-blue-500/10 dark:from-indigo-500/15 dark:to-blue-500/15 shadow-lg shadow-primary/5 border border-default-200 dark:border-default-100">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-[10px] font-bold uppercase text-muted-foreground">{t("ctxMgr.utilization")}</p>
-                    <StatusBadge variant="info">{activeWindow.totalTokens.toLocaleString()} / {activeWindow.maxTokens.toLocaleString()}</StatusBadge>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {/* Model Target */}
+                <Card className="p-5">
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground mb-2 flex items-center gap-1.5">
+                    <Cpu className="size-3" /> {t("ctxMgr.modelPreset")}
+                  </p>
+                  <Dropdown>
+                    <DropdownTrigger>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-sm font-black px-0 h-auto justify-start w-full text-left"
+                        aria-label={t("ctxMgr.modelPreset")}
+                      >
+                        {MODEL_PRESETS.find(m => m.maxTokens === activeWindow.maxTokens)?.name ?? t("ctxMgr.modelPreset")}
+                        <span className="text-[10px] font-normal text-muted-foreground ml-1">
+                          ({(activeWindow.maxTokens / 1000).toFixed(0)}K)
+                        </span>
+                      </Button>
+                    </DropdownTrigger>
+                    <DropdownMenu
+                      selectionMode="single"
+                      selectedKeys={new Set([MODEL_PRESETS.find(m => m.maxTokens === activeWindow.maxTokens)?.id ?? ""])}
+                      onSelectionChange={(keys) => {
+                        const id = Array.from(keys)[0] as string;
+                        const preset = MODEL_PRESETS.find(m => m.id === id);
+                        if (preset) setMaxTokens(preset.maxTokens);
+                      }}
+                      className="max-h-[280px] overflow-y-auto"
+                    >
+                      {MODEL_PRESETS.filter(m => m.id !== "custom").map(m => (
+                        <DropdownItem key={m.id}>
+                          {m.name} ({(m.maxTokens / 1000).toFixed(0)}K)
+                        </DropdownItem>
+                      ))}
+                    </DropdownMenu>
+                  </Dropdown>
+                </Card>
+
+                {/* Utilization */}
+                <Card className="p-5">
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground mb-2">{t("ctxMgr.utilization")}</p>
+                  <div className="flex items-baseline gap-2 mb-2">
+                    <span className={cn(
+                      "text-3xl font-black",
+                      activeWindow.utilizationPercentage > 90 ? "text-red-500 dark:text-red-400" : activeWindow.utilizationPercentage > 60 ? "text-amber-500 dark:text-amber-400" : "text-emerald-500 dark:text-emerald-400"
+                    )}>{activeWindow.utilizationPercentage}%</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">{activeWindow.totalTokens.toLocaleString()}</span>
                   </div>
-                  <p className={cn(
-                    "text-4xl font-black mb-2",
-                    activeWindow.utilizationPercentage > 90 ? "text-red-500 dark:text-red-400" : activeWindow.utilizationPercentage > 60 ? "text-amber-500 dark:text-amber-400" : "text-indigo-600 dark:text-indigo-400"
-                  )}>{activeWindow.utilizationPercentage}%</p>
-                  <div className="h-2 w-full bg-muted rounded-full overflow-hidden mb-3">
+                  <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
                     <div
                       className={cn(
                         "h-full rounded-full transition-all",
-                        activeWindow.utilizationPercentage > 90 ? "bg-red-500 dark:bg-red-400" : activeWindow.utilizationPercentage > 60 ? "bg-amber-500 dark:bg-amber-400" : "bg-emerald-500 dark:bg-emerald-400"
+                        activeWindow.utilizationPercentage > 90 ? "bg-red-500" : activeWindow.utilizationPercentage > 60 ? "bg-amber-500" : "bg-emerald-500"
                       )}
                       style={{ width: `${Math.min(100, activeWindow.utilizationPercentage)}%` }}
                     />
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <Cpu className="size-3 text-muted-foreground" />
-                    <Dropdown>
-                      <DropdownTrigger>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="text-[10px] font-bold px-2 py-1 h-auto"
-                          aria-label={t("ctxMgr.modelPreset")}
-                        >
-                          {MODEL_PRESETS.find(m => m.maxTokens === activeWindow.maxTokens)?.name ?? t("ctxMgr.modelPreset")}
-                        </Button>
-                      </DropdownTrigger>
-                      <DropdownMenu
-                        selectionMode="single"
-                        selectedKeys={new Set([MODEL_PRESETS.find(m => m.maxTokens === activeWindow.maxTokens)?.id ?? ""])}
-                        onSelectionChange={(keys) => {
-                          const id = Array.from(keys)[0] as string;
-                          const preset = MODEL_PRESETS.find(m => m.id === id);
-                          if (preset) setMaxTokens(preset.maxTokens);
-                        }}
-                      >
-                        {MODEL_PRESETS.filter(m => m.id !== "custom").map(m => (
-                          <DropdownItem key={m.id}>
-                            {m.name} ({(m.maxTokens / 1000).toFixed(0)}K)
-                          </DropdownItem>
-                        ))}
-                      </DropdownMenu>
-                    </Dropdown>
-                  </div>
                 </Card>
 
-                <Card className="p-6 flex flex-col justify-center border-2 border-transparent hover:border-indigo-500/20 transition-all">
-                  <div className="flex items-center gap-3">
-                    <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl text-indigo-600 dark:text-indigo-400">
-                      <Coins className="size-6" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t("ctxMgr.estCost")}</p>
-                      <p className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">
-                        {formatCost((activeWindow.totalTokens / 1_000_000) * (AI_MODELS.find(m => m.id === "gpt-4o")?.inputPricePerMToken || 2.5))}
-                      </p>
-                    </div>
-                  </div>
+                {/* Cost */}
+                <Card className="p-5">
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground mb-2 flex items-center gap-1.5">
+                    <Coins className="size-3" /> {t("ctxMgr.estCost")}
+                  </p>
+                  <p className="text-2xl font-black text-foreground mb-1">
+                    {formatCost((activeWindow.totalTokens / 1_000_000) * (AI_MODELS.find(m => m.id === "gpt-4o")?.inputPricePerMToken || 2.5))}
+                  </p>
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="mt-4 font-bold border-indigo-100 dark:border-indigo-900 text-indigo-600 dark:text-indigo-400"
+                    className="text-[10px] font-bold text-primary px-0 h-auto"
                     onPress={() => {
                       const fullContent = activeWindow.documents.map(d => `--- ${d.title} ---\n${d.content}`).join("\n\n");
                       navigateTo("token-visualizer", fullContent);
                     }}
                   >
-                    {t("ctxMgr.deepTokenAudit")}
+                    {t("ctxMgr.deepTokenAudit")} →
                   </Button>
                 </Card>
 
-                <Card className="p-6 flex flex-col gap-4">
-                  <div className="flex flex-col gap-1">
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase">{t("ctxMgr.packagingEngine")}</p>
-                    <Checkbox
-                      isSelected={stripComments}
-                      onChange={() => setStripComments(!stripComments)}
-                      className="mt-1"
-                    >
-                      <span className="text-[10px] font-black uppercase text-primary tracking-tighter">{t("ctxMgr.stripComments")}</span>
-                    </Checkbox>
-                  </div>
+                {/* Export */}
+                <Card className="p-5 flex flex-col gap-3">
+                  <Checkbox
+                    isSelected={stripComments}
+                    onChange={() => setStripComments(!stripComments)}
+                  >
+                    <span className="text-[10px] font-bold uppercase text-muted-foreground">{t("ctxMgr.stripComments")}</span>
+                  </Checkbox>
                   <CopyButton
                     getText={() => exportForAI({ stripComments }) || ""}
                     label={t("ctxMgr.copyAiReady")}
-                    className="font-bold shadow-lg shadow-primary/20 h-12 w-full"
+                    className="font-bold shadow-lg shadow-primary/20 h-11 w-full"
                   />
                 </Card>
               </div>
