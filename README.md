@@ -236,11 +236,11 @@ We follow a **Strategic Coverage** architecture. Not all code needs the same lev
 **Per-file enforcement** is enabled: each CORE file must individually meet thresholds. The CI pipeline fails if any file drops below its floor.
 
 ```bash
-npm run test:run                                             # All unit tests (1067+)
+npm run test:run                                             # All unit tests (1257)
 npx vitest run tests/unit/application/json-formatter.test.ts # Single file
 npx vitest run -t "should format"                            # By pattern
 npm run test:coverage                                        # Coverage report
-npm run test:e2e                                             # Playwright E2E (5 tests)
+npm run test:e2e                                             # Playwright E2E (3 specs)
 ```
 
 ---
@@ -528,8 +528,12 @@ Todas las respuestas incluyen cabeceras de seguridad estrictas via `next.config.
 
 ### Principios de Diseno
 
-- **Sin backend** &mdash; cero superficie de ataque del lado servidor
-- **Sin API routes** &mdash; todo el procesamiento en el navegador
+- **Local-first** &mdash; todas las herramientas funcionan sin servidor ni IA
+- **API keys solo en servidor** &mdash; sin prefijo `NEXT_PUBLIC_`, las claves nunca llegan al navegador
+- **BYOK solo en memoria** &mdash; claves de usuario en Zustand (sin persist), se pierden al cerrar pestana
+- **Anti-inyeccion** &mdash; system prompts en servidor con directivas anti-inyeccion explicitas
+- **Rate limiting** &mdash; basado en IP, en memoria (10 RPM gratis / 50 RPM BYOK)
+- **Validacion de entrada** &mdash; schemas Zod con max-length en todos los endpoints de IA
 - **Sin datos de usuario** &mdash; solo localStorage, sin transmision externa
 - **CSP reforzado** &mdash; bloquea XSS, clickjacking e inyeccion de datos
 - **Proteccion contra prototype pollution** &mdash; claves peligrosas (`__proto__`, `constructor`, `prototype`) filtradas

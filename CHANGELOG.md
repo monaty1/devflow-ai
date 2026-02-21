@@ -5,6 +5,38 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.1] - 2026-02-21
+
+### Context Manager UX Overhaul & UI Polish
+
+Comprehensive iteration on Context Manager until it provides real value, plus MagicInput and cross-tool UI fixes.
+
+#### Context Manager — Full Rewrite
+- **Multi-file drag-and-drop**: Global drop zone with overlay, auto-creates window when dropping files with no window selected
+- **File browser button**: Native file input with multi-select support (.ts, .tsx, .py, .json, .md and 20+ extensions)
+- **Direct file add**: Files from drag/drop/browse added directly — no modal step required
+- **Auto-incremental names**: Default window names "My Project", "My Project 2", "My Project 3"...
+- **Compact stats bar**: Replaced 4 separate dashboard cards with a single row (model, utilization %, cost, export)
+- **Wider document table**: Grid changed from 3/5 to 9/12 columns for the table area, eliminating horizontal scroll
+- **Delete confirmation modal**: HeroUI `AlertDialog` with blur backdrop for both document and project deletion
+- **Translated priority labels**: High/Medium/Low rendered in user's locale
+- **Native select for model & priority**: Replaced HeroUI Dropdown (broke inside tables/compact spaces) with native `<select>`
+- **Empty state redesign**: 3-step guide (Create → Add Files → Export) with action buttons
+
+#### MagicInput Fix
+- **Focus ring fix**: Replaced HeroUI `TextArea` with native `<textarea>` to eliminate square focus ring inside rounded Card
+
+#### Cross-tool Polish
+- **max-w-7xl standardization**: All 15 tool pages now use consistent 1280px max width
+- **React Compiler compliance**: Moved `pendingFilesRef.current` access from render to `useEffect`
+
+#### i18n
+- **23 new keys** in both `en.json` and `es.json` (~1539 keys per locale, up from ~1507)
+
+#### Stats
+- **1257 unit tests passing** (unchanged)
+- **0 type errors**, **0 lint errors**, production build verified
+
 ## [4.0.0] - 2026-02-21
 
 ### Feature Enhancements — "Wow Factor" Release

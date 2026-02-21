@@ -86,18 +86,23 @@ This ensures the tool is always responsive and functional, even without AI.
                   | AIProviderFactory |
                   +--------+---------+
                            |
-           +---------------+---------------+
-           |                               |
-  +--------v---------+          +----------v--------+
-  |  GeminiClient    |          |    GroqClient      |
-  | (primary, free)  |          |   (fallback)       |
-  +------------------+          +-------------------+
+        +--------+---------+---------+--------+
+        |        |                   |        |
+  +-----v----+ +v----------+ +------v-----+ +v--------------+
+  | Gemini   | | Groq      | | OpenRouter | | Pollinations  |
+  | (primary)| | (fallback)| | (fallback) | | (free, no key)|
+  +----------+ +-----------+ +------------+ +---------------+
 ```
 
-- **AIProviderPort** interface decouples all logic from specific SDKs
-- **Gemini 2.0 Flash** (free tier: 15 RPM, 1.5M tokens/day)
-- **Groq Llama 3.1 70B** (fallback via raw fetch)
-- **BYOK** (Bring Your Own Key): Users can provide their own API key, stored in memory only (Zustand, no persist)
+**Provider chain** (in priority order):
+1. **BYOK key** — if user provides their own API key, it's used directly
+2. **Gemini 2.0 Flash** — primary (free tier: 15 RPM, 1.5M tokens/day)
+3. **Groq Llama 3.1 70B** — first fallback (via raw fetch)
+4. **OpenRouter** — second fallback (multiple models)
+5. **Pollinations** — final fallback (always free, no API key needed)
+
+- **AIProviderPort** interface (`application/ports/ai-provider.port.ts`) decouples all logic from specific SDKs
+- **BYOK** (Bring Your Own Key): Users provide their own API key via `X-DevFlow-API-Key` + `X-DevFlow-Provider` headers, stored in memory only (Zustand, no persist)
 
 ### Rate Limiting
 

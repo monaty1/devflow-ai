@@ -19,11 +19,15 @@ DevFlow AI es una plataforma open-source que centraliza **15 herramientas** esen
 **Resultados:**
 
 - 15 herramientas funcionales end-to-end
-- 100% ejecucion local (sin APIs externas para procesamiento)
-- 942+ tests con coverage estrategico 100/80/0 per-file
+- 100% ejecucion local + IA opcional con 4 proveedores (Gemini, Groq, OpenRouter, Pollinations)
+- **1257 tests** con coverage estrategico 100/80/0 per-file (29 archivos de test)
+- 3 E2E specs con Playwright (navigation, JSON formatter, settings)
 - Lighthouse score **100/100/100/100** en Desktop
 - Homepage optimizada con Server Components (RSC) para rendimiento movil
-- Internacionalizacion completa (English/Castellano, ~1374 claves)
+- Internacionalizacion completa (English/Castellano, **~1539 claves** por idioma)
+- **8 CI jobs**: quality, security, dependency-review, build, e2e, CodeQL SAST, Semgrep SAST, Lighthouse
+- Command Palette (`Cmd+K`) para acceso rapido a cualquier herramienta
+- Export/Import de configuracion
 - Deploy en produccion con CI/CD y error tracking (Sentry)
 
 ---
@@ -47,7 +51,7 @@ Ademas, los desarrolladores frontend enfrentan tareas repetitivas diarias: forma
 
 - Aplicar React 19 y Next.js 16 con App Router y Server Components
 - Implementar Clean Architecture en un proyecto real de 15 herramientas
-- Crear una suite de tests comprehensiva (942+ tests) con Vitest
+- Crear una suite de tests comprehensiva (1257 tests) con Vitest + Playwright E2E
 - Utilizar IA generativa (Claude Code) como herramienta de desarrollo
 - Demostrar dominio de TypeScript 5 en modo maximo estricto
 
@@ -55,10 +59,10 @@ Ademas, los desarrolladores frontend enfrentan tareas repetitivas diarias: forma
 
 - Construir 15 herramientas funcionales con patron arquitectonico consistente
 - Lograr coverage estrategico 100/80/0 con enforcement per-file
-- Deploy en produccion con CI/CD completo (7 jobs: lint, type-check, tests, security, build, e2e, SAST)
+- Deploy en produccion con CI/CD completo (8 jobs: lint, type-check, tests, security, dependency-review, build, e2e, CodeQL, Semgrep, Lighthouse)
 - Lighthouse score 100 en todas las metricas (Desktop)
-- Internacionalizacion completa (EN/ES)
-- Seguridad enterprise: CSP, HSTS, prototype pollution protection
+- Internacionalizacion completa (EN/ES, ~1539 claves por idioma)
+- Seguridad enterprise: CSP, HSTS, prototype pollution, SAST (CodeQL + Semgrep), harden-runner, eslint-plugin-security
 
 #### Objetivos de Producto
 
@@ -190,7 +194,7 @@ La calidad de un prompt impacta directamente en la respuesta del LLM. Tecnicas c
 
 **RF-18: Internacionalizacion**
 
-- ~1374 claves traducidas en English y Castellano
+- ~1539 claves traducidas en English y Castellano
 - Cambio de idioma en tiempo real sin recarga
 
 ### 3.2 Requisitos No Funcionales
@@ -399,7 +403,7 @@ page.tsx (Server Component - async)
 
 **Sistema custom ligero** (sin dependencia de i18next):
 
-- ~1374 claves de traduccion en `locales/en.json` y `locales/es.json`
+- ~1539 claves de traduccion en `locales/en.json` y `locales/es.json`
 - Hook `useTranslation()` con interpolacion `{key}`
 - Funcion server-side `t()` para Server Components
 - Cambio de idioma instantaneo via Zustand
@@ -445,32 +449,36 @@ Modelo de coverage estrategico con enforcement per-file:
 ### 5.2 Resultados de Tests
 
 ```
-Test Files  25 passed (25)
-Tests       942 passed (942)
-Duration    ~26s
+Test Files  29 passed (29)
+Tests       1257 passed (1257)
+Duration    ~25s
 ```
 
 **Distribucion por herramienta:**
 
-| Test File            | Tests | Lineas | Calidad   |
-| -------------------- | ----- | ------ | --------- |
-| uuid-generator       | 65    | 449    | Excelente |
-| regex-humanizer      | 59    | 442    | Excelente |
-| cron-builder         | 52    | 498    | Excelente |
-| variable-name-wizard | 50    | ~400   | Excelente |
-| git-commit-generator | 48    | ~380   | Excelente |
-| base64               | 42    | 354    | Excelente |
-| json-formatter       | 38    | 364    | Excelente |
-| dto-matic            | 39    | ~350   | Muy bueno |
-| code-review          | 32    | 440    | Muy bueno |
-| tailwind-sorter      | 30    | ~300   | Muy bueno |
-| http-status-finder   | 28    | 309    | Bueno     |
-| prompt-analyzer      | 19    | ~200   | Bueno     |
-| cost-calculator      | 17    | 146    | Bueno     |
-| token-visualizer     | 19    | ~180   | Bueno     |
-| context-manager      | 16    | ~150   | Bueno     |
-| + 5 component tests  | 55    | ~480   | Bueno     |
-| + 1 domain test      | 4     | 44     | Basico    |
+| Test File            | Tests | Calidad   |
+| -------------------- | ----- | --------- |
+| uuid-generator       | 89    | Excelente |
+| regex-humanizer      | 83    | Excelente |
+| cron-builder         | 75    | Excelente |
+| variable-name-wizard | 74    | Excelente |
+| git-commit-generator | 71    | Excelente |
+| base64               | 66    | Excelente |
+| json-formatter       | 61    | Excelente |
+| dto-matic            | 62    | Excelente |
+| code-review          | 55    | Excelente |
+| tailwind-sorter      | 53    | Muy bueno |
+| http-status-finder   | 51    | Muy bueno |
+| prompt-analyzer      | 43    | Muy bueno |
+| cost-calculator      | 45    | Muy bueno |
+| token-visualizer     | 40    | Muy bueno |
+| context-manager      | 39    | Muy bueno |
+| tool-recommendations | 22    | Bueno     |
+| smart-navigation     | 18    | Bueno     |
+| + 5 component tests  | 55    | Bueno     |
+| + 4 integration tests| 38    | Bueno     |
+| + 1 domain test      | 4     | Basico    |
+| **E2E (Playwright)** | 3 specs | navigation, json-formatter, settings |
 
 ### 5.3 Tipos de Tests Implementados
 
@@ -527,7 +535,7 @@ Build:         OK (28 paginas generadas)
 | Testing        | Vitest                | 4.0          | Fast, compatible con Testing Library       |
 | Linting        | ESLint                | 9.x          | Flat config                                |
 | Error Tracking | Sentry                | 10.38        | Client + Server + Edge                     |
-| CI/CD          | GitHub Actions        | -            | 3 jobs paralelos                           |
+| CI/CD          | GitHub Actions        | -            | 8 jobs (quality, security, dep-review, build, e2e, CodeQL, Semgrep, Lighthouse) |
 | Hosting        | Vercel                | -            | Edge Network, ISR, preview URLs            |
 
 **Total dependencias produccion:** 18 (minimalista)
@@ -539,28 +547,47 @@ Build:         OK (28 paginas generadas)
 
 ### 7.1 CI/CD Pipeline
 
-GitHub Actions ejecuta en cada push a `main`/`develop` y todas las PRs:
+GitHub Actions ejecuta **8 jobs** en cada push a `main`/`develop` y todas las PRs:
 
 ```
-┌─── PUSH / PR ──────────────────────────────────────┐
-│                                                      │
-│  Job 1: QUALITY (paralelo)                          │
-│  ├─ npm run lint           (ESLint 9)               │
-│  ├─ npm run type-check     (tsc --noEmit strict)    │
-│  ├─ npm run test:coverage  (942+ tests + thresholds)│
-│  └─ Upload coverage artifacts (14 dias)             │
-│                                                      │
-│  Job 2: SECURITY (paralelo)                         │
-│  └─ npm audit --audit-level=high (bloquea merges)   │
-│                                                      │
-│  Job 3: BUILD (depende de Quality + Security)       │
-│  └─ npm run build (Next.js produccion)              │
-│                                                      │
-│  + GitHub Dependabot (semanal, npm + Actions)       │
-└──────────────────────────────────────────────────────┘
+┌─── PUSH / PR ────────────────────────────────────────────────────────┐
+│                                                                        │
+│  Job 1: QUALITY (paralelo)                                            │
+│  ├─ npm run lint              (ESLint 9 + eslint-plugin-security)     │
+│  ├─ npm run type-check        (tsc --noEmit strict)                   │
+│  ├─ npm run test:coverage     (1257 tests + umbrales per-file)        │
+│  └─ PR coverage comments      (artifacts 14 dias)                     │
+│                                                                        │
+│  Job 2: SECURITY (paralelo)                                           │
+│  ├─ npm audit --audit-level=high                                      │
+│  └─ lockfile-lint (validacion de registro npm)                        │
+│                                                                        │
+│  Job 3: DEPENDENCY-REVIEW (solo PRs)                                  │
+│  └─ dependency-review-action (fail-on-severity: moderate)             │
+│                                                                        │
+│  Job 4: BUILD (depende de Quality + Security)                         │
+│  ├─ npm run build             (Next.js produccion)                    │
+│  └─ CycloneDX SBOM           (retencion 90 dias)                     │
+│                                                                        │
+│  Job 5: E2E (depende de Build)                                        │
+│  └─ Playwright tests          (3 specs, Chromium, retry=2)            │
+│                                                                        │
+│  Job 6: CODEQL (paralelo)                                             │
+│  └─ CodeQL JS/TS SAST         (security-extended, semanal + push/PR)  │
+│                                                                        │
+│  Job 7: SEMGREP (paralelo)                                            │
+│  └─ Semgrep SAST              (OWASP Top 10, React, Next.js → SARIF) │
+│                                                                        │
+│  Job 8: LIGHTHOUSE (solo PRs)                                         │
+│  └─ Lighthouse CI             (LCP <2.5s, FCP <1.8s, JS <300KB)      │
+│                                                                        │
+│  + Renovate (actualizacion automatica de dependencias)                │
+│  + StepSecurity harden-runner en todos los jobs                       │
+│  + Todas las GitHub Actions con SHA fijo (SHA-pinned)                 │
+└──────────────────────────────────────────────────────────────────────┘
 ```
 
-**Concurrency control:** Runs cancelados si se pushea al mismo branch.
+**Concurrency control:** Runs cancelados automaticamente si se pushea al mismo branch.
 
 ### 7.2 Produccion
 
@@ -576,19 +603,21 @@ GitHub Actions ejecuta en cada push a `main`/`develop` y todas las PRs:
 
 ### 8.1 Metricas del Proyecto
 
-| Metrica                    | Valor            |
-| -------------------------- | ---------------- |
-| Herramientas               | 15               |
-| Lineas de codigo (source)  | ~18,450          |
-| Lineas de tests            | ~5,550           |
-| Archivos fuente (.ts/.tsx) | 147              |
-| Componentes React          | 21               |
-| Custom hooks               | 20               |
-| Tests                      | 942+             |
-| Paginas (routes)           | 24               |
-| Claves i18n                | ~1374 (x2 idiomas)|
-| Commits                    | 28+              |
-| Dependencias produccion    | 18               |
+| Metrica                    | Valor              |
+| -------------------------- | ------------------ |
+| Herramientas               | 15                 |
+| Tests unitarios            | 1257               |
+| Tests E2E (Playwright)     | 3 specs            |
+| Archivos de test           | 29 unit + 3 E2E    |
+| Archivos fuente (.ts/.tsx) | 150+               |
+| Componentes React          | 25+                |
+| Custom hooks               | 22+                |
+| Paginas (routes)           | 24                 |
+| Claves i18n                | ~1539 (x2 idiomas) |
+| Jobs CI/CD                 | 8                  |
+| Commits                    | 120+               |
+| Proveedores IA             | 4 (Gemini, Groq, OpenRouter, Pollinations) |
+| Dependencias produccion    | 18                 |
 
 ### 8.2 Lighthouse Scores (Desktop)
 
@@ -607,7 +636,7 @@ GitHub Actions ejecuta en cada push a `main`/`develop` y todas las PRs:
 - useContext para Favoritos ✓
 - useReducer para Favoritos ✓
 - useMemo/useCallback para optimizacion ✓
-- Custom hooks (20 hooks) ✓
+- Custom hooks (22+ hooks) ✓
 - Class Component (ErrorBoundary) ✓
 - Responsive design (Tailwind CSS v4) ✓
 - GSAP animations (5 hooks de animacion) ✓
@@ -615,9 +644,13 @@ GitHub Actions ejecuta en cada push a `main`/`develop` y todas las PRs:
 - Skeletons de carga ✓
 - TypeScript strict mode ✓
 - Dark/Light mode con deteccion automatica ✓
-- i18n completo (EN/ES) ✓
-- Tests (942+ passing) ✓
-- CI/CD pipeline ✓
+- i18n completo (EN/ES, ~1539 claves por idioma) ✓
+- Tests unitarios (1257 passing, 29 archivos) ✓
+- Tests E2E con Playwright (3 specs) ✓
+- CI/CD pipeline (8 jobs) ✓
+- SAST (CodeQL + Semgrep) ✓
+- Command Palette (`Cmd+K`) ✓
+- Export/Import de configuracion ✓
 - Deploy en produccion ✓
 
 ### 8.4 Comparativa con Alternativas
@@ -644,9 +677,11 @@ GitHub Actions ejecuta en cada push a `main`/`develop` y todas las PRs:
 1. **Producto funcional end-to-end:** 15 herramientas reales desplegadas en produccion con 24 rutas navegables
 2. **Arquitectura ejemplar:** Clean Architecture con patron 5-capas replicado sin excepciones en las 15 herramientas
 3. **Performance maxima:** Lighthouse 100/100/100/100, Server Components, ISR
-4. **Testing robusto:** 942+ tests reales con aserciones significativas, coverage per-file
-5. **Seguridad enterprise:** CSP sin unsafe-eval, HSTS 2 anos, prototype pollution protection, Dependabot
-6. **Developer Experience:** TypeScript strict, ESLint, CI/CD con 3 quality gates
+4. **Testing robusto:** 1257 tests unitarios + 3 E2E specs con aserciones significativas, coverage per-file
+5. **Seguridad enterprise:** CSP sin unsafe-eval, HSTS, CodeQL + Semgrep SAST, SHA-pinned actions, harden-runner
+6. **Developer Experience:** TypeScript strict, ESLint + security plugin, CI/CD con 8 quality gates
+7. **UX avanzada:** Command Palette (Cmd+K), MagicInput, Export/Import, dark/light mode, WCAG AAA
+8. **IA opcional:** 4 proveedores con fallback automatico, BYOK, rate limiting IP-based
 
 ### 9.2 Aprendizajes Clave
 
@@ -681,10 +716,16 @@ GitHub Actions ejecuta en cada push a `main`/`develop` y todas las PRs:
 
 **Roadmap Futuro:**
 
+_Completado (ya implementado):_
+
+- ~~E2E tests con Playwright~~ → 3 specs (navigation, json-formatter, settings)
+- ~~Export/Import de configuracion~~ → JSON roundtrip con validacion Zod
+- ~~Command Palette~~ → `Cmd+K` con busqueda fuzzy de 15 tools + acciones
+
 _Corto plazo (1-2 meses):_
 
-- E2E tests con Playwright para flujos criticos
 - PWA con service worker para uso offline completo
+- Mas E2E specs (cubrir las 15 herramientas)
 - Export a PDF de reportes de analisis
 
 _Medio plazo (3-6 meses):_
@@ -747,7 +788,8 @@ Archivos clave:
 - `lib/application/*.ts` - Logica pura de las 15 herramientas
 - `hooks/use-*.ts` - 20 custom hooks
 - `app/(dashboard)/tools/*/page.tsx` - UI de cada herramienta
-- `tests/unit/application/*.test.ts` - Suite de 942+ tests
+- `tests/unit/application/*.test.ts` - Suite de 1257 tests (29 archivos)
+- `tests/e2e/*.spec.ts` - 3 Playwright E2E specs
 
 ### Anexo C: Demo en Produccion
 
