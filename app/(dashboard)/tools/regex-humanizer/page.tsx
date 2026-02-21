@@ -91,7 +91,7 @@ export default function RegexHumanizerPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <div className="mx-auto max-w-7xl space-y-6">
       <ToolHeader
         icon={Regex}
         gradient="from-pink-500 to-rose-600"

@@ -64,7 +64,7 @@ export default function TokenVisualizerPage() {
   }, [input, provider, isCompareMode, tokenize]);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <div className="mx-auto max-w-7xl space-y-6">
       <ToolHeader
         icon={Binary}
         gradient="from-emerald-500 to-teal-600"

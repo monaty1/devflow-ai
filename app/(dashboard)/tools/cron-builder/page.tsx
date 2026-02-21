@@ -130,7 +130,7 @@ export default function CronBuilderPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <div className="mx-auto max-w-7xl space-y-6">
       <ToolHeader
         icon={Clock}
         gradient="from-orange-500 to-amber-600"

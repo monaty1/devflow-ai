@@ -188,7 +188,7 @@ export default function CodeReviewPage() {
   }, [navigateTo, t]);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <div className="mx-auto max-w-7xl space-y-6">
       {/* Header */}
       <ToolHeader
         icon={FileCode}
