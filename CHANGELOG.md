@@ -5,6 +5,29 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0] - 2026-02-21
+
+### HeroUI Component Consistency (Fase 1)
+
+Final pass replacing all remaining raw HTML interactive elements with HeroUI v3 components.
+
+#### Converted
+- **settings/page.tsx**: Raw `<button>` clearResult → HeroUI `Button`
+- **data-table.tsx**: Raw `<input>` search → HeroUI `SearchField` (with SearchIcon + ClearButton)
+- **command-palette.tsx**: Raw `<input>` search → HeroUI `SearchField`
+- **Documentation**: TFM.md, README.md, ARCHITECTURE.md fully updated with current stats (1257 tests, ~1539 i18n keys, 8 CI jobs, 4 AI providers, 120+ commits)
+
+#### Justified Exceptions (documented)
+- 2 `<button role="option">` in command palette — ARIA listbox pattern (HeroUI Button doesn't accept `role`)
+- 2 `<input type="file" className="hidden">` — hidden file triggers (no HeroUI alternative)
+- 3 `<select>` — HeroUI Dropdown breaks in compact spaces (table cells, stat bars)
+- 1 `<textarea>` in MagicInput — HeroUI TextArea focus ring issue in rounded Card
+
+#### Stats
+- **0 `<button>` in `app/`**, **0 `<input>` in `components/`** (all converted)
+- **0 `console.error/warn/log`** in hooks (all cleaned up)
+- **1257 unit tests passing**, **0 type errors**, **0 lint errors**
+
 ## [4.0.1] - 2026-02-21
 
 ### Context Manager UX Overhaul & UI Polish
