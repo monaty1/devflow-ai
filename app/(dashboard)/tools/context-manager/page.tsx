@@ -26,6 +26,8 @@ import {
   Cpu,
   Upload,
   Copy,
+  FilePlus2,
+  ClipboardPaste,
 } from "lucide-react";
 import { useContextManager } from "@/hooks/use-context-manager";
 import { useToast } from "@/hooks/use-toast";
@@ -82,6 +84,7 @@ export default function ContextManagerPage() {
   // Drag-and-drop file support
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dragCounter = useRef(0);
 
   const detectDocType = (filename: string): DocumentType => {
     const ext = filename.split(".").pop()?.toLowerCase() ?? "";
@@ -94,46 +97,127 @@ export default function ContextManagerPage() {
     return "notes";
   };
 
-  const handleFileRead = useCallback((file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const content = e.target?.result as string;
-      if (content) {
-        setDocTitle(file.name);
-        setDocPath(file.name);
-        setDocType(detectDocType(file.name));
-        setDocContent(content);
-        setShowAddDoc(true);
-      }
-    };
-    reader.readAsText(file);
-  }, []);
+  // Queue files when window was just auto-created (state not yet updated)
+  const pendingFilesRef = useRef<{ name: string; content: string; type: DocumentType }[]>([]);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
+  // Add files directly (skip modal)
+  const addFilesDirectly = useCallback((files: { name: string; content: string; type: DocumentType }[]) => {
+    if (!activeWindowId) {
+      // Window was just created but state not yet updated — queue files
+      pendingFilesRef.current = files;
+      return;
+    }
+    for (const file of files) {
+      addDocument(file.name, file.content, file.type, "medium", [], file.name);
+    }
+    if (files.length === 1) {
+      addToast(t("ctxMgr.addedToContext", { title: files[0]?.name ?? "" }), "success");
+    } else {
+      addToast(t("ctxMgr.filesAdded", { count: String(files.length) }), "success");
+    }
+  }, [activeWindowId, addDocument, addToast, t]);
+
+  // Process pending files when activeWindowId updates
+  // (Using a layout-effect-like pattern inline)
+  if (pendingFilesRef.current.length > 0 && activeWindowId) {
+    const files = pendingFilesRef.current;
+    pendingFilesRef.current = [];
+    // Schedule microtask so it runs after render
+    queueMicrotask(() => {
+      for (const file of files) {
+        addDocument(file.name, file.content, file.type, "medium", [], file.name);
+      }
+      if (files.length === 1) {
+        addToast(t("ctxMgr.addedToContext", { title: files[0]?.name ?? "" }), "success");
+      } else {
+        addToast(t("ctxMgr.filesAdded", { count: String(files.length) }), "success");
+      }
+    });
+  }
+
+  const handleFiles = useCallback((fileList: FileList) => {
+    const readPromises: Promise<{ name: string; content: string; type: DocumentType }>[] = [];
+
+    for (let i = 0; i < fileList.length; i++) {
+      const file = fileList[i];
+      if (!file) continue;
+      readPromises.push(
+        new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            resolve({
+              name: file.name,
+              content: (e.target?.result as string) || "",
+              type: detectDocType(file.name),
+            });
+          };
+          reader.onerror = () => {
+            resolve({ name: file.name, content: "", type: "notes" as DocumentType });
+          };
+          reader.readAsText(file);
+        })
+      );
+    }
+
+    void Promise.all(readPromises).then((results) => {
+      const valid = results.filter((r) => r.content.length > 0);
+      if (valid.length === 0) return;
+
+      // Ensure window exists
+      if (!activeWindowId) {
+        createWindow(t("ctxMgr.autoWindowName"));
+        pendingFilesRef.current = valid;
+      } else {
+        addFilesDirectly(valid);
+      }
+    });
+  }, [activeWindowId, createWindow, addFilesDirectly, t]);
+
+  // Global drag handlers for the main content area
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handleFileRead(file);
-  }, [handleFileRead]);
+    dragCounter.current++;
+    if (e.dataTransfer.types.includes("Files")) {
+      setIsDragging(true);
+    }
+  }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDragging(true);
   }, []);
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDragging(false);
+    dragCounter.current--;
+    if (dragCounter.current <= 0) {
+      dragCounter.current = 0;
+      setIsDragging(false);
+    }
   }, []);
 
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current = 0;
+    setIsDragging(false);
+    if (e.dataTransfer.files.length > 0) {
+      handleFiles(e.dataTransfer.files);
+    }
+  }, [handleFiles]);
+
   const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleFileRead(file);
+    if (e.target.files && e.target.files.length > 0) {
+      handleFiles(e.target.files);
+    }
     if (fileInputRef.current) fileInputRef.current.value = "";
-  }, [handleFileRead]);
+  }, [handleFiles]);
+
+  const openFileBrowser = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
 
   const docColumns: ColumnConfig[] = [
     { name: t("table.colDocument"), uid: "title", sortable: true },
@@ -171,9 +255,9 @@ export default function ContextManagerPage() {
           <div className="flex flex-col gap-1 min-w-[100px]">
             <span className="font-mono text-xs font-bold">{doc.tokenCount.toLocaleString()}</span>
             <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-primary" 
-                style={{ width: `${Math.min(100, (doc.tokenCount / (activeWindow?.maxTokens || 1)) * 100)}%` }} 
+              <div
+                className="h-full bg-primary"
+                style={{ width: `${Math.min(100, (doc.tokenCount / (activeWindow?.maxTokens || 1)) * 100)}%` }}
               />
             </div>
           </div>
@@ -209,6 +293,19 @@ export default function ContextManagerPage() {
     }
   }, [activeWindow, changePriority, removeDocument, t]);
 
+  // Hidden file input — always in DOM, supports multiple
+  const fileInputElement = (
+    <input
+      ref={fileInputRef}
+      type="file"
+      multiple
+      accept=".ts,.tsx,.js,.jsx,.py,.java,.go,.rs,.c,.cpp,.h,.cs,.rb,.php,.swift,.kt,.vue,.svelte,.css,.scss,.html,.md,.mdx,.txt,.json,.yaml,.yml,.graphql,.proto,.rst,.adoc"
+      className="hidden"
+      onChange={handleFileInput}
+      aria-hidden="true"
+    />
+  );
+
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <ToolHeader
@@ -220,6 +317,8 @@ export default function ContextManagerPage() {
       />
 
       <ToolSuggestions toolId="context-manager" input={activeWindow?.name || ""} output={""} />
+
+      {fileInputElement}
 
       <div className="grid gap-6 lg:grid-cols-12">
         {/* Sidebar: Windows List */}
@@ -238,9 +337,9 @@ export default function ContextManagerPage() {
               }}
               variant="primary"
             />
-            <Button 
-              size="sm" 
-              variant="ghost" 
+            <Button
+              size="sm"
+              variant="ghost"
               onPress={() => {
                 if (newWindowName) {
                   createWindow(newWindowName);
@@ -255,6 +354,11 @@ export default function ContextManagerPage() {
 
           <div className="space-y-2 mt-4 overflow-auto max-h-[600px] pr-2 scrollbar-hide">
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-2">{t("ctxMgr.projectContexts")}</p>
+            {windows.length === 0 && (
+              <p className="text-xs text-muted-foreground/50 px-2 py-4 text-center italic">
+                {t("ctxMgr.noWindowsHint")}
+              </p>
+            )}
             {windows.map((w) => (
               <div
                 key={w.id}
@@ -292,8 +396,27 @@ export default function ContextManagerPage() {
           </div>
         </Card>
 
-        {/* Main Content */}
-        <div className="lg:col-span-9 space-y-6">
+        {/* Main Content — global drop zone */}
+        <div
+          className="lg:col-span-9 space-y-6 relative"
+          onDragEnter={handleDragEnter}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          {/* Global drag overlay */}
+          {isDragging && (
+            <div className="absolute inset-0 z-40 rounded-2xl border-2 border-dashed border-primary bg-primary/5 backdrop-blur-sm flex items-center justify-center pointer-events-none">
+              <div className="flex flex-col items-center gap-3 p-8 rounded-2xl bg-background/80 shadow-xl">
+                <div className="size-16 bg-primary/10 rounded-2xl flex items-center justify-center">
+                  <Upload className="size-8 text-primary animate-bounce" />
+                </div>
+                <p className="text-lg font-black text-primary">{t("ctxMgr.dropFilesHere")}</p>
+                <p className="text-sm text-muted-foreground">{t("ctxMgr.dropOrBrowseHint")}</p>
+              </div>
+            </div>
+          )}
+
           {activeWindow ? (
             <>
               {/* Dashboard Row */}
@@ -360,9 +483,9 @@ export default function ContextManagerPage() {
                       </p>
                     </div>
                   </div>
-                  <Button 
-                    size="sm" 
-                    variant="ghost" 
+                  <Button
+                    size="sm"
+                    variant="ghost"
                     className="mt-4 font-bold border-indigo-100 dark:border-indigo-900 text-indigo-600 dark:text-indigo-400"
                     onPress={() => {
                       const fullContent = activeWindow.documents.map(d => `--- ${d.title} ---\n${d.content}`).join("\n\n");
@@ -376,8 +499,8 @@ export default function ContextManagerPage() {
                 <Card className="p-6 flex flex-col gap-4">
                   <div className="flex flex-col gap-1">
                     <p className="text-[10px] font-bold text-muted-foreground uppercase">{t("ctxMgr.packagingEngine")}</p>
-                    <Checkbox 
-                      isSelected={stripComments} 
+                    <Checkbox
+                      isSelected={stripComments}
                       onChange={() => setStripComments(!stripComments)}
                       className="mt-1"
                     >
@@ -400,31 +523,41 @@ export default function ContextManagerPage() {
                     <FolderTree className="size-3 text-primary" /> {t("ctxMgr.projectHierarchy")}
                   </h3>
                   {activeWindow.documents.length > 0 ? (
-                    <div className="text-[10px] font-mono leading-tight overflow-auto max-h-[400px] text-primary/80 space-y-1">
-                      {activeWindow.documents.map(d => d.filePath || d.title).sort().map((p, i) => (
-                        <div key={i} className="flex items-center gap-1.5">
-                          <FileText className="size-3 shrink-0 opacity-60" />
-                          <span>{p}</span>
-                        </div>
-                      ))}
+                    <div className="space-y-3">
+                      <div className="text-[10px] font-mono leading-tight overflow-auto max-h-[300px] text-primary/80 space-y-1">
+                        {activeWindow.documents.map(d => d.filePath || d.title).sort().map((p, i) => (
+                          <div key={i} className="flex items-center gap-1.5">
+                            <FileText className="size-3 shrink-0 opacity-60" />
+                            <span>{p}</span>
+                          </div>
+                        ))}
+                      </div>
+                      {/* Mini drop zone below existing files */}
+                      <div
+                        className="flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-default-200 hover:border-primary/30 cursor-pointer transition-all group"
+                        onClick={openFileBrowser}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") openFileBrowser(); }}
+                        aria-label={t("ctxMgr.uploadFile")}
+                      >
+                        <Plus className="size-3 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+                        <span className="text-[10px] text-muted-foreground/40 group-hover:text-primary font-bold transition-colors">
+                          {t("ctxMgr.addMoreFiles")}
+                        </span>
+                      </div>
                     </div>
                   ) : (
                     <div
-                      className={cn(
-                        "flex flex-col items-center justify-center py-8 rounded-xl border-2 border-dashed transition-all cursor-pointer",
-                        isDragging ? "border-primary bg-primary/5" : "border-default-200 hover:border-primary/30"
-                      )}
-                      onDrop={handleDrop}
-                      onDragOver={handleDragOver}
-                      onDragLeave={handleDragLeave}
-                      onClick={() => fileInputRef.current?.click()}
+                      className="flex flex-col items-center justify-center py-8 rounded-xl border-2 border-dashed border-default-200 hover:border-primary/30 cursor-pointer transition-all group"
+                      onClick={openFileBrowser}
                       role="button"
                       tabIndex={0}
-                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") fileInputRef.current?.click(); }}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") openFileBrowser(); }}
                       aria-label={t("ctxMgr.dropFilesHere")}
                     >
-                      <Upload className={cn("size-6 mb-2", isDragging ? "text-primary" : "text-muted-foreground/40")} />
-                      <p className="text-[10px] font-bold text-muted-foreground">{t("ctxMgr.dropOrBrowse")}</p>
+                      <Upload className="size-6 mb-2 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+                      <p className="text-[10px] font-bold text-muted-foreground group-hover:text-primary transition-colors">{t("ctxMgr.dropOrBrowse")}</p>
                       <p className="text-[10px] text-muted-foreground/60">{t("ctxMgr.dropOrBrowseHint")}</p>
                     </div>
                   )}
@@ -436,25 +569,18 @@ export default function ContextManagerPage() {
                     <h3 className="font-bold flex items-center gap-2 text-sm">
                       <FileText className="size-4 text-primary" />
                       {t("ctxMgr.contextUnits")}
+                      {activeWindow.documents.length > 0 && (
+                        <Chip size="sm" variant="primary" className="text-[10px] font-bold">{activeWindow.documents.length}</Chip>
+                      )}
                     </h3>
                     <div className="flex items-center gap-2">
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept=".ts,.tsx,.js,.jsx,.py,.java,.go,.rs,.c,.cpp,.h,.cs,.rb,.php,.swift,.kt,.vue,.svelte,.css,.scss,.html,.md,.mdx,.txt,.json,.yaml,.yml,.graphql,.proto,.rst,.adoc"
-                        className="hidden"
-                        onChange={handleFileInput}
-                        aria-hidden="true"
-                      />
                       <Button
-                        isIconOnly
                         size="sm"
                         variant="ghost"
-                        onPress={() => fileInputRef.current?.click()}
-                        aria-label={t("ctxMgr.uploadFile")}
-                        className="text-primary"
+                        onPress={openFileBrowser}
+                        className="font-bold text-[10px] uppercase h-7 px-3 text-primary gap-1"
                       >
-                        <Upload className="size-3.5" />
+                        <Upload className="size-3" /> {t("ctxMgr.browseFiles")}
                       </Button>
                       <Button
                         variant="ghost"
@@ -462,24 +588,53 @@ export default function ContextManagerPage() {
                         onPress={() => setShowAddDoc(true)}
                         className="font-black text-[10px] uppercase h-7 px-3 text-primary"
                       >
-                        <Plus className="size-3 mr-1" /> {t("ctxMgr.addSourceBtn")}
+                        <ClipboardPaste className="size-3 mr-1" /> {t("ctxMgr.pasteCode")}
                       </Button>
                     </div>
                   </div>
 
-                  <DataTable
-                    columns={docColumns}
-                    data={activeWindow.documents}
-                    filterField="title"
-                    renderCell={renderDocCell}
-                    initialVisibleColumns={["title", "tokens", "priority", "actions"]}
-                    emptyContent={t("ctxMgr.noDocsWindow")}
-                  />
+                  {activeWindow.documents.length > 0 ? (
+                    <DataTable
+                      columns={docColumns}
+                      data={activeWindow.documents}
+                      filterField="title"
+                      renderCell={renderDocCell}
+                      initialVisibleColumns={["title", "tokens", "priority", "actions"]}
+                      emptyContent={t("ctxMgr.noDocsWindow")}
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
+                      <div className="size-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
+                        <FilePlus2 className="size-8 text-primary/50" />
+                      </div>
+                      <h4 className="text-sm font-bold text-foreground/60 mb-1">{t("ctxMgr.noDocsTitle")}</h4>
+                      <p className="text-xs text-muted-foreground mb-6 max-w-xs">{t("ctxMgr.noDocsDesc")}</p>
+                      <div className="flex items-center gap-3">
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onPress={openFileBrowser}
+                          className="font-bold gap-1"
+                        >
+                          <Upload className="size-3.5" /> {t("ctxMgr.browseFiles")}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onPress={() => setShowAddDoc(true)}
+                          className="font-bold gap-1"
+                        >
+                          <ClipboardPaste className="size-3.5" /> {t("ctxMgr.pasteCode")}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </Card>
               </div>
             </>
           ) : (
-            <Card className="p-12 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center h-full">
+            /* Empty state — no window selected */
+            <Card className="p-12 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center min-h-[500px]">
               <div className="size-20 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-full flex items-center justify-center mb-6">
                 <BookOpen className="size-10 text-blue-500/50" />
               </div>
@@ -487,7 +642,9 @@ export default function ContextManagerPage() {
               <p className="text-muted-foreground max-w-md mx-auto font-medium mb-8">
                 {t("ctxMgr.selectCreateDesc")}
               </p>
-              <div className="grid gap-4 sm:grid-cols-3 max-w-lg w-full">
+
+              {/* Step cards */}
+              <div className="grid gap-4 sm:grid-cols-3 max-w-lg w-full mb-8">
                 {[
                   { icon: FolderPlus, label: t("ctxMgr.step1"), desc: t("ctxMgr.step1Desc") },
                   { icon: Upload, label: t("ctxMgr.step2"), desc: t("ctxMgr.step2Desc") },
@@ -502,12 +659,24 @@ export default function ContextManagerPage() {
                   </div>
                 ))}
               </div>
+
+              {/* Quick actions */}
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="primary"
+                  onPress={openFileBrowser}
+                  className="font-bold gap-2"
+                >
+                  <Upload className="size-4" /> {t("ctxMgr.browseFiles")}
+                </Button>
+                <span className="text-xs text-muted-foreground">{t("ctxMgr.orDragFiles")}</span>
+              </div>
             </Card>
           )}
         </div>
       </div>
 
-      {/* Add Document Modal (Luxury Design) */}
+      {/* Add Document Modal — for manual paste only */}
       {showAddDoc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="add-doc-title">
           <Card className="w-full max-w-2xl p-8 shadow-2xl border-indigo-500/20">
@@ -574,56 +743,28 @@ export default function ContextManagerPage() {
               </div>
 
               <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("ctxMgr.contentLabel")}</label>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onPress={() => fileInputRef.current?.click()}
-                    className="text-[10px] font-bold text-primary gap-1 h-6"
-                  >
-                    <Upload className="size-3" /> {t("ctxMgr.uploadFile")}
-                  </Button>
-                </div>
-                <div
-                  className="relative"
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setIsDragging(false);
-                    const file = e.dataTransfer.files[0];
-                    if (file) handleFileRead(file);
-                  }}
-                  onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-                  onDragLeave={() => setIsDragging(false)}
-                >
-                  <TextArea
-                    value={docContent}
-                    onChange={(e) => setDocContent(e.target.value)}
-                    onKeyDown={(e) => {
-                      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-                        e.preventDefault();
-                        if (docTitle && docContent) {
-                          addDocument(docTitle, docContent, docType, docPriority, [], docPath);
-                          addToast(t("ctxMgr.addedToContext", { title: docTitle }), "success");
-                          resetDocForm();
-                          setShowAddDoc(false);
+                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("ctxMgr.contentLabel")}</label>
+                <TextArea
+                  value={docContent}
+                  onChange={(e) => setDocContent(e.target.value)}
+                  onKeyDown={(e) => {
+                    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                      e.preventDefault();
+                      if (docTitle && docContent) {
+                        if (!activeWindowId) {
+                          createWindow(t("ctxMgr.autoWindowName"));
                         }
+                        addDocument(docTitle, docContent, docType, docPriority, [], docPath);
+                        addToast(t("ctxMgr.addedToContext", { title: docTitle }), "success");
+                        resetDocForm();
+                        setShowAddDoc(false);
                       }
-                    }}
-                    placeholder={t("ctxMgr.pasteContentPlaceholder")}
-                    className="h-48 w-full resize-none rounded-2xl border-2 border-divider bg-background p-4 font-mono text-sm focus:border-indigo-500 outline-none transition-all shadow-inner"
-                    aria-label={t("ctxMgr.contentLabel")}
-                  />
-                  {isDragging && (
-                    <div className="absolute inset-0 rounded-2xl border-2 border-dashed border-primary bg-primary/10 flex items-center justify-center pointer-events-none z-10">
-                      <div className="flex flex-col items-center gap-2">
-                        <Upload className="size-8 text-primary" />
-                        <span className="text-sm font-bold text-primary">{t("ctxMgr.dropFileHere")}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                    }
+                  }}
+                  placeholder={t("ctxMgr.pasteContentPlaceholder")}
+                  className="h-48 w-full resize-none rounded-2xl border-2 border-divider bg-background p-4 font-mono text-sm focus:border-indigo-500 outline-none transition-all shadow-inner"
+                  aria-label={t("ctxMgr.contentLabel")}
+                />
               </div>
 
               <div className="flex gap-3 pt-2">
@@ -632,6 +773,9 @@ export default function ContextManagerPage() {
                   className="flex-1 font-black h-12 text-md shadow-xl shadow-indigo-500/20"
                   isDisabled={!docTitle.trim() || !docContent.trim()}
                   onPress={() => {
+                    if (!activeWindowId) {
+                      createWindow(t("ctxMgr.autoWindowName"));
+                    }
                     addDocument(docTitle, docContent, docType, docPriority, [], docPath);
                     addToast(t("ctxMgr.addedToContext", { title: docTitle }), "success");
                     resetDocForm();
