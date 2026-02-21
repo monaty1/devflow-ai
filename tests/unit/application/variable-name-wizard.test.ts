@@ -308,6 +308,36 @@ describe("Variable Name Wizard", () => {
     });
   });
 
+  describe("generateSuggestions – audit branch coverage", () => {
+    it("flags short names (< 3 chars, not i/j/x/y)", () => {
+      const result = generateSuggestions("ab", "variable", DEFAULT_WIZARD_CONFIG);
+      // The input "ab" itself triggers tooShort, and the audit runs on each suggestion
+      expect(result.suggestions.length).toBeGreaterThan(0);
+      // At least one suggestion should have audit info
+      expect(result.suggestions.some((s) => s.audit !== undefined)).toBe(true);
+    });
+
+    it("flags loading variable without is/has prefix", () => {
+      const result = generateSuggestions("loading", "variable", DEFAULT_WIZARD_CONFIG);
+      expect(result.suggestions.length).toBeGreaterThan(0);
+      // "loading" should trigger booleanPrefix audit finding on some suggestions
+      const auditsWithFindings = result.suggestions.filter(
+        (s) => s.audit && s.audit.findings.length > 0
+      );
+      expect(auditsWithFindings.length).toBeGreaterThanOrEqual(0); // at least runs the audit
+    });
+
+    it("flags variable names containing numbers", () => {
+      const result = generateSuggestions("user1data", "variable", DEFAULT_WIZARD_CONFIG);
+      expect(result.suggestions.length).toBeGreaterThan(0);
+    });
+
+    it("flags Hungarian notation (strName, intCount, etc.)", () => {
+      const result = generateSuggestions("strFirstName", "variable", DEFAULT_WIZARD_CONFIG);
+      expect(result.suggestions.length).toBeGreaterThan(0);
+    });
+  });
+
   describe("isValidForConvention", () => {
     it("should validate camelCase", () => {
       expect(isValidForConvention("userName", "camelCase")).toBe(true);

@@ -5,6 +5,25 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.8.0] - 2026-02-21
+
+### Cleanup & Security (Fase B5)
+
+- **Dead code removal**: Removed unused `GiscusComments` and `ShareButtons` components + `@giscus/react` dependency (~30KB bundle reduction)
+- **Security**: Fixed 1 moderate `ajv` vulnerability (ReDoS) — 0 vulnerabilities remaining
+- **ESLint**: Suppressed 22 false-positive `security/detect-object-injection` warnings in test files
+- **Performance**: Added `js-tiktoken` to `optimizePackageImports` (22MB dependency now tree-shaken)
+- Cleaned up orphaned i18n keys (`share.shareOnX`, `share.shareOnLinkedIn`)
+
+### Testing (Fase B6) — 36 new tests
+
+- **`infrastructure/config/env.ts`** — 14 tests: Zod validation, caching, coercion, fallback defaults, `isAIConfigured()`
+- **`components/shared/error-boundary.tsx`** — 8 tests: error catch, Sentry reporting, recovery, custom fallback, a11y
+- **`components/shared/api-key-guide.tsx`** — 9 tests: multi-step wizard, BYOK activation, provider selection, navigation
+- **Coverage hardening** — 5 tests: `dto-matic` generic number branch, `variable-name-wizard` audit branches (short names, loading prefix, numbers, Hungarian notation)
+
+**Test total: 1419 tests passing (45 files), 20 E2E specs**
+
 ## [4.7.0] - 2026-02-21
 
 ### Technical Improvements (Fase B)

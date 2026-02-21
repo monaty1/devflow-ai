@@ -68,6 +68,7 @@ const nextConfig: NextConfig = {
       "zod",
       "react-hook-form",
       "recharts",
+      "js-tiktoken",
     ],
   } as NextConfig["experimental"] & { viewTransition: boolean },
   async headers() {

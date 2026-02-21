@@ -20,7 +20,7 @@ DevFlow AI es una plataforma open-source que centraliza **15 herramientas** esen
 
 - 15 herramientas funcionales end-to-end
 - 100% ejecucion local + IA opcional con 4 proveedores (Gemini, Groq, OpenRouter, Pollinations)
-- **1383 tests** con coverage estrategico 100/80/0 per-file (42 archivos de test)
+- **1419 tests** con coverage estrategico 100/80/0 per-file (45 archivos de test)
 - 20 E2E specs con Playwright (15 tools + settings + navigation + accessibility WCAG AAA)
 - Lighthouse score **100/100/100/100** en Desktop
 - Homepage optimizada con Server Components (RSC) para rendimiento movil
@@ -51,7 +51,7 @@ Ademas, los desarrolladores frontend enfrentan tareas repetitivas diarias: forma
 
 - Aplicar React 19 y Next.js 16 con App Router y Server Components
 - Implementar Clean Architecture en un proyecto real de 15 herramientas
-- Crear una suite de tests comprehensiva (1383 tests) con Vitest + Playwright E2E
+- Crear una suite de tests comprehensiva (1419 tests) con Vitest + Playwright E2E
 - Utilizar IA generativa (Claude Code) como herramienta de desarrollo
 - Demostrar dominio de TypeScript 5 en modo maximo estricto
 
@@ -449,8 +449,8 @@ Modelo de coverage estrategico con enforcement per-file:
 ### 5.2 Resultados de Tests
 
 ```
-Test Files  42 passed (42)
-Tests       1383 passed (1383)
+Test Files  45 passed (45)
+Tests       1419 passed (1419)
 Duration    ~50s
 ```
 
@@ -555,7 +555,7 @@ GitHub Actions ejecuta **10 jobs** en cada push a `main`/`develop` y todas las P
 │  Job 1: QUALITY (paralelo)                                            │
 │  ├─ npm run lint              (ESLint 9 + eslint-plugin-security)     │
 │  ├─ npm run type-check        (tsc --noEmit strict)                   │
-│  ├─ npm run test:coverage     (1383 tests + umbrales per-file)        │
+│  ├─ npm run test:coverage     (1419 tests + umbrales per-file)        │
 │  └─ PR coverage comments      (artifacts 14 dias)                     │
 │                                                                        │
 │  Job 2: SECURITY (paralelo)                                           │
@@ -613,7 +613,7 @@ GitHub Actions ejecuta **10 jobs** en cada push a `main`/`develop` y todas las P
 | Metrica                    | Valor              |
 | -------------------------- | ------------------ |
 | Herramientas               | 15                 |
-| Tests unitarios            | 1383               |
+| Tests unitarios            | 1419               |
 | Tests E2E (Playwright)     | 20 specs           |
 | Archivos de test           | 42 unit + 20 E2E   |
 | Archivos fuente (.ts/.tsx) | 150+               |
@@ -652,7 +652,7 @@ GitHub Actions ejecuta **10 jobs** en cada push a `main`/`develop` y todas las P
 - TypeScript strict mode ✓
 - Dark/Light mode con deteccion automatica ✓
 - i18n completo (EN/ES, ~1543 claves por idioma) ✓
-- Tests unitarios (1383 passing, 42 archivos) ✓
+- Tests unitarios (1419 passing, 45 archivos) ✓
 - Tests E2E con Playwright (20 specs, 15 tools + a11y) ✓
 - CI/CD pipeline (10 jobs) ✓
 - SAST (CodeQL + Semgrep) ✓
@@ -684,7 +684,7 @@ GitHub Actions ejecuta **10 jobs** en cada push a `main`/`develop` y todas las P
 1. **Producto funcional end-to-end:** 15 herramientas reales desplegadas en produccion con 24 rutas navegables
 2. **Arquitectura ejemplar:** Clean Architecture con patron 5-capas replicado sin excepciones en las 15 herramientas
 3. **Performance maxima:** Lighthouse 100/100/100/100, Server Components, ISR
-4. **Testing robusto:** 1383 tests unitarios + 20 E2E specs + accessibility audit (axe-core WCAG AAA), coverage per-file
+4. **Testing robusto:** 1419 tests unitarios + 20 E2E specs + accessibility audit (axe-core WCAG AAA), coverage per-file
 5. **Seguridad enterprise:** CSP sin unsafe-eval, HSTS, CodeQL + Semgrep SAST, SHA-pinned actions, harden-runner
 6. **Developer Experience:** TypeScript strict, ESLint + security plugin, CI/CD con 10 quality gates
 7. **UX avanzada:** PWA instalable, Command Palette (Cmd+K), MagicInput, Export/Import, dark/light mode, WCAG AAA
@@ -795,7 +795,7 @@ Archivos clave:
 - `lib/application/*.ts` - Logica pura de las 15 herramientas
 - `hooks/use-*.ts` - 20 custom hooks
 - `app/(dashboard)/tools/*/page.tsx` - UI de cada herramienta
-- `tests/unit/application/*.test.ts` - Suite de 1383 tests (42 archivos)
+- `tests/unit/application/*.test.ts` - Suite de 1419 tests (45 archivos)
 - `tests/e2e/*.spec.ts` - 20 Playwright E2E specs (15 tools + accessibility WCAG AAA + navigation + settings + command-palette + settings-export)
 
 ### Anexo C: Demo en Produccion

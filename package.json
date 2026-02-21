@@ -1,6 +1,6 @@
 {
   "name": "devflow-ai",
-  "version": "4.7.0",
+  "version": "4.8.0",
   "private": true,
   "description": "AI-Powered Developer Toolkit",
   "author": "Alberto Guinda",
@@ -21,7 +21,6 @@
     "analyze": "ANALYZE=true next build"
   },
   "dependencies": {
-    "@giscus/react": "^3.1.0",
     "@google/generative-ai": "^0.24.1",
     "@heroui/pagination": "^2.2.26",
     "@heroui/react": "^3.0.0-beta.5",

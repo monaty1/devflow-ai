@@ -1055,6 +1055,27 @@ describe("DTO-Matic", () => {
       expect(typeof mock["price"]).toBe("number");
       expect(typeof mock["count"]).toBe("number");
     });
+
+    it("should generate generic number for fields not matching age/price/count", () => {
+      const parsed = parseJson('{"score": 42, "level": 5}');
+      const mock = generateMockData(parsed.fields) as Record<string, unknown>;
+      expect(typeof mock["score"]).toBe("number");
+      expect(typeof mock["level"]).toBe("number");
+    });
+
+    it("should return null for unknown/null-type fields", () => {
+      // Fields parsed from null values have type "null" — generateValue returns null
+      const parsed = parseJson('{"metadata": null}');
+      let gotNull = false;
+      for (let i = 0; i < 20; i++) {
+        const mock = generateMockData(parsed.fields) as Record<string, unknown>;
+        if (mock["metadata"] === null || mock["metadata"] === undefined) {
+          gotNull = true;
+          break;
+        }
+      }
+      expect(gotNull).toBe(true);
+    });
   });
 
   describe("Index file generation", () => {

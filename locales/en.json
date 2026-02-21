@@ -1493,8 +1493,6 @@
   "uuid.ariaUuidMode": "UUID mode",
   "uuid.placeholderHexPrefix": "e.g. deadbeef",
   "varName.ariaWizardMode": "Wizard mode",
-  "share.shareOnX": "Share on X (Twitter)",
-  "share.shareOnLinkedIn": "Share on LinkedIn",
   "ctxMgr.placeholderFilename": "e.g. user-service.ts",
   "ctxMgr.placeholderFilePath": "src/services/user-service.ts",
   "ctxMgr.step1": "1. Create",

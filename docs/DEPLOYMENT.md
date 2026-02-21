@@ -90,7 +90,7 @@ To customize limits, set `RATE_LIMIT_RPM` and `RATE_LIMIT_DAILY_TOKENS` env vars
   "status": "healthy",
   "timestamp": "2026-02-21T...",
   "ai": { "configured": true, "providers": ["gemini", "groq", "openrouter", "pollinations"] },
-  "version": "4.7.0"
+  "version": "4.8.0"
 }
 ```
 

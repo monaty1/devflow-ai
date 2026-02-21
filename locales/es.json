@@ -1493,8 +1493,6 @@
   "uuid.ariaUuidMode": "Modo UUID",
   "uuid.placeholderHexPrefix": "ej. deadbeef",
   "varName.ariaWizardMode": "Modo asistente",
-  "share.shareOnX": "Compartir en X (Twitter)",
-  "share.shareOnLinkedIn": "Compartir en LinkedIn",
   "ctxMgr.placeholderFilename": "ej. user-service.ts",
   "ctxMgr.placeholderFilePath": "src/services/user-service.ts",
   "ctxMgr.step1": "1. Crear",
