@@ -423,37 +423,21 @@ export default function ContextManagerPage() {
                   <p className="text-[10px] font-bold uppercase text-muted-foreground mb-2 flex items-center gap-1.5">
                     <Cpu className="size-3" /> {t("ctxMgr.modelPreset")}
                   </p>
-                  <Dropdown>
-                    <DropdownTrigger>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-sm font-black px-0 h-auto justify-start w-full text-left"
-                        aria-label={t("ctxMgr.modelPreset")}
-                      >
-                        {MODEL_PRESETS.find(m => m.maxTokens === activeWindow.maxTokens)?.name ?? t("ctxMgr.modelPreset")}
-                        <span className="text-[10px] font-normal text-muted-foreground ml-1">
-                          ({(activeWindow.maxTokens / 1000).toFixed(0)}K)
-                        </span>
-                      </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu
-                      selectionMode="single"
-                      selectedKeys={new Set([MODEL_PRESETS.find(m => m.maxTokens === activeWindow.maxTokens)?.id ?? ""])}
-                      onSelectionChange={(keys) => {
-                        const id = Array.from(keys)[0] as string;
-                        const preset = MODEL_PRESETS.find(m => m.id === id);
-                        if (preset) setMaxTokens(preset.maxTokens);
-                      }}
-                      className="max-h-[280px] overflow-y-auto"
-                    >
-                      {MODEL_PRESETS.filter(m => m.id !== "custom").map(m => (
-                        <DropdownItem key={m.id}>
-                          {m.name} ({(m.maxTokens / 1000).toFixed(0)}K)
-                        </DropdownItem>
-                      ))}
-                    </DropdownMenu>
-                  </Dropdown>
+                  <select
+                    value={MODEL_PRESETS.find(m => m.maxTokens === activeWindow.maxTokens)?.id ?? "gpt-4o"}
+                    onChange={(e) => {
+                      const preset = MODEL_PRESETS.find(m => m.id === e.target.value);
+                      if (preset) setMaxTokens(preset.maxTokens);
+                    }}
+                    className="w-full bg-transparent text-sm font-black text-foreground border-none outline-none cursor-pointer appearance-none py-1"
+                    aria-label={t("ctxMgr.modelPreset")}
+                  >
+                    {MODEL_PRESETS.filter(m => m.id !== "custom").map(m => (
+                      <option key={m.id} value={m.id}>
+                        {m.name} ({(m.maxTokens / 1000).toFixed(0)}K)
+                      </option>
+                    ))}
+                  </select>
                 </Card>
 
                 {/* Utilization */}
