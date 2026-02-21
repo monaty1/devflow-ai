@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
+import dynamic from "next/dynamic";
 import { ThemeProvider } from "next-themes";
 import { HeroUIProvider } from "@heroui/system";
 import { SWRConfig } from "swr";
@@ -8,7 +9,11 @@ import { FavoritesProvider } from "@/lib/context";
 import { ToastProvider } from "@/components/shared/toast-container";
 import { useLocaleStore } from "@/lib/stores/locale-store";
 import { CommandPalette } from "@/components/shared/command-palette";
-import { InstallPrompt } from "@/components/shared/install-prompt";
+
+const InstallPrompt = dynamic(
+  () => import("@/components/shared/install-prompt").then((m) => m.InstallPrompt),
+  { ssr: false },
+);
 
 function HtmlLangSync() {
   const locale = useLocaleStore((s) => s.locale);

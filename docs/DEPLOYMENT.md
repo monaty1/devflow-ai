@@ -90,7 +90,7 @@ To customize limits, set `RATE_LIMIT_RPM` and `RATE_LIMIT_DAILY_TOKENS` env vars
   "status": "healthy",
   "timestamp": "2026-02-21T...",
   "ai": { "configured": true, "providers": ["gemini", "groq", "openrouter", "pollinations"] },
-  "version": "4.2.0"
+  "version": "4.7.0"
 }
 ```
 
@@ -106,7 +106,7 @@ The GitHub Actions pipeline runs automatically:
 | security | push/PR | npm audit + lockfile-lint |
 | dependency-review | PR only | Block moderate+ vulnerabilities |
 | build | after quality+security | Production build + SBOM |
-| e2e | after build | Playwright tests (18 specs) |
+| e2e | after build | Playwright tests (20 specs) |
 | a11y | after build | axe-core WCAG AAA audit |
 | codeql | push/PR + weekly | CodeQL SAST (security-extended) |
 | semgrep | push/PR | Semgrep OWASP Top 10 |

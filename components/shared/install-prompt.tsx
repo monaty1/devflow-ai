@@ -77,14 +77,15 @@ export function InstallPrompt() {
             </Button>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={handleDismiss}
-          className="text-muted-foreground hover:text-foreground"
+        <Button
+          isIconOnly
+          variant="ghost"
+          size="sm"
+          onPress={handleDismiss}
           aria-label={t("common.close")}
         >
           <X className="size-4" />
-        </button>
+        </Button>
       </div>
     </div>
   );

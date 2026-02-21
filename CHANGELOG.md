@@ -5,6 +5,39 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.7.0] - 2026-02-21
+
+### Technical Improvements (Fase B)
+
+Performance optimizations, AI infrastructure test coverage, and component test expansion. 57 new tests (1326 to 1383), 4 prod files improved, 9 new test files.
+
+#### B1: Performance & Bundle
+
+- **Dynamic import InstallPrompt** (`app/providers.tsx`) — Lazy-load PWA install banner with `next/dynamic` + `ssr: false` to reduce first paint JS
+- **Dynamic import ApiKeyGuide** (`app/(dashboard)/layout.tsx`) — Lazy-load 324-line modal component on demand instead of upfront
+- **Fix raw `<button>` in install-prompt** (`components/shared/install-prompt.tsx`) — Replace raw `<button>` dismiss with HeroUI `Button isIconOnly variant="ghost"` for consistency
+
+#### B2: AI Infrastructure Tests (32 new tests)
+
+- **AI Provider Factory** (`tests/unit/infrastructure/ai-provider-factory.test.ts`) — 10 tests: BYOK priority, env var chain, Pollinations fallback, BYOK overrides env
+- **OpenRouter Client** (`tests/unit/infrastructure/openrouter-client.test.ts`) — 4 tests: success response, error handling, default options, availability
+- **Pollinations Client** (`tests/unit/infrastructure/pollinations-client.test.ts`) — 4 tests: no-key constructor, success response, error handling, availability
+- **Pricing Service** (`tests/unit/infrastructure/pricing-service.test.ts`) — 9 tests: fetch+parse, filtering, categorization, popularity, display names, error re-throw
+- **AI Status Route** (`tests/unit/api/ai-status.test.ts`) — 5 tests: provider detection per env var, premiumConfigured flag, Pollinations fallback
+
+#### B3: Component Tests (25 new tests)
+
+- **ThemeToggle** (`tests/component/theme-toggle.test.tsx`) — 8 tests: compact/full variants, light→dark→system cycling, aria-labels per theme
+- **LocaleToggle** (`tests/component/locale-toggle.test.tsx`) — 6 tests: icon/full variants, locale switching, flag SVG rendering
+- **InstallPrompt** (`tests/component/install-prompt.test.tsx`) — 6 tests: dismissed state, beforeinstallprompt event, dismiss localStorage, SW registration
+- **ToolSuggestions** (`tests/component/tool-suggestions.test.tsx`) — 5 tests: empty state, recommendation rendering, navigation, shared data localStorage
+
+#### B4: Documentation
+
+- Updated test counts across README.md, TFM.md, DEPLOYMENT.md (1257→1383, 29→42 files, 18→20 E2E)
+- Updated i18n key counts (~1539→~1543)
+- Bumped version to 4.7.0
+
 ## [4.6.0] - 2026-02-21
 
 ### Exhaustive Audit & Quality Hardening (Phases 1-5)

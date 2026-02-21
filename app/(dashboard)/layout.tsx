@@ -16,11 +16,16 @@ import {
   BookOpen,
   Wand2,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useTranslation } from "@/hooks/use-translation";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { LocaleToggle } from "@/components/shared/locale-toggle";
-import { ApiKeyGuide } from "@/components/shared/api-key-guide";
 import { Button } from "@/components/ui";
+
+const ApiKeyGuide = dynamic(
+  () => import("@/components/shared/api-key-guide").then((m) => m.ApiKeyGuide),
+  { ssr: false },
+);
 import { cn } from "@/lib/utils";
 
 interface DashboardLayoutProps {

@@ -7,7 +7,7 @@
 ### 15 herramientas para developers &middot; IA integrada &middot; Local-first &middot; Open Source
 
 [![Build](https://img.shields.io/github/actions/workflow/status/albertoguinda/devflow-ai/ci.yml?branch=main&style=flat-square&logo=github&label=CI)](https://github.com/albertoguinda/devflow-ai/actions)
-[![Tests](https://img.shields.io/badge/tests-1257_passing-brightgreen?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
+[![Tests](https://img.shields.io/badge/tests-1383_passing-brightgreen?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
 [![Coverage](https://img.shields.io/badge/coverage-strategic_(100%2F80%2F0)-blue?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
 [![Lighthouse](https://img.shields.io/badge/Lighthouse-100%2F100%2F100%2F100-brightgreen?style=flat-square&logo=lighthouse&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
@@ -238,11 +238,11 @@ We follow a **Strategic Coverage** architecture. Not all code needs the same lev
 **Per-file enforcement** is enabled: each CORE file must individually meet thresholds. The CI pipeline fails if any file drops below its floor.
 
 ```bash
-npm run test:run                                             # All unit tests (1257)
+npm run test:run                                             # All unit tests (1383)
 npx vitest run tests/unit/application/json-formatter.test.ts # Single file
 npx vitest run -t "should format"                            # By pattern
 npm run test:coverage                                        # Coverage report
-npm run test:e2e                                             # Playwright E2E (18 specs)
+npm run test:e2e                                             # Playwright E2E (20 specs)
 ```
 
 ---
@@ -315,7 +315,7 @@ quality:    ESLint (+ security plugin) → TypeScript → Tests + Coverage → P
 security:   npm audit --audit-level=high + lockfile-lint (parallel)
 dep-review: dependency-review-action on PRs (moderate+ blocked)
 build:      next build → SBOM generation (CycloneDX, 90-day retention) + bundle size tracking
-e2e:        Playwright E2E tests (18 specs, Chromium, after build)
+e2e:        Playwright E2E tests (20 specs, Chromium, after build)
 a11y:       axe-core WCAG AAA accessibility audit (19 pages, after build)
 codeql:     CodeQL JS/TS SAST (push + PRs + weekly)
 semgrep:    Semgrep SAST — OWASP Top 10, React, Next.js, TypeScript rules (SARIF → Security tab)
@@ -583,7 +583,7 @@ quality:    ESLint (+ plugin seguridad) → TypeScript → Tests + Coverage → 
 security:   npm audit --audit-level=high + lockfile-lint (en paralelo)
 dep-review: dependency-review-action en PRs (moderate+ bloqueado)
 build:      next build → generacion SBOM (CycloneDX, retencion 90 dias) + tracking tamano bundle
-e2e:        Tests E2E Playwright (18 specs, Chromium, despues de build)
+e2e:        Tests E2E Playwright (20 specs, Chromium, despues de build)
 a11y:       Auditoria de accesibilidad axe-core WCAG AAA (19 paginas, despues de build)
 codeql:     CodeQL JS/TS SAST (push + PRs + semanal)
 semgrep:    Semgrep SAST — OWASP Top 10, React, Next.js, TypeScript (SARIF → pestana Security)
