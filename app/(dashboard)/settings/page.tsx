@@ -300,9 +300,9 @@ export default function SettingsPage() {
           />
         </div>
         {lastResult && (
-          <button type="button" onClick={clearResult} className={cn("mt-3 block text-sm cursor-pointer", lastResult.type === "success" ? "text-success" : "text-destructive")}>
+          <Button variant="ghost" size="sm" onPress={clearResult} className={cn("mt-3 text-sm", lastResult.type === "success" ? "text-success" : "text-destructive")}>
             {lastResult.message}
-          </button>
+          </Button>
         )}
       </Card>
 

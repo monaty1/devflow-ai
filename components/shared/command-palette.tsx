@@ -1,8 +1,8 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
-import { Modal } from "@heroui/react";
-import { Search, Command as CommandIcon, ArrowRight } from "lucide-react";
+import { Modal, SearchField } from "@heroui/react";
+import { Command as CommandIcon, ArrowRight } from "lucide-react";
 import { useCommandPalette } from "@/hooks/use-command-palette";
 import { useTranslation } from "@/hooks/use-translation";
 import { cn } from "@/lib/utils";
@@ -64,20 +64,26 @@ export function CommandPalette() {
       <Modal.Container size="lg">
         <Modal.Dialog className="p-0">
           {/* Search input */}
-          <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-            <Search className="size-5 text-muted-foreground" />
-            <input
-              ref={inputRef}
-              type="text"
+          <div className="border-b border-border px-4 py-3">
+            <SearchField
+              name="cmd-search"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={t("cmdPalette.placeholder")}
-              className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              onChange={setQuery}
               aria-label={t("cmdPalette.placeholder")}
-            />
-            <kbd className="hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
-              ESC
-            </kbd>
+              autoFocus
+            >
+              <SearchField.Group className="h-9">
+                <SearchField.SearchIcon />
+                <SearchField.Input
+                  ref={inputRef}
+                  placeholder={t("cmdPalette.placeholder")}
+                  className="text-sm"
+                />
+                <kbd className="hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
+                  ESC
+                </kbd>
+              </SearchField.Group>
+            </SearchField>
           </div>
 
           {/* Results */}
