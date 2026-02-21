@@ -5,6 +5,41 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.0] - 2026-02-21
+
+### CI/CD & Documentation (Fase 3)
+
+Release automation, accessibility CI gate, and deployment documentation.
+
+#### 3.3 — Accessibility CI Job (axe-core)
+- New `a11y` job in `.github/workflows/ci.yml` runs after `build`
+- Installs Playwright + `@axe-core/playwright`, executes `tests/e2e/accessibility.spec.ts`
+- Audits 19 pages against WCAG AAA tags — CI fails on critical/serious violations
+- SHA-pinned actions + StepSecurity harden-runner (consistent with all other jobs)
+
+#### 3.5 — Deployment Guide
+- Created `docs/DEPLOYMENT.md` with complete Vercel deployment instructions
+- Environment variables reference: required (AI providers) vs optional (rate limits, Sentry)
+- BYOK mechanism documentation (headers, rate limit multipliers)
+- Security headers table, rate limiter config, health check endpoint
+- CI/CD pipeline overview (10 jobs) with trigger descriptions
+- Troubleshooting section for common deployment issues
+
+#### 3.6 — Documentation Updates
+- README: Added `a11y` and `release` jobs to CI pipeline sections (EN + ES)
+- README: Added DEPLOYMENT.md reference in architecture sections (EN + ES)
+- README (ES): Fixed E2E count from "5 tests" to "18 specs"
+
+#### Already Completed (Previous Sessions)
+- 3.1 Release workflow: `.github/workflows/release.yml` (SHA-pinned, harden-runner, SBOM)
+- 3.2 Bundle size tracking: Already in `ci.yml` build job (du + artifact upload)
+- 3.4 SECURITY.md: Already rewritten with real architecture, CI controls, and scope
+
+#### Stats
+- **10 CI jobs** total: quality, security, dep-review, build, e2e, a11y, codeql, semgrep, lighthouse, release
+- **1 new doc**: `docs/DEPLOYMENT.md` (~130 lines)
+- **1 CI job added**: `a11y` (~25 lines)
+
 ## [4.2.0] - 2026-02-21
 
 ### Testing Expansion (Fase 2)

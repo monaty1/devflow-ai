@@ -110,6 +110,7 @@
 
 > See [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) for the full AI layer, security model, and data flow diagrams.
 > See [`docs/API.md`](./docs/API.md) for the Route Handler API reference.
+> See [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md) for the Vercel deployment guide and environment variables.
 
 **Dependency flow:** `Presentation -> Application -> Domain`
 
@@ -312,11 +313,13 @@ GitHub Actions runs on every push to `main` and all pull requests:
 quality:    ESLint (+ security plugin) → TypeScript → Tests + Coverage → PR coverage comments
 security:   npm audit --audit-level=high + lockfile-lint (parallel)
 dep-review: dependency-review-action on PRs (moderate+ blocked)
-build:      next build → SBOM generation (CycloneDX, 90-day retention)
+build:      next build → SBOM generation (CycloneDX, 90-day retention) + bundle size tracking
 e2e:        Playwright E2E tests (18 specs, Chromium, after build)
+a11y:       axe-core WCAG AAA accessibility audit (19 pages, after build)
 codeql:     CodeQL JS/TS SAST (push + PRs + weekly)
 semgrep:    Semgrep SAST — OWASP Top 10, React, Next.js, TypeScript rules (SARIF → Security tab)
 lighthouse: Lighthouse CI performance audit on PRs (LCP <2.5s, FCP <1.8s, JS <300KB)
+release:    GitHub Release with auto-generated notes + SBOM (on tag push or manual dispatch)
 ```
 
 All jobs run with least-privilege permissions and StepSecurity harden-runner.
@@ -419,6 +422,7 @@ Coverage reports and Playwright reports are uploaded as artifacts.
 
 > Ver [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) para la capa IA, modelo de seguridad y diagramas.
 > Ver [`docs/API.md`](./docs/API.md) para la referencia de los Route Handlers.
+> Ver [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md) para la guia de despliegue en Vercel y variables de entorno.
 
 **Flujo de dependencias:** `Presentacion -> Aplicacion -> Dominio`
 
@@ -576,11 +580,13 @@ GitHub Actions se ejecuta en cada push a `main` y todas las pull requests:
 quality:    ESLint (+ plugin seguridad) → TypeScript → Tests + Coverage → comentarios de cobertura en PR
 security:   npm audit --audit-level=high + lockfile-lint (en paralelo)
 dep-review: dependency-review-action en PRs (moderate+ bloqueado)
-build:      next build → generacion SBOM (CycloneDX, retencion 90 dias)
-e2e:        Tests E2E Playwright (5 tests, Chromium, despues de build)
+build:      next build → generacion SBOM (CycloneDX, retencion 90 dias) + tracking tamano bundle
+e2e:        Tests E2E Playwright (18 specs, Chromium, despues de build)
+a11y:       Auditoria de accesibilidad axe-core WCAG AAA (19 paginas, despues de build)
 codeql:     CodeQL JS/TS SAST (push + PRs + semanal)
 semgrep:    Semgrep SAST — OWASP Top 10, React, Next.js, TypeScript (SARIF → pestana Security)
 lighthouse: Lighthouse CI auditoria de rendimiento en PRs (LCP <2.5s, FCP <1.8s, JS <300KB)
+release:    GitHub Release con notas auto-generadas + SBOM (en tag push o dispatch manual)
 ```
 
 Todos los jobs se ejecutan con permisos minimos y StepSecurity harden-runner.

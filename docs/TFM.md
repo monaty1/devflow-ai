@@ -59,7 +59,7 @@ Ademas, los desarrolladores frontend enfrentan tareas repetitivas diarias: forma
 
 - Construir 15 herramientas funcionales con patron arquitectonico consistente
 - Lograr coverage estrategico 100/80/0 con enforcement per-file
-- Deploy en produccion con CI/CD completo (8 jobs: lint, type-check, tests, security, dependency-review, build, e2e, CodeQL, Semgrep, Lighthouse)
+- Deploy en produccion con CI/CD completo (10 jobs: quality, security, dep-review, build, e2e, a11y, release, CodeQL, Semgrep, Lighthouse)
 - Lighthouse score 100 en todas las metricas (Desktop)
 - Internacionalizacion completa (EN/ES, ~1539 claves por idioma)
 - Seguridad enterprise: CSP, HSTS, prototype pollution, SAST (CodeQL + Semgrep), harden-runner, eslint-plugin-security
@@ -535,7 +535,7 @@ Build:         OK (28 paginas generadas)
 | Testing        | Vitest                | 4.0          | Fast, compatible con Testing Library       |
 | Linting        | ESLint                | 9.x          | Flat config                                |
 | Error Tracking | Sentry                | 10.38        | Client + Server + Edge                     |
-| CI/CD          | GitHub Actions        | -            | 8 jobs (quality, security, dep-review, build, e2e, CodeQL, Semgrep, Lighthouse) |
+| CI/CD          | GitHub Actions        | -            | 10 jobs (quality, security, dep-review, build, e2e, a11y, release, CodeQL, Semgrep, Lighthouse) |
 | Hosting        | Vercel                | -            | Edge Network, ISR, preview URLs            |
 
 **Total dependencias produccion:** 18 (minimalista)
@@ -547,7 +547,7 @@ Build:         OK (28 paginas generadas)
 
 ### 7.1 CI/CD Pipeline
 
-GitHub Actions ejecuta **8 jobs** en cada push a `main`/`develop` y todas las PRs:
+GitHub Actions ejecuta **10 jobs** en cada push a `main`/`develop` y todas las PRs:
 
 ```
 ┌─── PUSH / PR ────────────────────────────────────────────────────────┐
@@ -567,19 +567,26 @@ GitHub Actions ejecuta **8 jobs** en cada push a `main`/`develop` y todas las PR
 │                                                                        │
 │  Job 4: BUILD (depende de Quality + Security)                         │
 │  ├─ npm run build             (Next.js produccion)                    │
+│  ├─ Bundle size tracking      (du + artifact upload)                  │
 │  └─ CycloneDX SBOM           (retencion 90 dias)                     │
 │                                                                        │
 │  Job 5: E2E (depende de Build)                                        │
 │  └─ Playwright tests          (18 specs, Chromium, retry=2)           │
 │                                                                        │
-│  Job 6: CODEQL (paralelo)                                             │
+│  Job 6: A11Y (depende de Build)                                       │
+│  └─ axe-core WCAG AAA         (19 paginas, critical/serious = 0)     │
+│                                                                        │
+│  Job 7: CODEQL (paralelo)                                             │
 │  └─ CodeQL JS/TS SAST         (security-extended, semanal + push/PR)  │
 │                                                                        │
-│  Job 7: SEMGREP (paralelo)                                            │
+│  Job 8: SEMGREP (paralelo)                                            │
 │  └─ Semgrep SAST              (OWASP Top 10, React, Next.js → SARIF) │
 │                                                                        │
-│  Job 8: LIGHTHOUSE (solo PRs)                                         │
+│  Job 9: LIGHTHOUSE (solo PRs)                                         │
 │  └─ Lighthouse CI             (LCP <2.5s, FCP <1.8s, JS <300KB)      │
+│                                                                        │
+│  Job 10: RELEASE (tag push o manual dispatch)                         │
+│  └─ GitHub Release            (notas auto-generadas + SBOM adjunto)   │
 │                                                                        │
 │  + Renovate (actualizacion automatica de dependencias)                │
 │  + StepSecurity harden-runner en todos los jobs                       │
@@ -614,7 +621,7 @@ GitHub Actions ejecuta **8 jobs** en cada push a `main`/`develop` y todas las PR
 | Custom hooks               | 22+                |
 | Paginas (routes)           | 24                 |
 | Claves i18n                | ~1539 (x2 idiomas) |
-| Jobs CI/CD                 | 8                  |
+| Jobs CI/CD                 | 10                 |
 | Commits                    | 120+               |
 | Proveedores IA             | 4 (Gemini, Groq, OpenRouter, Pollinations) |
 | Dependencias produccion    | 18                 |
@@ -647,7 +654,7 @@ GitHub Actions ejecuta **8 jobs** en cada push a `main`/`develop` y todas las PR
 - i18n completo (EN/ES, ~1539 claves por idioma) ✓
 - Tests unitarios (1257 passing, 29 archivos) ✓
 - Tests E2E con Playwright (18 specs, 15 tools + a11y) ✓
-- CI/CD pipeline (8 jobs) ✓
+- CI/CD pipeline (10 jobs) ✓
 - SAST (CodeQL + Semgrep) ✓
 - Command Palette (`Cmd+K`) ✓
 - Export/Import de configuracion ✓
@@ -677,9 +684,9 @@ GitHub Actions ejecuta **8 jobs** en cada push a `main`/`develop` y todas las PR
 1. **Producto funcional end-to-end:** 15 herramientas reales desplegadas en produccion con 24 rutas navegables
 2. **Arquitectura ejemplar:** Clean Architecture con patron 5-capas replicado sin excepciones en las 15 herramientas
 3. **Performance maxima:** Lighthouse 100/100/100/100, Server Components, ISR
-4. **Testing robusto:** 1257 tests unitarios + 18 E2E specs + accessibility audit (axe-core WCAG AA), coverage per-file
+4. **Testing robusto:** 1257 tests unitarios + 18 E2E specs + accessibility audit (axe-core WCAG AAA), coverage per-file
 5. **Seguridad enterprise:** CSP sin unsafe-eval, HSTS, CodeQL + Semgrep SAST, SHA-pinned actions, harden-runner
-6. **Developer Experience:** TypeScript strict, ESLint + security plugin, CI/CD con 8 quality gates
+6. **Developer Experience:** TypeScript strict, ESLint + security plugin, CI/CD con 10 quality gates
 7. **UX avanzada:** Command Palette (Cmd+K), MagicInput, Export/Import, dark/light mode, WCAG AAA
 8. **IA opcional:** 4 proveedores con fallback automatico, BYOK, rate limiting IP-based
 
