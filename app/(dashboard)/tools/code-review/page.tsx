@@ -37,7 +37,7 @@ import { useSmartNavigation } from "@/hooks/use-smart-navigation";
 import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { CodeReviewSkeleton, AISectionSkeleton } from "@/components/shared/skeletons";
+import { CodeReviewSkeleton } from "@/components/shared/skeletons";
 import type { SupportedLanguage, CodeIssue } from "@/types/code-review";
 import type { ToolRoute } from "@/hooks/use-smart-navigation";
 
@@ -389,7 +389,12 @@ export default function CodeReviewPage() {
 
               {/* AI Deep Analysis */}
               {isAIEnabled && isAILoading && !aiResult && (
-                <AISectionSkeleton />
+                <Card className="p-6 border-violet-500/20 bg-violet-500/5">
+                  <div className="flex items-center gap-3">
+                    <Bot className="size-5 text-violet-500 animate-pulse" aria-hidden="true" />
+                    <span className="text-sm font-medium text-muted-foreground">{t("ai.analyzing")}</span>
+                  </div>
+                </Card>
               )}
               {isAIEnabled && aiResult && (
                 <Card className="p-6 border-violet-500/20 bg-violet-500/5 shadow-xl shadow-violet-500/5" role="region" aria-label={t("ai.deepAnalysis")}>

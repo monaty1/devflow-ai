@@ -423,21 +423,22 @@ export default function CostCalculatorPage() {
             )}
           </Card>
 
-          {/* Projection Chart */}
-          <Card className="p-6 mt-6">
-            <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-              <Sparkles className="size-5 text-warning" />
-              {t("costCalc.projectionTitle")}
-            </h3>
-            <div className="h-[300px] w-full">
-              <CostProjectionChart chartData={chartData} topModelNames={topModelNames} />
-            </div>
-            <p className="text-[10px] text-muted-foreground mt-4 italic text-center">
-              {t("costCalc.projectionNote")}
-            </p>
-          </Card>
         </div>
       </div>
+
+      {/* Projection Chart — full width, outside the grid */}
+      <Card className="p-6">
+        <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
+          <Sparkles className="size-5 text-warning" />
+          {t("costCalc.projectionTitle")}
+        </h3>
+        <div className="h-[350px] w-full">
+          <CostProjectionChart chartData={chartData} topModelNames={topModelNames} />
+        </div>
+        <p className="text-[10px] text-muted-foreground mt-4 italic text-center">
+          {t("costCalc.projectionNote")}
+        </p>
+      </Card>
 
       {/* Detail Modal */}
       {(() => {

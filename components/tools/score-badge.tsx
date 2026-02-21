@@ -7,6 +7,8 @@ import type { ScoreCategory } from "@/types/prompt-analyzer";
 interface ScoreBadgeProps {
   score: number;
   category: ScoreCategory;
+  /** Optional translated category label (falls back to raw category string) */
+  categoryLabel?: string;
   size?: "sm" | "md" | "lg";
   animate?: boolean;
 }
@@ -28,6 +30,7 @@ const SIZES = {
 export function ScoreBadge({
   score,
   category,
+  categoryLabel,
   size = "md",
   animate = true,
 }: ScoreBadgeProps) {
@@ -117,7 +120,7 @@ export function ScoreBadge({
           {animate ? 0 : score}
         </span>
         <span className="text-xs text-muted-foreground capitalize">
-          {category}
+          {categoryLabel ?? category}
         </span>
       </div>
     </div>

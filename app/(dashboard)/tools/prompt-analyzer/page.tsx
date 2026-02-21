@@ -72,22 +72,22 @@ const SEVERITY_COLORS = {
   low: "text-blue-900 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-200",
 };
 
-const AXIS_LABELS: Record<AnatomyElement, string> = {
-  role: "Role",
-  task: "Task",
-  context: "Context",
-  steps: "Steps",
-  format: "Format",
-  constraints: "Constraints",
-  clarification: "Clarify",
+const AXIS_LABEL_KEYS: Record<AnatomyElement, string> = {
+  role: "promptAnalyzer.radar.role",
+  task: "promptAnalyzer.radar.task",
+  context: "promptAnalyzer.radar.context",
+  steps: "promptAnalyzer.radar.steps",
+  format: "promptAnalyzer.radar.format",
+  constraints: "promptAnalyzer.radar.constraints",
+  clarification: "promptAnalyzer.radar.clarify",
 };
 
-function AnatomyRadar({ dimensions, compareDimensions }: { dimensions: PromptDimension[]; compareDimensions?: PromptDimension[] | undefined }) {
-  const size = 220;
+function AnatomyRadar({ dimensions, compareDimensions, axisLabels }: { dimensions: PromptDimension[]; compareDimensions?: PromptDimension[] | undefined; axisLabels: Record<AnatomyElement, string> }) {
+  const size = 280;
   const cx = size / 2;
   const cy = size / 2;
-  const maxR = 70;
-  const labelR = 88;
+  const maxR = 95;
+  const labelR = 122;
   const n = dimensions.length;
 
   const getPoint = (index: number, score: number) => {
@@ -121,14 +121,14 @@ function AnatomyRadar({ dimensions, compareDimensions }: { dimensions: PromptDim
           }).join(" ")}
           fill="none"
           stroke="currentColor"
-          strokeOpacity={0.08}
-          strokeWidth={0.5}
+          strokeOpacity={0.15}
+          strokeWidth={0.7}
         />
       ))}
       {/* Axis lines */}
       {dimensions.map((_, i) => {
         const p = getPoint(i, 100);
-        return <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="currentColor" strokeOpacity={0.06} strokeWidth={0.5} />;
+        return <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="currentColor" strokeOpacity={0.12} strokeWidth={0.7} />;
       })}
       {/* Axis labels */}
       {dimensions.map((d, i) => {
@@ -141,10 +141,10 @@ function AnatomyRadar({ dimensions, compareDimensions }: { dimensions: PromptDim
             textAnchor="middle"
             dominantBaseline="central"
             className="fill-current text-muted-foreground"
-            fontSize={8}
-            fontWeight={500}
+            fontSize={10}
+            fontWeight={600}
           >
-            {AXIS_LABELS[d.id]}
+            {axisLabels[d.id]}
           </text>
         );
       })}
@@ -153,11 +153,11 @@ function AnatomyRadar({ dimensions, compareDimensions }: { dimensions: PromptDim
         <path d={toPath(compareDimensions)} className="fill-violet-500/12 stroke-violet-500 dark:fill-violet-400/12 dark:stroke-violet-400" strokeWidth={1} strokeDasharray="3 2" />
       )}
       {/* Main fill */}
-      <path d={toPath(dimensions)} className="fill-blue-500/15 stroke-blue-500 dark:fill-blue-400/15 dark:stroke-blue-400" strokeWidth={1.5} />
+      <path d={toPath(dimensions)} className="fill-blue-500/20 stroke-blue-500 dark:fill-blue-400/20 dark:stroke-blue-400" strokeWidth={2} />
       {/* Dots */}
       {dimensions.map((d, i) => {
         const p = getPoint(i, d.score);
-        return <circle key={i} cx={p.x} cy={p.y} r={2.5} className="fill-blue-500 dark:fill-blue-400" />;
+        return <circle key={i} cx={p.x} cy={p.y} r={3} className="fill-blue-500 dark:fill-blue-400" />;
       })}
     </svg>
   );
@@ -186,6 +186,9 @@ export default function PromptAnalyzerPage() {
     payload_splitting_risk: t("promptAnalyzer.issuePayloadSplitting"),
     virtualization_risk: t("promptAnalyzer.issueVirtualization"),
   }), [t]);
+  const radarLabels = useMemo(() => Object.fromEntries(
+    Object.entries(AXIS_LABEL_KEYS).map(([k, v]) => [k, t(v)])
+  ) as Record<AnatomyElement, string>, [t]);
   const [showHistory, setShowHistory] = useState(false);
   const { result, history, isAnalyzing, analyze, clearHistory, removeFromHistory } =
     usePromptAnalyzer();
@@ -222,6 +225,10 @@ export default function PromptAnalyzerPage() {
         );
       } else if (analysis.score >= 8) {
         addToast(t("promptAnalyzer.toastExcellent"), "success");
+      } else if (analysis.score >= 5) {
+        addToast(t("promptAnalyzer.toastAverage", { score: analysis.score }), "info");
+      } else {
+        addToast(t("promptAnalyzer.toastLow", { score: analysis.score }), "warning");
       }
     } catch {
       addToast(t("promptAnalyzer.toastFailed"), "error");
@@ -302,13 +309,14 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder={t("promptAnalyzer.placeholder")}
+            rows={7}
             onKeyDown={(e) => {
               if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
                 e.preventDefault();
                 if (prompt.trim()) handleAnalyze();
               }
             }}
-            className="min-h-[160px] w-full resize-y rounded-lg border border-border bg-background p-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="w-full resize-y"
             aria-label={t("promptAnalyzer.enterPrompt")}
           />
 
@@ -426,6 +434,7 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
                 <ScoreBadge
                   score={result.score}
                   category={result.category}
+                  categoryLabel={t(`promptAnalyzer.category.${result.category}`)}
                   size="lg"
                 />
                 {compareItem && scoreDelta && (
@@ -447,54 +456,56 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
 
               {/* Zone 2: Radar chart - centered, larger */}
               <div className="flex-1 flex justify-center">
-                <div className="size-[220px]">
-                  <AnatomyRadar dimensions={result.dimensions} compareDimensions={compareItem?.dimensions} />
+                <div className="size-[280px]">
+                  <AnatomyRadar dimensions={result.dimensions} compareDimensions={compareItem?.dimensions} axisLabels={radarLabels} />
                 </div>
               </div>
 
               {/* Zone 3: Text info */}
               <div className="flex-1 text-center sm:text-left">
-                <div className="flex items-start justify-between">
-                  <h2 className="text-xl font-semibold text-foreground">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold tracking-tight text-foreground">
                     {t("promptAnalyzer.analysisComplete")}
                   </h2>
-                  <Button variant="ghost" size="sm" onPress={handleExport} aria-label={t("promptAnalyzer.exportReport")}>
+                  <Button variant="ghost" size="sm" isIconOnly onPress={handleExport} aria-label={t("promptAnalyzer.exportReport")}>
                     <Download className="size-4" />
                   </Button>
                 </div>
-                <p className="mt-1 text-muted-foreground">
-                  {t("promptAnalyzer.scoreResult", { score: result.score, category: result.category })}
+                <p className="mt-1.5 text-sm text-muted-foreground">
+                  {t("promptAnalyzer.scoreResult", { score: result.score, category: t(`promptAnalyzer.category.${result.category}`) })}
                 </p>
-                <div className="mt-4 flex flex-wrap justify-center gap-4 sm:justify-start">
-                  <div className="flex items-center gap-2 text-sm">
-                    <FileText className="size-4 text-muted-foreground" />
-                    <span>{t("common.tokens", { count: result.tokenCount })}</span>
+                <div className="mt-4 grid grid-cols-3 gap-3">
+                  <div className="flex items-center gap-2 rounded-lg bg-muted/40 px-3 py-2">
+                    <FileText className="size-4 shrink-0 text-blue-500" />
+                    <span className="text-sm font-medium">{t("common.tokens", { count: result.tokenCount })}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <AlertTriangle className="size-4 text-muted-foreground" />
-                    <span>{t("promptAnalyzer.issues", { count: result.issues.length })}</span>
+                  <div className="flex items-center gap-2 rounded-lg bg-muted/40 px-3 py-2">
+                    <AlertTriangle className="size-4 shrink-0 text-amber-500" />
+                    <span className="text-sm font-medium">{t("promptAnalyzer.issues", { count: result.issues.length })}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Sparkles className="size-4 text-muted-foreground" />
-                    <span>{t("promptAnalyzer.securityFlags", { count: result.securityFlags.length })}</span>
+                  <div className="flex items-center gap-2 rounded-lg bg-muted/40 px-3 py-2">
+                    <Sparkles className="size-4 shrink-0 text-violet-500" />
+                    <span className="text-sm font-medium">{t("promptAnalyzer.securityFlags", { count: result.securityFlags.length })}</span>
                   </div>
                 </div>
 
                 <div className="mt-4 flex gap-2">
                   <Button
                     size="sm"
-                    variant="ghost"
+                    variant="outline"
                     onPress={() => navigateTo("token-visualizer", result.prompt)}
+                    className="gap-1.5"
                   >
-                    <ScanSearch className="mr-1.5 size-3.5" />
+                    <ScanSearch className="size-3.5" />
                     {t("promptAnalyzer.checkTokens")}
                   </Button>
                   <Button
                     size="sm"
-                    variant="ghost"
+                    variant="outline"
                     onPress={() => navigateTo("cost-calculator", result.prompt)}
+                    className="gap-1.5"
                   >
-                    <Coins className="mr-1.5 size-3.5" />
+                    <Coins className="size-3.5" />
                     {t("promptAnalyzer.estimateCost")}
                   </Button>
                 </div>
@@ -514,13 +525,13 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
                   {t("promptAnalyzer.anatomy.subtitle")}
                 </p>
               </div>
-              <div className="flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-1.5">
-                <span className="text-xs font-medium text-muted-foreground">
+              <div className="flex items-center gap-3 rounded-xl bg-primary/10 px-4 py-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   {t("promptAnalyzer.anatomy.score")}
                 </span>
-                <span className="text-lg font-bold text-primary">
+                <span className="text-2xl font-bold tabular-nums text-primary">
                   {result.anatomyScore}
-                  <span className="text-xs font-normal text-muted-foreground">/100</span>
+                  <span className="text-sm font-normal text-muted-foreground">/100</span>
                 </span>
               </div>
             </div>
@@ -560,10 +571,10 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
                             })()}
                           </div>
                         </div>
-                        <div className="mt-1.5 h-2.5 w-full overflow-hidden rounded-full bg-muted">
+                        <div className="mt-1.5 h-3 w-full overflow-hidden rounded-full bg-muted">
                           <div
-                            className={`h-full rounded-full transition-all duration-500 ${barColor}`}
-                            style={{ width: `${dim.score}%` }}
+                            className={`h-full rounded-full transition-all duration-700 ease-out ${barColor}`}
+                            style={{ width: `${Math.max(dim.score, 2)}%` }}
                           />
                         </div>
                       </div>
@@ -737,27 +748,31 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
               <Lightbulb className="size-5 text-yellow-500" />
               {t("promptAnalyzer.suggestions")}
             </h3>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {result.suggestions.map((suggestion, index) => (
                 <li
                   key={index}
-                  className="flex items-start gap-3 text-sm text-muted-foreground"
+                  className="flex items-start gap-3 rounded-lg border border-border/50 p-3 text-sm text-muted-foreground transition-colors hover:bg-muted/30"
                 >
-                  <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" />
-                  {suggestion}
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                    {index + 1}
+                  </span>
+                  <span className="pt-0.5">{suggestion}</span>
                 </li>
               ))}
             </ul>
           </Card>
         </div>
       ) : (
-        <Card className="p-12">
+        <Card className="p-16">
           <div className="text-center">
-            <Sparkles className="mx-auto size-12 text-muted-foreground/50" />
-            <h3 className="mt-4 text-lg font-medium text-foreground">
+            <div className="mx-auto flex size-20 items-center justify-center rounded-2xl bg-gradient-to-br from-yellow-500/10 to-orange-600/10">
+              <Sparkles className="size-10 text-yellow-500/60" />
+            </div>
+            <h3 className="mt-6 text-lg font-semibold text-foreground">
               {t("promptAnalyzer.readyToAnalyze")}
             </h3>
-            <p className="mt-2 text-muted-foreground">
+            <p className="mx-auto mt-2 max-w-sm text-muted-foreground">
               {t("promptAnalyzer.emptyStateHint")}
             </p>
           </div>
