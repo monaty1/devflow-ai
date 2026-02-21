@@ -425,4 +425,38 @@ describe("Context Manager", () => {
       expect(doc2Updated?.priority).toBe("high");
     });
   });
+
+  describe("estimateTokens (tiktoken)", () => {
+    it("should count tokens using tiktoken for known text", () => {
+      // "Hello world" ≈ 2 tokens in cl100k_base
+      const doc = createDocument("test", "Hello world", "notes", "medium", []);
+      expect(doc.tokenCount).toBeGreaterThan(0);
+      // tiktoken should give a more accurate count than length/4
+      // "Hello world" is 11 chars / 4 = 3 with naive, but 2 tokens with tiktoken
+      expect(doc.tokenCount).toBeLessThanOrEqual(3);
+    });
+
+    it("should return 0 tokens for empty string", () => {
+      const doc = createDocument("test", "", "notes", "medium", []);
+      expect(doc.tokenCount).toBe(0);
+    });
+
+    it("should handle long text without error", () => {
+      const longText = "The quick brown fox jumps over the lazy dog. ".repeat(100);
+      const doc = createDocument("test", longText, "notes", "medium", []);
+      expect(doc.tokenCount).toBeGreaterThan(0);
+      expect(doc.tokenCount).toBeLessThan(longText.length); // tiktoken is more efficient
+    });
+
+    it("should handle unicode text", () => {
+      const doc = createDocument("test", "Hello 世界 🌍", "notes", "medium", []);
+      expect(doc.tokenCount).toBeGreaterThan(0);
+    });
+
+    it("should handle code content", () => {
+      const code = 'function hello() { return "world"; }';
+      const doc = createDocument("test", code, "code", "medium", []);
+      expect(doc.tokenCount).toBeGreaterThan(0);
+    });
+  });
 });

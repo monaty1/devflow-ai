@@ -4,7 +4,8 @@ test.describe("JSON Formatter", () => {
   test("formats valid JSON input", async ({ page }) => {
     await page.goto("/tools/json-formatter");
 
-    const input = page.locator("textarea").first();
+    // Use more robust selectors: first textarea role or data-testid
+    const input = page.getByRole("textbox").first();
     await input.fill('{"name":"test","value":123}');
 
     // Click the format button
@@ -12,14 +13,13 @@ test.describe("JSON Formatter", () => {
     await formatBtn.click();
 
     // Output should contain formatted JSON with indentation
-    const output = page.locator("textarea, pre, code").last();
-    await expect(output).toContainText('"name"');
+    await expect(page.getByText('"name"')).toBeVisible();
   });
 
   test("shows error for invalid JSON", async ({ page }) => {
     await page.goto("/tools/json-formatter");
 
-    const input = page.locator("textarea").first();
+    const input = page.getByRole("textbox").first();
     await input.fill("{invalid json}");
 
     const formatBtn = page.getByRole("button", { name: /format/i }).first();

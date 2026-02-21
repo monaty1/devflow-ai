@@ -15,9 +15,9 @@ export function calculateCost(
   const totalCost = inputCost + outputCost;
 
   // Calculate Value Score: Performance per Million Dollars
-  // higher is better
-  const valueScore = model.benchmarkScore 
-    ? (model.benchmarkScore / (totalCost || 0.000001))
+  // higher is better — undefined when cost is zero (free models)
+  const valueScore = model.benchmarkScore && totalCost > 0
+    ? (model.benchmarkScore / totalCost)
     : undefined;
 
   return {

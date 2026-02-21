@@ -957,9 +957,10 @@ export function testRegex(patternInput: string, input: string, locale: RegexLoca
         groupColors,
       });
 
-      // Prevent infinite loops with zero-length matches
+      // Prevent infinite loops with zero-length matches (Unicode-safe)
       if ((match[0] ?? "").length === 0) {
-        regex.lastIndex++;
+        const cp = input.codePointAt(regex.lastIndex);
+        regex.lastIndex += cp !== undefined && cp > 0xFFFF ? 2 : 1;
       }
     }
 

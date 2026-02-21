@@ -82,4 +82,72 @@ describe("CopyButton", () => {
     render(<CopyButton text="test" label="Copy" />);
     expect(screen.queryByLabelText("Copy to clipboard")).not.toBeInTheDocument();
   });
+
+  it("falls back to execCommand when clipboard API fails", async () => {
+    const user = userEvent.setup();
+    // Make clipboard.writeText reject
+    const originalClipboard = navigator.clipboard;
+    Object.defineProperty(navigator, "clipboard", {
+      value: {
+        writeText: vi.fn().mockRejectedValue(new Error("Not allowed")),
+      },
+      writable: true,
+      configurable: true,
+    });
+
+    // jsdom may not have execCommand, so define it
+    document.execCommand = vi.fn().mockReturnValue(true);
+
+    render(<CopyButton text="fallback-test" />);
+    await user.click(screen.getByTestId("copy-btn"));
+
+    await waitFor(() => {
+      expect(document.execCommand).toHaveBeenCalledWith("copy");
+    });
+
+    Object.defineProperty(navigator, "clipboard", {
+      value: originalClipboard,
+      writable: true,
+      configurable: true,
+    });
+  });
+
+  it("clears previous timeout on rapid clicks", async () => {
+    const user = userEvent.setup();
+    render(<CopyButton text="rapid" />);
+
+    // Click twice rapidly
+    await user.click(screen.getByTestId("copy-btn"));
+    await user.click(screen.getByTestId("copy-btn"));
+
+    // Should still show check icon (no error)
+    await waitFor(() => {
+      expect(screen.getByTestId("copy-btn").innerHTML).toContain("text-success");
+    });
+  });
+
+  it("renders disabled state", () => {
+    render(<CopyButton text="test" isDisabled />);
+    expect(screen.getByTestId("copy-btn")).toBeDisabled();
+  });
+
+  it("reverts icon back to copy after timeout", async () => {
+    const user = userEvent.setup();
+    render(<CopyButton text="timeout-test" />);
+
+    await user.click(screen.getByTestId("copy-btn"));
+
+    // Should show check icon immediately after copy
+    await waitFor(() => {
+      expect(screen.getByTestId("copy-btn").innerHTML).toContain("text-success");
+    });
+
+    // Wait for the 2000ms timeout to fire and revert the icon
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("copy-btn").innerHTML).not.toContain("text-success");
+      },
+      { timeout: 3000 },
+    );
+  }, 10000);
 });

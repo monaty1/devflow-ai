@@ -111,7 +111,7 @@ export function CommandPalette() {
                       onClick={() => executeCommand(cmd)}
                       onMouseEnter={() => setSelectedIndex(idx)}
                       className={cn(
-                        "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors",
+                        "group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors",
                         idx === selectedIndex
                           ? "bg-primary/10 text-foreground"
                           : "text-foreground/80 hover:bg-muted"
@@ -121,7 +121,7 @@ export function CommandPalette() {
                       <div className="flex-1 min-w-0">
                         <span className="font-medium">{t(cmd.labelKey)}</span>
                       </div>
-                      <ArrowRight className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100" />
+                      <ArrowRight className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100" aria-hidden="true" />
                     </button>
                   );
                 })}

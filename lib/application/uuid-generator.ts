@@ -31,7 +31,7 @@ export function generateUuidV1(): string {
   const timeLow = timeHex.slice(-8);
   const timeMid = timeHex.slice(-12, -8);
   const timeHiVersion = "1" + timeHex.slice(0, 3);
-  const clockSeq = (0x80 | (Math.random() * 0x3f)) << 8 | (Math.random() * 0xff);
+  const clockSeq = (0x80 | Math.floor(Math.random() * 0x3f)) << 8 | Math.floor(Math.random() * 0xff);
   const clockSeqHex = clockSeq.toString(16).padStart(4, "0");
   const node = Array.from({ length: 6 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, "0")).join("");
   return `${timeLow}-${timeMid}-${timeHiVersion}-${clockSeqHex}-${node}`;

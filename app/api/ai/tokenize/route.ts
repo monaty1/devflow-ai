@@ -8,7 +8,10 @@ import {
   validateBody,
   successResponse,
   errorResponse,
+  getClientIP,
 } from "@/lib/api/middleware";
+import { getRateLimiter } from "@/infrastructure/services/rate-limiter";
+import { getServerEnv } from "@/infrastructure/config/env";
 
 /**
  * Tokenize endpoint — uses real BPE tokenization via js-tiktoken.
@@ -46,6 +49,12 @@ export async function POST(request: NextRequest) {
       totalTokens: tokens.length,
       model,
     };
+
+    // Record request for rate limiting (consistent with other AI routes)
+    const env = getServerEnv();
+    const limiter = getRateLimiter(env.RATE_LIMIT_RPM, env.RATE_LIMIT_DAILY_TOKENS);
+    const ip = getClientIP(request);
+    limiter.recordRequest(ip);
 
     return successResponse(result);
   } catch (error) {

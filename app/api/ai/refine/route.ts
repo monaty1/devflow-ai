@@ -56,7 +56,12 @@ export async function POST(request: NextRequest) {
 
 function parseRefineResponse(text: string): AIRefineResult {
   const cleaned = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-  const parsed = JSON.parse(cleaned) as Record<string, unknown>;
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(cleaned) as Record<string, unknown>;
+  } catch {
+    throw new Error(`AI returned malformed JSON: ${cleaned.slice(0, 200)}`);
+  }
 
   return {
     refinedPrompt:

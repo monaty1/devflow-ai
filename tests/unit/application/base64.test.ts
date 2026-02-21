@@ -348,4 +348,25 @@ describe("Base64 Encoder/Decoder", () => {
       expect(decoded).toBe(original);
     });
   });
+
+  describe("getByteView — error reporting", () => {
+    it("should return error field for invalid base64 input", () => {
+      const result = getByteView("!!!invalid!!!", true);
+      expect(result.error).toBe("Invalid base64 input");
+      expect(result.hex).toBe("");
+      expect(result.decimal).toEqual([]);
+    });
+
+    it("should not return error for valid base64 input", () => {
+      const result = getByteView("SGVsbG8=", true);
+      expect(result.error).toBeUndefined();
+      expect(result.hex).toContain("48");
+    });
+
+    it("should not return error for plain text input", () => {
+      const result = getByteView("Hello", false);
+      expect(result.error).toBeUndefined();
+      expect(result.decimal.length).toBeGreaterThan(0);
+    });
+  });
 });

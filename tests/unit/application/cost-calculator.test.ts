@@ -205,15 +205,14 @@ describe("Cost Calculator", () => {
       expect(result.valueScore).toBeUndefined();
     });
 
-    it("should handle zero cost with benchmarkScore gracefully", () => {
+    it("should return undefined valueScore for zero cost even with benchmarkScore", () => {
       const modelWithBenchmark: AIModel = {
         ...testModel,
         benchmarkScore: 85,
       };
       const result = calculateCost(modelWithBenchmark, 0, 0);
-      expect(result.valueScore).toBeDefined();
-      // totalCost is 0, so formula uses 0.000001 as fallback
-      expect(result.valueScore).toBeGreaterThan(0);
+      // Zero cost means free model — valueScore is undefined (no meaningful ratio)
+      expect(result.valueScore).toBeUndefined();
     });
   });
 
@@ -337,6 +336,31 @@ describe("Cost Calculator", () => {
     it("should handle large daily requests", () => {
       const cost = calculateMonthlyCost(testModel, 10000, 1000, 500);
       expect(cost).toBeGreaterThan(0);
+    });
+  });
+
+  describe("calculateCost — value score edge cases", () => {
+    it("should return undefined valueScore for free model (zero cost)", () => {
+      const freeModel: AIModel = {
+        ...testModel,
+        inputPricePerMToken: 0,
+        outputPricePerMToken: 0,
+        benchmarkScore: 80,
+      };
+      const result = calculateCost(freeModel, 1000, 1000);
+      expect(result.totalCost).toBe(0);
+      expect(result.valueScore).toBeUndefined();
+    });
+
+    it("should return valid valueScore for model with cost and benchmark", () => {
+      const model: AIModel = {
+        ...testModel,
+        benchmarkScore: 85,
+      };
+      const result = calculateCost(model, 1_000_000, 1_000_000);
+      expect(result.valueScore).toBeDefined();
+      expect(result.valueScore).toBeGreaterThan(0);
+      expect(Number.isFinite(result.valueScore)).toBe(true);
     });
   });
 });

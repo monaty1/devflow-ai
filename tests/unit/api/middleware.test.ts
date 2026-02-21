@@ -41,19 +41,47 @@ function makeRequest(
 }
 
 describe("getClientIP", () => {
-  it("should extract IP from x-forwarded-for", () => {
+  it("should prefer x-real-ip over x-forwarded-for", () => {
+    const req = makeRequest({
+      "x-real-ip": "10.0.0.1",
+      "x-forwarded-for": "1.2.3.4, 5.6.7.8",
+    });
+    expect(getClientIP(req)).toBe("10.0.0.1");
+  });
+
+  it("should extract last IP from x-forwarded-for (proxy-set)", () => {
     const req = makeRequest({ "x-forwarded-for": "1.2.3.4, 5.6.7.8" });
+    expect(getClientIP(req)).toBe("5.6.7.8");
+  });
+
+  it("should handle single IP in x-forwarded-for", () => {
+    const req = makeRequest({ "x-forwarded-for": "1.2.3.4" });
     expect(getClientIP(req)).toBe("1.2.3.4");
   });
 
-  it("should extract IP from x-real-ip", () => {
+  it("should extract IP from x-real-ip when no x-forwarded-for", () => {
     const req = makeRequest({ "x-real-ip": "10.0.0.1" });
     expect(getClientIP(req)).toBe("10.0.0.1");
   });
 
-  it("should default to 127.0.0.1", () => {
+  it("should default to 127.0.0.1 when no headers", () => {
     const req = makeRequest();
     expect(getClientIP(req)).toBe("127.0.0.1");
+  });
+
+  it("should handle empty x-forwarded-for with whitespace", () => {
+    const req = makeRequest({ "x-forwarded-for": "  ,  , " });
+    expect(getClientIP(req)).toBe("127.0.0.1");
+  });
+
+  it("should trim whitespace from IPs", () => {
+    const req = makeRequest({ "x-forwarded-for": " 1.2.3.4 , 5.6.7.8 " });
+    expect(getClientIP(req)).toBe("5.6.7.8");
+  });
+
+  it("should trim whitespace from x-real-ip", () => {
+    const req = makeRequest({ "x-real-ip": " 10.0.0.1 " });
+    expect(getClientIP(req)).toBe("10.0.0.1");
   });
 });
 

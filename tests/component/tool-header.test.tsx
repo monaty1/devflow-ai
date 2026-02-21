@@ -102,4 +102,18 @@ describe("ToolHeader", () => {
     expect(screen.getByLabelText("Breadcrumb")).toBeInTheDocument();
     expect(screen.getByText("Tools")).toBeInTheDocument();
   });
+
+  it("marks icon as aria-hidden for decorative use", () => {
+    const { container } = render(
+      <ToolHeader
+        title="A11y Test"
+        description="Desc"
+        icon={Wrench}
+        gradient="from-blue-500 to-purple-600"
+      />
+    );
+    // Lucide renders an SVG — it should have aria-hidden="true"
+    const svg = container.querySelector("svg");
+    expect(svg).toHaveAttribute("aria-hidden", "true");
+  });
 });

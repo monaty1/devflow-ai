@@ -11,6 +11,12 @@ import type {
   ParsedJson,
   NamingConvention,
 } from "@/types/dto-matic";
+import {
+  toCamelCase,
+  toPascalCase,
+  toSnakeCase,
+  toKebabCase,
+} from "@/lib/application/shared/naming-utils";
 
 // --- JSON Parsing ---
 
@@ -1091,31 +1097,6 @@ function applyNaming(name: string, convention: NamingConvention): string {
     default:
       return name;
   }
-}
-
-function toCamelCase(str: string): string {
-  return str
-    .replace(/[-_\s]+(.)?/g, (_: string, c: string | undefined) => (c ? c.toUpperCase() : ""))
-    .replace(/^[A-Z]/, (c: string) => c.toLowerCase());
-}
-
-function toPascalCase(str: string): string {
-  const camel = toCamelCase(str);
-  return camel.charAt(0).toUpperCase() + camel.slice(1);
-}
-
-function toSnakeCase(str: string): string {
-  return str
-    .replace(/([a-z])([A-Z])/g, "$1_$2")
-    .replace(/[-\s]+/g, "_")
-    .toLowerCase();
-}
-
-function toKebabCase(str: string): string {
-  return str
-    .replace(/([a-z])([A-Z])/g, "$1-$2")
-    .replace(/[_\s]+/g, "-")
-    .toLowerCase();
 }
 
 // --- Stats ---

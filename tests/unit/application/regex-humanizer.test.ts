@@ -982,4 +982,19 @@ describe("Regex Humanizer", () => {
       expect(dot!.description).toContain("Any character");
     });
   });
+
+  describe("testRegex — Unicode zero-length match safety", () => {
+    it("should not infinite loop with emoji input and zero-length pattern", () => {
+      const result = testRegex("", "🎉🚀💻");
+      expect(result.isValid).toBe(true);
+      // Should produce matches without hanging
+      expect(result.allMatches.length).toBeGreaterThan(0);
+    });
+
+    it("should advance correctly over CJK characters", () => {
+      const result = testRegex("", "你好世界");
+      expect(result.isValid).toBe(true);
+      expect(result.allMatches.length).toBeGreaterThan(0);
+    });
+  });
 });

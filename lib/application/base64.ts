@@ -74,7 +74,8 @@ export function decodeBase64(
  */
 export function getByteView(input: string, isBase64: boolean): ByteRepresentation {
   let bytes: Uint8Array;
-  
+  let error: string | undefined;
+
   if (isBase64) {
     try {
       const binaryString = atob(input.replace(/[\s\n\r]/g, ""));
@@ -84,16 +85,18 @@ export function getByteView(input: string, isBase64: boolean): ByteRepresentatio
       }
     } catch {
       bytes = new Uint8Array();
+      error = "Invalid base64 input";
     }
   } else {
     bytes = new TextEncoder().encode(input);
   }
 
-  const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(' ');
-  const binary = Array.from(bytes).map(b => b.toString(2).padStart(8, '0')).join(' ');
-  const decimal = Array.from(bytes);
+  const byteArray = Array.from(bytes);
+  const hex = byteArray.map(b => b.toString(16).padStart(2, '0')).join(' ');
+  const binary = byteArray.map(b => b.toString(2).padStart(8, '0')).join(' ');
+  const decimal = byteArray;
 
-  return { hex, binary, decimal };
+  return { hex, binary, decimal, error };
 }
 
 /**

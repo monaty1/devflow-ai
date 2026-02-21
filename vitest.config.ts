@@ -26,6 +26,7 @@ export default defineConfig({
         "components/shared/status-badge.tsx",
         "components/shared/tool-header.tsx",
         "components/shared/toast-container.tsx",
+        "components/shared/copy-button.tsx",
       ],
       exclude: [
         "**/*.d.ts",

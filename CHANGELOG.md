@@ -5,6 +5,60 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.6.0] - 2026-02-21
+
+### Exhaustive Audit & Quality Hardening (Phases 1-5)
+
+Comprehensive 5-phase audit covering security, bug fixes, accessibility, testing, and refactoring. 69 new tests (1257 to 1326), 31 findings resolved across ~35 files.
+
+#### Phase 1: Security & API Robustness (v4.4.1)
+
+- **IP extraction hardening** (`lib/api/middleware.ts`) — Prioritize `x-real-ip` (proxy-set, not spoofable) before `x-forwarded-for`; take LAST IP from forwarded chain to prevent client-side spoofing
+- **AI JSON parser try-catch** (`app/api/ai/{review,refine,suggest}/route.ts`) — Each `parse*Response` now catches `SyntaxError` and throws descriptive `"AI returned malformed JSON: ..."` with first 200 chars of raw response
+- **Tokenize rate limiting** (`app/api/ai/tokenize/route.ts`) — Added missing `limiter.recordRequest(ip)` call after successful tokenization (consistent with review/suggest/refine)
+- **Client fetcher hardening** (`lib/api/fetcher.ts`) — `response.json()` wrapped in try-catch to handle non-JSON error responses (e.g. 502 HTML from reverse proxy)
+- **19 new tests**: middleware IP extraction (8), AI JSON parsing (6), fetcher error handling (5)
+
+#### Phase 2: Tool Logic Bugs (v4.5.0)
+
+- **Accurate token estimation** (`lib/application/context-manager.ts`) — Replaced naive `Math.ceil(text.length / 4)` with `js-tiktoken` cl100k_base encoder (lazy-loaded with fallback)
+- **UUID v1 bitwise fix** (`lib/application/uuid-generator.ts`) — Added `Math.floor()` to prevent float truncation in clock sequence generation
+- **Base64 error reporting** (`lib/application/base64.ts`, `types/base64.ts`) — `getByteView` now returns `error?: string` field instead of silently returning empty array; eliminated triple `Array.from` (reuse single `byteArray`)
+- **JSON fixJson escaped quotes** (`lib/application/json-formatter.ts`) — Quote replacement regex now handles escaped single quotes: `/'((?:[^'\\]|\\.)*)'/g`
+- **Cost calculator div-by-zero** (`lib/application/cost-calculator.ts`) — `valueScore` returns `undefined` when `totalCost <= 0` instead of dividing by epsilon
+- **Unicode-safe regex advancement** (`lib/application/regex-humanizer.ts`) — Zero-length match advancement uses `codePointAt()` to correctly handle surrogate pairs (emoji, CJK)
+- **19 new tests**: tiktoken estimation (5), UUID variant/version bits (4), base64 error field (3), escaped quotes (3), div-by-zero (2), Unicode safety (2)
+
+#### Phase 3: Components & Accessibility (v4.5.1)
+
+- **Command palette group-hover fix** (`components/shared/command-palette.tsx`) — Added `group` class to tool buttons so `group-hover:opacity-100` on ArrowRight icon works correctly
+- **Tool header aria-hidden** (`components/shared/tool-header.tsx`) — Added `aria-hidden="true"` to decorative icon for screen readers
+- **Copy-button coverage** (`vitest.config.ts`) — Added `copy-button.tsx` to coverage scope; now 100% stmts/funcs/lines
+- **matchMedia mock** (`tests/setup.ts`) — Configurable dark mode via `__PREFER_DARK_MODE__` global for theme tests
+- **18 new tests**: command-palette component tests (12), tool-header aria-hidden (1), copy-button (timeout revert, clipboard fallback, rapid clicks, disabled state — 5)
+
+#### Phase 4: Testing Hardening (v4.5.2)
+
+- **JSON formatter E2E selectors** (`tests/e2e/json-formatter.spec.ts`) — Replaced fragile `locator("textarea").first()` with ARIA `getByRole("textbox")`
+- **Command palette E2E** (`tests/e2e/command-palette.spec.ts`) — 6 tests: Cmd+K opens, filter, arrow navigation, Enter navigates, Escape closes
+- **Settings export E2E** (`tests/e2e/settings-export.spec.ts`) — 4 tests: export produces JSON, import restores, invalid import error
+- **Toast FIFO test** (`tests/component/toast.test.tsx`) — Verifies oldest toast removed when MAX_TOASTS exceeded
+- **Centralized next/navigation mock** (`tests/setup.ts`) — Global mock for `useRouter`, `usePathname`, `useSearchParams`
+
+#### Phase 5: Refactoring & Quality (v4.6.0)
+
+- **Cron builder modularization** — Moved `lib/application/cron-builder.ts` (832 lines) to `lib/application/cron-builder/index.ts` directory module (backward-compatible barrel)
+- **Shared naming utils** (`lib/application/shared/naming-utils.ts`) — Extracted `toCamelCase`, `toPascalCase`, `toSnakeCase`, `toKebabCase` from dto-matic; dto-matic now imports from shared
+- **Centralized tool constants** (`config/tool-constants.ts`) — `REGEX_TESTER.MAX_MATCHES/TIMEOUT_MS`, `CONTEXT_MANAGER.DEFAULT_MAX_TOKENS`
+- **AI status premiumConfigured** (`app/api/ai/status/route.ts`, `types/ai.ts`) — New `premiumConfigured: boolean` field indicating if a paid AI provider is configured
+- **16 new tests**: naming-utils comprehensive coverage (16)
+
+#### Stats
+- **1326 unit tests passing** (was 1257, +69 new)
+- **33 test files** (was 29)
+- **All coverage thresholds met** (per-file 80/70/80/80)
+- **0 lint errors**, **0 type errors**, production build verified
+
 ## [4.4.0] - 2026-02-21
 
 ### Feature Enhancements (Fase 4)

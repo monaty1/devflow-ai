@@ -51,8 +51,8 @@ export function validateJson(input: string): { isValid: boolean; error?: JsonVal
 export function fixJson(input: string): string {
   let fixed = input.trim();
 
-  // 1. Replace single quotes with double quotes (basic heuristic)
-  fixed = fixed.replace(/'([^']*)'/g, '"$1"');
+  // 1. Replace single quotes with double quotes (handles escaped quotes)
+  fixed = fixed.replace(/'((?:[^'\\]|\\.)*)'/g, '"$1"');
 
   // 2. Remove trailing commas
   fixed = fixed.replace(/,\s*([}\]])/g, "$1");

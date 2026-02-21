@@ -702,4 +702,26 @@ describe("JSON Formatter", () => {
       expect(stats.values).toBe(2);
     });
   });
+
+  describe("fixJson — escaped quotes", () => {
+    it("should handle escaped single quotes inside strings", () => {
+      const input = "{'name': 'it\\'s a test'}";
+      const fixed = fixJson(input);
+      // Should not break on escaped quote
+      expect(fixed).toContain('"name"');
+    });
+
+    it("should replace simple single quotes", () => {
+      const input = "{'key': 'value'}";
+      const fixed = fixJson(input);
+      expect(fixed).toBe('{"key": "value"}');
+    });
+
+    it("should handle nested single quotes correctly", () => {
+      const input = "{'data': {'nested': 'val'}}";
+      const fixed = fixJson(input);
+      expect(fixed).toContain('"nested"');
+      expect(fixed).toContain('"val"');
+    });
+  });
 });

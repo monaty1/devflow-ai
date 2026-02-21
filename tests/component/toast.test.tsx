@@ -100,6 +100,26 @@ describe("ToastProvider", () => {
     const count = screen.getByTestId("toast-count");
     expect(Number(count.textContent)).toBeLessThanOrEqual(5);
   });
+
+  it("removes oldest toast (FIFO) when max is exceeded", async () => {
+    const user = userEvent.setup();
+    renderWithProvider();
+
+    // Add first toast
+    await user.click(screen.getByText("Success"));
+    expect(screen.getByText("Success!")).toBeInTheDocument();
+
+    // Add 5 more toasts to exceed MAX_TOASTS
+    for (let i = 0; i < 5; i++) {
+      await user.click(screen.getByText("Error"));
+    }
+
+    // The oldest "Success!" toast should have been FIFO-removed
+    expect(screen.queryByText("Success!")).not.toBeInTheDocument();
+    // But "Error!" toasts should still be present
+    const count = screen.getByTestId("toast-count");
+    expect(Number(count.textContent)).toBeLessThanOrEqual(5);
+  });
 });
 
 describe("useToast", () => {

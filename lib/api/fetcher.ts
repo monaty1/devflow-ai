@@ -28,12 +28,16 @@ export async function aiFetcher<T>(
   });
 
   if (!response.ok) {
-    const errorBody = (await response.json()) as ApiResult<never>;
-    throw new Error(
-      "error" in errorBody && errorBody.error
-        ? errorBody.error
-        : `Request failed (${response.status})`,
-    );
+    let errorMessage = `Request failed (${response.status})`;
+    try {
+      const errorBody = (await response.json()) as ApiResult<never>;
+      if ("error" in errorBody && errorBody.error) {
+        errorMessage = errorBody.error;
+      }
+    } catch {
+      // Response is not JSON (e.g. 502 HTML from proxy)
+    }
+    throw new Error(errorMessage);
   }
 
   const result = (await response.json()) as ApiResult<T>;

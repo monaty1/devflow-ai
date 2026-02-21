@@ -8,14 +8,18 @@ import { getServerEnv } from "@/infrastructure/config/env";
  * Extract client IP from request headers.
  */
 export function getClientIP(request: NextRequest): string {
+  // Prefer x-real-ip (set by reverse proxy like Vercel, not spoofable)
+  const realIp = request.headers.get("x-real-ip")?.trim();
+  if (realIp) return realIp;
+
+  // Fallback to x-forwarded-for: take the LAST IP (set by trusted proxy)
+  // First IP is client-controlled and spoofable
   const forwarded = request.headers.get("x-forwarded-for");
   if (forwarded) {
-    const firstIp = forwarded.split(",")[0]?.trim();
-    if (firstIp) return firstIp;
+    const ips = forwarded.split(",").map((ip) => ip.trim()).filter(Boolean);
+    const lastIp = ips.at(-1);
+    if (lastIp) return lastIp;
   }
-
-  const realIp = request.headers.get("x-real-ip");
-  if (realIp) return realIp;
 
   return "127.0.0.1";
 }

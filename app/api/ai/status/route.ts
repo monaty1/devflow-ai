@@ -19,9 +19,14 @@ export async function GET() {
         ? ("openrouter" as const)
         : ("pollinations" as const);
 
+  const premiumConfigured = Boolean(
+    env.GEMINI_API_KEY || env.GROQ_API_KEY || env.OPENROUTER_API_KEY,
+  );
+
   const result: AIStatusResult = {
     configured,
     provider,
+    premiumConfigured,
     limits: {
       rpm: env.RATE_LIMIT_RPM,
       dailyTokens: env.RATE_LIMIT_DAILY_TOKENS,

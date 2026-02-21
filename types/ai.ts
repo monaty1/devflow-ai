@@ -90,6 +90,8 @@ export interface RateLimitInfo {
 export interface AIStatusResult {
   configured: boolean;
   provider: AIProviderType | null;
+  /** Whether a premium (paid) AI provider is configured (Gemini/Groq/OpenRouter) */
+  premiumConfigured: boolean;
   limits: {
     rpm: number;
     dailyTokens: number;

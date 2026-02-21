@@ -23,6 +23,7 @@ export interface ByteRepresentation {
   hex: string;
   binary: string;
   decimal: number[];
+  error?: string | undefined;
 }
 
 export interface Base64Result {

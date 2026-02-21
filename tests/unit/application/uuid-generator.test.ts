@@ -643,4 +643,40 @@ describe("UUID Generator", () => {
       expect(result!.duplicates).toHaveLength(1);
     });
   });
+
+  describe("generateUuidV1 — bitwise correctness", () => {
+    it("should produce valid UUID format", () => {
+      const uuid = generateUuidV1();
+      expect(uuid).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-1[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+    });
+
+    it("should have version nibble '1'", () => {
+      const uuid = generateUuidV1();
+      const hex = uuid.replace(/-/g, "");
+      expect(hex[12]).toBe("1");
+    });
+
+    it("should have variant bits in 0x80-0xbf range", () => {
+      // Run multiple times to increase confidence
+      for (let i = 0; i < 20; i++) {
+        const uuid = generateUuidV1();
+        const hex = uuid.replace(/-/g, "");
+        const variantByte = parseInt(hex.slice(16, 18), 16);
+        expect(variantByte).toBeGreaterThanOrEqual(0x80);
+        expect(variantByte).toBeLessThanOrEqual(0xbf);
+      }
+    });
+
+    it("should produce integer clock sequence values (no float artifacts)", () => {
+      for (let i = 0; i < 50; i++) {
+        const uuid = generateUuidV1();
+        // The clock seq is chars 16-19 (variant + clock_seq_lo)
+        const clockHex = uuid.replace(/-/g, "").slice(16, 20);
+        const clockVal = parseInt(clockHex, 16);
+        expect(Number.isInteger(clockVal)).toBe(true);
+        expect(clockVal).toBeGreaterThanOrEqual(0);
+        expect(clockVal).toBeLessThanOrEqual(0xFFFF);
+      }
+    });
+  });
 });
