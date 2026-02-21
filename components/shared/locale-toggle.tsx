@@ -2,6 +2,7 @@
 
 import { useLocaleStore } from "@/lib/stores/locale-store";
 import { useTranslation } from "@/hooks/use-translation";
+import { Button } from "@/components/ui";
 
 function SpainFlag({ className }: { className?: string }) {
   return (
@@ -33,10 +34,11 @@ export function LocaleToggle({ variant = "icon" }: LocaleToggleProps) {
 
   if (variant === "full") {
     return (
-      <button
-        type="button"
-        onClick={() => setLocale(locale === "en" ? "es" : "en")}
-        className="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      <Button
+        variant="ghost"
+        size="sm"
+        onPress={() => setLocale(locale === "en" ? "es" : "en")}
+        className="gap-3 px-4 py-2.5 text-sm font-medium w-full justify-start"
         aria-label={t("sidebar.switchLocale")}
       >
         {locale === "en" ? (
@@ -45,15 +47,16 @@ export function LocaleToggle({ variant = "icon" }: LocaleToggleProps) {
           <USFlag className="size-5 rounded-sm" />
         )}
         {locale === "en" ? "Español" : "English"}
-      </button>
+      </Button>
     );
   }
 
   return (
-    <button
-      type="button"
-      onClick={() => setLocale(locale === "en" ? "es" : "en")}
-      className="inline-flex size-9 items-center justify-center rounded-md transition-colors hover:bg-muted"
+    <Button
+      isIconOnly
+      variant="ghost"
+      size="sm"
+      onPress={() => setLocale(locale === "en" ? "es" : "en")}
       aria-label={t("sidebar.switchLocale")}
     >
       {locale === "en" ? (
@@ -61,6 +64,6 @@ export function LocaleToggle({ variant = "icon" }: LocaleToggleProps) {
       ) : (
         <USFlag className="size-5 rounded-sm" />
       )}
-    </button>
+    </Button>
   );
 }

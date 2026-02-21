@@ -308,14 +308,15 @@ export default function DtoMaticPage() {
                             class: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-200",
                           };
                           return (
-                            <button
+                            <Button
                               key={file.id}
-                              onClick={() => setSelectedFileId(file.id)}
+                              variant={isActive ? "primary" : "ghost"}
+                              onPress={() => setSelectedFileId(file.id)}
                               className={cn(
-                                "flex items-center gap-3 p-3 rounded-xl text-left transition-all border",
+                                "flex items-center gap-3 p-3 h-auto rounded-xl text-left justify-start w-full",
                                 isActive
                                   ? "bg-primary/10 border-primary/30 shadow-sm"
-                                  : "bg-transparent border-transparent hover:bg-muted/50"
+                                  : "bg-transparent hover:bg-muted/50"
                               )}
                             >
                               <FileCode className={cn("size-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
@@ -326,7 +327,7 @@ export default function DtoMaticPage() {
                               <Chip size="sm" className={cn("capitalize text-[10px] font-bold shrink-0", typeColors[file.type] || "bg-muted text-muted-foreground")}>
                                 {file.type}
                               </Chip>
-                            </button>
+                            </Button>
                           );
                         })}
                       </div>

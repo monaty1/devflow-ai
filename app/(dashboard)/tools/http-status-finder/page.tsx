@@ -156,20 +156,17 @@ export default function HttpStatusFinderPage() {
               variant="primary"
               className="font-bold text-sm"
             />
-            <div className="grid grid-cols-5 gap-2 mt-6">
+            <div className="grid grid-cols-5 gap-2 mt-6" role="radiogroup" aria-label={t("httpStatus.filterByCategory")}>
               {["1xx", "2xx", "3xx", "4xx", "5xx"].map((cat) => (
-                <button
+                <Button
                   key={cat}
-                  onClick={() => setCategoryFilter(categoryFilter === cat ? null : cat as HttpStatusCategory)}
-                  className={cn(
-                    "px-2 py-2 rounded-xl border-2 text-[10px] font-black uppercase transition-all",
-                    categoryFilter === cat 
-                      ? "bg-primary border-primary text-white shadow-lg" 
-                      : "bg-muted/30 border-transparent hover:bg-muted text-muted-foreground"
-                  )}
+                  size="sm"
+                  variant={categoryFilter === cat ? "primary" : "ghost"}
+                  onPress={() => setCategoryFilter(categoryFilter === cat ? null : cat as HttpStatusCategory)}
+                  className="text-[10px] font-black uppercase"
                 >
                   {cat}
-                </button>
+                </Button>
               ))}
             </div>
           </Card>
@@ -187,15 +184,16 @@ export default function HttpStatusFinderPage() {
                 { q: t("httpStatus.decisionQ4"), a: "413" },
                 { q: t("httpStatus.decisionQ5"), a: "502" },
               ].map((item, i) => (
-                <button
+                <Button
                   key={i}
-                  onClick={() => setSearchInput(item.a)}
-                  className="flex justify-between items-center bg-muted/50 p-3 rounded-xl border border-default-200 group hover:bg-muted transition-colors cursor-pointer w-full"
+                  variant="ghost"
+                  onPress={() => setSearchInput(item.a)}
+                  className="flex justify-between items-center bg-muted/50 p-3 h-auto rounded-xl border border-default-200 group hover:bg-muted w-full"
                 >
                   <span className="text-[10px] font-bold text-foreground/80">{item.q}</span>
                   <ChevronRight className="size-3 text-muted-foreground/30 group-hover:translate-x-1 transition-transform" />
                   <span className="text-[10px] font-black uppercase text-cyan-500 dark:text-cyan-400">{item.a}</span>
-                </button>
+                </Button>
               ))}
             </div>
           </Card>
@@ -339,8 +337,13 @@ export default function HttpStatusFinderPage() {
               {activeView === "grid" ? (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   {displayCodes.map((status) => (
-                    <button key={status.code} onClick={() => setSelectedCode(status)} className="group text-left h-full">
-                      <Card className="p-5 border-2 border-transparent hover:border-primary/30 transition-all cursor-pointer shadow-sm group-hover:shadow-xl group-hover:-translate-y-1 h-full flex flex-row items-center gap-4 bg-content1 overflow-hidden relative">
+                    <Button
+                      key={status.code}
+                      variant="ghost"
+                      onPress={() => setSelectedCode(status)}
+                      className="h-auto p-0 text-left w-full group"
+                    >
+                      <Card className="p-5 border-2 border-transparent group-hover:border-primary/30 transition-all cursor-pointer shadow-sm group-hover:shadow-xl group-hover:-translate-y-1 h-full flex flex-row items-center gap-4 bg-content1 overflow-hidden relative w-full">
                         <div className={cn("size-14 shrink-0 rounded-2xl flex items-center justify-center font-black text-lg shadow-inner", CATEGORY_COLORS[status.category])}>
                           {status.code}
                         </div>
@@ -350,7 +353,7 @@ export default function HttpStatusFinderPage() {
                         </div>
                         <div className="absolute -bottom-2 -right-2 opacity-5 group-hover:opacity-10 transition-opacity"><Globe className="size-16" /></div>
                       </Card>
-                    </button>
+                    </Button>
                   ))}
                 </div>
               ) : (

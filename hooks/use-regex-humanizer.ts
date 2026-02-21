@@ -11,6 +11,7 @@ interface UseRegexHumanizerReturn {
   testResult: TestResult | null;
   isExplaining: boolean;
   isGenerating: boolean;
+  error: string | null;
   setPattern: (pattern: string) => void;
   explain: (pattern: string) => Promise<void>;
   generate: (description: string) => Promise<void>;
@@ -25,15 +26,17 @@ export function useRegexHumanizer(): UseRegexHumanizerReturn {
   const [testResult, setTestResult] = useState<TestResult | null>(null);
   const [isExplaining, setIsExplaining] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const explain = useCallback(async (patternInput: string) => {
     if (!patternInput.trim()) return;
     setIsExplaining(true);
+    setError(null);
     try {
       const result = explainRegex(patternInput, "javascript", locale);
       setExplanation(result);
     } catch (e) {
-      console.error(e);
+      setError(e instanceof Error ? e.message : "Explanation failed");
     } finally {
       setIsExplaining(false);
     }
@@ -42,6 +45,7 @@ export function useRegexHumanizer(): UseRegexHumanizerReturn {
   const generate = useCallback(async (description: string) => {
     if (!description.trim()) return;
     setIsGenerating(true);
+    setError(null);
     try {
       const regex = generateRegex(description, locale);
       setPattern(regex);
@@ -49,18 +53,19 @@ export function useRegexHumanizer(): UseRegexHumanizerReturn {
       const explanationResult = explainRegex(regex, "javascript", locale);
       setExplanation(explanationResult);
     } catch (e) {
-      console.error(e);
+      setError(e instanceof Error ? e.message : "Generation failed");
     } finally {
       setIsGenerating(false);
     }
   }, [locale]);
 
   const test = useCallback(async (regexPattern: string, text: string) => {
+    setError(null);
     try {
       const result = testRegex(regexPattern, text, locale);
       setTestResult(result);
     } catch (e) {
-      console.error(e);
+      setError(e instanceof Error ? e.message : "Test failed");
     }
   }, [locale]);
 
@@ -68,6 +73,7 @@ export function useRegexHumanizer(): UseRegexHumanizerReturn {
     setPattern("");
     setExplanation(null);
     setTestResult(null);
+    setError(null);
   }, []);
 
   return {
@@ -76,6 +82,7 @@ export function useRegexHumanizer(): UseRegexHumanizerReturn {
     testResult,
     isExplaining,
     isGenerating,
+    error,
     setPattern,
     explain,
     generate,

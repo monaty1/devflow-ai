@@ -4,7 +4,7 @@ import { useSyncExternalStore } from "react";
 import { Sun, Moon, Monitor } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useTranslation } from "@/hooks/use-translation";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui";
 
 const subscribeNoop = () => () => {};
 const getTrue = () => true;
@@ -27,20 +27,30 @@ export function ThemeToggle({ variant = "compact" }: ThemeToggleProps) {
   const Icon = theme === "light" ? Sun : theme === "dark" ? Moon : Monitor;
   const label = theme === "light" ? t("theme.lightMode") : theme === "dark" ? t("theme.darkMode") : t("theme.systemTheme");
 
+  if (variant === "compact") {
+    return (
+      <Button
+        isIconOnly
+        variant="ghost"
+        size="sm"
+        onPress={() => setTheme(nextTheme)}
+        aria-label={label}
+      >
+        <Icon className="size-5" />
+      </Button>
+    );
+  }
+
   return (
-    <button
-      type="button"
-      onClick={() => setTheme(nextTheme)}
-      className={cn(
-        "inline-flex items-center justify-center rounded-md transition-colors",
-        variant === "compact"
-          ? "size-9 text-muted-foreground hover:bg-muted hover:text-foreground"
-          : "gap-3 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-      )}
+    <Button
+      variant="ghost"
+      size="sm"
+      onPress={() => setTheme(nextTheme)}
+      className="gap-3 px-4 py-2.5 text-sm font-medium w-full justify-start"
       aria-label={label}
     >
       <Icon className="size-5" />
-      {variant === "full" && <span className="capitalize">{theme ?? "system"}</span>}
-    </button>
+      <span className="capitalize">{theme ?? "system"}</span>
+    </Button>
   );
 }

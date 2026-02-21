@@ -16,6 +16,7 @@ interface UseVariableNameWizardReturn {
   conversionResult: ConversionResult | null;
   generationResult: GenerationResult | null;
   isProcessing: boolean;
+  error: string | null;
   setInput: (input: string) => void;
   setMode: (mode: "convert" | "generate") => void;
   updateConfig: <K extends keyof WizardConfig>(key: K, value: WizardConfig[K]) => void;
@@ -54,6 +55,7 @@ export function useVariableNameWizard(): UseVariableNameWizardReturn {
   const [conversionResult, setConversionResult] = useState<ConversionResult | null>(null);
   const [generationResult, setGenerationResult] = useState<GenerationResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -64,11 +66,12 @@ export function useVariableNameWizard(): UseVariableNameWizardReturn {
   const convert = useCallback(async () => {
     if (!input.trim()) return;
     setIsProcessing(true);
+    setError(null);
     try {
       const result = convertToAll(input);
       setConversionResult(result);
     } catch (e) {
-      console.error(e);
+      setError(e instanceof Error ? e.message : "Conversion failed");
     } finally {
       setIsProcessing(false);
     }
@@ -77,11 +80,12 @@ export function useVariableNameWizard(): UseVariableNameWizardReturn {
   const generate = useCallback(async () => {
     if (!input.trim()) return;
     setIsProcessing(true);
+    setError(null);
     try {
       const result = generateSuggestions(input, config.type, config, locale);
       setGenerationResult(result);
     } catch (e) {
-      console.error(e);
+      setError(e instanceof Error ? e.message : "Generation failed");
     } finally {
       setIsProcessing(false);
     }
@@ -95,6 +99,7 @@ export function useVariableNameWizard(): UseVariableNameWizardReturn {
     setInput("");
     setConversionResult(null);
     setGenerationResult(null);
+    setError(null);
   }, []);
 
   const loadExample = useCallback(() => {
@@ -108,6 +113,7 @@ export function useVariableNameWizard(): UseVariableNameWizardReturn {
     conversionResult,
     generationResult,
     isProcessing,
+    error,
     setInput,
     setMode,
     updateConfig,

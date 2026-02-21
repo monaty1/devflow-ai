@@ -9,6 +9,7 @@ import type { LucideIcon } from "lucide-react";
 import { useTranslation } from "@/hooks/use-translation";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { LocaleToggle } from "@/components/shared/locale-toggle";
+import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
 export function Navbar() {
@@ -97,16 +98,18 @@ export function Navbar() {
         </div>
 
         {/* Mobile Menu Button — min 44px touch target (WCAG 2.2 AA) */}
-        <button
-          type="button"
-          className="ml-auto inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:hidden"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        <Button
+          isIconOnly
+          variant="ghost"
+          size="sm"
+          className="ml-auto md:hidden"
+          onPress={() => setIsMenuOpen(!isMenuOpen)}
           aria-expanded={isMenuOpen}
           aria-controls="mobile-menu"
           aria-label={t("nav.toggleMenu")}
         >
           {isMenuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
-        </button>
+        </Button>
       </nav>
 
       {/* Mobile Menu */}

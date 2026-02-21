@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
-import { Card, Button, Select, Label, ListBox } from "@heroui/react";
+import { useState, useRef, useSyncExternalStore } from "react";
+import { Card, Button, Select, Label, ListBox, Switch, TextField, InputGroup } from "@heroui/react";
 import { useTheme } from "next-themes";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
 import { useLocaleStore } from "@/lib/stores/locale-store";
 import { useAISettingsStore } from "@/lib/stores/ai-settings-store";
-import { Sun, Moon, Monitor, Bot, Eye, EyeOff, Trash2 } from "lucide-react";
+import { Sun, Moon, Monitor, Bot, Eye, EyeOff, Trash2, Download, Upload } from "lucide-react";
+import { useSettingsExport } from "@/hooks/use-settings-export";
+import { cn } from "@/lib/utils";
 import type { AIProviderType } from "@/types/ai";
 
 interface Settings {
@@ -50,6 +52,16 @@ export default function SettingsPage() {
   );
   const [settings, setSettings] = useState<Settings>(() => getInitialSettings());
   const [showKey, setShowKey] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { isExporting, isImporting, lastResult, handleExport, handleImport, clearResult } = useSettingsExport();
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      void handleImport(file);
+      e.target.value = "";
+    }
+  };
 
   // AI settings
   const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
@@ -94,51 +106,40 @@ export default function SettingsPage() {
             </label>
             <div className="flex gap-3">
               {(["light", "dark", "system"] as const).map((themeOption) => (
-                <button
+                <Button
                   key={themeOption}
-                  type="button"
-                  onClick={() => setTheme(themeOption)}
-                  className={`flex-1 rounded-lg border-2 p-3 text-sm font-medium capitalize transition-colors ${
-                    mounted && theme === themeOption
-                      ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                      : "border-border text-muted-foreground hover:border-muted-foreground/50"
-                  }`}
+                  variant={mounted && theme === themeOption ? "primary" : "ghost"}
+                  onPress={() => setTheme(themeOption)}
+                  className="flex-1 capitalize"
                 >
                   {themeOption === "light" ? <Sun className="mr-1 inline size-4" /> : themeOption === "dark" ? <Moon className="mr-1 inline size-4" /> : <Monitor className="mr-1 inline size-4" />}{" "}
                   {t(`settings.${themeOption}`)}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
 
           {/* Notifications */}
           <div className="flex items-center justify-between">
-            <div>
-              <p id="notifications-label" className="text-sm font-medium text-foreground">
-                {t("settings.notifications")}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {t("settings.notificationsDesc")}
-              </p>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={settings.notifications}
-              aria-labelledby="notifications-label"
-              onClick={() =>
-                setSettings({ ...settings, notifications: !settings.notifications })
+            <Switch
+              isSelected={settings.notifications}
+              onChange={(val) =>
+                setSettings({ ...settings, notifications: val })
               }
-              className={`relative h-6 w-11 rounded-full transition-colors ${
-                settings.notifications ? "bg-blue-500" : "bg-muted"
-              }`}
+              aria-label={t("settings.notifications")}
             >
-              <span
-                className={`absolute left-0.5 top-0.5 size-5 rounded-full bg-white shadow transition-transform ${
-                  settings.notifications ? "translate-x-5" : ""
-                }`}
-              />
-            </button>
+              <div className="flex flex-col">
+                <Label className="text-sm font-medium text-foreground">
+                  {t("settings.notifications")}
+                </Label>
+                <span className="text-xs text-muted-foreground">
+                  {t("settings.notificationsDesc")}
+                </span>
+              </div>
+              <Switch.Control>
+                <Switch.Thumb />
+              </Switch.Control>
+            </Switch>
           </div>
 
           {/* Language */}
@@ -180,30 +181,23 @@ export default function SettingsPage() {
         <div className="space-y-6">
           {/* Enable/Disable AI */}
           <div className="flex items-center justify-between">
-            <div>
-              <p id="ai-enabled-label" className="text-sm font-medium text-foreground">
-                {t("settings.ai.enable")}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {t("settings.ai.enableDesc")}
-              </p>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={isAIEnabled}
-              aria-labelledby="ai-enabled-label"
-              onClick={() => setAIEnabled(!isAIEnabled)}
-              className={`relative h-6 w-11 rounded-full transition-colors ${
-                isAIEnabled ? "bg-blue-500" : "bg-muted"
-              }`}
+            <Switch
+              isSelected={isAIEnabled}
+              onChange={(val) => setAIEnabled(val)}
+              aria-label={t("settings.ai.enable")}
             >
-              <span
-                className={`absolute left-0.5 top-0.5 size-5 rounded-full bg-white shadow transition-transform ${
-                  isAIEnabled ? "translate-x-5" : ""
-                }`}
-              />
-            </button>
+              <div className="flex flex-col">
+                <Label className="text-sm font-medium text-foreground">
+                  {t("settings.ai.enable")}
+                </Label>
+                <span className="text-xs text-muted-foreground">
+                  {t("settings.ai.enableDesc")}
+                </span>
+              </div>
+              <Switch.Control>
+                <Switch.Thumb />
+              </Switch.Control>
+            </Switch>
           </div>
 
           {/* Provider Selector */}
@@ -235,34 +229,37 @@ export default function SettingsPage() {
 
           {/* API Key Input */}
           <div>
-            <label htmlFor="api-key-input" className="mb-2 block text-sm font-medium text-muted-foreground">
-              {t("settings.ai.apiKey")}
-            </label>
             <div className="flex gap-2">
-              <div className="relative flex-1">
-                <input
-                  id="api-key-input"
-                  type={showKey ? "text" : "password"}
-                  value={byokKey}
-                  onChange={(e) => setByokKey(e.target.value)}
-                  placeholder={t("settings.ai.apiKeyPlaceholder")}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 pr-10 text-sm font-mono placeholder:text-muted-foreground"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowKey(!showKey)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
-                  aria-label={showKey ? t("settings.ai.hideKey") : t("settings.ai.showKey")}
-                >
-                  {showKey ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                </button>
-              </div>
+              <TextField className="flex-1" name="api-key" onChange={setByokKey}>
+                <Label className="mb-2 block text-sm font-medium text-muted-foreground">
+                  {t("settings.ai.apiKey")}
+                </Label>
+                <InputGroup>
+                  <InputGroup.Input
+                    type={showKey ? "text" : "password"}
+                    value={byokKey}
+                    placeholder={t("settings.ai.apiKeyPlaceholder")}
+                    className="w-full font-mono"
+                  />
+                  <InputGroup.Suffix className="pr-0">
+                    <Button
+                      isIconOnly
+                      variant="ghost"
+                      size="sm"
+                      onPress={() => setShowKey(!showKey)}
+                      aria-label={showKey ? t("settings.ai.hideKey") : t("settings.ai.showKey")}
+                    >
+                      {showKey ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    </Button>
+                  </InputGroup.Suffix>
+                </InputGroup>
+              </TextField>
               {byokKey && (
                 <Button
                   variant="outline"
                   size="sm"
                   onPress={() => { clearByok(); addToast(t("settings.ai.keyCleared"), "info"); }}
-                  className="shrink-0"
+                  className="shrink-0 self-end"
                 >
                   <Trash2 className="size-4" />
                 </Button>
@@ -277,6 +274,36 @@ export default function SettingsPage() {
             {t("settings.ai.freeNote")}
           </p>
         </div>
+      </Card>
+
+      {/* Export / Import */}
+      <Card className="p-6">
+        <h2 className="mb-4 text-lg font-semibold">{t("settings.exportImport")}</h2>
+        <p className="mb-4 text-sm text-muted-foreground">
+          {t("settings.exportImportDesc")}
+        </p>
+        <div className="flex gap-3">
+          <Button variant="primary" onPress={handleExport} isDisabled={isExporting}>
+            <Download className="size-4" />
+            {t("settings.export")}
+          </Button>
+          <Button variant="ghost" onPress={() => fileInputRef.current?.click()} isDisabled={isImporting}>
+            <Upload className="size-4" />
+            {t("settings.import")}
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+        </div>
+        {lastResult && (
+          <button type="button" onClick={clearResult} className={cn("mt-3 block text-sm cursor-pointer", lastResult.type === "success" ? "text-success" : "text-destructive")}>
+            {lastResult.message}
+          </button>
+        )}
       </Card>
 
       {/* Danger Zone */}

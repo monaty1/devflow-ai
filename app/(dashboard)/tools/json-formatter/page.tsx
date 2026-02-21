@@ -77,10 +77,11 @@ export default function JsonFormatterPage() {
     switch (key) {
       case "path":
         return (
-          <button
-            type="button"
-            onClick={() => copyPath(item.path)}
-            className="group/path flex items-center gap-1.5 cursor-pointer hover:bg-primary/10 rounded px-1 -mx-1 transition-colors"
+          <Button
+            variant="ghost"
+            size="sm"
+            onPress={() => copyPath(item.path)}
+            className="group/path h-auto min-h-0 gap-1.5 px-1 -mx-1"
             aria-label={t("jsonFmt.copyPath", { path: item.path })}
           >
             <code className="text-[11px] font-bold text-primary bg-primary/5 px-1.5 py-0.5 rounded">{item.path}</code>
@@ -89,7 +90,7 @@ export default function JsonFormatterPage() {
             ) : (
               <Copy className="size-3 text-muted-foreground opacity-0 group-hover/path:opacity-100 transition-opacity shrink-0" />
             )}
-          </button>
+          </Button>
         );
       case "type":
         return (

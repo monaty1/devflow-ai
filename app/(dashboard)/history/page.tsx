@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Card, Button } from "@heroui/react";
-import { Trash2, Search, Clock, Inbox } from "lucide-react";
+import { Card, Button, SearchField } from "@heroui/react";
+import { Trash2, Clock, Inbox } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
 
@@ -150,44 +150,37 @@ export default function HistoryPage() {
 
       {/* Search & Filter */}
       <div className="flex flex-col gap-3 sm:flex-row">
-        <div className="relative flex-1">
-          <label htmlFor="history-search" className="sr-only">{t("history.searchLabel")}</label>
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            id="history-search"
-            type="text"
-            placeholder={t("history.search")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-border bg-background py-2 pl-10 pr-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-          />
-        </div>
+        <SearchField
+          name="history-search"
+          value={search}
+          onChange={setSearch}
+          aria-label={t("history.searchLabel")}
+          className="flex-1"
+        >
+          <SearchField.Group>
+            <SearchField.SearchIcon />
+            <SearchField.Input placeholder={t("history.search")} className="w-full" />
+            <SearchField.ClearButton />
+          </SearchField.Group>
+        </SearchField>
         {toolSlugs.length > 1 && (
           <div className="flex flex-wrap gap-1">
-            <button
-              type="button"
-              onClick={() => setToolFilter(null)}
-              className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-all ${
-                toolFilter === null
-                  ? "border-primary bg-primary/10"
-                  : "border-border hover:border-primary/50"
-              }`}
+            <Button
+              variant={toolFilter === null ? "primary" : "ghost"}
+              size="sm"
+              onPress={() => setToolFilter(null)}
             >
               {t("history.filterAll")}
-            </button>
+            </Button>
             {toolSlugs.map((slug) => (
-              <button
+              <Button
                 key={slug}
-                type="button"
-                onClick={() => setToolFilter(toolFilter === slug ? null : slug)}
-                className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-all ${
-                  toolFilter === slug
-                    ? "border-primary bg-primary/10"
-                    : "border-border hover:border-primary/50"
-                }`}
+                variant={toolFilter === slug ? "primary" : "ghost"}
+                size="sm"
+                onPress={() => setToolFilter(toolFilter === slug ? null : slug)}
               >
                 {t(`tool.${slug}.name`)}
-              </button>
+              </Button>
             ))}
           </div>
         )}

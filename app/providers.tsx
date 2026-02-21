@@ -7,6 +7,7 @@ import { SWRConfig } from "swr";
 import { FavoritesProvider } from "@/lib/context";
 import { ToastProvider } from "@/components/shared/toast-container";
 import { useLocaleStore } from "@/lib/stores/locale-store";
+import { CommandPalette } from "@/components/shared/command-palette";
 
 function HtmlLangSync() {
   const locale = useLocaleStore((s) => s.locale);
@@ -47,6 +48,7 @@ export function Providers({ children }: ProvidersProps) {
             <ToastProvider>
               <HtmlLangSync />
               <ConsoleEasterEgg />
+              <CommandPalette />
               {children}
             </ToastProvider>
           </FavoritesProvider>

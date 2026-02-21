@@ -197,22 +197,22 @@ export default function VariableNameWizardPage() {
                 <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("varName.targetLang")}</label>
                 <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={t("varName.targetLang")}>
                   {LANGUAGES.map(lang => (
-                    <button
+                    <Button
                       key={lang.id}
-                      onClick={() => updateConfig("language", lang.id as WizardConfig["language"])}
-                      role="radio"
-                      aria-checked={config.language === lang.id}
+                      variant={config.language === lang.id ? "primary" : "ghost"}
+                      onPress={() => updateConfig("language", lang.id as WizardConfig["language"])}
                       aria-label={lang.label}
+                      size="sm"
                       className={cn(
-                        "flex items-center gap-2 p-2 rounded-lg border transition-all text-left",
+                        "flex items-center gap-2 justify-start text-left",
                         config.language === lang.id
-                          ? "bg-primary text-white border-primary shadow-md"
-                          : "bg-muted/30 border-transparent hover:bg-muted text-muted-foreground hover:text-foreground"
+                          ? "shadow-md"
+                          : "bg-muted/30"
                       )}
                     >
                       <lang.icon className="size-3" aria-hidden="true" />
                       <span className="text-[10px] font-bold uppercase">{lang.label.split(" ")[0]}</span>
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
@@ -451,20 +451,20 @@ export default function VariableNameWizardPage() {
                     className="h-24 w-full resize-none rounded-xl border border-divider bg-background p-3 font-mono text-xs focus:ring-2 focus:ring-violet-500/20 shadow-inner mb-3"
                     aria-label={t("varName.batchRename")}
                   />
-                  <div className="flex gap-2 mb-4" role="radiogroup" aria-label={t("varName.batchTarget")}>
+                  <div className="flex gap-2 mb-4 flex-wrap" role="radiogroup" aria-label={t("varName.batchTarget")}>
                     {(["camelCase", "snake_case", "PascalCase", "kebab-case", "SCREAMING_SNAKE"] as NamingConvention[]).map(c => (
-                      <button
+                      <Button
                         key={c}
-                        role="radio"
-                        aria-checked={batchTarget === c}
-                        onClick={() => setBatchTarget(c)}
+                        size="sm"
+                        variant={batchTarget === c ? "primary" : "ghost"}
+                        onPress={() => setBatchTarget(c)}
                         className={cn(
-                          "px-2 py-1 rounded-lg text-[10px] font-bold transition-all border",
-                          batchTarget === c ? "bg-violet-500 text-white border-violet-500" : "bg-muted/30 border-transparent text-muted-foreground hover:bg-muted"
+                          "text-[10px] font-bold",
+                          batchTarget === c ? "bg-violet-500 border-violet-500" : "bg-muted/30"
                         )}
                       >
                         {c}
-                      </button>
+                      </Button>
                     ))}
                   </div>
                   {batchResults.length > 0 && (

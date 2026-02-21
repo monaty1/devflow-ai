@@ -188,4 +188,155 @@ describe("Cost Calculator", () => {
       expect(formatted).toContain("234");
     });
   });
+
+  describe("calculateCost — value score", () => {
+    it("should calculate value score when benchmarkScore exists", () => {
+      const modelWithBenchmark: AIModel = {
+        ...testModel,
+        benchmarkScore: 85,
+      };
+      const result = calculateCost(modelWithBenchmark, 1000000, 1000000);
+      expect(result.valueScore).toBeDefined();
+      expect(result.valueScore).toBeGreaterThan(0);
+    });
+
+    it("should return undefined valueScore when no benchmarkScore", () => {
+      const result = calculateCost(testModel, 1000, 500);
+      expect(result.valueScore).toBeUndefined();
+    });
+
+    it("should handle zero cost with benchmarkScore gracefully", () => {
+      const modelWithBenchmark: AIModel = {
+        ...testModel,
+        benchmarkScore: 85,
+      };
+      const result = calculateCost(modelWithBenchmark, 0, 0);
+      expect(result.valueScore).toBeDefined();
+      // totalCost is 0, so formula uses 0.000001 as fallback
+      expect(result.valueScore).toBeGreaterThan(0);
+    });
+  });
+
+  describe("compareAllModels — custom models", () => {
+    it("should accept custom models array", () => {
+      const customModels: AIModel[] = [
+        { ...testModel, id: "cheap", displayName: "Cheap", inputPricePerMToken: 0.1, outputPricePerMToken: 0.3 },
+        { ...testModel, id: "expensive", displayName: "Expensive", inputPricePerMToken: 50, outputPricePerMToken: 150 },
+      ];
+      const comparison = compareAllModels(1000, 500, customModels);
+      expect(comparison.results.length).toBe(2);
+      expect(comparison.results[0]?.id).toBe("cheap");
+    });
+
+    it("should handle single model", () => {
+      const comparison = compareAllModels(1000, 500, [testModel]);
+      expect(comparison.results.length).toBe(1);
+    });
+
+    it("should handle zero tokens", () => {
+      const comparison = compareAllModels(0, 0);
+      expect(comparison.results.every((r) => r.totalCost === 0)).toBe(true);
+    });
+  });
+
+  describe("formatCost — currencies", () => {
+    it("should format with EUR symbol", () => {
+      expect(formatCost(10, "EUR")).toContain("€");
+    });
+
+    it("should format with GBP symbol", () => {
+      expect(formatCost(10, "GBP")).toContain("£");
+    });
+
+    it("should format with USD symbol by default", () => {
+      expect(formatCost(10)).toContain("$");
+    });
+
+    it("should format zero cost", () => {
+      expect(formatCost(0)).toBe("$0.00");
+    });
+
+    it("should format with ES locale", () => {
+      const formatted = formatCost(1234.56, "USD", "es");
+      expect(formatted).toContain("$");
+      expect(formatted).toContain("1");
+    });
+
+    it("should format very large costs", () => {
+      const formatted = formatCost(999999.99);
+      expect(formatted).toContain("$");
+    });
+
+    it("should handle boundary at 0.0001", () => {
+      expect(formatCost(0.0001)).toBe("$0.0001");
+    });
+
+    it("should handle boundary at 0.01", () => {
+      expect(formatCost(0.01)).toBe("$0.010");
+    });
+
+    it("should handle boundary at 1.00", () => {
+      expect(formatCost(1.0)).toBe("$1.00");
+    });
+
+    it("should handle boundary at 100", () => {
+      const formatted = formatCost(100);
+      expect(formatted).toContain("$");
+      expect(formatted).toContain("100");
+    });
+  });
+
+  describe("convertCost — edge cases", () => {
+    it("should handle negative costs", () => {
+      expect(convertCost(-5, "EUR")).toBeCloseTo(-4.6, 1);
+    });
+
+    it("should handle very large values", () => {
+      const result = convertCost(1000000, "GBP");
+      expect(result).toBeCloseTo(790000, 0);
+    });
+  });
+
+  describe("exportComparisonCsv — edge cases", () => {
+    it("should handle USD currency (default)", () => {
+      const comparison = compareAllModels(1000, 500);
+      const csv = exportComparisonCsv(comparison);
+      expect(csv).toContain("$");
+    });
+
+    it("should include value score or N/A", () => {
+      const comparison = compareAllModels(1000, 500);
+      const csv = exportComparisonCsv(comparison);
+      // Should contain either a numeric score or N/A
+      const lines = csv.split("\n").slice(1);
+      for (const line of lines) {
+        const lastField = line.split(",").pop();
+        expect(lastField === "N/A" || !isNaN(parseFloat(lastField ?? ""))).toBe(true);
+      }
+    });
+
+    it("should handle large token values", () => {
+      const comparison = compareAllModels(10000000, 5000000);
+      const csv = exportComparisonCsv(comparison);
+      expect(csv.split("\n").length).toBeGreaterThan(1);
+    });
+  });
+
+  describe("calculateMonthlyCost — edge cases", () => {
+    it("should return 0 for zero daily requests", () => {
+      const cost = calculateMonthlyCost(testModel, 0, 1000, 500);
+      expect(cost).toBe(0);
+    });
+
+    it("should handle custom days per month", () => {
+      const cost28 = calculateMonthlyCost(testModel, 10, 1000, 500, 28);
+      const cost31 = calculateMonthlyCost(testModel, 10, 1000, 500, 31);
+      expect(cost31).toBeGreaterThan(cost28);
+    });
+
+    it("should handle large daily requests", () => {
+      const cost = calculateMonthlyCost(testModel, 10000, 1000, 500);
+      expect(cost).toBeGreaterThan(0);
+    });
+  });
 });

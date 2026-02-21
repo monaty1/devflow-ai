@@ -20,6 +20,7 @@ import { useTranslation } from "@/hooks/use-translation";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { LocaleToggle } from "@/components/shared/locale-toggle";
 import { ApiKeyGuide } from "@/components/shared/api-key-guide";
+import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
 interface DashboardLayoutProps {
@@ -110,14 +111,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Setup AI */}
       <div className="px-4 pb-2">
-        <button
-          type="button"
-          onClick={() => setGuideOpen(true)}
-          className="flex w-full items-center gap-3 rounded-lg bg-primary/10 px-4 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
+        <Button
+          variant="ghost"
+          onPress={() => setGuideOpen(true)}
+          className="flex w-full items-center gap-3 rounded-lg bg-primary/10 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary/20 h-auto justify-start"
         >
           <Wand2 className="size-5" />
           {t("guide.ai.setupAI")}
-        </button>
+        </Button>
       </div>
 
       {/* Footer */}
@@ -159,14 +160,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         aria-label={t("sidebar.sidebarLabel")}
       >
         {/* Close button */}
-        <button
-          type="button"
-          onClick={closeSidebar}
-          className="absolute right-3 top-5 rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+        <Button
+          isIconOnly
+          size="sm"
+          variant="ghost"
+          onPress={closeSidebar}
+          className="absolute right-3 top-5"
           aria-label={t("sidebar.closeSidebar")}
         >
           <X className="size-5" />
-        </button>
+        </Button>
         {sidebarContent}
       </aside>
 
@@ -174,16 +177,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="flex flex-1 flex-col">
         {/* Mobile Header */}
         <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-3 md:hidden">
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(true)}
-            className="rounded-lg p-2 text-foreground hover:bg-muted"
+          <Button
+            isIconOnly
+            size="sm"
+            variant="ghost"
+            onPress={() => setSidebarOpen(true)}
             aria-expanded={sidebarOpen}
             aria-controls="mobile-sidebar"
             aria-label={t("sidebar.openSidebar")}
           >
             <Menu className="size-5" />
-          </button>
+          </Button>
           <NextLink
             href="/"
             className="flex items-center gap-2 text-lg font-bold text-foreground"

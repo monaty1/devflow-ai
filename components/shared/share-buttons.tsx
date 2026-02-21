@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { Linkedin, Link2, Check } from "lucide-react";
 import { useTranslation } from "@/hooks/use-translation";
+import { Button } from "@/components/ui";
 
 interface ShareButtonsProps {
   url: string;
@@ -51,14 +52,15 @@ export function ShareButtons({ url, title, description }: ShareButtonsProps) {
       >
         <Linkedin className="size-4" />
       </a>
-      <button
-        type="button"
-        onClick={handleCopy}
-        className="inline-flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      <Button
+        isIconOnly
+        variant="ghost"
+        size="sm"
+        onPress={handleCopy}
         aria-label={copied ? "Link copied" : "Copy link"}
       >
         {copied ? <Check className="size-4 text-green-600" /> : <Link2 className="size-4" />}
-      </button>
+      </Button>
     </div>
   );
 }

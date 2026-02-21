@@ -7,7 +7,7 @@
 ### 15 herramientas para developers &middot; IA integrada &middot; Local-first &middot; Open Source
 
 [![Build](https://img.shields.io/github/actions/workflow/status/albertoguinda/devflow-ai/ci.yml?branch=main&style=flat-square&logo=github&label=CI)](https://github.com/albertoguinda/devflow-ai/actions)
-[![Tests](https://img.shields.io/badge/tests-1190_passing-brightgreen?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
+[![Tests](https://img.shields.io/badge/tests-1257_passing-brightgreen?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
 [![Coverage](https://img.shields.io/badge/coverage-strategic_(100%2F80%2F0)-blue?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
 [![Lighthouse](https://img.shields.io/badge/Lighthouse-100%2F100%2F100%2F100-brightgreen?style=flat-square&logo=lighthouse&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
@@ -60,8 +60,10 @@
 - **AI-enhanced** &mdash; 4 providers: Gemini, Groq, OpenRouter, Pollinations (always free, no key needed)
 - **BYOK** &mdash; bring your own API key for higher limits (configurable in Settings)
 - **AI Setup Guide** &mdash; 3-step wizard in the sidebar to configure AI providers
+- **Command Palette** &mdash; `Cmd+K` to instantly search and launch any tool or action
 - **Smart suggestions** &mdash; context-aware cross-tool recommendations
 - **MagicInput** &mdash; paste anything, auto-detect type, route to the right tool
+- **Export/Import settings** &mdash; backup and restore all preferences as JSON
 - **Local history** &mdash; localStorage persistence
 - **Copy to clipboard** &mdash; 1-click from any tool
 - **Dark / Light mode** &mdash; auto-detection + manual toggle
@@ -84,7 +86,7 @@
 | Components | [HeroUI v3 beta](https://heroui.com) (compound pattern)         |
 | Icons      | [Lucide React](https://lucide.dev)                              |
 | Animations | [GSAP](https://gsap.com) + [Framer Motion](https://motion.dev)  |
-| Testing    | [Vitest](https://vitest.dev) + Testing Library                  |
+| Testing    | [Vitest](https://vitest.dev) + [Playwright](https://playwright.dev) + [axe-core](https://github.com/dequelabs/axe-core) |
 | Linting    | ESLint 9 (flat config)                                          |
 
 ---
@@ -367,8 +369,10 @@ Coverage reports and Playwright reports are uploaded as artifacts.
 - **IA integrada** &mdash; 4 proveedores: Gemini, Groq, OpenRouter, Pollinations (siempre gratis, sin API key)
 - **BYOK** &mdash; trae tu propia API key para limites superiores (configurable en Ajustes)
 - **Guia de configuracion IA** &mdash; wizard de 3 pasos en la barra lateral para configurar proveedores de IA
+- **Paleta de comandos** &mdash; `Cmd+K` para buscar y lanzar cualquier herramienta o accion
 - **Sugerencias inteligentes** &mdash; recomendaciones de herramientas segun el contexto
 - **MagicInput** &mdash; pega cualquier cosa, deteccion automatica, redirige a la herramienta correcta
+- **Exportar/Importar configuracion** &mdash; respalda y restaura preferencias como JSON
 - **Historial local** &mdash; persistencia con localStorage
 - **Copy to clipboard** &mdash; en 1 click desde cualquier herramienta
 - **Dark / Light mode** &mdash; deteccion automatica + toggle manual
@@ -391,7 +395,7 @@ Coverage reports and Playwright reports are uploaded as artifacts.
 | Componentes| [HeroUI v3 beta](https://heroui.com) (patron compuesto)         |
 | Iconos     | [Lucide React](https://lucide.dev)                              |
 | Animaciones| [GSAP](https://gsap.com) + [Framer Motion](https://motion.dev)  |
-| Testing    | [Vitest](https://vitest.dev) + Testing Library                  |
+| Testing    | [Vitest](https://vitest.dev) + [Playwright](https://playwright.dev) + [axe-core](https://github.com/dequelabs/axe-core) |
 | Linting    | ESLint 9 (flat config)                                          |
 
 ---

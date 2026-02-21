@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
+import { Button } from "@heroui/react";
 import { useTranslation } from "@/hooks/use-translation";
 
 interface ErrorPageProps {
@@ -35,14 +36,13 @@ export default function RootError({ error, reset }: ErrorPageProps) {
         )}
 
         <div className="flex justify-center gap-3">
-          <button
-            type="button"
-            onClick={reset}
-            className="flex min-h-11 min-w-11 items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+          <Button
+            variant="danger"
+            onPress={reset}
           >
             <RefreshCw className="size-4" aria-hidden="true" />
             {t("error.tryAgain")}
-          </button>
+          </Button>
           <Link
             href="/"
             className="flex min-h-11 min-w-11 items-center gap-2 rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 dark:border-red-800 dark:bg-red-950 dark:text-red-300 dark:hover:bg-red-900"

@@ -2,6 +2,7 @@
 
 import { CheckCircle, XCircle, AlertTriangle, Info, X } from "lucide-react";
 import { useTranslation } from "@/hooks/use-translation";
+import { Button } from "@/components/ui";
 import {
   ToastContext,
   useToastState,
@@ -52,14 +53,16 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
     >
       <Icon className={`size-5 shrink-0 ${styles.iconColor}`} />
       <p className="flex-1 text-sm text-foreground">{toast.message}</p>
-      <button
-        type="button"
-        onClick={() => onRemove(toast.id)}
-        className="shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      <Button
+        isIconOnly
+        variant="ghost"
+        size="sm"
+        onPress={() => onRemove(toast.id)}
+        className="shrink-0"
         aria-label={t("common.dismiss")}
       >
         <X className="size-4" />
-      </button>
+      </Button>
     </div>
   );
 }

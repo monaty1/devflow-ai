@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@heroui/react";
+import { InputGroup } from "@heroui/react";
+import { Button } from "@/components/ui";
 import { Eye, EyeOff, ExternalLink, Check, Sparkles } from "lucide-react";
 import { useTranslation } from "@/hooks/use-translation";
 import { useAISettingsStore } from "@/lib/stores/ai-settings-store";
@@ -155,12 +156,12 @@ export function ApiKeyGuide({ open, onClose }: ApiKeyGuideProps) {
               </p>
               <div className="grid gap-2">
                 {PROVIDERS.map((p) => (
-                  <button
+                  <Button
                     key={p.id}
-                    type="button"
-                    onClick={() => setProvider(p.id)}
+                    variant="ghost"
+                    onPress={() => setProvider(p.id)}
                     className={cn(
-                      "flex items-center justify-between rounded-lg border p-3 text-left transition-colors",
+                      "flex h-auto items-center justify-between rounded-lg border p-3 text-left",
                       provider === p.id
                         ? "border-primary bg-primary/5"
                         : "border-border hover:border-primary/30"
@@ -186,7 +187,7 @@ export function ApiKeyGuide({ open, onClose }: ApiKeyGuideProps) {
                     >
                       {t(`guide.ai.${p.badge}`)}
                     </span>
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -246,31 +247,33 @@ export function ApiKeyGuide({ open, onClose }: ApiKeyGuideProps) {
                   <p className="text-sm text-muted-foreground">
                     {t("guide.ai.step3.subtitle")}
                   </p>
-                  <div className="relative">
-                    <input
+                  <InputGroup className="w-full">
+                    <InputGroup.Input
                       type={showKey ? "text" : "password"}
                       value={apiKey}
-                      onChange={(e) => setApiKey(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setApiKey(e.target.value)}
                       placeholder={t("guide.ai.step3.placeholder")}
-                      className="w-full rounded-lg border border-border bg-background py-2.5 pl-4 pr-10 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowKey((s) => !s)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      aria-label={
-                        showKey
-                          ? t("guide.ai.step3.hideKey")
-                          : t("guide.ai.step3.showKey")
-                      }
-                    >
-                      {showKey ? (
-                        <EyeOff className="size-4" />
-                      ) : (
-                        <Eye className="size-4" />
-                      )}
-                    </button>
-                  </div>
+                    <InputGroup.Suffix>
+                      <Button
+                        isIconOnly
+                        size="sm"
+                        variant="ghost"
+                        onPress={() => setShowKey((s) => !s)}
+                        aria-label={
+                          showKey
+                            ? t("guide.ai.step3.hideKey")
+                            : t("guide.ai.step3.showKey")
+                        }
+                      >
+                        {showKey ? (
+                          <EyeOff className="size-4" />
+                        ) : (
+                          <Eye className="size-4" />
+                        )}
+                      </Button>
+                    </InputGroup.Suffix>
+                  </InputGroup>
                 </>
               ) : (
                 <div className="rounded-lg border border-green-500/30 bg-green-500/5 p-4 text-center">

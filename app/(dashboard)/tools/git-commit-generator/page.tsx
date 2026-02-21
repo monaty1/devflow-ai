@@ -204,14 +204,15 @@ export default function GitCommitGeneratorPage() {
               <div className="space-y-1">
                 <div className="flex justify-between items-center px-1">
                   <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">{t("gitCommit.descBody")}</label>
-                  <button
-                    type="button"
-                    onClick={() => updateConfig("body", config.body + "\n- ")}
-                    className="text-[9px] font-black text-primary uppercase flex items-center gap-1 hover:underline"
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onPress={() => updateConfig("body", config.body + "\n- ")}
+                    className="text-[9px] font-black text-primary uppercase h-auto px-1"
                     aria-label={t("gitCommit.addPoint")}
                   >
                     <ListPlus className="size-2.5" aria-hidden="true" /> {t("gitCommit.addPoint")}
-                  </button>
+                  </Button>
                 </div>
                 <TextArea
                   placeholder={t("gitCommit.bodyPlaceholder")}

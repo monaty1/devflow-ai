@@ -364,20 +364,16 @@ export default function CodeReviewPage() {
                       const FilterIcon = filter.icon;
                       const isActive = severityFilter === filter.key;
                       return (
-                        <button
+                        <Button
                           key={filter.key}
-                          type="button"
-                          role="radio"
-                          aria-checked={isActive}
-                          onClick={() => setSeverityFilter(filter.key)}
-                          className={cn(
-                            "inline-flex items-center gap-1 px-3 h-7 rounded-lg text-xs font-bold transition-colors",
-                            isActive ? "bg-primary text-primary-foreground" : "bg-muted/50 text-muted-foreground hover:bg-muted"
-                          )}
+                          size="sm"
+                          variant={isActive ? "primary" : "ghost"}
+                          onPress={() => setSeverityFilter(filter.key)}
+                          className="text-xs font-bold"
                         >
                           {FilterIcon && <FilterIcon className="size-3" aria-hidden="true" />}
                           {filter.label}
-                        </button>
+                        </Button>
                       );
                     })}
                   </div>

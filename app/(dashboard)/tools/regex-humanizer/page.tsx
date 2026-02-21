@@ -162,14 +162,15 @@ export default function RegexHumanizerPage() {
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t("regex.presets")}</p>
                   <div className="flex flex-wrap gap-1.5">
                     {commonPatterns.slice(0, 8).map((cp) => (
-                      <button
+                      <Button
                         key={cp.id}
-                        type="button"
-                        onClick={() => { setPattern(cp.pattern); explain(cp.pattern); }}
-                        className="px-2.5 py-1 rounded-lg bg-muted/50 text-xs font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors border border-border/50"
+                        size="sm"
+                        variant="ghost"
+                        onPress={() => { setPattern(cp.pattern); explain(cp.pattern); }}
+                        className="px-2.5 text-xs font-medium"
                       >
                         {cp.name}
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 </div>
@@ -262,17 +263,19 @@ export default function RegexHumanizerPage() {
                 { s: "\\s", d: "Space" }, { s: ".", d: "Any" },
                 { s: "^", d: "Start" }, { s: "$", d: "End" }
               ].map(ref => (
-                <button
+                <Button
                   key={ref.s}
-                  onClick={() => {
+                  size="sm"
+                  variant="ghost"
+                  onPress={() => {
                     setPattern(pattern + ref.s);
                     setActiveTab("explain");
                   }}
-                  className="flex justify-between items-center px-2 py-1 bg-muted/30 rounded text-[10px] font-mono hover:bg-primary/10 transition-colors cursor-pointer"
+                  className="flex justify-between items-center px-2 h-auto py-1 bg-muted/30 text-[10px] font-mono"
                 >
                   <span className="text-primary font-bold">{ref.s}</span>
                   <span className="opacity-60">{ref.d}</span>
-                </button>
+                </Button>
               ))}
             </div>
           </div>

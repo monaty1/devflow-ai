@@ -114,7 +114,7 @@ export function useDtoMatic() {
       const mock = generateMockData(parsed.fields, count);
       setMockData(JSON.stringify(mock, null, 2));
     } catch (e) {
-      console.error(e);
+      setError(e instanceof Error ? e.message : "Mock generation failed");
     }
   }, [jsonInput]);
 

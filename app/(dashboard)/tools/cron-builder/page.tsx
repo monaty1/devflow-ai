@@ -234,23 +234,22 @@ export default function CronBuilderPage() {
 
               <Tabs.Panel id="infra">
                 <div className="space-y-6 mt-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2" role="radiogroup" aria-label={t("cron.infraFormat")}>
                     {INFRA_FORMATS.map((f) => (
-                      <button
+                      <Button
                         key={f.id}
-                        onClick={() => {
-                          setConfigFormat(f.id);
-                        }}
+                        variant={configFormat === f.id ? "primary" : "ghost"}
+                        onPress={() => setConfigFormat(f.id)}
                         className={cn(
-                          "flex flex-col items-center justify-center p-3 rounded-xl border transition-all gap-2",
+                          "flex flex-col items-center justify-center p-3 h-auto rounded-xl gap-2",
                           configFormat === f.id
                             ? "bg-primary/10 border-primary/30 text-primary shadow-sm"
-                            : "bg-muted/30 border-transparent hover:bg-muted/50"
+                            : "bg-muted/30 hover:bg-muted/50"
                         )}
                       >
                         <f.icon className="size-5" />
                         <span className="text-[10px] font-bold uppercase text-center">{f.label.split(" ")[0]}</span>
-                      </button>
+                      </Button>
                     ))}
                   </div>
 

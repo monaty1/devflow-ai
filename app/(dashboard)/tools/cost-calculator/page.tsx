@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from "react";
 import dynamic from "next/dynamic";
-import { Chip, Modal } from "@heroui/react";
+import { Chip, Modal, Slider, NumberField, Input, Label } from "@heroui/react";
 import {
   RotateCcw,
   TrendingDown,
@@ -234,78 +234,90 @@ export default function CostCalculatorPage() {
 
             <div className="space-y-6">
               <div>
-                <label className="mb-2 block text-sm font-medium">
-                  {t("costCalc.inputTokens")}
-                </label>
-                <div className="flex items-center gap-4">
-                  <input
-                    type="range"
-                    min="0"
-                    max="100000"
-                    step="1000"
-                    value={inputTokens}
-                    onChange={(e) => setInputTokens(Number.isNaN(parseInt(e.target.value)) ? 0 : parseInt(e.target.value))}
-                    className="flex-1 accent-primary"
-                    aria-label={t("costCalc.inputTokens")}
-                  />
-                  <input
-                    type="number"
-                    value={inputTokens}
-                    onChange={(e) => setInputTokens(parseInt(e.target.value) || 0)}
-                    className="w-24 rounded-lg border border-border bg-background px-3 py-1 text-sm text-right font-mono"
-                    aria-label={t("costCalc.inputTokens")}
-                  />
-                </div>
+                <Slider
+                  minValue={0}
+                  maxValue={100000}
+                  step={1000}
+                  value={inputTokens}
+                  onChange={(v) => setInputTokens(typeof v === "number" ? v : 0)}
+                  className="w-full"
+                >
+                  <Label>{t("costCalc.inputTokens")}</Label>
+                  <Slider.Output />
+                  <Slider.Track>
+                    <Slider.Fill />
+                    <Slider.Thumb />
+                  </Slider.Track>
+                </Slider>
+                <NumberField
+                  value={inputTokens}
+                  onChange={(v) => setInputTokens(v)}
+                  minValue={0}
+                  maxValue={100000}
+                  step={1000}
+                  aria-label={t("costCalc.inputTokens")}
+                  className="mt-2"
+                >
+                  <Input className="w-24 text-right font-mono text-sm" />
+                </NumberField>
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">
-                  {t("costCalc.outputTokens")}
-                </label>
-                <div className="flex items-center gap-4">
-                  <input
-                    type="range"
-                    min="0"
-                    max="50000"
-                    step="500"
-                    value={outputTokens}
-                    onChange={(e) => setOutputTokens(Number.isNaN(parseInt(e.target.value)) ? 0 : parseInt(e.target.value))}
-                    className="flex-1 accent-primary"
-                    aria-label={t("costCalc.outputTokens")}
-                  />
-                  <input
-                    type="number"
-                    value={outputTokens}
-                    onChange={(e) => setOutputTokens(parseInt(e.target.value) || 0)}
-                    className="w-24 rounded-lg border border-border bg-background px-3 py-1 text-sm text-right font-mono"
-                    aria-label={t("costCalc.outputTokens")}
-                  />
-                </div>
+                <Slider
+                  minValue={0}
+                  maxValue={50000}
+                  step={500}
+                  value={outputTokens}
+                  onChange={(v) => setOutputTokens(typeof v === "number" ? v : 0)}
+                  className="w-full"
+                >
+                  <Label>{t("costCalc.outputTokens")}</Label>
+                  <Slider.Output />
+                  <Slider.Track>
+                    <Slider.Fill />
+                    <Slider.Thumb />
+                  </Slider.Track>
+                </Slider>
+                <NumberField
+                  value={outputTokens}
+                  onChange={(v) => setOutputTokens(v)}
+                  minValue={0}
+                  maxValue={50000}
+                  step={500}
+                  aria-label={t("costCalc.outputTokens")}
+                  className="mt-2"
+                >
+                  <Input className="w-24 text-right font-mono text-sm" />
+                </NumberField>
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">
-                  {t("costCalc.dailyRequests")}
-                </label>
-                <div className="flex items-center gap-4">
-                  <input
-                    type="range"
-                    min="1"
-                    max="10000"
-                    step="100"
-                    value={dailyRequests}
-                    onChange={(e) => setDailyRequests(Number.isNaN(parseInt(e.target.value)) ? 1 : parseInt(e.target.value))}
-                    className="flex-1 accent-primary"
-                    aria-label={t("costCalc.dailyRequests")}
-                  />
-                  <input
-                    type="number"
-                    value={dailyRequests}
-                    onChange={(e) => setDailyRequests(parseInt(e.target.value) || 0)}
-                    className="w-24 rounded-lg border border-border bg-background px-3 py-1 text-sm text-right font-mono"
-                    aria-label={t("costCalc.dailyRequests")}
-                  />
-                </div>
+                <Slider
+                  minValue={1}
+                  maxValue={10000}
+                  step={100}
+                  value={dailyRequests}
+                  onChange={(v) => setDailyRequests(typeof v === "number" ? v : 1)}
+                  className="w-full"
+                >
+                  <Label>{t("costCalc.dailyRequests")}</Label>
+                  <Slider.Output />
+                  <Slider.Track>
+                    <Slider.Fill />
+                    <Slider.Thumb />
+                  </Slider.Track>
+                </Slider>
+                <NumberField
+                  value={dailyRequests}
+                  onChange={(v) => setDailyRequests(v)}
+                  minValue={1}
+                  maxValue={10000}
+                  step={100}
+                  aria-label={t("costCalc.dailyRequests")}
+                  className="mt-2"
+                >
+                  <Input className="w-24 text-right font-mono text-sm" />
+                </NumberField>
               </div>
             </div>
           </Card>

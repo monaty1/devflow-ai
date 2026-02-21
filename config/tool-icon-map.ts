@@ -14,6 +14,15 @@ import {
   Fingerprint,
   GitCommitHorizontal,
   Globe,
+  Database,
+  FileCode2,
+  GitCommit,
+  ArrowUpDown,
+  Sun,
+  Languages,
+  Settings,
+  BookOpen,
+  History,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -33,4 +42,13 @@ export const TOOL_ICON_MAP: Record<string, LucideIcon> = {
   Fingerprint,
   GitCommitHorizontal,
   Globe,
+  Database,
+  FileCode2,
+  GitCommit,
+  ArrowUpDown,
+  Sun,
+  Languages,
+  Settings,
+  BookOpen,
+  History,
 };

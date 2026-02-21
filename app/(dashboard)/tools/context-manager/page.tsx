@@ -262,13 +262,14 @@ export default function ContextManagerPage() {
                     <Cpu className="size-3 text-muted-foreground" />
                     <Dropdown>
                       <DropdownTrigger>
-                        <button
-                          type="button"
-                          className="bg-muted/50 border border-default-200 rounded-lg text-[10px] font-bold px-2 py-1 outline-none cursor-pointer hover:bg-muted transition-colors"
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-[10px] font-bold px-2 py-1 h-auto"
                           aria-label={t("ctxMgr.modelPreset")}
                         >
                           {MODEL_PRESETS.find(m => m.maxTokens === activeWindow.maxTokens)?.name ?? t("ctxMgr.modelPreset")}
-                        </button>
+                        </Button>
                       </DropdownTrigger>
                       <DropdownMenu
                         selectionMode="single"

@@ -5,6 +5,157 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - 2026-02-21
+
+### Feature Enhancements — "Wow Factor" Release
+
+Major feature additions: Command Palette, Export/Import Settings, and comprehensive testing. Zero new dependencies.
+
+#### 4.1 — Command Palette (Cmd+K)
+- **Global keyboard shortcut**: `Cmd+K` / `Ctrl+K` opens from anywhere
+- **20 commands**: 15 tools + 5 actions (toggle theme, toggle locale, settings, docs, history)
+- **Instant search**: filters by translated name, description, and ID
+- **Keyboard navigation**: arrow keys, Enter to execute, Escape to close
+- **Zero dependencies**: built with HeroUI `Modal` + custom search + keyboard handlers
+- **Files**: `config/commands.ts`, `hooks/use-command-palette.ts`, `components/shared/command-palette.tsx`
+- **i18n**: 16 new keys in both locales
+
+#### 4.2 — Export/Import Settings
+- **Export**: downloads all `devflow-*` localStorage keys as timestamped JSON
+- **Import**: validates file format (appName, version, devflow-prefix filter), writes to localStorage
+- **Security**: rejects non-devflow keys, validates string types only
+- **14 unit tests**: roundtrip, validation edge cases, filename format
+- **Files**: `types/settings-export.ts`, `lib/application/settings-export.ts`, `hooks/use-settings-export.ts`
+- **UI**: new card in Settings page with Export/Import buttons
+
+#### Stats
+- **1257 unit tests passing** (up from 1243, +14 new)
+- **29 test files** (up from 28)
+- **~20 new i18n keys** per locale
+- **0 new dependencies**
+
+## [3.9.0] - 2026-02-21
+
+### CI/CD & Documentation
+
+Release automation, bundle tracking, accessibility CI, and comprehensive documentation.
+
+#### 3.1 — Release Workflow
+- **`.github/workflows/release.yml`** — automated GitHub Release on tag push (`v*`) or manual dispatch
+- Uses `softprops/action-gh-release` (SHA-pinned) with auto-generated release notes
+- Builds, generates CycloneDX SBOM, and attaches it to the release
+- StepSecurity harden-runner on all steps
+
+#### 3.2 — Bundle Size Tracking
+- Added bundle size recording step to CI `build` job
+- Records total `.next/` size and top 20 JS chunks
+- Uploads as artifact for PR comparison
+
+#### 3.3 — Accessibility CI
+- New `a11y` job in CI pipeline (runs after build)
+- Executes `tests/e2e/accessibility.spec.ts` with axe-core against all 19 pages
+- WCAG 2.0 AA compliance enforced on every push/PR
+
+#### 3.4 — SECURITY.md Rewrite
+- Replaced GitHub template with real security policy
+- Documents: supported versions (3.x), local-first architecture, CSP, rate limiter, CI security jobs
+- Vulnerability reporting via GitHub Security Advisories
+- Clear in-scope/out-of-scope definitions
+
+#### 3.5 — DEPLOYMENT.md
+- Vercel setup guide with env vars table (required vs optional)
+- Docker self-hosting instructions with multi-stage Dockerfile
+- Rate limiter configuration documentation
+
+#### Stats
+- **7 CI jobs** → **8 CI jobs** (added `a11y`)
+- **3 new files**: `release.yml`, `SECURITY.md` (rewrite), `DEPLOYMENT.md`
+
+## [3.8.0] - 2026-02-21
+
+### Testing Expansion
+
+Comprehensive testing coverage expansion: 15 E2E specs (from 3), axe-core accessibility testing, and strengthened unit tests.
+
+#### 2.1 — 14 New E2E Specs (14 files)
+- **prompt-analyzer** — Analyzes prompt, verifies score appears
+- **code-review** — Reviews code with issues, verifies findings
+- **cost-calculator** — Verifies model cost data renders
+- **uuid-generator** — Generates UUID, verifies format
+- **base64** — Encodes text, verifies base64 output
+- **regex-humanizer** — Explains regex pattern
+- **variable-name-wizard** — Generates naming suggestions
+- **dto-matic** — Generates code from JSON
+- **cron-builder** — Verifies cron description
+- **git-commit** — Generates conventional commit message
+- **http-status** — Searches and finds status codes
+- **tailwind-sorter** — Sorts Tailwind classes
+- **token-visualizer** — Visualizes tokens from text
+- **context-manager** — Verifies model presets
+
+#### 2.2 — Accessibility Testing with axe-core (1 file)
+- **accessibility.spec.ts** — WCAG 2.0 AA audit across all 19 pages (15 tools + tools index + settings + docs + history)
+- Uses `@axe-core/playwright` with `color-contrast` rule disabled for HeroUI beta upstream issues
+
+#### 2.3 — Unit Test Strengthening (+53 tests)
+- **token-visualizer.test.ts** — 21 new tests (16 → 37): providers, unicode, waste detection, sub-word splitting, contractions, efficiency scoring
+- **cost-calculator.test.ts** — 24 new tests (22 → 46): value score, custom models, currency formatting boundaries, edge cases
+- **hook-error-propagation.test.ts** — 8 new integration tests: verifies error state propagation in use-variable-name-wizard, use-regex-humanizer, use-dto-matic
+
+#### Stats
+- **1243 unit tests passing** (up from 1190, +53 new)
+- **18 E2E spec files** (3 original + 14 new + 1 accessibility)
+- **1 new dev dependency**: `@axe-core/playwright`
+
+## [3.7.0] - 2026-02-21
+
+### HeroUI Component Consistency
+
+Eliminated ALL raw HTML `<button>` and `<input>` elements from production code. Every interactive element now uses HeroUI v3 components for consistent accessibility, keyboard navigation, and touch targets (44px WCAG 2.2 AA).
+
+#### 1.1 — Tool Pages: Raw Buttons → HeroUI Button (12 files)
+- **tools/page.tsx** — Search `<input>` → HeroUI `SearchField`; 6 category filter `<button>` → `Button`
+- **uuid-generator** — 5 version selection buttons → `Button` with `role="radiogroup"`
+- **variable-name-wizard** — 10 language + batch target buttons → `Button`
+- **code-review** — Severity filter buttons → `Button` with variant toggle
+- **prompt-analyzer** — History toggle + compare clear buttons → `Button`
+- **dto-matic** — File list selection buttons → `Button`
+- **context-manager** — Model preset dropdown trigger → `Button`
+- **git-commit-generator** — Add point button → `Button`
+- **cron-builder** — 4 infrastructure format buttons → `Button` with `role="radiogroup"`
+- **http-status-finder** — Category filters + decision wizard + status code cards → `Button`
+- **regex-humanizer** — 8 preset buttons + 6 cheat sheet buttons → `Button`
+- **json-formatter** — Path copy button → `Button`
+
+#### 1.2 — Layout, Shared, Pages: Raw Buttons → HeroUI Button (12 files)
+- **layout.tsx** — 3 sidebar buttons (AI setup, close, mobile toggle) → `Button`
+- **theme-toggle.tsx** — Toggle button → `Button isIconOnly`
+- **locale-toggle.tsx** — 2 locale buttons → `Button`
+- **share-buttons.tsx** — Copy link button → `Button isIconOnly`
+- **toast-container.tsx** — Dismiss button → `Button isIconOnly`
+- **navbar.tsx** — Mobile menu toggle → `Button isIconOnly`
+- **settings/page.tsx** — Theme toggles → `Button`; notification/AI toggles → `Switch`; API key → `TextField`
+- **history/page.tsx** — Search → `SearchField`; filter buttons → `Button`
+- **docs/page.tsx** — Search → `SearchField`; category buttons → `Button`
+- **error.tsx** + **dashboard/error.tsx** — Try Again → `Button variant="danger"`
+- **api-key-guide.tsx** — Provider selection → `Button`; API key input → `InputGroup`; show/hide → `Button isIconOnly`
+
+#### 1.3 — Raw Inputs → HeroUI Components (1 file)
+- **cost-calculator** — 3 range `<input>` → HeroUI `Slider` (compound pattern with Label/Track/Fill/Thumb) + 3 number `<input>` → `NumberField`
+
+#### 1.4 — Console.error → Error State (3 hooks)
+- **use-variable-name-wizard.ts** — Added `error` state, replaced 2 `console.error` with `setError`
+- **use-regex-humanizer.ts** — Added `error` state, replaced 3 `console.error` with `setError`
+- **use-dto-matic.ts** — Replaced 1 `console.error` with `setError` (already had error state)
+
+#### i18n
+- **3 new keys** added to both `en.json` and `es.json`: `tools.filterByCategory`, `httpStatus.filterByCategory`, `cron.infraFormat`
+
+#### Stats
+- **0 raw `<button>` or `<input>`** in production code (only `data-table.tsx` v2 wrapper remains)
+- **~30 files modified** across app, components, and hooks
+- **1190 tests passing**, **0 type errors**, **0 lint errors**
+
 ## [3.6.0] - 2026-02-20
 
 ### Quality Sprint: Full i18n, Coverage Boost, Performance & Dependency Updates

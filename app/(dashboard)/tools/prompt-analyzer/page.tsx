@@ -287,14 +287,14 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
             >
               {t("promptAnalyzer.enterPrompt")}
             </label>
-            <button
-              type="button"
-              onClick={() => setShowHistory(!showHistory)}
-              className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            <Button
+              variant="ghost"
+              size="sm"
+              onPress={() => setShowHistory(!showHistory)}
             >
               <History className="size-4" />
               {t("common.history", { count: history.length })}
-            </button>
+            </Button>
           </div>
 
           <TextArea
@@ -438,9 +438,9 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
                       <><MinusIcon className="size-3 text-muted-foreground" /><span className="font-bold text-muted-foreground">0</span></>
                     )}
                     <span className="text-muted-foreground">{t("promptAnalyzer.vsHistory")}</span>
-                    <button type="button" onClick={() => setCompareItem(null)} className="ml-1 text-muted-foreground hover:text-foreground">
+                    <Button variant="ghost" size="sm" isIconOnly onPress={() => setCompareItem(null)} aria-label={t("common.clear")}>
                       <XCircle className="size-3" />
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>

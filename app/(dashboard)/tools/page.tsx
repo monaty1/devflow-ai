@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search } from "lucide-react";
+import { SearchField } from "@heroui/react";
 import { ToolCard } from "@/components/tools";
 import { MagicInput } from "@/components/tools/magic-input";
 import { TOOLS_DATA } from "@/config/tools-data";
 import { useTranslation } from "@/hooks/use-translation";
 import { ToolHeader } from "@/components/shared/tool-header";
+import { Button } from "@/components/ui";
 import type { ToolCategory } from "@/types/tools";
 
 export default function ToolsPage() {
@@ -51,32 +52,28 @@ export default function ToolsPage() {
 
       {/* Search + Filters */}
       <div className="space-y-4">
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder={t("tools.search")}
+        <div className="max-w-md">
+          <SearchField
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-border bg-background py-2 pl-10 pr-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-          />
+            onChange={setSearch}
+            aria-label={t("tools.search")}
+          >
+            <SearchField.Input placeholder={t("tools.search")} />
+          </SearchField>
         </div>
 
         {/* Category Filters */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t("tools.filterByCategory")}>
           {CATEGORIES.map((cat) => (
-            <button
+            <Button
               key={cat.value}
-              type="button"
-              onClick={() => setCategory(cat.value)}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                category === cat.value
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
+              size="sm"
+              variant={category === cat.value ? "primary" : "ghost"}
+              onPress={() => setCategory(cat.value)}
+              className="rounded-full"
             >
               {cat.label}
-            </button>
+            </Button>
           ))}
         </div>
       </div>

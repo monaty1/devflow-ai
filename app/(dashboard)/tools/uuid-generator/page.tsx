@@ -131,13 +131,14 @@ export default function UuidGeneratorPage() {
                 <div className="space-y-6 mt-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("uuid.versionLabel")}</label>
-                    <div className="grid gap-2">
+                    <div className="grid gap-2" role="radiogroup" aria-label={t("uuid.versionLabel")}>
                       {VERSIONS.map((v) => (
-                        <button
+                        <Button
                           key={v.id}
-                          onClick={() => updateConfig("version", v.id)}
+                          variant={config.version === v.id ? "primary" : "ghost"}
+                          onPress={() => updateConfig("version", v.id)}
                           className={cn(
-                            "flex flex-col items-start p-3 rounded-xl border transition-all text-left",
+                            "flex flex-col items-start p-3 h-auto rounded-xl text-left justify-start",
                             config.version === v.id
                               ? "bg-primary/10 border-primary/20 text-primary shadow-sm"
                               : "bg-muted/30 border-transparent hover:bg-muted/50"
@@ -145,7 +146,7 @@ export default function UuidGeneratorPage() {
                         >
                           <span className="text-xs font-bold">{v.label}</span>
                           <span className="text-[10px] opacity-60">{v.desc}</span>
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   </div>
