@@ -1,9 +1,9 @@
 {
   "name": "devflow-ai",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "private": true,
   "description": "AI-Powered Developer Toolkit",
-  "author": "Alberto",
+  "author": "Alberto Guinda",
   "license": "MIT",
   "scripts": {
     "dev": "next dev --turbopack",

@@ -21,7 +21,7 @@ DevFlow AI es una plataforma open-source que centraliza **15 herramientas** esen
 - 15 herramientas funcionales end-to-end
 - 100% ejecucion local + IA opcional con 4 proveedores (Gemini, Groq, OpenRouter, Pollinations)
 - **1257 tests** con coverage estrategico 100/80/0 per-file (29 archivos de test)
-- 3 E2E specs con Playwright (navigation, JSON formatter, settings)
+- 18 E2E specs con Playwright (15 tools + settings + navigation + accessibility WCAG AAA)
 - Lighthouse score **100/100/100/100** en Desktop
 - Homepage optimizada con Server Components (RSC) para rendimiento movil
 - Internacionalizacion completa (English/Castellano, **~1539 claves** por idioma)
@@ -478,7 +478,7 @@ Duration    ~25s
 | + 5 component tests  | 55    | Bueno     |
 | + 4 integration tests| 38    | Bueno     |
 | + 1 domain test      | 4     | Basico    |
-| **E2E (Playwright)** | 3 specs | navigation, json-formatter, settings |
+| **E2E (Playwright)** | 18 specs | 15 tools + navigation + settings + accessibility (axe-core WCAG AA) |
 
 ### 5.3 Tipos de Tests Implementados
 
@@ -570,7 +570,7 @@ GitHub Actions ejecuta **8 jobs** en cada push a `main`/`develop` y todas las PR
 │  └─ CycloneDX SBOM           (retencion 90 dias)                     │
 │                                                                        │
 │  Job 5: E2E (depende de Build)                                        │
-│  └─ Playwright tests          (3 specs, Chromium, retry=2)            │
+│  └─ Playwright tests          (18 specs, Chromium, retry=2)           │
 │                                                                        │
 │  Job 6: CODEQL (paralelo)                                             │
 │  └─ CodeQL JS/TS SAST         (security-extended, semanal + push/PR)  │
@@ -607,8 +607,8 @@ GitHub Actions ejecuta **8 jobs** en cada push a `main`/`develop` y todas las PR
 | -------------------------- | ------------------ |
 | Herramientas               | 15                 |
 | Tests unitarios            | 1257               |
-| Tests E2E (Playwright)     | 3 specs            |
-| Archivos de test           | 29 unit + 3 E2E    |
+| Tests E2E (Playwright)     | 18 specs           |
+| Archivos de test           | 29 unit + 18 E2E   |
 | Archivos fuente (.ts/.tsx) | 150+               |
 | Componentes React          | 25+                |
 | Custom hooks               | 22+                |
@@ -646,7 +646,7 @@ GitHub Actions ejecuta **8 jobs** en cada push a `main`/`develop` y todas las PR
 - Dark/Light mode con deteccion automatica ✓
 - i18n completo (EN/ES, ~1539 claves por idioma) ✓
 - Tests unitarios (1257 passing, 29 archivos) ✓
-- Tests E2E con Playwright (3 specs) ✓
+- Tests E2E con Playwright (18 specs, 15 tools + a11y) ✓
 - CI/CD pipeline (8 jobs) ✓
 - SAST (CodeQL + Semgrep) ✓
 - Command Palette (`Cmd+K`) ✓
@@ -677,7 +677,7 @@ GitHub Actions ejecuta **8 jobs** en cada push a `main`/`develop` y todas las PR
 1. **Producto funcional end-to-end:** 15 herramientas reales desplegadas en produccion con 24 rutas navegables
 2. **Arquitectura ejemplar:** Clean Architecture con patron 5-capas replicado sin excepciones en las 15 herramientas
 3. **Performance maxima:** Lighthouse 100/100/100/100, Server Components, ISR
-4. **Testing robusto:** 1257 tests unitarios + 3 E2E specs con aserciones significativas, coverage per-file
+4. **Testing robusto:** 1257 tests unitarios + 18 E2E specs + accessibility audit (axe-core WCAG AA), coverage per-file
 5. **Seguridad enterprise:** CSP sin unsafe-eval, HSTS, CodeQL + Semgrep SAST, SHA-pinned actions, harden-runner
 6. **Developer Experience:** TypeScript strict, ESLint + security plugin, CI/CD con 8 quality gates
 7. **UX avanzada:** Command Palette (Cmd+K), MagicInput, Export/Import, dark/light mode, WCAG AAA
@@ -718,14 +718,14 @@ GitHub Actions ejecuta **8 jobs** en cada push a `main`/`develop` y todas las PR
 
 _Completado (ya implementado):_
 
-- ~~E2E tests con Playwright~~ → 3 specs (navigation, json-formatter, settings)
+- ~~E2E tests con Playwright~~ → 18 specs (15 tools + navigation + settings + accessibility)
+- ~~axe-core WCAG AAA audit~~ → 19 paginas auditadas (15 tools + settings + docs + history + tools index)
 - ~~Export/Import de configuracion~~ → JSON roundtrip con validacion Zod
 - ~~Command Palette~~ → `Cmd+K` con busqueda fuzzy de 15 tools + acciones
 
 _Corto plazo (1-2 meses):_
 
 - PWA con service worker para uso offline completo
-- Mas E2E specs (cubrir las 15 herramientas)
 - Export a PDF de reportes de analisis
 
 _Medio plazo (3-6 meses):_
@@ -789,7 +789,7 @@ Archivos clave:
 - `hooks/use-*.ts` - 20 custom hooks
 - `app/(dashboard)/tools/*/page.tsx` - UI de cada herramienta
 - `tests/unit/application/*.test.ts` - Suite de 1257 tests (29 archivos)
-- `tests/e2e/*.spec.ts` - 3 Playwright E2E specs
+- `tests/e2e/*.spec.ts` - 18 Playwright E2E specs (15 tools + accessibility WCAG AAA + navigation + settings)
 
 ### Anexo C: Demo en Produccion
 

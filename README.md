@@ -240,7 +240,7 @@ npm run test:run                                             # All unit tests (1
 npx vitest run tests/unit/application/json-formatter.test.ts # Single file
 npx vitest run -t "should format"                            # By pattern
 npm run test:coverage                                        # Coverage report
-npm run test:e2e                                             # Playwright E2E (3 specs)
+npm run test:e2e                                             # Playwright E2E (18 specs)
 ```
 
 ---
@@ -313,7 +313,7 @@ quality:    ESLint (+ security plugin) → TypeScript → Tests + Coverage → P
 security:   npm audit --audit-level=high + lockfile-lint (parallel)
 dep-review: dependency-review-action on PRs (moderate+ blocked)
 build:      next build → SBOM generation (CycloneDX, 90-day retention)
-e2e:        Playwright E2E tests (5 tests, Chromium, after build)
+e2e:        Playwright E2E tests (18 specs, Chromium, after build)
 codeql:     CodeQL JS/TS SAST (push + PRs + weekly)
 semgrep:    Semgrep SAST — OWASP Top 10, React, Next.js, TypeScript rules (SARIF → Security tab)
 lighthouse: Lighthouse CI performance audit on PRs (LCP <2.5s, FCP <1.8s, JS <300KB)

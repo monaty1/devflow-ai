@@ -5,6 +5,39 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.0] - 2026-02-21
+
+### Testing Expansion (Fase 2)
+
+Comprehensive E2E test coverage expansion from 3 to 18 specs, plus WCAG AA accessibility audit.
+
+#### 2.1 — 15 New E2E Specs (Playwright)
+- **uuid-generator**: Generate UUID v4 + bulk generation (5 UUIDs)
+- **base64**: Encode "Hello World" → `SGVsbG8gV29ybGQ=` + decode roundtrip
+- **regex-humanizer**: Explain `\d{3}-\d{4}` → mentions "digit"
+- **variable-name-wizard**: "hello world" → camelCase, snake_case conversions
+- **cron-builder**: Default `* * * * *` visible + human-readable description
+- **git-commit**: Type/scope form visible + character counter
+- **prompt-analyzer**: Paste prompt → score `/10` appears
+- **code-review**: Paste code with `eval()` → issues detected
+- **cost-calculator**: Pricing table + model names (GPT/Claude/Gemini)
+- **token-visualizer**: Type text → token count appears
+- **context-manager**: Create project → appears in sidebar
+- **http-status**: Status codes 200/404 visible + detail on click
+- **dto-matic**: JSON → TypeScript interface generation
+- **tailwind-sorter**: Classes → sorted output
+
+#### 2.2 — Accessibility Testing (axe-core)
+- **19 pages audited**: All 15 tools + settings + docs + history + tools index
+- **WCAG 2.1 AAA** tags: `wcag2a`, `wcag2aa`, `wcag2aaa`, `wcag21a`, `wcag21aa`, `wcag21aaa`, `wcag22aa`
+- Filters for critical/serious violations only (no false positives from HeroUI beta)
+
+#### Stats
+- **18 E2E specs** (was 3), **~36 test cases**
+- **1257 unit tests** (unchanged, already at target)
+- Token visualizer: 37 tests, Cost calculator: 46 tests (both already exceeded plan targets)
+- Integration tests: hook-error-propagation + cross-module already existed
+
 ## [4.1.0] - 2026-02-21
 
 ### HeroUI Component Consistency (Fase 1)
