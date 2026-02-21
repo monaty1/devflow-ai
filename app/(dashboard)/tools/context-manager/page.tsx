@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import {
   Chip,
   Input,
@@ -118,12 +118,10 @@ export default function ContextManagerPage() {
   }, [activeWindowId, addDocument, addToast, t]);
 
   // Process pending files when activeWindowId updates
-  // (Using a layout-effect-like pattern inline)
-  if (pendingFilesRef.current.length > 0 && activeWindowId) {
-    const files = pendingFilesRef.current;
-    pendingFilesRef.current = [];
-    // Schedule microtask so it runs after render
-    queueMicrotask(() => {
+  useEffect(() => {
+    if (pendingFilesRef.current.length > 0 && activeWindowId) {
+      const files = pendingFilesRef.current;
+      pendingFilesRef.current = [];
       for (const file of files) {
         addDocument(file.name, file.content, file.type, "medium", [], file.name);
       }
@@ -132,8 +130,8 @@ export default function ContextManagerPage() {
       } else {
         addToast(t("ctxMgr.filesAdded", { count: String(files.length) }), "success");
       }
-    });
-  }
+    }
+  }, [activeWindowId, addDocument, addToast, t]);
 
   const handleFiles = useCallback((fileList: FileList) => {
     const readPromises: Promise<{ name: string; content: string; type: DocumentType }>[] = [];
