@@ -687,7 +687,7 @@ GitHub Actions ejecuta **10 jobs** en cada push a `main`/`develop` y todas las P
 4. **Testing robusto:** 1257 tests unitarios + 18 E2E specs + accessibility audit (axe-core WCAG AAA), coverage per-file
 5. **Seguridad enterprise:** CSP sin unsafe-eval, HSTS, CodeQL + Semgrep SAST, SHA-pinned actions, harden-runner
 6. **Developer Experience:** TypeScript strict, ESLint + security plugin, CI/CD con 10 quality gates
-7. **UX avanzada:** Command Palette (Cmd+K), MagicInput, Export/Import, dark/light mode, WCAG AAA
+7. **UX avanzada:** PWA instalable, Command Palette (Cmd+K), MagicInput, Export/Import, dark/light mode, WCAG AAA
 8. **IA opcional:** 4 proveedores con fallback automatico, BYOK, rate limiting IP-based
 
 ### 9.2 Aprendizajes Clave
@@ -732,7 +732,7 @@ _Completado (ya implementado):_
 
 _Corto plazo (1-2 meses):_
 
-- PWA con service worker para uso offline completo
+- ~~PWA con service worker para uso offline completo~~ → Implementado: manifest.ts, sw.js, install prompt
 - Export a PDF de reportes de analisis
 
 _Medio plazo (3-6 meses):_

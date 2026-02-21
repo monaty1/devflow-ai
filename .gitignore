@@ -83,3 +83,4 @@ audit_report.md
 
 # Reference screenshots (local only)
 *.png
+!/public/icons/*.png

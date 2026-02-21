@@ -1537,5 +1537,9 @@
   "cmdPalette.openDocs": "Abrir Documentacion",
   "cmdPalette.openDocsDesc": "Ir a la pagina de documentacion",
   "cmdPalette.openHistory": "Abrir Historial",
-  "cmdPalette.openHistoryDesc": "Ir a la pagina de historial"
+  "cmdPalette.openHistoryDesc": "Ir a la pagina de historial",
+  "pwa.installTitle": "Instalar DevFlow AI",
+  "pwa.installDescription": "Agrega a tu pantalla de inicio para acceso rapido y uso offline.",
+  "pwa.install": "Instalar",
+  "pwa.notNow": "Ahora no"
 }

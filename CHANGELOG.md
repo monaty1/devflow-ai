@@ -5,6 +5,35 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.0] - 2026-02-21
+
+### Feature Enhancements (Fase 4)
+
+PWA support, completing the final phase of the master plan.
+
+#### 4.2 — Progressive Web App (PWA)
+- **Web App Manifest** (`app/manifest.ts`): Next.js metadata API with name, icons, standalone display, indigo theme
+- **Service Worker** (`public/sw.js`): Vanilla JS (~55 lines, 0 dependencies)
+  - Cache strategy: App shell cache-first, API routes network-first, static stale-while-revalidate
+  - Auto-cleanup of old caches on activation
+- **Install Prompt** (`components/shared/install-prompt.tsx`): "Add to Home Screen" banner
+  - Listens for `beforeinstallprompt` event
+  - HeroUI Button actions (Install / Not now)
+  - Dismiss persisted via localStorage (`devflow-pwa-dismissed`)
+  - SSR-safe with `typeof window` guard
+- **PWA Icons**: 192x192 and 512x512 PNG icons in `public/icons/`
+- **CSP**: Added `worker-src 'self'` for service worker registration
+- **i18n**: 4 new keys per locale (`pwa.installTitle`, `pwa.installDescription`, `pwa.install`, `pwa.notNow`)
+
+#### Already Completed (Previous Sessions)
+- 4.1 Command Palette (`Cmd+K`): Already existed (command-palette.tsx, use-command-palette.ts, commands.ts)
+- 4.3 Export/Import Settings: Already existed (settings-export.ts, use-settings-export.ts, + 14 tests)
+
+#### Stats
+- **0 new dependencies** (vanilla service worker, no Serwist/workbox)
+- **~1543 i18n keys** per locale (was ~1539)
+- **5 new files**: manifest.ts, sw.js, install-prompt.tsx, icon-192x192.png, icon-512x512.png
+
 ## [4.3.0] - 2026-02-21
 
 ### CI/CD & Documentation (Fase 3)

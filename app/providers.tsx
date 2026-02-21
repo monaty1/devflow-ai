@@ -8,6 +8,7 @@ import { FavoritesProvider } from "@/lib/context";
 import { ToastProvider } from "@/components/shared/toast-container";
 import { useLocaleStore } from "@/lib/stores/locale-store";
 import { CommandPalette } from "@/components/shared/command-palette";
+import { InstallPrompt } from "@/components/shared/install-prompt";
 
 function HtmlLangSync() {
   const locale = useLocaleStore((s) => s.locale);
@@ -49,6 +50,7 @@ export function Providers({ children }: ProvidersProps) {
               <HtmlLangSync />
               <ConsoleEasterEgg />
               <CommandPalette />
+              <InstallPrompt />
               {children}
             </ToastProvider>
           </FavoritesProvider>

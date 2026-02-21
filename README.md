@@ -63,6 +63,7 @@
 - **Command Palette** &mdash; `Cmd+K` to instantly search and launch any tool or action
 - **Smart suggestions** &mdash; context-aware cross-tool recommendations
 - **MagicInput** &mdash; paste anything, auto-detect type, route to the right tool
+- **PWA** &mdash; installable as standalone app with offline support (service worker)
 - **Export/Import settings** &mdash; backup and restore all preferences as JSON
 - **Local history** &mdash; localStorage persistence
 - **Copy to clipboard** &mdash; 1-click from any tool
@@ -375,6 +376,7 @@ Coverage reports and Playwright reports are uploaded as artifacts.
 - **Paleta de comandos** &mdash; `Cmd+K` para buscar y lanzar cualquier herramienta o accion
 - **Sugerencias inteligentes** &mdash; recomendaciones de herramientas segun el contexto
 - **MagicInput** &mdash; pega cualquier cosa, deteccion automatica, redirige a la herramienta correcta
+- **PWA** &mdash; instalable como app standalone con soporte offline (service worker)
 - **Exportar/Importar configuracion** &mdash; respalda y restaura preferencias como JSON
 - **Historial local** &mdash; persistencia con localStorage
 - **Copy to clipboard** &mdash; en 1 click desde cualquier herramienta
