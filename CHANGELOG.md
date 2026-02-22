@@ -5,6 +5,59 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.9.0] - 2026-02-22
+
+### Final Polish Sprint — TFM Submission
+
+8-task autonomous sprint for final submission quality. Focus on edge cases, accessibility, mobile, and UX consistency.
+
+#### Task 1: Cross-tool Smart Suggestions Audit
+- Added 2 missing recommendation rules in `lib/application/tool-recommendations.ts`:
+  - Code Review → Git Commit Generator ("Write a commit message for this reviewed code")
+  - Regex Humanizer → Prompt Analyzer ("Use this regex pattern in a prompt")
+- All 15 tools verified rendering `<ToolSuggestions>`
+
+#### Task 2: Empty & Edge Case States
+- **Base64** — disabled process button when input is empty (`isDisabled={!input.trim()}`)
+- **Code Review** — added standalone AI error card when `aiError` exists but `aiResult` doesn't (AlertTriangle + `role="alert"`)
+
+#### Task 3: Accessibility Final Pass
+- **Command Palette** — added `aria-label={t("cmdPalette.title")}` to `Modal.Dialog`
+- 19/19 pages pass axe-core WCAG AA (Playwright accessibility tests)
+
+#### Task 4: Mobile Responsiveness
+- **Tailwind Sorter** — stats grid changed from `grid-cols-3` to `grid-cols-1 sm:grid-cols-3`
+- **Prompt Analyzer** — stats grid changed from `grid-cols-3` to `grid-cols-1 sm:grid-cols-3`
+
+#### Task 5: API Cost Calculator Data Freshness
+- Added `isUsingFallback` flag to `hooks/use-cost-calculator.ts` for detecting static fallback data
+- Added "Using cached prices" `Chip` (variant="soft") to cost-calculator page when live data unavailable
+- **Claude 4.x models** added to `config/ai-models.ts`: Opus 4.6 ($15/$75), Sonnet 4.6 ($3/$15), Haiku 4.5 ($0.8/$4)
+- Updated display names in `infrastructure/services/pricing-service.ts`
+
+#### Task 6: PWA & Offline Verification
+- Verified: `app/manifest.ts`, `public/sw.js` (stale-while-revalidate), install prompt, 192+512 icons
+- Build: 35 routes, 0 warnings
+
+#### Task 7: Final UX Polish
+- **Relative timestamps** — added `formatRelativeTime()` utility to `lib/utils.ts` (localized EN/ES: "just now", "3m ago", "yesterday", etc.)
+- **History page** — updated to use relative timestamps with locale awareness
+- Verified: all 15 tools have `generateToolMetadata()` in layout.tsx, 13/15 have Ctrl+Enter shortcuts
+
+#### Task 8: i18n Completeness
+- **~1595 keys** in both `en.json` and `es.json` — perfect parity
+- Added missing `promptAnalyzer.suggestions` and `costCalc.cachedPrices` keys to both locales
+- 0 hardcoded user-facing strings across all tool pages
+
+#### Data Flow & History Persistence
+- **Regex Humanizer** — added `useToolHistory` for localStorage persistence
+- **Code Review** — added `useToolHistory` for localStorage persistence
+
+#### Stats
+- **1416 unit tests passing** (45 files), **20 E2E specs**
+- **0 TypeScript errors**, **0 lint errors**, **35 routes** built
+- **~1595 i18n keys** per locale (was ~1543)
+
 ## [4.8.0] - 2026-02-21
 
 ### Cleanup & Security (Fase B5)

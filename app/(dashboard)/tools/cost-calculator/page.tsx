@@ -12,13 +12,13 @@ import {
   Coins,
   ArrowRight,
   Eye,
-  Copy,
   Sparkles,
   Download,
   Cpu,
   Zap,
   BarChart3,
   Bot,
+  AlertTriangle,
 } from "lucide-react";
 import { useCostCalculator } from "@/hooks/use-cost-calculator";
 import { useAISuggest } from "@/hooks/use-ai-suggest";
@@ -32,6 +32,7 @@ import { useTranslation } from "@/hooks/use-translation";
 import { formatCost, exportComparisonCsv } from "@/lib/application/cost-calculator";
 import type { Currency } from "@/lib/application/cost-calculator";
 import { ToolHeader } from "@/components/shared/tool-header";
+import { CopyButton } from "@/components/shared/copy-button";
 import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { PROVIDER_LABELS } from "@/config/ai-models";
 import { ToolSuggestions } from "@/components/shared/tool-suggestions";
@@ -59,11 +60,12 @@ export default function CostCalculatorPage() {
     monthlyCost,
     reset,
     isSyncing,
+    isUsingFallback,
     lastSync,
     syncPrices,
   } = useCostCalculator();
 
-  const { adviseCostWithAI, aiResult, isAILoading } = useAISuggest();
+  const { adviseCostWithAI, aiResult, isAILoading, aiError } = useAISuggest();
   const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
 
   const [detailModel, setDetailModel] = useState<CostCalculation | null>(null);
@@ -154,18 +156,11 @@ export default function CostCalculatorPage() {
             >
               <Eye className="size-4 text-muted-foreground" />
             </Button>
-            <Button
-              isIconOnly
-              size="sm"
+            <CopyButton
+              text={JSON.stringify({ model: result.model.id, provider: result.model.provider, inputTokens, outputTokens, dailyRequests, totalCost: result.totalCost }, null, 2)}
               variant="ghost"
-              aria-label={t("costCalc.copyConfig")}
-              onPress={() => {
-                const configStr = JSON.stringify({ model: result.model.id, provider: result.model.provider, inputTokens, outputTokens, dailyRequests, totalCost: result.totalCost }, null, 2);
-                void navigator.clipboard.writeText(configStr);
-              }}
-            >
-              <Copy className="size-4 text-muted-foreground" />
-            </Button>
+              size="sm"
+            />
           </div>
         );
       default:
@@ -208,7 +203,12 @@ export default function CostCalculatorPage() {
         description={t("costCalc.description")}
         breadcrumb
         actions={
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            {isUsingFallback && !isSyncing && (
+              <Chip size="sm" variant="soft" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px]">
+                {t("costCalc.cachedPrices")}
+              </Chip>
+            )}
             <Button
               variant="ghost"
               size="sm"
@@ -409,6 +409,15 @@ export default function CostCalculatorPage() {
               )}
             </Card>
           )}
+
+          {isAIEnabled && aiError && (
+            <Card className="p-3 border-danger/30 bg-danger/5">
+              <p className="text-xs text-danger font-bold flex items-center gap-2">
+                <AlertTriangle className="size-3.5 shrink-0" />
+                {t("ai.errorOccurred", { message: aiError.message })}
+              </p>
+            </Card>
+          )}
         </div>
 
         {/* Comparison Table */}
@@ -594,26 +603,18 @@ export default function CostCalculatorPage() {
                   <Button variant="ghost" slot="close">
                     {t("costCalc.close")}
                   </Button>
-                  <Button
-                    variant="primary"
-                    onPress={() => {
-                      if (!detailModel) return;
-                      const configStr = JSON.stringify({
-                        model: detailModel.model.id,
-                        provider: detailModel.model.provider,
-                        inputTokens,
-                        outputTokens,
-                        dailyRequests,
-                        totalCost: detailModel.totalCost,
-                        monthlyCost: monthlyCostModel,
-                      }, null, 2);
-                      void navigator.clipboard.writeText(configStr);
-                    }}
-                    className="gap-2"
-                  >
-                    <Copy className="size-4" />
-                    {t("costCalc.copyConfig")}
-                  </Button>
+                  <CopyButton
+                    text={detailModel ? JSON.stringify({
+                      model: detailModel.model.id,
+                      provider: detailModel.model.provider,
+                      inputTokens,
+                      outputTokens,
+                      dailyRequests,
+                      totalCost: detailModel.totalCost,
+                      monthlyCost: monthlyCostModel,
+                    }, null, 2) : ""}
+                    label={t("costCalc.copyConfig")}
+                  />
                 </Modal.Footer>
               </Modal.Dialog>
             </Modal.Container>

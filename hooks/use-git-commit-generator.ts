@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type {
   CommitConfig,
   CommitResult,
@@ -35,17 +35,24 @@ export function useGitCommitGenerator() {
 
   const commitTypes = useMemo(() => getCommitTypes(locale), [locale]);
 
+  // Debounce config for live preview computations (150ms)
+  const [debouncedConfig, setDebouncedConfig] = useState<CommitConfig>(DEFAULT_COMMIT_CONFIG);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedConfig(config), 150);
+    return () => clearTimeout(timer);
+  }, [config]);
+
   const addToHistory = useCallback((commitResult: CommitResult) => {
     addItemToHistory(commitResult);
   }, [addItemToHistory]);
 
   const message = useMemo(() => {
-    return generateCommitMessage(config).message;
-  }, [config]);
+    return generateCommitMessage(debouncedConfig).message;
+  }, [debouncedConfig]);
 
   const validation = useMemo(() => {
-    return validateCommitMessage(message, config, locale);
-  }, [message, config, locale]);
+    return validateCommitMessage(message, debouncedConfig, locale);
+  }, [message, debouncedConfig, locale]);
 
   const generate = useCallback(() => {
     if (!config.description.trim()) return;

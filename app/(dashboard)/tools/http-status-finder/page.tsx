@@ -21,6 +21,7 @@ import {
   LayoutGrid,
   List,
   Bot,
+  AlertTriangle,
 } from "lucide-react";
 import { useHttpStatusFinder } from "@/hooks/use-http-status-finder";
 import { useTranslation } from "@/hooks/use-translation";
@@ -59,7 +60,7 @@ export default function HttpStatusFinderPage() {
 
   const [searchInput, setSearchInput] = useState(query);
   const [activeView, setActiveView] = useState<"grid" | "table">("grid");
-  const { explainHttpStatusWithAI, aiResult, isAILoading } = useAISuggest();
+  const { explainHttpStatusWithAI, aiResult, isAILoading, aiError } = useAISuggest();
   const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
 
   // Debounce search by 300ms
@@ -276,7 +277,7 @@ export default function HttpStatusFinderPage() {
                       <Activity className="size-4 text-emerald-500 dark:text-emerald-400" />
                       {t("httpStatus.liveSimulation")}
                     </h3>
-                    <Button size="sm" variant="primary" className="font-black h-8 bg-emerald-500 hover:bg-emerald-600 border-none shadow-lg shadow-emerald-500/20" onPress={() => runMockTest(selectedCode.code)} isLoading={isTesting}>
+                    <Button size="sm" variant="primary" className="font-black h-8 bg-emerald-500 hover:bg-emerald-600 border-none shadow-lg shadow-emerald-500/20 dark:shadow-emerald-500/30" onPress={() => runMockTest(selectedCode.code)} isLoading={isTesting}>
                       {t("httpStatus.triggerResponse")}
                     </Button>
                   </div>
@@ -339,7 +340,7 @@ export default function HttpStatusFinderPage() {
                     <Button
                       size="sm"
                       variant="primary"
-                      className="font-bold bg-violet-600 hover:bg-violet-700 border-none shadow-lg shadow-violet-500/20"
+                      className="font-bold bg-violet-600 hover:bg-violet-700 border-none shadow-lg shadow-violet-500/20 dark:shadow-violet-500/30"
                       onPress={() => {
                         void explainHttpStatusWithAI(`${selectedCode.code} ${selectedCode.name}: ${selectedCode.description}. When to use: ${selectedCode.whenToUse}`);
                       }}
@@ -358,13 +359,22 @@ export default function HttpStatusFinderPage() {
                   {aiResult?.suggestions && aiResult.suggestions.length > 0 && !isAILoading && (
                     <div className="space-y-3">
                       {aiResult.suggestions.map((s, i) => (
-                        <div key={i} className="p-4 bg-background/80 rounded-xl border border-violet-500/10">
+                        <div key={i} className="p-4 bg-background/80 rounded-xl border border-violet-500/10 dark:border-violet-500/20">
                           <p className="text-sm font-medium leading-relaxed">{s.value}</p>
                           <p className="text-[10px] text-muted-foreground mt-2 italic">{s.reasoning}</p>
                         </div>
                       ))}
                     </div>
                   )}
+                </Card>
+              )}
+
+              {isAIEnabled && aiError && (
+                <Card className="p-3 border-danger/30 bg-danger/5">
+                  <p className="text-xs text-danger font-bold flex items-center gap-2">
+                    <AlertTriangle className="size-3.5 shrink-0" />
+                    {t("ai.errorOccurred", { message: aiError.message })}
+                  </p>
                 </Card>
               )}
             </div>

@@ -5,15 +5,21 @@ import type {
   ContextWindow,
   ExportedContext,
 } from "@/types/context-manager";
-import { getEncoding, type Tiktoken } from "js-tiktoken";
+import type { Tiktoken } from "js-tiktoken";
 
 const DEFAULT_MAX_TOKENS = 128000; // GPT-4 context window
 
-// Lazy-loaded encoder for accurate token counting
+// Dynamically loaded encoder — keeps js-tiktoken out of the initial bundle
 let encoder: Tiktoken | null = null;
-function getEncoder(): Tiktoken {
-  if (!encoder) encoder = getEncoding("cl100k_base");
-  return encoder;
+let encoderLoading: Promise<void> | null = null;
+
+export function preloadTokenEncoder(): Promise<void> {
+  if (!encoderLoading) {
+    encoderLoading = import("js-tiktoken").then((m) => {
+      encoder = m.getEncoding("cl100k_base");
+    });
+  }
+  return encoderLoading;
 }
 
 // --- Model Presets ---
@@ -46,12 +52,14 @@ export function getModelPreset(id: string): ModelPreset | undefined {
 }
 
 function estimateTokens(text: string): number {
-  try {
-    return getEncoder().encode(text).length;
-  } catch {
-    // Fallback to heuristic if encoder fails
-    return Math.ceil(text.length / 4);
+  if (encoder) {
+    try {
+      return encoder.encode(text).length;
+    } catch {
+      // Fall through to heuristic
+    }
   }
+  return Math.ceil(text.length / 4);
 }
 
 export function createDocument(

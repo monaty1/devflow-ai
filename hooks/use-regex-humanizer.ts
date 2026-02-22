@@ -4,6 +4,14 @@ import { useState, useCallback } from "react";
 import type { RegexAnalysis, TestResult } from "@/types/regex-humanizer";
 import { explainRegex, generateRegex, testRegex } from "@/lib/application/regex-humanizer";
 import { useLocaleStore } from "@/lib/stores/locale-store";
+import { useToolHistory } from "@/hooks/use-tool-history";
+
+interface HistoryItem {
+  id: string;
+  input: string;
+  output: string;
+  timestamp: string;
+}
 
 interface UseRegexHumanizerReturn {
   pattern: string;
@@ -12,11 +20,13 @@ interface UseRegexHumanizerReturn {
   isExplaining: boolean;
   isGenerating: boolean;
   error: string | null;
+  history: HistoryItem[];
   setPattern: (pattern: string) => void;
   explain: (pattern: string) => Promise<void>;
   generate: (description: string) => Promise<void>;
   test: (pattern: string, text: string) => Promise<void>;
   reset: () => void;
+  clearHistory: () => void;
 }
 
 export function useRegexHumanizer(): UseRegexHumanizerReturn {
@@ -27,6 +37,8 @@ export function useRegexHumanizer(): UseRegexHumanizerReturn {
   const [isExplaining, setIsExplaining] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { history, addToHistory: addItemToHistory, clearHistory } =
+    useToolHistory<HistoryItem>("devflow-regex-humanizer-history", 15);
 
   const explain = useCallback(async (patternInput: string) => {
     if (!patternInput.trim()) return;
@@ -35,12 +47,18 @@ export function useRegexHumanizer(): UseRegexHumanizerReturn {
     try {
       const result = explainRegex(patternInput, "javascript", locale);
       setExplanation(result);
+      addItemToHistory({
+        id: crypto.randomUUID(),
+        input: patternInput.slice(0, 80) + (patternInput.length > 80 ? "..." : ""),
+        output: result.explanation.slice(0, 80) + (result.explanation.length > 80 ? "..." : ""),
+        timestamp: new Date().toISOString(),
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Explanation failed");
     } finally {
       setIsExplaining(false);
     }
-  }, [locale]);
+  }, [locale, addItemToHistory]);
 
   const generate = useCallback(async (description: string) => {
     if (!description.trim()) return;
@@ -83,10 +101,12 @@ export function useRegexHumanizer(): UseRegexHumanizerReturn {
     isExplaining,
     isGenerating,
     error,
+    history,
     setPattern,
     explain,
     generate,
     test,
     reset,
+    clearHistory,
   };
 }

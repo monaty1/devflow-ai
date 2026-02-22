@@ -20,11 +20,12 @@ DevFlow AI es una plataforma open-source que centraliza **15 herramientas** esen
 
 - 15 herramientas funcionales end-to-end
 - 100% ejecucion local + IA opcional con 4 proveedores (Gemini, Groq, OpenRouter, Pollinations)
-- **1419 tests** con coverage estrategico 100/80/0 per-file (45 archivos de test)
+- **1416 tests** con coverage estrategico 100/80/0 per-file (45 archivos de test)
 - 20 E2E specs con Playwright (15 tools + settings + navigation + accessibility WCAG AAA)
 - Lighthouse score **100/100/100/100** en Desktop
 - Homepage optimizada con Server Components (RSC) para rendimiento movil
-- Internacionalizacion completa (English/Castellano, **~1543 claves** por idioma)
+- Internacionalizacion completa (English/Castellano, **~1595 claves** por idioma)
+- **35 rutas** generadas (pages + API routes)
 - **8 CI jobs**: quality, security, dependency-review, build, e2e, CodeQL SAST, Semgrep SAST, Lighthouse
 - Command Palette (`Cmd+K`) para acceso rapido a cualquier herramienta
 - Export/Import de configuracion
@@ -51,7 +52,7 @@ Ademas, los desarrolladores frontend enfrentan tareas repetitivas diarias: forma
 
 - Aplicar React 19 y Next.js 16 con App Router y Server Components
 - Implementar Clean Architecture en un proyecto real de 15 herramientas
-- Crear una suite de tests comprehensiva (1419 tests) con Vitest + Playwright E2E
+- Crear una suite de tests comprehensiva (1416 tests) con Vitest + Playwright E2E
 - Utilizar IA generativa (Claude Code) como herramienta de desarrollo
 - Demostrar dominio de TypeScript 5 en modo maximo estricto
 
@@ -61,7 +62,7 @@ Ademas, los desarrolladores frontend enfrentan tareas repetitivas diarias: forma
 - Lograr coverage estrategico 100/80/0 con enforcement per-file
 - Deploy en produccion con CI/CD completo (10 jobs: quality, security, dep-review, build, e2e, a11y, release, CodeQL, Semgrep, Lighthouse)
 - Lighthouse score 100 en todas las metricas (Desktop)
-- Internacionalizacion completa (EN/ES, ~1543 claves por idioma)
+- Internacionalizacion completa (EN/ES, ~1595 claves por idioma)
 - Seguridad enterprise: CSP, HSTS, prototype pollution, SAST (CodeQL + Semgrep), harden-runner, eslint-plugin-security
 
 #### Objetivos de Producto
@@ -85,7 +86,7 @@ Los LLMs como GPT-4, Claude y Gemini procesan texto mediante tokenizacion. Cada 
 - Context window disponible
 - Calidad de la respuesta
 
-**Aplicacion en DevFlow AI:** Token Visualizer simula BPE y Cost Calculator compara precios de 10+ modelos en tiempo real.
+**Aplicacion en DevFlow AI:** Token Visualizer simula BPE y Cost Calculator compara precios de 10+ modelos en tiempo real, incluyendo Claude 4.x (Opus 4.6, Sonnet 4.6, Haiku 4.5), GPT-4o, Gemini 2.0 Flash y otros.
 
 #### Prompt Engineering
 
@@ -194,7 +195,7 @@ La calidad de un prompt impacta directamente en la respuesta del LLM. Tecnicas c
 
 **RF-18: Internacionalizacion**
 
-- ~1543 claves traducidas en English y Castellano
+- ~1595 claves traducidas en English y Castellano
 - Cambio de idioma en tiempo real sin recarga
 
 ### 3.2 Requisitos No Funcionales
@@ -403,7 +404,7 @@ page.tsx (Server Component - async)
 
 **Sistema custom ligero** (sin dependencia de i18next):
 
-- ~1543 claves de traduccion en `locales/en.json` y `locales/es.json`
+- ~1595 claves de traduccion en `locales/en.json` y `locales/es.json`
 - Hook `useTranslation()` con interpolacion `{key}`
 - Funcion server-side `t()` para Server Components
 - Cambio de idioma instantaneo via Zustand
@@ -450,7 +451,7 @@ Modelo de coverage estrategico con enforcement per-file:
 
 ```
 Test Files  45 passed (45)
-Tests       1419 passed (1419)
+Tests       1416 passed (1416)
 Duration    ~50s
 ```
 
@@ -511,10 +512,10 @@ Duration    ~50s
 ### 5.4 Metricas de Calidad
 
 ```
-ESLint:        0 errores, 0 warnings
+ESLint:        0 errores
 TypeScript:    0 errores (strict mode maximo)
 npm audit:     0 vulnerabilidades
-Build:         OK (28 paginas generadas)
+Build:         OK (35 rutas generadas)
 ```
 
 ---
@@ -528,7 +529,7 @@ Build:         OK (28 paginas generadas)
 | Language       | TypeScript            | 5.x          | Maximum strict mode (15+ flags)            |
 | Styling        | Tailwind CSS          | 4.x          | CSS-first config, design tokens            |
 | Components     | HeroUI                | v3 beta      | Compound patterns, React Aria              |
-| Icons          | Lucide React          | 0.563        | 500+ iconos, tree-shakeable                |
+| Icons          | Lucide React          | 0.563+       | 500+ iconos, tree-shakeable                |
 | Animations     | GSAP + Framer Motion  | 3.14 + 12.30 | Professional-grade                         |
 | State          | Zustand               | 5.0          | Lightweight, localStorage persist          |
 | Forms          | React Hook Form + Zod | 7.71 + 4.3   | Performant validation                      |
@@ -613,16 +614,16 @@ GitHub Actions ejecuta **10 jobs** en cada push a `main`/`develop` y todas las P
 | Metrica                    | Valor              |
 | -------------------------- | ------------------ |
 | Herramientas               | 15                 |
-| Tests unitarios            | 1419               |
+| Tests unitarios            | 1416               |
 | Tests E2E (Playwright)     | 20 specs           |
-| Archivos de test           | 42 unit + 20 E2E   |
+| Archivos de test           | 45 unit + 20 E2E   |
 | Archivos fuente (.ts/.tsx) | 150+               |
 | Componentes React          | 25+                |
 | Custom hooks               | 22+                |
-| Paginas (routes)           | 24                 |
-| Claves i18n                | ~1543 (x2 idiomas) |
+| Paginas (routes)           | 35                 |
+| Claves i18n                | ~1595 (x2 idiomas) |
 | Jobs CI/CD                 | 10                 |
-| Commits                    | 120+               |
+| Commits                    | 150+               |
 | Proveedores IA             | 4 (Gemini, Groq, OpenRouter, Pollinations) |
 | Dependencias produccion    | 18                 |
 
@@ -637,7 +638,7 @@ GitHub Actions ejecuta **10 jobs** en cada push a `main`/`develop` y todas las P
 
 ### 8.3 Requisitos del Curso Frontend Cumplidos
 
-- 24 paginas navegables (>10 requerido) ✓
+- 35 rutas navegables (>10 requerido) ✓
 - useState en multiples componentes ✓
 - useEffect para side effects ✓
 - useContext para Favoritos ✓
@@ -651,8 +652,8 @@ GitHub Actions ejecuta **10 jobs** en cada push a `main`/`develop` y todas las P
 - Skeletons de carga ✓
 - TypeScript strict mode ✓
 - Dark/Light mode con deteccion automatica ✓
-- i18n completo (EN/ES, ~1543 claves por idioma) ✓
-- Tests unitarios (1419 passing, 45 archivos) ✓
+- i18n completo (EN/ES, ~1595 claves por idioma) ✓
+- Tests unitarios (1416 passing, 45 archivos) ✓
 - Tests E2E con Playwright (20 specs, 15 tools + a11y) ✓
 - CI/CD pipeline (10 jobs) ✓
 - SAST (CodeQL + Semgrep) ✓
@@ -677,14 +678,29 @@ GitHub Actions ejecuta **10 jobs** en cada push a `main`/`develop` y todas las P
 
 ---
 
+## 8.5 Sprint Final de Pulido (v4.9.0)
+
+Sprint autonomo de 8 tareas para la entrega del TFM:
+
+1. **Cross-tool Smart Suggestions:** Auditoria de los 15 flujos de recomendacion. Anadidas 2 reglas faltantes: Code Review → Git Commit Generator, Regex Humanizer → Prompt Analyzer
+2. **Empty & edge case states:** Boton deshabilitado en Base64 sin input. Card de error AI standalone en Code Review
+3. **Accesibilidad:** `aria-label` en Modal.Dialog del Command Palette. 19/19 paginas pasan axe-core WCAG AA
+4. **Mobile responsiveness:** Grids `grid-cols-3` → `grid-cols-1 sm:grid-cols-3` en Tailwind Sorter y Prompt Analyzer
+5. **API Cost Calculator:** Indicador "cached prices" cuando los datos live no estan disponibles. Modelos Claude 4.x (Opus 4.6, Sonnet 4.6, Haiku 4.5) anadidos
+6. **PWA & offline:** Verificado manifest.ts, service worker, install prompt. Build 35 rutas, 0 warnings
+7. **UX polish:** Timestamps relativos (`formatRelativeTime`) en historial, localizados EN/ES. Metadata SEO verificada en las 15 herramientas
+8. **i18n completeness:** 1595 claves en ambos idiomas, paridad perfecta. 0 strings hardcodeadas
+
+---
+
 ## 9. Conclusiones
 
 ### 9.1 Logros Principales
 
-1. **Producto funcional end-to-end:** 15 herramientas reales desplegadas en produccion con 24 rutas navegables
+1. **Producto funcional end-to-end:** 15 herramientas reales desplegadas en produccion con 35 rutas
 2. **Arquitectura ejemplar:** Clean Architecture con patron 5-capas replicado sin excepciones en las 15 herramientas
 3. **Performance maxima:** Lighthouse 100/100/100/100, Server Components, ISR
-4. **Testing robusto:** 1419 tests unitarios + 20 E2E specs + accessibility audit (axe-core WCAG AAA), coverage per-file
+4. **Testing robusto:** 1416 tests unitarios + 20 E2E specs + accessibility audit (axe-core WCAG AAA), coverage per-file
 5. **Seguridad enterprise:** CSP sin unsafe-eval, HSTS, CodeQL + Semgrep SAST, SHA-pinned actions, harden-runner
 6. **Developer Experience:** TypeScript strict, ESLint + security plugin, CI/CD con 10 quality gates
 7. **UX avanzada:** PWA instalable, Command Palette (Cmd+K), MagicInput, Export/Import, dark/light mode, WCAG AAA
@@ -784,7 +800,9 @@ _Largo plazo (6-12 meses):_
 
 ### Anexo A: Presentacion (Slides)
 
-[docs/TFM-Slides.pdf](./TFM-Slides.pdf)
+[slides/presentation.md](../slides/presentation.md) — Ejecutar con `npx @slidev/cli slides/presentation.md`
+
+Ver [docs/SLIDES-GUIDE.md](./SLIDES-GUIDE.md) para instrucciones de ejecucion y exportacion a PDF.
 
 ### Anexo B: Repositorio
 
@@ -795,7 +813,7 @@ Archivos clave:
 - `lib/application/*.ts` - Logica pura de las 15 herramientas
 - `hooks/use-*.ts` - 20 custom hooks
 - `app/(dashboard)/tools/*/page.tsx` - UI de cada herramienta
-- `tests/unit/application/*.test.ts` - Suite de 1419 tests (45 archivos)
+- `tests/unit/application/*.test.ts` - Suite de 1416 tests (45 archivos)
 - `tests/e2e/*.spec.ts` - 20 Playwright E2E specs (15 tools + accessibility WCAG AAA + navigation + settings + command-palette + settings-export)
 
 ### Anexo C: Demo en Produccion

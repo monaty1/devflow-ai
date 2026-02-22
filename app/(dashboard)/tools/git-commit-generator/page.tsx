@@ -42,7 +42,7 @@ import { getCommitTypeInfo } from "@/lib/application/git-commit-generator";
 export default function GitCommitGeneratorPage() {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const { generateCommitWithAI, aiResult: aiCommitResult, isAILoading: isAIGenerating } = useAISuggest();
+  const { generateCommitWithAI, aiResult: aiCommitResult, isAILoading: isAIGenerating, aiError } = useAISuggest();
   const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
   const {
     config,
@@ -284,13 +284,13 @@ export default function GitCommitGeneratorPage() {
           </Card>
 
           {/* Quick Diff Analysis */}
-          <Card className="p-6 border-indigo-500/20 bg-indigo-500/5">
+          <Card className="p-6 border-indigo-500/20 bg-indigo-500/5 dark:border-indigo-500/30 dark:bg-indigo-500/10">
             <h3 className="text-xs font-black uppercase text-indigo-600 dark:text-indigo-400 mb-4 flex items-center gap-2 tracking-widest">
               <FileDiff className="size-4" /> {t("gitCommit.aiDiffAuditor")}
             </h3>
             <TextArea
               placeholder={t("gitCommit.pasteDiff")}
-              className="h-32 w-full resize-none rounded-xl border border-divider bg-background p-3 font-mono text-[10px] mb-3 focus:ring-2 focus:ring-indigo-500/20 shadow-inner"
+              className="h-32 w-full resize-none rounded-xl border border-divider bg-background p-3 font-mono text-[10px] mb-3 focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/30 shadow-inner"
               onChange={(e) => setDiffInput(e.target.value)}
               value={diffInput}
               onKeyDown={(e) => {
@@ -384,23 +384,23 @@ export default function GitCommitGeneratorPage() {
                     </div>
                     <div className="flex justify-between items-center text-xs">
                       <span>{t("gitCommit.bodySeparation")}</span>
-                      <StatusBadge variant={config.body ? "success" : "info"}>{config.body ? "YES" : "N/A"}</StatusBadge>
+                      <StatusBadge variant={config.body ? "success" : "info"}>{config.body ? t("gitCommit.bodyYes") : t("gitCommit.bodyNa")}</StatusBadge>
                     </div>
                   </div>
                 </Card>
 
                 {/* AI-Generated Commit Suggestions */}
                 {isAIEnabled && (isAIGenerating || aiCommitResult) && (
-                  <Card className="p-6 border-violet-500/20 bg-violet-500/5">
+                  <Card className="p-6 border-violet-500/20 bg-violet-500/5 dark:border-violet-500/30 dark:bg-violet-500/10">
                     <div className="flex items-center gap-2 mb-4">
-                      <Bot className="size-4 text-violet-500" aria-hidden="true" />
+                      <Bot className="size-4 text-violet-500 dark:text-violet-400" aria-hidden="true" />
                       <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">{t("ai.suggestions")}</span>
                       {isAIGenerating && (
                         <span className="text-xs text-muted-foreground animate-pulse ml-auto">{t("ai.generating")}</span>
                       )}
                     </div>
                     {aiCommitResult && aiCommitResult.suggestions.map((s, i) => (
-                      <div key={i} className="p-3 bg-violet-500/5 border border-violet-500/10 rounded-xl space-y-2 mb-3 last:mb-0">
+                      <div key={i} className="p-3 bg-violet-500/5 border border-violet-500/10 dark:bg-violet-500/10 dark:border-violet-500/20 rounded-xl space-y-2 mb-3 last:mb-0">
                         <div className="flex items-center justify-between gap-2">
                           <code className="font-mono text-sm font-bold text-violet-600 dark:text-violet-400 truncate">{s.value}</code>
                           <div className="flex items-center gap-2 shrink-0">
@@ -416,6 +416,15 @@ export default function GitCommitGeneratorPage() {
                         <p className="text-xs text-muted-foreground">{s.reasoning}</p>
                       </div>
                     ))}
+                  </Card>
+                )}
+
+                {isAIEnabled && aiError && (
+                  <Card className="p-3 border-danger/30 bg-danger/5">
+                    <p className="text-xs text-danger font-bold flex items-center gap-2">
+                      <AlertTriangle className="size-3.5 shrink-0" />
+                      {t("ai.errorOccurred", { message: aiError.message })}
+                    </p>
                   </Card>
                 )}
               </div>
@@ -437,7 +446,7 @@ export default function GitCommitGeneratorPage() {
                 </Card>
 
                 {/* Batch Generation */}
-                <Card className="p-6 border-indigo-500/20 bg-indigo-500/5">
+                <Card className="p-6 border-indigo-500/20 bg-indigo-500/5 dark:border-indigo-500/30 dark:bg-indigo-500/10">
                   <h3 className="text-xs font-black uppercase text-indigo-600 dark:text-indigo-400 mb-4 flex items-center gap-2 tracking-widest">
                     <ListPlus className="size-3" /> {t("gitCommit.batchGenerate")}
                   </h3>
@@ -445,13 +454,13 @@ export default function GitCommitGeneratorPage() {
                     value={batchInput}
                     onChange={(e) => setBatchInput(e.target.value)}
                     placeholder={t("gitCommit.batchPlaceholder")}
-                    className="h-24 w-full resize-none rounded-xl border border-divider bg-background p-3 font-mono text-xs focus:ring-2 focus:ring-indigo-500/20 shadow-inner mb-3"
+                    className="h-24 w-full resize-none rounded-xl border border-divider bg-background p-3 font-mono text-xs focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-400/30 shadow-inner mb-3"
                     aria-label={t("gitCommit.batchGenerate")}
                   />
                   {batchMessages.length > 0 && (
                     <div className="space-y-2">
                       {batchMessages.map((msg, i) => (
-                        <div key={i} className="flex items-center justify-between p-2 bg-background/50 rounded-lg border border-indigo-500/10">
+                        <div key={i} className="flex items-center justify-between p-2 bg-background/50 rounded-lg border border-indigo-500/10 dark:border-indigo-500/20">
                           <span className="font-mono text-xs text-primary truncate mr-2">{msg}</span>
                           <CopyButton text={msg} size="sm" variant="ghost" />
                         </div>

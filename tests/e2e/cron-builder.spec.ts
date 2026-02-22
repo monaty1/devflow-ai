@@ -4,8 +4,8 @@ test.describe("Cron Builder", () => {
   test("default cron expression is visible", async ({ page }) => {
     await page.goto("/tools/cron-builder");
 
-    // The default cron expression (* * * * *) should be displayed prominently
-    await expect(page.getByText("* * * * *")).toBeVisible();
+    // The default cron expression (0 * * * *) should be displayed prominently
+    await expect(page.getByText("0 * * * *")).toBeVisible();
   });
 
   test("human-readable description appears", async ({ page }) => {

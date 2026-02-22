@@ -22,6 +22,7 @@ import {
   Plus,
   Minus,
   Bot,
+  AlertTriangle,
 } from "lucide-react";
 import { useJsonFormatter } from "@/hooks/use-json-formatter";
 import { useAISuggest } from "@/hooks/use-ai-suggest";
@@ -61,7 +62,7 @@ export default function JsonFormatterPage() {
     fix,
   } = useJsonFormatter();
 
-  const { explainJsonWithAI, aiResult: aiJsonResult, isAILoading: isAIAnalyzing } = useAISuggest();
+  const { explainJsonWithAI, aiResult: aiJsonResult, isAILoading: isAIAnalyzing, aiError } = useAISuggest();
   const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
   const { addToast } = useToast();
 
@@ -216,7 +217,7 @@ export default function JsonFormatterPage() {
               </Button>
             )}
             <p className="text-[9px] text-muted-foreground text-center mt-2 font-medium">
-              Ctrl+Enter → {t("jsonFmt.formatBtn")}
+              {t("jsonFmt.shortcutHint")}
             </p>
           </Card>
 
@@ -241,7 +242,7 @@ export default function JsonFormatterPage() {
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] font-bold uppercase text-muted-foreground/60">{t("jsonFmt.nodeDensity")}</p>
-                <p className="text-sm font-black uppercase">{result?.stats.values || 0} items</p>
+                <p className="text-sm font-black uppercase">{result?.stats.values || 0} {t("jsonFmt.itemsUnit")}</p>
               </div>
             </div>
             <div className="mt-6 pt-6 border-t border-default-200 space-y-3">
@@ -257,6 +258,16 @@ export default function JsonFormatterPage() {
                </div>
             </div>
           </Card>
+
+          {/* AI Error */}
+          {isAIEnabled && aiError && (
+            <Card className="p-3 border-danger/30 bg-danger/5">
+              <p className="text-xs text-danger font-bold flex items-center gap-2">
+                <AlertTriangle className="size-3.5 shrink-0" />
+                {t("ai.errorOccurred", { message: aiError.message })}
+              </p>
+            </Card>
+          )}
 
           {/* AI Analysis Results */}
           {isAIEnabled && (isAIAnalyzing || aiJsonResult) && (

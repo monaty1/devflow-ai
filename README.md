@@ -7,7 +7,7 @@
 ### 15 herramientas para developers &middot; IA integrada &middot; Local-first &middot; Open Source
 
 [![Build](https://img.shields.io/github/actions/workflow/status/albertoguinda/devflow-ai/ci.yml?branch=main&style=flat-square&logo=github&label=CI)](https://github.com/albertoguinda/devflow-ai/actions)
-[![Tests](https://img.shields.io/badge/tests-1419_passing-brightgreen?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
+[![Tests](https://img.shields.io/badge/tests-1416_passing-brightgreen?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
 [![Coverage](https://img.shields.io/badge/coverage-strategic_(100%2F80%2F0)-blue?style=flat-square&logo=vitest&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
 [![Lighthouse](https://img.shields.io/badge/Lighthouse-100%2F100%2F100%2F100-brightgreen?style=flat-square&logo=lighthouse&logoColor=white)](https://github.com/albertoguinda/devflow-ai)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
@@ -15,7 +15,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Tailwind](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 
-**[English](#what-is-this)** &middot; **[Castellano](#para-que-sirve)** &middot; **[TFM Documento](./docs/TFM.md)** &middot; **[TFM Slides (PDF)](./docs/TFM-Slides.pdf)**
+**[English](#what-is-this)** &middot; **[Castellano](#para-que-sirve)** &middot; **[TFM Documento](./docs/TFM.md)** &middot; **[Presentacion Slidev](./slides/presentation.md)**
 
 </div>
 
@@ -238,7 +238,7 @@ We follow a **Strategic Coverage** architecture. Not all code needs the same lev
 **Per-file enforcement** is enabled: each CORE file must individually meet thresholds. The CI pipeline fails if any file drops below its floor.
 
 ```bash
-npm run test:run                                             # All unit tests (1419)
+npm run test:run                                             # All unit tests (1416)
 npx vitest run tests/unit/application/json-formatter.test.ts # Single file
 npx vitest run -t "should format"                            # By pattern
 npm run test:coverage                                        # Coverage report
@@ -619,7 +619,8 @@ Este proyecto es el TFM del **Master Desarrollo con IA** (BIG School).
 | --------- | ------ |
 | Memoria completa (Markdown) | [docs/TFM.md](./docs/TFM.md) |
 | Enunciado / Assignment PDF | [docs/Documentacion-TFM.pdf](./docs/Documentacion-TFM.pdf) |
-| Slides presentacion | [docs/TFM-Slides.pdf](./docs/TFM-Slides.pdf) |
+| Presentacion (Slidev) | [slides/presentation.md](./slides/presentation.md) |
+| Guia de slides | [docs/SLIDES-GUIDE.md](./docs/SLIDES-GUIDE.md) |
 | Demo en produccion | https://devflowai.vercel.app |
 | Repositorio | https://github.com/albertoguinda/devflow-ai |
 

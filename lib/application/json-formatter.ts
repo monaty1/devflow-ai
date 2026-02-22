@@ -350,48 +350,6 @@ export function extractJsonPaths(input: string): JsonPathResult[] {
 }
 
 /**
- * Gets value at a specific JSON path
- */
-export function getValueAtPath(input: string, path: string): unknown {
-  const parsed = JSON.parse(input);
-
-  if (path === "$") return parsed;
-
-  // Remove leading $. if present
-  const cleanPath = path.replace(/^\$\.?/, "");
-
-  // Split path into parts
-  const parts = cleanPath.match(/[^.[\]]+|\[\d+\]/g) || [];
-
-  let current: unknown = parsed;
-
-  for (const part of parts) {
-    if (current === null || current === undefined) {
-      return undefined;
-    }
-
-    if (part.startsWith("[") && part.endsWith("]")) {
-      // Array index
-      const index = parseInt(part.slice(1, -1), 10);
-      if (Array.isArray(current)) {
-        current = current[index];
-      } else {
-        return undefined;
-      }
-    } else {
-      // Object key
-      if (typeof current === "object" && current !== null) {
-        current = (current as Record<string, unknown>)[part];
-      } else {
-        return undefined;
-      }
-    }
-  }
-
-  return current;
-}
-
-/**
  * Compares two JSON strings for equality
  */
 export function compareJson(json1: string, json2: string): boolean {

@@ -6,16 +6,18 @@ test.describe("Tailwind Sorter", () => {
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   });
 
-  test("sorts Tailwind classes", async ({ page }) => {
+  test("auto-sorts Tailwind classes on input", async ({ page }) => {
     await page.goto("/tools/tailwind-sorter");
 
     const input = page.locator("textarea").first();
     await input.fill("text-red-500 flex mt-4 p-2 bg-blue-500 items-center");
 
-    const sortBtn = page.getByRole("button", { name: /sort|ordenar/i }).first();
-    await sortBtn.click();
+    // Auto-sort fires after 400ms debounce — wait for stats cards to appear
+    const classesCard = page.locator("text=/\\d+/").first();
+    await expect(classesCard).toBeVisible({ timeout: 5000 });
 
-    // Output should contain the sorted classes
-    await expect(page.locator("textarea, pre, code").last()).toContainText("flex");
+    // The sorted output should contain the input classes (reordered)
+    await expect(page.getByText("flex")).toBeVisible();
+    await expect(page.getByText("items-center")).toBeVisible();
   });
 });

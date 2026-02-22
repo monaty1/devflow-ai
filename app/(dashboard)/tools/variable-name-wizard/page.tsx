@@ -59,7 +59,7 @@ export default function VariableNameWizardPage() {
     loadExample,
   } = useVariableNameWizard();
 
-  const { suggestWithAI, aiResult: aiSuggestResult, isAILoading: isAISuggesting } = useAISuggest();
+  const { suggestWithAI, aiResult: aiSuggestResult, isAILoading: isAISuggesting, aiError } = useAISuggest();
   const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
   const { addToast } = useToast();
   const [activeTab, setActiveTab] = useState<"generate" | "convert" | string>("generate");
@@ -110,9 +110,10 @@ export default function VariableNameWizardPage() {
       case "audit":
         const audit = suggestion.audit;
         const Icon = audit?.status === "good" ? ShieldCheck : audit?.status === "warning" ? AlertTriangle : ShieldAlert;
+        const auditLabel = audit?.status === "good" ? t("varName.auditGood") : audit?.status === "warning" ? t("varName.auditWarning") : t("varName.auditError");
         return (
           <div className="flex items-center gap-2">
-            <Icon className={cn(
+            <Icon aria-label={auditLabel} className={cn(
               "size-4",
               audit?.status === "good" ? "text-emerald-500 dark:text-emerald-400" : audit?.status === "warning" ? "text-amber-500 dark:text-amber-400" : "text-danger"
             )} />
@@ -321,7 +322,7 @@ export default function VariableNameWizardPage() {
                     <Card className="p-6 border-emerald-500/20 bg-emerald-500/5">
                       <div className="flex justify-between items-start">
                         <div>
-                          <p className="text-[10px] font-black text-emerald-600 uppercase mb-1">{t("varName.recommendedChoice")}</p>
+                          <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase mb-1">{t("varName.recommendedChoice")}</p>
                           <h4 className="text-xl font-black font-mono">{generationResult.suggestions[0]?.name}</h4>
                         </div>
                         <StatusBadge variant="success">{t("varName.bestMatch")}</StatusBadge>
@@ -334,10 +335,10 @@ export default function VariableNameWizardPage() {
                     <Card className="p-6 border-blue-500/20 bg-blue-500/5">
                       <div className="flex justify-between items-start">
                         <div>
-                          <p className="text-[10px] font-black text-blue-600 uppercase mb-1">{t("varName.namingScoreLabel")}</p>
+                          <p className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase mb-1">{t("varName.namingScoreLabel")}</p>
                           <h4 className="text-2xl font-black">{generationResult.suggestions[0]?.score}/100</h4>
                         </div>
-                        <div className="p-2 bg-blue-500/20 rounded-full text-blue-600"><Star className="size-5 fill-current" /></div>
+                        <div className="p-2 bg-blue-500/20 rounded-full text-blue-600 dark:text-blue-400"><Star className="size-5 fill-current" /></div>
                       </div>
                       <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden mt-4">
                         <div
@@ -394,6 +395,15 @@ export default function VariableNameWizardPage() {
                       )}
                     </Card>
                   )}
+
+                  {isAIEnabled && aiError && (
+                    <Card className="p-3 border-danger/30 bg-danger/5">
+                      <p className="text-xs text-danger font-bold flex items-center gap-2">
+                        <AlertTriangle className="size-3.5 shrink-0" />
+                        {t("ai.errorOccurred", { message: aiError.message })}
+                      </p>
+                    </Card>
+                  )}
                 </div>
               ) : (
                 <Card className="p-20 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center h-[500px]">
@@ -441,7 +451,7 @@ export default function VariableNameWizardPage() {
 
                 {/* Batch Rename */}
                 <Card className="p-6 border-violet-500/20 bg-violet-500/5">
-                  <h3 className="text-xs font-black uppercase text-violet-600 mb-4 flex items-center gap-2 tracking-widest">
+                  <h3 className="text-xs font-black uppercase text-violet-600 dark:text-violet-400 mb-4 flex items-center gap-2 tracking-widest">
                     <Layers className="size-3" /> {t("varName.batchRename")}
                   </h3>
                   <TextArea

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import {
   createDocument,
   createContextWindow,
@@ -9,6 +9,7 @@ import {
   reorderDocuments,
   exportContext,
   exportForAI,
+  preloadTokenEncoder,
 } from "@/lib/application/context-manager";
 import type {
   ContextWindow,
@@ -59,6 +60,9 @@ interface UseContextManagerReturn {
 export function useContextManager(): UseContextManagerReturn {
   const [windows, setWindows] = useState<ContextWindow[]>(getInitialWindows);
   const [activeWindowId, setActiveWindowId] = useState<string | null>(null);
+
+  // Preload js-tiktoken encoder asynchronously (keeps it out of initial bundle)
+  useEffect(() => { preloadTokenEncoder(); }, []);
 
   const saveWindows = useCallback(
     (updater: (prev: ContextWindow[]) => ContextWindow[]) => {

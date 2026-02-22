@@ -6,6 +6,7 @@ import type {
   GenerationResult,
   WizardConfig,
 } from "@/types/variable-name-wizard";
+import { DEFAULT_WIZARD_CONFIG } from "@/types/variable-name-wizard";
 import { convertToAll, generateSuggestions } from "@/lib/application/variable-name-wizard";
 import { useLocaleStore } from "@/lib/stores/locale-store";
 
@@ -28,22 +29,14 @@ interface UseVariableNameWizardReturn {
 
 const STORAGE_KEY = "devflow-variable-name-wizard-config";
 
-const DEFAULT_CONFIG: WizardConfig = {
-  preferredConvention: "camelCase",
-  maxSuggestions: 10,
-  includeAbbreviations: false,
-  language: "typescript",
-  type: "variable",
-};
-
 function loadConfig(): WizardConfig {
-  if (typeof window === "undefined") return DEFAULT_CONFIG;
+  if (typeof window === "undefined") return DEFAULT_WIZARD_CONFIG;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return DEFAULT_CONFIG;
-    return { ...DEFAULT_CONFIG, ...JSON.parse(raw) } as WizardConfig;
+    if (!raw) return DEFAULT_WIZARD_CONFIG;
+    return { ...DEFAULT_WIZARD_CONFIG, ...JSON.parse(raw) } as WizardConfig;
   } catch {
-    return DEFAULT_CONFIG;
+    return DEFAULT_WIZARD_CONFIG;
   }
 }
 

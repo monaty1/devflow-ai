@@ -27,6 +27,33 @@ const GLOW_MAP: Record<string, string> = {
 };
 
 /**
+ * Format an ISO timestamp or Date as a relative time string.
+ * Returns "just now", "2m ago", "3h ago", "yesterday", or a short date.
+ */
+export function formatRelativeTime(date: string | Date, locale: string = "en"): string {
+  const now = Date.now();
+  const then = typeof date === "string" ? new Date(date).getTime() : date.getTime();
+  const diffMs = now - then;
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHour = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHour / 24);
+
+  const isEs = locale === "es";
+
+  if (diffSec < 60) return isEs ? "ahora mismo" : "just now";
+  if (diffMin < 60) return isEs ? `hace ${diffMin}m` : `${diffMin}m ago`;
+  if (diffHour < 24) return isEs ? `hace ${diffHour}h` : `${diffHour}h ago`;
+  if (diffDay === 1) return isEs ? "ayer" : "yesterday";
+  if (diffDay < 7) return isEs ? `hace ${diffDay}d` : `${diffDay}d ago`;
+
+  return new Date(then).toLocaleDateString(isEs ? "es-ES" : "en-US", {
+    month: "short",
+    day: "numeric",
+  });
+}
+
+/**
  * Get decorative glow border classes from a tool's gradient color string.
  * Parses "from-{color}-500" and returns matching border + shadow classes.
  */

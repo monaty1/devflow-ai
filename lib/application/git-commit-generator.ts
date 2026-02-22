@@ -482,26 +482,3 @@ export function generateChangelog(commits: CommitResult[]): string {
 
   return changelog.trim();
 }
-
-/**
- * Generates a copyable `git commit -m "..."` shell command
- */
-export function generateGitCommand(commit: CommitResult): string {
-  const info = getCommitTypeInfo(commit.type);
-  const scope = commit.scope ? `(${commit.scope})` : "";
-  const hasBreaking = commit.breakingChange.length > 0;
-  const breaking = hasBreaking ? "!" : "";
-  const subject = `${info.emoji} ${commit.type}${scope}${breaking}: ${commit.description}`;
-
-  const parts = [subject];
-  if (commit.body) parts.push("", commit.body);
-  if (hasBreaking) {
-    parts.push("", `BREAKING CHANGE: ${commit.breakingChange}`);
-  }
-  if (commit.issueRef) parts.push("", commit.issueRef);
-
-  const message = parts.join("\n");
-  // Escape single quotes for shell safety
-  const escaped = message.replace(/'/g, "'\\''");
-  return `git commit -m '${escaped}'`;
-}

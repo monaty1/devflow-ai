@@ -5,6 +5,8 @@ import { Card, Button, SearchField } from "@heroui/react";
 import { Trash2, Clock, Inbox } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
+import { useLocaleStore } from "@/lib/stores/locale-store";
+import { formatRelativeTime } from "@/lib/utils";
 
 interface HistoryItem {
   id: string;
@@ -95,6 +97,7 @@ export default function HistoryPage() {
   const [history, setHistory] = useState<HistoryItem[]>(getInitialHistory);
   const { addToast } = useToast();
   const { t } = useTranslation();
+  const locale = useLocaleStore((s) => s.locale);
 
   const toolSlugs = useMemo(() => {
     const slugs = new Set(history.map((item) => item.toolSlug));
@@ -201,7 +204,7 @@ export default function HistoryPage() {
                     {item.summary || "—"}
                   </p>
                   <span className="shrink-0 text-xs text-muted-foreground">
-                    {new Date(item.createdAt).toLocaleDateString()}
+                    {formatRelativeTime(item.createdAt, locale)}
                   </span>
                 </div>
               </Card>

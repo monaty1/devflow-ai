@@ -139,8 +139,13 @@ export function getRecommendations(context: ToolContext): ToolRecommendation[] {
     });
   }
 
-  // Rule: Code Review → Variable Name Wizard
+  // Rule: Code Review → Git Commit Generator, Variable Name Wizard
   if (toolId === "code-review" && detectedTypes.includes("code")) {
+    recommendations.push({
+      toolSlug: "git-commit-generator",
+      toolName: "Git Commit Generator",
+      reason: "Write a commit message for this reviewed code",
+    });
     recommendations.push({
       toolSlug: "variable-name-wizard",
       toolName: "Variable Name Wizard",
@@ -161,8 +166,14 @@ export function getRecommendations(context: ToolContext): ToolRecommendation[] {
     }
   }
 
-  // Rule: Regex Humanizer → Variable Name Wizard
+  // Rule: Regex Humanizer → Prompt Analyzer, Variable Name Wizard
   if (toolId === "regex-humanizer" && input) {
+    recommendations.push({
+      toolSlug: "prompt-analyzer",
+      toolName: "Prompt Analyzer",
+      reason: "Use this regex pattern in a prompt",
+      dataToPass: input,
+    });
     recommendations.push({
       toolSlug: "variable-name-wizard",
       toolName: "Variable Name Wizard",

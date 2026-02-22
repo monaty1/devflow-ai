@@ -20,6 +20,7 @@ import {
   Cpu,
   Upload,
   Bot,
+  AlertTriangle,
 } from "lucide-react";
 import { useBase64 } from "@/hooks/use-base64";
 import { useTranslation } from "@/hooks/use-translation";
@@ -47,7 +48,7 @@ export default function Base64Page() {
     loadExample,
   } = useBase64();
 
-  const { explainBase64WithAI, aiResult, isAILoading } = useAISuggest();
+  const { explainBase64WithAI, aiResult, isAILoading, aiError } = useAISuggest();
   const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
 
   const [activeView, setActiveView] = useState<"text" | "preview" | "inspector">("text");
@@ -176,7 +177,7 @@ export default function Base64Page() {
               </div>
             </div>
 
-            <Button onPress={process} variant="primary" className="w-full mt-6 h-12 font-black shadow-xl shadow-primary/20 text-md">
+            <Button onPress={process} isDisabled={!input.trim()} variant="primary" className="w-full mt-6 h-12 font-black shadow-xl shadow-primary/20 text-md">
               <Sparkles className="size-4 mr-2" /> {mode === "encode" ? t("base64.generateEncoding") : t("base64.executeDecoding")}
             </Button>
           </Card>
@@ -189,7 +190,7 @@ export default function Base64Page() {
               <div className="space-y-6">
                 <div className="flex justify-between items-end">
                   <span className="text-[10px] font-bold uppercase text-muted-foreground/60">{t("base64.outputSize")}</span>
-                  <span className="text-2xl font-black text-cyan-500 dark:text-cyan-400">{result.stats.outputBytes} bytes</span>
+                  <span className="text-2xl font-black text-cyan-500 dark:text-cyan-400">{t("base64.bytes", { count: result.stats.outputBytes })}</span>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-[9px] font-black uppercase text-muted-foreground/60">
@@ -218,7 +219,7 @@ export default function Base64Page() {
               <Button
                 size="sm"
                 variant="primary"
-                className="w-full font-bold bg-violet-600 hover:bg-violet-700 border-none shadow-lg shadow-violet-500/20 mb-4"
+                className="w-full font-bold bg-violet-600 dark:bg-violet-500 hover:bg-violet-700 dark:hover:bg-violet-600 border-none shadow-lg shadow-violet-500/20 mb-4"
                 onPress={() => {
                   const content = result.output.slice(0, 2000);
                   void explainBase64WithAI(`Type: ${result.detectedType || "unknown"}, Mode: ${mode}, Content (first 2000 chars): ${content}`);
@@ -229,20 +230,29 @@ export default function Base64Page() {
               </Button>
               {isAILoading && (
                 <div className="space-y-2 animate-pulse">
-                  <div className="h-3 bg-violet-500/20 rounded w-3/4" />
-                  <div className="h-3 bg-violet-500/20 rounded w-1/2" />
+                  <div className="h-3 bg-violet-500/20 dark:bg-violet-500/30 rounded w-3/4" />
+                  <div className="h-3 bg-violet-500/20 dark:bg-violet-500/30 rounded w-1/2" />
                 </div>
               )}
               {aiResult?.suggestions && aiResult.suggestions.length > 0 && !isAILoading && (
                 <div className="space-y-3">
                   {aiResult.suggestions.map((s, i) => (
-                    <div key={i} className="p-3 bg-background/80 rounded-xl border border-violet-500/10">
+                    <div key={i} className="p-3 bg-background/80 rounded-xl border border-violet-500/10 dark:border-violet-500/20">
                       <p className="text-xs font-medium leading-relaxed">{s.value}</p>
                       <p className="text-[10px] text-muted-foreground mt-2 italic">{s.reasoning}</p>
                     </div>
                   ))}
                 </div>
               )}
+            </Card>
+          )}
+
+          {isAIEnabled && aiError && (
+            <Card className="p-3 border-danger/30 bg-danger/5">
+              <p className="text-xs text-danger font-bold flex items-center gap-2">
+                <AlertTriangle className="size-3.5 shrink-0" />
+                {t("ai.errorOccurred", { message: aiError.message })}
+              </p>
             </Card>
           )}
         </div>
@@ -277,11 +287,19 @@ export default function Base64Page() {
                 <Card className="p-0 border-divider shadow-xl overflow-hidden h-[600px] flex flex-col">
                   <div className="p-4 border-b border-divider flex justify-between items-center bg-muted/20">
                     <span className="text-[10px] font-black opacity-40 uppercase tracking-widest">{t("base64.rawPayload")}</span>
-                    <span className="text-[9px] font-mono opacity-30">{result?.stats.outputLength || 0} characters</span>
+                    <span className="text-[9px] font-mono opacity-30">{t("base64.characters", { count: result?.stats.outputLength || 0 })}</span>
                   </div>
-                  <pre className="p-8 font-mono text-[11px] leading-relaxed overflow-auto flex-1 bg-background break-all">
-                    <code>{result?.output}</code>
-                  </pre>
+                  {result?.output ? (
+                    <pre className="p-8 font-mono text-[11px] leading-relaxed overflow-auto flex-1 bg-background break-all">
+                      <code>{result.output}</code>
+                    </pre>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-center p-8 opacity-40">
+                      <Binary className="size-12 mb-3" />
+                      <p className="text-sm font-bold">{t("base64.emptyState")}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{t("base64.emptyStateHint")}</p>
+                    </div>
+                  )}
                 </Card>
               </Tabs.Panel>
 
@@ -289,11 +307,11 @@ export default function Base64Page() {
                 <div className="space-y-6 h-[600px] overflow-auto pr-2 scrollbar-hide">
                   {result?.detectedType === "jwt" && jwtParts && (
                     <div className="grid gap-4">
-                      <Card className="p-6 border-blue-500/20 bg-blue-500/5">
+                      <Card className="p-6 border-blue-500/20 dark:border-blue-500/30 bg-blue-500/5 dark:bg-blue-500/10">
                         <p className="text-[10px] font-black text-blue-500 dark:text-blue-400 uppercase mb-3 tracking-widest">{t("base64.jwtHeader")}</p>
                         <pre className="text-xs font-mono text-blue-700 dark:text-blue-300">{jwtParts.header}</pre>
                       </Card>
-                      <Card className="p-6 border-purple-500/20 bg-purple-500/5">
+                      <Card className="p-6 border-purple-500/20 dark:border-purple-500/30 bg-purple-500/5 dark:bg-purple-500/10">
                         <p className="text-[10px] font-black text-purple-500 dark:text-purple-400 uppercase mb-3 tracking-widest">{t("base64.jwtPayload")}</p>
                         <pre className="text-xs font-mono text-purple-700 dark:text-purple-300">{jwtParts.payload}</pre>
                       </Card>
@@ -318,7 +336,7 @@ export default function Base64Page() {
                   )}
 
                   {result?.detectedType === "json" && (
-                    <Card className="p-8 border-emerald-500/20 bg-emerald-500/5 h-full">
+                    <Card className="p-8 border-emerald-500/20 dark:border-emerald-500/30 bg-emerald-500/5 dark:bg-emerald-500/10 h-full">
                       <div className="flex items-center justify-between mb-6">
                         <h3 className="font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-2 text-md italic">
                           <Database className="size-5" /> {t("base64.structuredObject")}

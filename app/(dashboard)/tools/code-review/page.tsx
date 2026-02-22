@@ -395,14 +395,19 @@ export default function CodeReviewPage() {
                   </div>
                 </Card>
               )}
+              {isAIEnabled && aiError && !aiResult && (
+                <Card className="p-4 border-danger/30 bg-danger/5" role="alert">
+                  <div className="flex items-center gap-2 text-danger">
+                    <AlertTriangle className="size-4" aria-hidden="true" />
+                    <span className="text-sm font-medium">{t("ai.unavailable")}</span>
+                  </div>
+                </Card>
+              )}
               {isAIEnabled && aiResult && (
                 <Card className="p-6 border-violet-500/20 bg-violet-500/5 shadow-xl shadow-violet-500/5" role="region" aria-label={t("ai.deepAnalysis")}>
                   <div className="mb-4 flex items-center gap-2">
                     <Bot className="size-5 text-violet-500" aria-hidden="true" />
                     <h3 className="font-bold text-lg">{t("ai.deepAnalysis")}</h3>
-                    {aiError && (
-                      <span className="text-xs text-danger ml-auto">{t("ai.unavailable")}</span>
-                    )}
                   </div>
                   <div className="space-y-4">
                     <div className="flex items-center gap-4">

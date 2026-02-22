@@ -12,6 +12,7 @@ import {
   Fingerprint,
   Info,
   Bot,
+  AlertTriangle,
 } from "lucide-react";
 import { useTokenVisualizer } from "@/hooks/use-token-visualizer";
 import { useAITokenize } from "@/hooks/use-ai-tokenize";
@@ -41,7 +42,7 @@ export default function TokenVisualizerPage() {
     reset 
   } = useTokenVisualizer();
 
-  const { tokenizeReal, aiResult: realTokenResult, isAILoading: isRealTokenizing } = useAITokenize();
+  const { tokenizeReal, aiResult: realTokenResult, isAILoading: isRealTokenizing, aiError } = useAITokenize();
   const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
   const { addToast } = useToast();
   const { navigateTo } = useSmartNavigation();
@@ -237,6 +238,15 @@ export default function TokenVisualizerPage() {
                   </div>
                 </div>
               )}
+            </Card>
+          )}
+
+          {isAIEnabled && aiError && (
+            <Card className="p-3 border-danger/30 bg-danger/5">
+              <p className="text-xs text-danger font-bold flex items-center gap-2">
+                <AlertTriangle className="size-3.5 shrink-0" />
+                {t("ai.errorOccurred", { message: aiError.message })}
+              </p>
             </Card>
           )}
 

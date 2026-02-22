@@ -60,13 +60,19 @@ system_prompts_leaks-main/
 # Vercel
 .vercel
 
-# Internal planning
+# Internal planning & personal notes
 TODO.md
 ENTREGA_TFM.md
+MEJORAS.md
+NOTAS*.md
+TIPS*.md
+APUNTES*.md
 docs/Documentacion-TFM.pdf
-docs/SLIDES-GUIDE.md
 
 EBOOK_200_PROMPTS_MDEV1.pdf
+
+# Old slides (replaced by slides/presentation.md)
+docs/slides.md
 # heroui-agents-md
 .heroui-docs/
 

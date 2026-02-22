@@ -7,7 +7,6 @@ export interface UuidConfig {
   version: UuidVersion;
   format: UuidFormat;
   quantity: number;
-  exportFormat: "text" | "json" | "csv" | "sql";
   prefix: string;
 }
 
@@ -15,7 +14,6 @@ export const DEFAULT_UUID_CONFIG: UuidConfig = {
   version: "v4",
   format: "standard",
   quantity: 1,
-  exportFormat: "text",
   prefix: "",
 };
 

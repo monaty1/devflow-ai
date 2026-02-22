@@ -62,7 +62,7 @@ export function CommandPalette() {
   return (
     <Modal.Backdrop isOpen={isOpen} onOpenChange={(open) => !open && close()}>
       <Modal.Container size="lg">
-        <Modal.Dialog className="p-0">
+        <Modal.Dialog className="p-0" aria-label={t("cmdPalette.title")}>
           {/* Search input */}
           <div className="border-b border-border px-4 py-3">
             <SearchField

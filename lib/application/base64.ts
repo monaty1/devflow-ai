@@ -100,26 +100,6 @@ export function getByteView(input: string, isBase64: boolean): ByteRepresentatio
 }
 
 /**
- * Convert bytes to hex string
- */
-export function bytesToHex(bytes: Uint8Array): string {
-  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-/**
- * Convert hex string to bytes
- */
-export function hexToBytes(hex: string): Uint8Array {
-  const cleanHex = hex.replace(/\s/g, '');
-  if (cleanHex.length % 2 !== 0) return new Uint8Array();
-  const bytes = new Uint8Array(cleanHex.length / 2);
-  for (let i = 0; i < cleanHex.length; i += 2) {
-    bytes[i / 2] = parseInt(cleanHex.substring(i, i + 2), 16);
-  }
-  return bytes;
-}
-
-/**
  * Validates if a string is valid Base64
  */
 export function validateBase64(

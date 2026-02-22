@@ -69,6 +69,8 @@ export function useCostCalculator() {
     setSelectedModelId("gpt-4o");
   }, []);
 
+  const isUsingFallback = !latestModels || latestModels.length === 0;
+
   return {
     inputTokens,
     setInputTokens,
@@ -82,6 +84,7 @@ export function useCostCalculator() {
     monthlyCost,
     reset,
     isSyncing: isValidating,
+    isUsingFallback,
     lastSync: latestModels ? new Date().toISOString() : null,
     syncPrices: () => mutate(),
     models

@@ -5,8 +5,6 @@ import {
   validateBase64,
   processBase64,
   getByteView,
-  bytesToHex,
-  hexToBytes,
   detectContent,
 } from "@/lib/application/base64";
 import { DEFAULT_BASE64_CONFIG } from "@/types/base64";
@@ -223,44 +221,6 @@ describe("Base64 Encoder/Decoder", () => {
       const result = getByteView("", false);
       expect(result.hex).toBe("");
       expect(result.decimal).toEqual([]);
-    });
-  });
-
-  describe("bytesToHex", () => {
-    it("should convert bytes to hex string", () => {
-      const bytes = new Uint8Array([0x48, 0x65, 0x6c, 0x6c, 0x6f]);
-      expect(bytesToHex(bytes)).toBe("48656c6c6f");
-    });
-
-    it("should handle empty array", () => {
-      expect(bytesToHex(new Uint8Array())).toBe("");
-    });
-
-    it("should pad single digit hex values", () => {
-      const bytes = new Uint8Array([0x01, 0x0a]);
-      expect(bytesToHex(bytes)).toBe("010a");
-    });
-  });
-
-  describe("hexToBytes", () => {
-    it("should convert hex string to bytes", () => {
-      const bytes = hexToBytes("48656c6c6f");
-      expect(Array.from(bytes)).toEqual([0x48, 0x65, 0x6c, 0x6c, 0x6f]);
-    });
-
-    it("should return empty array for odd length hex", () => {
-      const bytes = hexToBytes("abc");
-      expect(bytes.length).toBe(0);
-    });
-
-    it("should handle empty string", () => {
-      const bytes = hexToBytes("");
-      expect(bytes.length).toBe(0);
-    });
-
-    it("should strip spaces from hex string", () => {
-      const bytes = hexToBytes("48 65");
-      expect(Array.from(bytes)).toEqual([0x48, 0x65]);
     });
   });
 

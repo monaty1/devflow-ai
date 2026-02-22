@@ -242,15 +242,15 @@ export default function UuidGeneratorPage() {
           </Card>
 
           {/* Collision Checker */}
-          <Card className="p-6 border-amber-500/20 bg-amber-500/5">
-            <h3 className="text-xs font-black uppercase text-amber-600 mb-4 flex items-center gap-2 tracking-widest">
+          <Card className="p-6 border-amber-500/20 dark:border-amber-500/30 bg-amber-500/5 dark:bg-amber-500/10">
+            <h3 className="text-xs font-black uppercase text-amber-600 dark:text-amber-400 mb-4 flex items-center gap-2 tracking-widest">
               <Search className="size-3" /> {t("uuid.collisionChecker")}
             </h3>
             <TextArea
               value={collisionInput}
               onChange={(e) => setCollisionInput(e.target.value)}
               placeholder={t("uuid.collisionPlaceholder")}
-              className="h-24 w-full resize-none rounded-xl border border-divider bg-background p-3 font-mono text-[10px] focus:ring-2 focus:ring-amber-500/20 shadow-inner mb-3"
+              className="h-24 w-full resize-none rounded-xl border border-divider bg-background p-3 font-mono text-[10px] focus:ring-2 focus:ring-amber-500/20 dark:focus:ring-amber-400/30 shadow-inner mb-3"
               aria-label={t("uuid.collisionChecker")}
             />
             {collisionResult && (

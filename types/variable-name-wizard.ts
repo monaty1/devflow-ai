@@ -59,53 +59,15 @@ export type VariableLanguage = "typescript" | "javascript" | "python" | "go" | "
 export interface WizardConfig {
   preferredConvention: NamingConvention;
   maxSuggestions: number;
-  includeAbbreviations: boolean;
   language: VariableLanguage;
   type: VariableType;
 }
 
 export const DEFAULT_WIZARD_CONFIG: WizardConfig = {
   preferredConvention: "camelCase",
-  maxSuggestions: 5,
-  includeAbbreviations: false,
+  maxSuggestions: 10,
   language: "typescript",
   type: "variable",
-};
-
-export const CONVENTION_LABELS: Record<NamingConvention, string> = {
-  camelCase: "camelCase",
-  PascalCase: "PascalCase",
-  snake_case: "snake_case",
-  SCREAMING_SNAKE_CASE: "SCREAMING_SNAKE_CASE",
-  "kebab-case": "kebab-case",
-  flatcase: "flatcase",
-  UPPERCASE: "UPPERCASE",
-  lowercase: "lowercase",
-};
-
-export const CONVENTION_EXAMPLES: Record<NamingConvention, string> = {
-  camelCase: "userName, isActive, getTotal",
-  PascalCase: "UserName, IsActive, GetTotal",
-  snake_case: "user_name, is_active, get_total",
-  SCREAMING_SNAKE_CASE: "USER_NAME, IS_ACTIVE, MAX_SIZE",
-  "kebab-case": "user-name, is-active, get-total",
-  flatcase: "username, isactive, gettotal",
-  UPPERCASE: "USERNAME, ISACTIVE, GETTOTAL",
-  lowercase: "username, isactive, gettotal",
-};
-
-export const TYPE_LABELS: Record<VariableType, string> = {
-  variable: "Variable",
-  function: "Función",
-  class: "Clase",
-  constant: "Constante",
-  interface: "Interface",
-  type: "Type Alias",
-  enum: "Enum",
-  component: "Componente React",
-  hook: "Hook React",
-  file: "Nombre de archivo",
-  "css-class": "Clase CSS",
 };
 
 export const TYPE_CONVENTIONS: Record<VariableType, NamingConvention[]> = {

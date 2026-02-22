@@ -46,7 +46,7 @@ export default function TailwindSorterPage() {
     loadExample,
   } = useTailwindSorter();
 
-  const { optimizeTailwindWithAI, aiResult, isAILoading } = useAISuggest();
+  const { optimizeTailwindWithAI, aiResult, isAILoading, aiError } = useAISuggest();
   const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
 
   const [activeView, setActiveView] = useState<"result" | "audit" | "diff" | "breakpoints" | string>("result");
@@ -108,7 +108,7 @@ export default function TailwindSorterPage() {
         <div className="lg:col-span-5 space-y-6">
           <Card className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold flex items-center gap-2 text-sky-600">
+              <h3 className="font-bold flex items-center gap-2 text-sky-600 dark:text-sky-400">
                 <ListFilter className="size-5" />
                 {t("tailwind.rawClasses")}
               </h3>
@@ -136,7 +136,7 @@ export default function TailwindSorterPage() {
                 <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">{t("tailwind.sortingOptions")}</p>
                 {isSorting && <div className="flex items-center gap-1 text-primary animate-pulse"><Activity className="size-3" /><span className="text-[10px] font-black uppercase">{t("tailwind.optimizing")}</span></div>}
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3" role="group" aria-label={t("tailwind.sortingOptions")}>
                 <Checkbox
                   isSelected={config.removeDuplicates}
                   onChange={(v: boolean) => updateConfig("removeDuplicates", v)}
@@ -209,6 +209,15 @@ export default function TailwindSorterPage() {
               )}
             </Card>
           )}
+
+          {isAIEnabled && aiError && (
+            <Card className="p-3 border-danger/30 bg-danger/5">
+              <p className="text-xs text-danger font-bold flex items-center gap-2">
+                <AlertTriangle className="size-3.5 shrink-0" />
+                {t("ai.errorOccurred", { message: aiError.message })}
+              </p>
+            </Card>
+          )}
         </div>
 
         {/* Results Column */}
@@ -216,7 +225,7 @@ export default function TailwindSorterPage() {
           {result ? (
             <>
               {/* Quick Stats */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <Card className="p-4 text-center border-b-4 border-b-sky-500 rounded-b-none">
                   <p className="text-[10px] font-black text-muted-foreground uppercase">{t("tailwind.classesLabel")}</p>
                   <p className="text-2xl font-black">{result.stats.uniqueClasses}</p>
@@ -272,7 +281,7 @@ export default function TailwindSorterPage() {
                   <Tabs.Panel id="result">
                     <div className="p-6 space-y-4">
                       <div className="flex justify-between items-center bg-sky-50 dark:bg-sky-950/20 p-3 rounded-xl border border-sky-100 dark:border-sky-900/30">
-                        <span className="text-xs font-bold text-sky-700">{t("tailwind.productionReady")}</span>
+                        <span className="text-xs font-bold text-sky-700 dark:text-sky-300">{t("tailwind.productionReady")}</span>
                         <CopyButton text={result.output} />
                       </div>
                       <div className="p-4 bg-muted/30 rounded-xl font-mono text-sm leading-relaxed border border-divider break-all min-h-[100px]">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import type {
   CronExpression,
   CronField,
@@ -35,32 +35,39 @@ export function useCronBuilder() {
     useToolHistory<HistoryItem>("devflow-cron-history", 15);
   const [isManualMode, setIsManualMode] = useState(false);
 
+  // Debounce rawExpression for expensive derived computations (150ms)
+  const [debouncedRaw, setDebouncedRaw] = useState(buildExpression(DEFAULT_CRON));
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedRaw(rawExpression), 150);
+    return () => clearTimeout(timer);
+  }, [rawExpression]);
+
   // Locale-aware presets
   const presets = useMemo(() => getCronPresets(locale), [locale]);
 
-  // Compute derived state using useMemo (not useEffect + setState)
-  const validation = useMemo(() => validateExpression(rawExpression, locale), [rawExpression, locale]);
+  // Compute derived state using useMemo with debounced input
+  const validation = useMemo(() => validateExpression(debouncedRaw, locale), [debouncedRaw, locale]);
 
   const explanation = useMemo(() => {
     if (validation.isValid) {
-      return explainExpression(rawExpression, locale);
+      return explainExpression(debouncedRaw, locale);
     }
     return null;
-  }, [rawExpression, validation.isValid, locale]);
+  }, [debouncedRaw, validation.isValid, locale]);
 
   const nextExecutions = useMemo(() => {
     if (validation.isValid) {
-      return calculateNextExecutions(rawExpression, 5, undefined, locale);
+      return calculateNextExecutions(debouncedRaw, 5, undefined, locale);
     }
     return [];
-  }, [rawExpression, validation.isValid, locale]);
+  }, [debouncedRaw, validation.isValid, locale]);
 
   const config = useMemo(() => {
     if (validation.isValid) {
-      return generateConfig(rawExpression, configFormat);
+      return generateConfig(debouncedRaw, configFormat);
     }
     return null;
-  }, [rawExpression, configFormat, validation.isValid]);
+  }, [debouncedRaw, configFormat, validation.isValid]);
 
   const setExpression = useCallback((newExpression: CronExpression) => {
     setExpressionState(newExpression);

@@ -42,9 +42,7 @@ export interface ClassGroup {
 
 export interface SorterConfig {
   removeDuplicates: boolean;
-  groupByCategory: boolean;
   sortWithinGroups: boolean;
-  preserveVariants: boolean;
   outputFormat: OutputFormat;
 }
 
@@ -52,9 +50,7 @@ export type OutputFormat = "single-line" | "multi-line" | "grouped";
 
 export const DEFAULT_SORTER_CONFIG: SorterConfig = {
   removeDuplicates: true,
-  groupByCategory: false,
   sortWithinGroups: true,
-  preserveVariants: true,
   outputFormat: "single-line",
 };
 

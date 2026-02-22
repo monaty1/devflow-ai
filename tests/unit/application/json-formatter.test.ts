@@ -7,7 +7,6 @@ import {
   sortObjectKeys,
   calculateJsonStats,
   extractJsonPaths,
-  getValueAtPath,
   compareJson,
   diffJsonLines,
   jsonToTypeScript,
@@ -166,32 +165,6 @@ describe("JSON Formatter", () => {
       const pathStrings = paths.map((p) => p.path);
       expect(pathStrings).toContain("$.items[0]");
       expect(pathStrings).toContain("$.items[1]");
-    });
-  });
-
-  describe("getValueAtPath", () => {
-    it("should get root value", () => {
-      const input = '{"name": "John"}';
-      const value = getValueAtPath(input, "$");
-      expect(value).toEqual({ name: "John" });
-    });
-
-    it("should get nested value", () => {
-      const input = '{"user": {"name": "John"}}';
-      const value = getValueAtPath(input, "$.user.name");
-      expect(value).toBe("John");
-    });
-
-    it("should get array element", () => {
-      const input = '{"items": [10, 20, 30]}';
-      const value = getValueAtPath(input, "$.items[1]");
-      expect(value).toBe(20);
-    });
-
-    it("should return undefined for invalid path", () => {
-      const input = '{"name": "John"}';
-      const value = getValueAtPath(input, "$.invalid.path");
-      expect(value).toBeUndefined();
     });
   });
 
@@ -635,32 +608,6 @@ describe("JSON Formatter", () => {
       expect(typeMap.get("$.str")).toBe("string");
       expect(typeMap.get("$.num")).toBe("number");
       expect(typeMap.get("$.nil")).toBe("null");
-    });
-  });
-
-  describe("getValueAtPath - edge cases", () => {
-    it("should return undefined when traversing through null", () => {
-      const input = '{"a": null}';
-      const value = getValueAtPath(input, "$.a.b");
-      expect(value).toBeUndefined();
-    });
-
-    it("should return undefined when using array index on non-array", () => {
-      const input = '{"a": "string"}';
-      const value = getValueAtPath(input, "$.a[0]");
-      expect(value).toBeUndefined();
-    });
-
-    it("should return undefined when using object key on non-object", () => {
-      const input = '{"a": 42}';
-      const value = getValueAtPath(input, "$.a.b");
-      expect(value).toBeUndefined();
-    });
-
-    it("should handle path without leading $.", () => {
-      const input = '{"name": "John"}';
-      const value = getValueAtPath(input, "name");
-      expect(value).toBe("John");
     });
   });
 

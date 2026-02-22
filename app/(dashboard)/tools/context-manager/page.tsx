@@ -29,6 +29,7 @@ import {
   Bug,
   Blocks,
   Bot,
+  AlertTriangle,
 } from "lucide-react";
 import { useContextManager } from "@/hooks/use-context-manager";
 import { useToast } from "@/hooks/use-toast";
@@ -50,7 +51,7 @@ export default function ContextManagerPage() {
   const { t } = useTranslation();
   const { addToast } = useToast();
   const { navigateTo } = useSmartNavigation();
-  const { optimizeContextWithAI, aiResult, isAILoading } = useAISuggest();
+  const { optimizeContextWithAI, aiResult, isAILoading, aiError } = useAISuggest();
   const { isAIEnabled } = useAISettingsStore();
   const {
     windows,
@@ -662,6 +663,15 @@ export default function ContextManagerPage() {
                       ))}
                     </div>
                   )}
+                </Card>
+              )}
+
+              {isAIEnabled && aiError && (
+                <Card className="p-3 border-danger/30 bg-danger/5">
+                  <p className="text-xs text-danger font-bold flex items-center gap-2">
+                    <AlertTriangle className="size-3.5 shrink-0" />
+                    {t("ai.errorOccurred", { message: aiError.message })}
+                  </p>
                 </Card>
               )}
             </>

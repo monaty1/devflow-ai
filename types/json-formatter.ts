@@ -5,15 +5,11 @@ export type JsonFormatMode = "format" | "minify" | "validate" | "to-yaml" | "to-
 export interface JsonFormatterConfig {
   indentSize: 2 | 4;
   sortKeys: boolean;
-  quoteStyle: "double" | "single";
-  escapeHtml: boolean;
 }
 
 export const DEFAULT_FORMATTER_CONFIG: JsonFormatterConfig = {
   indentSize: 2,
   sortKeys: false,
-  quoteStyle: "double",
-  escapeHtml: false,
 };
 
 export interface JsonValidationError {

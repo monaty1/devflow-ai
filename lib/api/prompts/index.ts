@@ -38,6 +38,7 @@ Return ONLY a valid JSON object (no markdown fences, no commentary) matching thi
 - 0-49: Significant issues that must be addressed before use
 
 ## Rules
+- Respond in the same language the user writes in (English or Spanish)
 - Be specific about line numbers and categories
 - Provide actionable, educational suggestions (target audience: junior-to-mid developers)
 - refactoredCode must be complete and working — not a diff or partial snippet
@@ -77,6 +78,7 @@ Return ONLY a valid JSON object (no markdown fences):
 - Domain accuracy: uses correct terminology for the field (20%)
 
 ## Rules
+- Respond in the same language the user writes in (English or Spanish)
 - Always suggest exactly 5 names, sorted by score descending
 - Include at least one shorter alternative (≤12 chars) and one more descriptive option
 - Return ONLY valid JSON, no markdown fences
@@ -105,6 +107,7 @@ Return ONLY a valid JSON object (no markdown fences):
 }
 
 ## Rules
+- Respond in the same language the user writes in (English or Spanish)
 - Suggest 1-3 patterns: from simple/readable to comprehensive/strict
 - Use JavaScript-compatible regex syntax (no lookbehinds unless noted)
 - Explain each part of the regex step by step in the reasoning
@@ -142,6 +145,7 @@ Return ONLY a valid JSON object (no markdown fences):
 - 0-49: Vague or ambiguous — needs significant restructuring
 
 ## Rules
+- Respond in the same language the user writes in (English or Spanish)
 - Each changelog entry explains ONE specific change made
 - Preserve the original intent — enhance, don't change the meaning
 - Return ONLY valid JSON, no markdown fences
@@ -171,6 +175,7 @@ Return ONLY a valid JSON object (no markdown fences):
 }
 
 ## Rules
+- Respond in the same language the user writes in (English or Spanish)
 - Suggest exactly 3 commit messages, from most specific to most concise
 - Use imperative mood: "add" not "added", "fix" not "fixed"
 - Subject line max 72 characters, no period at end
@@ -202,6 +207,7 @@ Return ONLY a valid JSON object (no markdown fences):
 }
 
 ## Rules
+- Respond in the same language the user writes in (English or Spanish)
 - Use standard 5-field cron format: minute(0-59) hour(0-23) dayOfMonth(1-31) month(1-12) dayOfWeek(0-6, 0=Sunday)
 - Suggest 1-3 expressions: the exact match, then alternatives if ambiguous
 - Explain each field clearly in the reasoning
@@ -237,6 +243,7 @@ Return ONLY a valid JSON object (no markdown fences):
 }
 
 ## Rules
+- Respond in the same language the user writes in (English or Spanish)
 - Provide 2-3 insights: structure summary, potential issues, improvement suggestions
 - Be specific about data types, nesting depth, and patterns found
 - Mention if the JSON follows common schemas (JSON:API, HAL, OpenAPI, etc.)
@@ -267,6 +274,7 @@ Return ONLY a valid JSON object (no markdown fences):
 }
 
 ## Rules
+- Respond in the same language the user writes in (English or Spanish)
 - Provide 2-3 insights: content identification, purpose analysis, security notes
 - Flag exposed credentials, API keys, or tokens immediately
 - For JSON content, summarize the schema structure
@@ -297,6 +305,7 @@ Return ONLY a valid JSON object (no markdown fences):
 }
 
 ## Rules
+- Respond in the same language the user writes in (English or Spanish)
 - Suggest exactly 3 improvements, sorted by impact
 - Focus on: type safety, immutability, validation, naming, API best practices
 - Be specific to the language shown (TypeScript, Java, Python, Go, C#)
@@ -326,6 +335,7 @@ Return ONLY a valid JSON object (no markdown fences):
 }
 
 ## Rules
+- Respond in the same language the user writes in (English or Spanish)
 - Provide 2-3 actionable insights with real-world examples
 - Compare with commonly confused status codes (401 vs 403, 301 vs 302, etc.)
 - Mention relevant HTTP headers (WWW-Authenticate, Retry-After, Location, etc.)
@@ -356,6 +366,7 @@ Return ONLY a valid JSON object (no markdown fences):
 }
 
 ## Rules
+- Respond in the same language the user writes in (English or Spanish)
 - Suggest 2-3 improvements: efficiency, modern features, accessibility
 - Mention Tailwind v4 features when applicable (size-*, text-balance, etc.)
 - Flag conflicting utilities (e.g., both 'hidden' and 'flex')
@@ -386,6 +397,7 @@ Return ONLY a valid JSON object (no markdown fences):
 }
 
 ## Rules
+- Respond in the same language the user writes in (English or Spanish)
 - Provide exactly 3 strategies: model selection, architecture, prompt optimization
 - Include specific cost reduction estimates when possible
 - Mention caching, batching, streaming, and prompt compression techniques
@@ -416,6 +428,7 @@ Return ONLY a valid JSON object (no markdown fences):
 }
 
 ## Rules
+- Respond in the same language the user writes in (English or Spanish)
 - Provide exactly 3 insights: context quality assessment, priority optimization, missing context recommendations
 - Score the overall context quality (0-100) in the first suggestion
 - Be specific about which files to prioritize, demote, or add

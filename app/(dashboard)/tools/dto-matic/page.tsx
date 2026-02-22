@@ -24,6 +24,7 @@ import {
   FileCode,
   Download,
   Bot,
+  AlertTriangle,
 } from "lucide-react";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { useDtoMatic } from "@/hooks/use-dto-matic";
@@ -59,7 +60,7 @@ export default function DtoMaticPage() {
     isValidJson,
   } = useDtoMatic();
 
-  const { optimizeDtoWithAI, aiResult, isAILoading } = useAISuggest();
+  const { optimizeDtoWithAI, aiResult, isAILoading, aiError } = useAISuggest();
   const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
 
   const [view, setView] = useState<"code" | "schema" | "mock" | string>("code");
@@ -275,6 +276,15 @@ export default function DtoMaticPage() {
                       ))}
                     </div>
                   )}
+                </Card>
+              )}
+
+              {isAIEnabled && aiError && (
+                <Card className="p-3 border-danger/30 bg-danger/5">
+                  <p className="text-xs text-danger font-bold flex items-center gap-2">
+                    <AlertTriangle className="size-3.5 shrink-0" />
+                    {t("ai.errorOccurred", { message: aiError.message })}
+                  </p>
                 </Card>
               )}
 

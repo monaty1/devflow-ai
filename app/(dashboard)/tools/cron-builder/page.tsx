@@ -85,19 +85,21 @@ export default function CronBuilderPage() {
     expression,
     explanation,
     nextExecutions,
+    validation,
     config,
+    configFormat,
     setField,
     setExpression,
+    setConfigFormat,
     reset,
   } = useCronBuilder();
 
-  const { generateCronWithAI, aiResult: aiCronResult, isAILoading: isAICronLoading } = useAISuggest();
+  const { generateCronWithAI, aiResult: aiCronResult, isAILoading: isAICronLoading, aiError } = useAISuggest();
   const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
   const { addToast } = useToast();
   const [naturalLanguageInput, setNaturalLanguageInput] = useState("");
 
   const [activeTab, setActiveTab] = useState<"builder" | "infra" | string>("builder");
-  const [configFormat, setConfigFormat] = useState<ConfigFormat>("kubernetes");
 
   const applyCronFromAI = useCallback((cronString: string) => {
     try {
@@ -257,6 +259,15 @@ export default function CronBuilderPage() {
                     </div>
                   )}
 
+                  {isAIEnabled && aiError && (
+                    <Card className="p-3 border-danger/30 bg-danger/5">
+                      <p className="text-xs text-danger font-bold flex items-center gap-2">
+                        <AlertTriangle className="size-3.5 shrink-0" />
+                        {t("ai.errorOccurred", { message: aiError.message })}
+                      </p>
+                    </Card>
+                  )}
+
                   <div className="bg-muted/50 p-6 rounded-2xl border border-divider text-center shadow-inner relative overflow-hidden group">
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                     <p className="text-4xl font-black tracking-widest text-primary font-mono select-all">
@@ -269,6 +280,19 @@ export default function CronBuilderPage() {
                       <CopyButton text={Object.values(expression).join(" ")} variant="ghost" size="sm" />
                     </div>
                   </div>
+
+                  {!validation.isValid && validation.errors.length > 0 && (
+                    <div className="flex items-start gap-3 p-3 bg-danger/10 border border-danger/20 rounded-xl text-sm">
+                      <AlertTriangle className="size-4 text-danger shrink-0 mt-0.5" aria-hidden="true" />
+                      <ul className="space-y-1">
+                        {validation.errors.map((err, i) => (
+                          <li key={i} className="text-danger font-medium text-xs">
+                            <span className="font-bold">{err.field}:</span> {err.message}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
                   <div className="space-y-4">
                     {[
@@ -292,6 +316,7 @@ export default function CronBuilderPage() {
                           }}
                           className="flex-1 font-mono font-bold"
                           placeholder="*"
+                          aria-label={f.label}
                         />
                         <span className="text-[10px] opacity-30 font-mono w-10" title={`Valid range: ${f.range}`}>{f.range}</span>
                       </div>
@@ -326,11 +351,12 @@ export default function CronBuilderPage() {
 
               <Tabs.Panel id="infra">
                 <div className="space-y-6 mt-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2" role="radiogroup" aria-label={t("cron.infraFormat")}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2" aria-label={t("cron.infraFormat")}>
                     {INFRA_FORMATS.map((f) => (
                       <Button
                         key={f.id}
                         variant={configFormat === f.id ? "primary" : "ghost"}
+                        aria-pressed={configFormat === f.id}
                         onPress={() => setConfigFormat(f.id)}
                         className={cn(
                           "flex flex-col items-center justify-center p-3 h-auto rounded-xl gap-2",

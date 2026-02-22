@@ -205,7 +205,7 @@ export default function PromptAnalyzerPage() {
       dimensions: dimDeltas,
     };
   }, [result, compareItem]);
-  const { refineWithAI, aiResult: aiRefineResult, isAILoading: isAIRefining } = useAIRefine();
+  const { refineWithAI, aiResult: aiRefineResult, isAILoading: isAIRefining, aiError } = useAIRefine();
   const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
   const { addToast } = useToast();
   const { navigateTo } = useSmartNavigation();
@@ -474,7 +474,7 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
                 <p className="mt-1.5 text-sm text-muted-foreground">
                   {t("promptAnalyzer.scoreResult", { score: result.score, category: t(`promptAnalyzer.category.${result.category}`) })}
                 </p>
-                <div className="mt-4 grid grid-cols-3 gap-3">
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="flex items-center gap-2 rounded-lg bg-muted/40 px-3 py-2">
                     <FileText className="size-4 shrink-0 text-blue-500" />
                     <span className="text-sm font-medium">{t("common.tokens", { count: result.tokenCount })}</span>
@@ -697,6 +697,15 @@ ${result.refinedPrompt ? `## Refined Prompt\n${result.refinedPrompt}` : ""}
                   )}
                 </div>
               )}
+            </Card>
+          )}
+
+          {isAIEnabled && aiError && (
+            <Card className="p-3 border-danger/30 bg-danger/5">
+              <p className="text-xs text-danger font-bold flex items-center gap-2">
+                <AlertTriangle className="size-3.5 shrink-0" />
+                {t("ai.errorOccurred", { message: aiError.message })}
+              </p>
             </Card>
           )}
 
