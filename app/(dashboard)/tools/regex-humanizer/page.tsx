@@ -40,6 +40,7 @@ export default function RegexHumanizerPage() {
     explanation,
     testResult,
     isExplaining,
+    error: regexError,
     setPattern,
     explain,
     generate,
@@ -47,7 +48,7 @@ export default function RegexHumanizerPage() {
     reset,
   } = useRegexHumanizer();
 
-  const { generateRegexWithAI, aiResult: aiRegexResult, isAILoading: isAIGenerating } = useAISuggest();
+  const { generateRegexWithAI, aiResult: aiRegexResult, isAILoading: isAIGenerating, aiError } = useAISuggest();
   const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
   const { addToast } = useToast();
   const [testText, setTestText] = useState("john.doe@example.com, test@devflow.ai, invalid-email");
@@ -107,6 +108,15 @@ export default function RegexHumanizerPage() {
       />
 
       <ToolSuggestions toolId="regex-humanizer" input={pattern} output={explanation?.explanation || ""} />
+
+      {(regexError || aiError) && (
+        <Card className="p-3 border-danger/30 bg-danger/5">
+          <p className="text-xs text-danger font-bold flex items-center gap-2">
+            <AlertTriangle className="size-3.5 shrink-0" />
+            {regexError ?? aiError?.message}
+          </p>
+        </Card>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Pattern Input & Generation */}
@@ -216,6 +226,7 @@ export default function RegexHumanizerPage() {
                     }
                   }}
                   isDisabled={!generateDesc.trim()}
+                  isLoading={isAIGenerating}
                   variant="primary"
                   className="w-full h-12 font-bold shadow-lg shadow-primary/20"
                 >
@@ -366,6 +377,45 @@ export default function RegexHumanizerPage() {
                       <pre className="text-sm font-mono leading-relaxed bg-muted/30 p-4 rounded-xl whitespace-pre-wrap">
                         {explanation.explanation}
                       </pre>
+
+                      {/* AI Deep Analysis */}
+                      {isAIEnabled && (
+                        <div className="mt-5 p-4 border border-violet-500/20 bg-violet-500/5 rounded-xl">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <Bot className="size-4 text-violet-500" />
+                              <span className="text-xs font-bold text-violet-600 dark:text-violet-400">{t("regex.aiDeepAnalysis")}</span>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="font-bold text-xs text-violet-600 dark:text-violet-400 border border-violet-500/30 hover:bg-violet-500/10"
+                              isLoading={isAIGenerating}
+                              onPress={() => {
+                                const ctx = `Regex: /${explanation.pattern}/${explanation.flags}\nSafety score: ${explanation.safetyScore}/100\nWarnings: ${explanation.warnings.length > 0 ? explanation.warnings.join("; ") : "None"}\nGroups: ${explanation.groups.length}\nCommon pattern: ${explanation.commonPattern ?? "None detected"}`;
+                                void generateRegexWithAI(ctx);
+                              }}
+                            >
+                              <Bot className="size-3.5 mr-1" /> {t("regex.aiExplainBtn")}
+                            </Button>
+                          </div>
+                          {isAIGenerating && (
+                            <p className="text-xs text-violet-500 animate-pulse">{t("regex.aiAnalyzing")}</p>
+                          )}
+                          {aiRegexResult && !isAIGenerating && aiRegexResult.suggestions.length > 0 && (
+                            <div className="space-y-2.5">
+                              {aiRegexResult.suggestions.map((s, i) => (
+                                <div key={i} className="p-3 bg-background/80 rounded-lg border border-violet-500/10">
+                                  <p className="text-xs text-foreground/90 leading-relaxed">{s.value}</p>
+                                  {s.reasoning && (
+                                    <p className="text-[10px] text-muted-foreground italic mt-1.5">{s.reasoning}</p>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </Tabs.Panel>
 
