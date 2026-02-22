@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
 import {
   AlertDialog,
   Chip,
@@ -10,11 +10,11 @@ import {
   Select,
   Label,
   ListBox,
+  Modal,
 } from "@heroui/react";
 import {
   Plus,
   Trash2,
-  FolderPlus,
   BookOpen,
   Coins,
   FileCode,
@@ -22,9 +22,12 @@ import {
   FolderTree,
   Cpu,
   Upload,
-  Copy,
   FilePlus2,
   ClipboardPaste,
+  Eye,
+  Search,
+  Bug,
+  Blocks,
 } from "lucide-react";
 import { useContextManager } from "@/hooks/use-context-manager";
 import { useToast } from "@/hooks/use-toast";
@@ -63,12 +66,17 @@ export default function ContextManagerPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: "document" | "window"; id: string; name: string } | null>(null);
   const [stripComments, setStripComments] = useState(true);
 
+  // Preview modals
+  const [previewDoc, setPreviewDoc] = useState<Document | null>(null);
+  const [showExportPreview, setShowExportPreview] = useState(false);
+
   // Controlled modal form state
   const [docTitle, setDocTitle] = useState("");
   const [docPath, setDocPath] = useState("");
   const [docType, setDocType] = useState<DocumentType>("code");
   const [docPriority, setDocPriority] = useState<Priority>("medium");
   const [docContent, setDocContent] = useState("");
+  const [docInstructions, setDocInstructions] = useState("");
 
   const resetDocForm = () => {
     setDocTitle("");
@@ -76,6 +84,7 @@ export default function ContextManagerPage() {
     setDocType("code");
     setDocPriority("medium");
     setDocContent("");
+    setDocInstructions("");
   };
 
   // Auto-incremental window name
@@ -104,38 +113,23 @@ export default function ContextManagerPage() {
     return "notes";
   };
 
-  // Queue files when window was just auto-created (state not yet updated)
-  const pendingFilesRef = useRef<{ name: string; content: string; type: DocumentType }[]>([]);
+  // Ingest handler — creates window if needed, returns target ID
+  const ensureWindow = useCallback((): string => {
+    if (activeWindowId) return activeWindowId;
+    return createWindow(getNextWindowName());
+  }, [activeWindowId, createWindow, getNextWindowName]);
 
   // Add files directly (skip modal)
-  const addFilesDirectly = useCallback((files: { name: string; content: string; type: DocumentType }[]) => {
-    if (!activeWindowId) {
-      pendingFilesRef.current = files;
-      return;
-    }
+  const addFilesDirectly = useCallback((files: { name: string; content: string; type: DocumentType }[], targetWindowId?: string) => {
+    const wId = targetWindowId ?? activeWindowId;
+    if (!wId) return;
     for (const file of files) {
-      addDocument(file.name, file.content, file.type, "medium", [], file.name);
+      addDocument(file.name, file.content, file.type, "medium", [], file.name, undefined, wId);
     }
     if (files.length === 1) {
       addToast(t("ctxMgr.addedToContext", { title: files[0]?.name ?? "" }), "success");
     } else {
       addToast(t("ctxMgr.filesAdded", { count: String(files.length) }), "success");
-    }
-  }, [activeWindowId, addDocument, addToast, t]);
-
-  // Process pending files when activeWindowId updates
-  useEffect(() => {
-    if (pendingFilesRef.current.length > 0 && activeWindowId) {
-      const files = pendingFilesRef.current;
-      pendingFilesRef.current = [];
-      for (const file of files) {
-        addDocument(file.name, file.content, file.type, "medium", [], file.name);
-      }
-      if (files.length === 1) {
-        addToast(t("ctxMgr.addedToContext", { title: files[0]?.name ?? "" }), "success");
-      } else {
-        addToast(t("ctxMgr.filesAdded", { count: String(files.length) }), "success");
-      }
     }
   }, [activeWindowId, addDocument, addToast, t]);
 
@@ -167,14 +161,10 @@ export default function ContextManagerPage() {
       const valid = results.filter((r) => r.content.length > 0);
       if (valid.length === 0) return;
 
-      if (!activeWindowId) {
-        createWindow(getNextWindowName());
-        pendingFilesRef.current = valid;
-      } else {
-        addFilesDirectly(valid);
-      }
+      const wId = ensureWindow();
+      addFilesDirectly(valid, wId);
     });
-  }, [activeWindowId, createWindow, getNextWindowName, addFilesDirectly]);
+  }, [ensureWindow, addFilesDirectly]);
 
   // Global drag handlers
   const handleDragEnter = useCallback((e: React.DragEvent) => {
@@ -223,28 +213,44 @@ export default function ContextManagerPage() {
     switch (key) {
       case "title":
         return (
-          <div className="flex items-center gap-2.5">
+          <div
+            className="flex items-center gap-2.5 cursor-pointer group/title"
+            role="button"
+            tabIndex={0}
+            onClick={() => setPreviewDoc(doc)}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setPreviewDoc(doc); } }}
+            aria-label={`${t("ctxMgr.preview")}: ${doc.title}`}
+          >
             <div className="p-1.5 bg-primary/10 rounded-md text-primary">
               {doc.type === "code" ? <FileCode className="size-3.5" /> : <FileText className="size-3.5" />}
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="font-bold text-xs truncate">{doc.title}</span>
+              <span className="font-bold text-xs truncate group-hover/title:text-primary transition-colors">{doc.title}</span>
               {doc.filePath && doc.filePath !== doc.title && (
                 <span className="text-[10px] text-muted-foreground font-mono truncate">{doc.filePath}</span>
               )}
             </div>
           </div>
         );
-      case "tokens":
+      case "tokens": {
+        const totalTokens = activeWindow?.totalTokens ?? 1;
+        const pct = totalTokens > 0 ? Math.round((doc.tokenCount / totalTokens) * 100) : 0;
         return (
-          <span className="font-mono text-xs font-bold tabular-nums">{doc.tokenCount.toLocaleString()}</span>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs font-bold tabular-nums">{doc.tokenCount.toLocaleString()}</span>
+            <div className="h-1.5 w-12 bg-muted rounded-full overflow-hidden">
+              <div className="h-full bg-primary rounded-full" style={{ width: `${pct}%` }} />
+            </div>
+            <span className="text-[10px] text-muted-foreground">{pct}%</span>
+          </div>
         );
+      }
       case "priority":
         return (
           <select
             value={doc.priority}
             onChange={(e) => changePriority(doc.id, e.target.value as Priority)}
-            className="bg-transparent text-xs font-bold text-foreground border-none outline-none cursor-pointer"
+            className="bg-transparent text-xs font-bold text-foreground border-none outline-none cursor-pointer dark:[color-scheme:dark] dark:[&_option]:bg-default-100 dark:[&_option]:text-foreground"
             aria-label={t("ctxMgr.priorityLabel")}
           >
             <option value="high">{t("ctxMgr.priorityHigh")}</option>
@@ -261,7 +267,7 @@ export default function ContextManagerPage() {
       default:
         return String(doc[key as keyof typeof doc] ?? "");
     }
-  }, [changePriority, t]);
+  }, [changePriority, t, activeWindow]);
 
   // Hidden file input
   const fileInputElement = (
@@ -332,23 +338,23 @@ export default function ContextManagerPage() {
             {windows.map((w) => (
               <div
                 key={w.id}
-                role="button"
-                tabIndex={0}
-                onClick={() => setActiveWindowId(w.id)}
-                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActiveWindowId(w.id); } }}
                 className={cn(
-                  "group flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-all border border-transparent",
+                  "group flex items-center justify-between p-2.5 rounded-lg transition-all border border-transparent",
                   activeWindowId === w.id
                     ? "bg-primary/10 border-primary/20 text-primary"
                     : "hover:bg-muted text-muted-foreground"
                 )}
-                aria-label={w.name}
-                aria-pressed={activeWindowId === w.id}
               >
-                <div className="flex flex-col min-w-0">
+                <button
+                  type="button"
+                  onClick={() => setActiveWindowId(w.id)}
+                  className="flex flex-col min-w-0 flex-1 text-left bg-transparent border-none outline-none cursor-pointer"
+                  aria-label={w.name}
+                  aria-pressed={activeWindowId === w.id}
+                >
                   <span className="text-xs font-bold truncate">{w.name}</span>
                   <span className="text-[10px] opacity-60">{w.documents.length} docs · {w.totalTokens.toLocaleString()} tok</span>
-                </div>
+                </button>
                 <Button
                   isIconOnly
                   size="sm"
@@ -399,7 +405,7 @@ export default function ContextManagerPage() {
                         const preset = MODEL_PRESETS.find(m => m.id === e.target.value);
                         if (preset) setMaxTokens(preset.maxTokens);
                       }}
-                      className="bg-transparent text-xs font-bold text-foreground border-none outline-none cursor-pointer"
+                      className="bg-transparent text-xs font-bold text-foreground border-none outline-none cursor-pointer dark:[color-scheme:dark] dark:[&_option]:bg-default-100 dark:[&_option]:text-foreground"
                       aria-label={t("ctxMgr.modelPreset")}
                     >
                       {MODEL_PRESETS.filter(m => m.id !== "custom").map(m => (
@@ -433,6 +439,13 @@ export default function ContextManagerPage() {
                         />
                       </div>
                     </div>
+                    {/* Utilization warning chips */}
+                    {activeWindow.utilizationPercentage > 100 && (
+                      <Chip size="sm" variant="soft" color="danger" className="text-[10px] font-bold">{t("ctxMgr.overLimit")}</Chip>
+                    )}
+                    {activeWindow.utilizationPercentage > 80 && activeWindow.utilizationPercentage <= 100 && (
+                      <Chip size="sm" variant="soft" color="warning" className="text-[10px] font-bold">{t("ctxMgr.nearLimit")}</Chip>
+                    )}
                   </div>
 
                   {/* Divider */}
@@ -468,6 +481,14 @@ export default function ContextManagerPage() {
                     >
                       <span className="text-[10px] font-bold text-muted-foreground">{t("ctxMgr.stripComments")}</span>
                     </Checkbox>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="font-bold text-xs h-9 gap-1"
+                      onPress={() => setShowExportPreview(true)}
+                    >
+                      <Eye className="size-3" /> {t("ctxMgr.exportPreview")}
+                    </Button>
                     <CopyButton
                       getText={() => exportForAI({ stripComments }) || ""}
                       label={t("ctxMgr.copyAiReady")}
@@ -584,21 +605,24 @@ export default function ContextManagerPage() {
               </div>
             </>
           ) : (
-            /* Empty state — no window selected */
+            /* Empty state — redesigned with value proposition */
             <Card className="p-12 border-dashed border-2 bg-muted/20 flex flex-col items-center justify-center text-center min-h-[500px]">
               <div className="size-20 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-full flex items-center justify-center mb-6">
                 <BookOpen className="size-10 text-blue-500/50" />
               </div>
               <h3 className="text-2xl font-black mb-2 text-foreground/60">{t("ctxMgr.selectCreateTitle")}</h3>
-              <p className="text-muted-foreground max-w-md mx-auto font-medium mb-8">
+              <p className="text-muted-foreground max-w-md mx-auto font-bold mb-2">
+                {t("ctxMgr.emptyValueProp")}
+              </p>
+              <p className="text-muted-foreground/70 max-w-md mx-auto font-medium mb-8 text-sm">
                 {t("ctxMgr.selectCreateDesc")}
               </p>
 
               <div className="grid gap-4 sm:grid-cols-3 max-w-lg w-full mb-8">
                 {[
-                  { icon: FolderPlus, label: t("ctxMgr.step1"), desc: t("ctxMgr.step1Desc") },
-                  { icon: Upload, label: t("ctxMgr.step2"), desc: t("ctxMgr.step2Desc") },
-                  { icon: Copy, label: t("ctxMgr.step3"), desc: t("ctxMgr.step3Desc") },
+                  { icon: Search, label: t("ctxMgr.useCaseReview"), desc: t("ctxMgr.useCaseReviewDesc") },
+                  { icon: Bug, label: t("ctxMgr.useCaseBugFix"), desc: t("ctxMgr.useCaseBugFixDesc") },
+                  { icon: Blocks, label: t("ctxMgr.useCaseFeature"), desc: t("ctxMgr.useCaseFeatureDesc") },
                 ].map((step, i) => (
                   <div key={i} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-muted/30 border border-default-200">
                     <div className="size-10 bg-primary/10 rounded-xl flex items-center justify-center">
@@ -637,7 +661,7 @@ export default function ContextManagerPage() {
               </AlertDialog.Heading>
             </AlertDialog.Header>
             <AlertDialog.Body>
-              <p>
+              <p className="text-white">
                 {deleteConfirm?.type === "window"
                   ? t("ctxMgr.confirmDeleteWindowDesc", { name: deleteConfirm.name })
                   : t("ctxMgr.confirmDeleteDesc", { name: deleteConfirm?.name ?? "" })}
@@ -664,104 +688,183 @@ export default function ContextManagerPage() {
         </AlertDialog.Container>
       </AlertDialog.Backdrop>
 
-      {/* Add Document Modal */}
-      {showAddDoc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="add-doc-title">
-          <Card className="w-full max-w-2xl p-8 shadow-2xl border-indigo-500/20">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 bg-indigo-500 rounded-2xl text-white shadow-lg shadow-indigo-500/30">
-                <FileCode className="size-6" />
-              </div>
-              <div>
-                <h3 id="add-doc-title" className="text-2xl font-black">{t("ctxMgr.addContextSource")}</h3>
-                <p className="text-xs text-muted-foreground font-medium">{t("ctxMgr.addContextSourceDesc")}</p>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <Input placeholder={t("ctxMgr.placeholderFilename")} value={docTitle} onChange={(e) => setDocTitle(e.target.value)} variant="primary" className="font-bold" />
-                <Input placeholder={t("ctxMgr.placeholderFilePath")} value={docPath} onChange={(e) => setDocPath(e.target.value)} variant="primary" />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Select value={docType} onChange={(value) => { if (value) setDocType(value as DocumentType); }} className="w-full" aria-label={t("ctxMgr.documentTypeLabel")}>
-                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("ctxMgr.documentTypeLabel")}</Label>
-                    <Select.Trigger className="h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm">
-                      <Select.Value /><Select.Indicator />
-                    </Select.Trigger>
-                    <Select.Popover>
-                      <ListBox>
-                        <ListBox.Item id="code" textValue={t("ctxMgr.optSourceCode")}>{t("ctxMgr.optSourceCode")}<ListBox.ItemIndicator /></ListBox.Item>
-                        <ListBox.Item id="documentation" textValue={t("ctxMgr.optTechnicalDocs")}>{t("ctxMgr.optTechnicalDocs")}<ListBox.ItemIndicator /></ListBox.Item>
-                        <ListBox.Item id="api" textValue={t("ctxMgr.optApiSpec")}>{t("ctxMgr.optApiSpec")}<ListBox.ItemIndicator /></ListBox.Item>
-                        <ListBox.Item id="notes" textValue={t("ctxMgr.optContextInstructions")}>{t("ctxMgr.optContextInstructions")}<ListBox.ItemIndicator /></ListBox.Item>
-                      </ListBox>
-                    </Select.Popover>
-                  </Select>
+      {/* Add Document Modal — HeroUI Modal for proper focus trap + a11y */}
+      <Modal isOpen={showAddDoc} onOpenChange={(open) => { if (!open) { resetDocForm(); setShowAddDoc(false); } }}>
+        <Modal.Backdrop className="backdrop-blur-md" />
+        <Modal.Container>
+          <Modal.Dialog className="sm:max-w-[700px]">
+            <Modal.CloseTrigger />
+            <Modal.Header>
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-indigo-500 rounded-2xl text-white shadow-lg shadow-indigo-500/30">
+                  <FileCode className="size-6" />
                 </div>
-                <div className="space-y-1">
-                  <Select value={docPriority} onChange={(value) => { if (value) setDocPriority(value as Priority); }} className="w-full" aria-label={t("ctxMgr.priorityLabel")}>
-                    <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("ctxMgr.priorityLabel")}</Label>
-                    <Select.Trigger className="h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm">
-                      <Select.Value /><Select.Indicator />
-                    </Select.Trigger>
-                    <Select.Popover>
-                      <ListBox>
-                        <ListBox.Item id="high" textValue={t("ctxMgr.optHighCrucial")}>{t("ctxMgr.optHighCrucial")}<ListBox.ItemIndicator /></ListBox.Item>
-                        <ListBox.Item id="medium" textValue={t("ctxMgr.optMediumStandard")}>{t("ctxMgr.optMediumStandard")}<ListBox.ItemIndicator /></ListBox.Item>
-                        <ListBox.Item id="low" textValue={t("ctxMgr.optLowReference")}>{t("ctxMgr.optLowReference")}<ListBox.ItemIndicator /></ListBox.Item>
-                      </ListBox>
-                    </Select.Popover>
-                  </Select>
+                <div>
+                  <Modal.Heading className="text-2xl font-black">{t("ctxMgr.addContextSource")}</Modal.Heading>
+                  <p className="text-xs text-muted-foreground font-medium">{t("ctxMgr.addContextSourceDesc")}</p>
                 </div>
               </div>
+            </Modal.Header>
+            <Modal.Body>
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <Input placeholder={t("ctxMgr.placeholderFilename")} value={docTitle} onChange={(e) => setDocTitle(e.target.value)} variant="primary" className="font-bold" aria-label={t("ctxMgr.docTitle")} />
+                  <Input placeholder={t("ctxMgr.placeholderFilePath")} value={docPath} onChange={(e) => setDocPath(e.target.value)} variant="primary" aria-label={t("ctxMgr.docPath")} />
+                </div>
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("ctxMgr.contentLabel")}</label>
-                <TextArea
-                  value={docContent}
-                  onChange={(e) => setDocContent(e.target.value)}
-                  onKeyDown={(e) => {
-                    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-                      e.preventDefault();
-                      if (docTitle && docContent) {
-                        if (!activeWindowId) createWindow(getNextWindowName());
-                        addDocument(docTitle, docContent, docType, docPriority, [], docPath);
-                        addToast(t("ctxMgr.addedToContext", { title: docTitle }), "success");
-                        resetDocForm();
-                        setShowAddDoc(false);
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <Select value={docType} onChange={(value) => { if (value) setDocType(value as DocumentType); }} className="w-full" aria-label={t("ctxMgr.documentTypeLabel")}>
+                      <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("ctxMgr.documentTypeLabel")}</Label>
+                      <Select.Trigger className="h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm">
+                        <Select.Value /><Select.Indicator />
+                      </Select.Trigger>
+                      <Select.Popover>
+                        <ListBox>
+                          <ListBox.Item id="code" textValue={t("ctxMgr.optSourceCode")}>{t("ctxMgr.optSourceCode")}<ListBox.ItemIndicator /></ListBox.Item>
+                          <ListBox.Item id="documentation" textValue={t("ctxMgr.optTechnicalDocs")}>{t("ctxMgr.optTechnicalDocs")}<ListBox.ItemIndicator /></ListBox.Item>
+                          <ListBox.Item id="api" textValue={t("ctxMgr.optApiSpec")}>{t("ctxMgr.optApiSpec")}<ListBox.ItemIndicator /></ListBox.Item>
+                          <ListBox.Item id="notes" textValue={t("ctxMgr.optContextInstructions")}>{t("ctxMgr.optContextInstructions")}<ListBox.ItemIndicator /></ListBox.Item>
+                        </ListBox>
+                      </Select.Popover>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Select value={docPriority} onChange={(value) => { if (value) setDocPriority(value as Priority); }} className="w-full" aria-label={t("ctxMgr.priorityLabel")}>
+                      <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("ctxMgr.priorityLabel")}</Label>
+                      <Select.Trigger className="h-10 rounded-xl border-2 border-divider bg-background px-3 text-sm">
+                        <Select.Value /><Select.Indicator />
+                      </Select.Trigger>
+                      <Select.Popover>
+                        <ListBox>
+                          <ListBox.Item id="high" textValue={t("ctxMgr.optHighCrucial")}>{t("ctxMgr.optHighCrucial")}<ListBox.ItemIndicator /></ListBox.Item>
+                          <ListBox.Item id="medium" textValue={t("ctxMgr.optMediumStandard")}>{t("ctxMgr.optMediumStandard")}<ListBox.ItemIndicator /></ListBox.Item>
+                          <ListBox.Item id="low" textValue={t("ctxMgr.optLowReference")}>{t("ctxMgr.optLowReference")}<ListBox.ItemIndicator /></ListBox.Item>
+                        </ListBox>
+                      </Select.Popover>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Instructions field */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("ctxMgr.instructionsLabel")}</label>
+                  <Input
+                    placeholder={t("ctxMgr.instructionsPlaceholder")}
+                    value={docInstructions}
+                    onChange={(e) => setDocInstructions(e.target.value)}
+                    variant="primary"
+                    aria-label={t("ctxMgr.instructionsLabel")}
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("ctxMgr.contentLabel")}</label>
+                  <TextArea
+                    value={docContent}
+                    onChange={(e) => setDocContent(e.target.value)}
+                    onKeyDown={(e) => {
+                      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                        e.preventDefault();
+                        if (docTitle && docContent) {
+                          const wId = ensureWindow();
+                          addDocument(docTitle, docContent, docType, docPriority, [], docPath, docInstructions || undefined, wId);
+                          addToast(t("ctxMgr.addedToContext", { title: docTitle }), "success");
+                          resetDocForm();
+                          setShowAddDoc(false);
+                        }
                       }
-                    }
-                  }}
-                  placeholder={t("ctxMgr.pasteContentPlaceholder")}
-                  className="h-48 w-full resize-none rounded-2xl border-2 border-divider bg-background p-4 font-mono text-sm focus:border-indigo-500 outline-none transition-all shadow-inner"
-                  aria-label={t("ctxMgr.contentLabel")}
-                />
+                    }}
+                    placeholder={t("ctxMgr.pasteContentPlaceholder")}
+                    className="h-48 w-full resize-none rounded-2xl border-2 border-divider bg-background p-4 font-mono text-sm focus:border-indigo-500 outline-none transition-all shadow-inner"
+                    aria-label={t("ctxMgr.contentLabel")}
+                  />
+                </div>
               </div>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                variant="primary"
+                className="flex-1 font-black h-12 text-md"
+                isDisabled={!docTitle.trim() || !docContent.trim()}
+                onPress={() => {
+                  const wId = ensureWindow();
+                  addDocument(docTitle, docContent, docType, docPriority, [], docPath, docInstructions || undefined, wId);
+                  addToast(t("ctxMgr.addedToContext", { title: docTitle }), "success");
+                  resetDocForm();
+                  setShowAddDoc(false);
+                }}
+              >
+                {t("ctxMgr.ingestToContext")}
+              </Button>
+              <Button variant="ghost" className="font-black h-12" onPress={() => { resetDocForm(); setShowAddDoc(false); }}>{t("common.cancel")}</Button>
+            </Modal.Footer>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal>
 
-              <div className="flex gap-3 pt-2">
-                <Button
-                  variant="primary"
-                  className="flex-1 font-black h-12 text-md"
-                  isDisabled={!docTitle.trim() || !docContent.trim()}
-                  onPress={() => {
-                    if (!activeWindowId) createWindow(getNextWindowName());
-                    addDocument(docTitle, docContent, docType, docPriority, [], docPath);
-                    addToast(t("ctxMgr.addedToContext", { title: docTitle }), "success");
-                    resetDocForm();
-                    setShowAddDoc(false);
-                  }}
-                >
-                  {t("ctxMgr.ingestToContext")}
-                </Button>
-                <Button variant="ghost" className="font-black h-12" onPress={() => { resetDocForm(); setShowAddDoc(false); }}>{t("common.cancel")}</Button>
-              </div>
-            </div>
-          </Card>
-        </div>
-      )}
+      {/* Content Preview Modal */}
+      <Modal isOpen={!!previewDoc} onOpenChange={(open) => { if (!open) setPreviewDoc(null); }}>
+        <Modal.Backdrop />
+        <Modal.Container>
+          <Modal.Dialog className="sm:max-w-[700px] max-h-[80vh]">
+            <Modal.CloseTrigger />
+            <Modal.Header>
+              <Modal.Heading>{t("ctxMgr.previewTitle")}</Modal.Heading>
+            </Modal.Header>
+            <Modal.Body className="overflow-auto">
+              {previewDoc && (
+                <div className="space-y-4">
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    <Chip size="sm" variant="primary">{previewDoc.type}</Chip>
+                    <Chip size="sm" variant="secondary">{previewDoc.priority}</Chip>
+                    <Chip size="sm" variant="secondary">{previewDoc.tokenCount.toLocaleString()} tokens</Chip>
+                    {previewDoc.filePath && <Chip size="sm" variant="secondary" className="font-mono">{previewDoc.filePath}</Chip>}
+                  </div>
+                  {previewDoc.instructions && (
+                    <div className="p-3 bg-warning/10 rounded-lg border border-warning/20 text-xs">
+                      <span className="font-bold text-warning">{t("ctxMgr.instructionsLabel")}:</span> {previewDoc.instructions}
+                    </div>
+                  )}
+                  <pre className="font-mono text-xs bg-muted/30 rounded-xl p-4 overflow-auto max-h-[400px] whitespace-pre-wrap break-words border border-divider">
+                    {previewDoc.content.split("\n").slice(0, 100).join("\n")}
+                    {previewDoc.content.split("\n").length > 100 && "\n\n... (truncated)"}
+                  </pre>
+                </div>
+              )}
+            </Modal.Body>
+            <Modal.Footer>
+              <Button slot="close" variant="ghost">{t("common.cancel")}</Button>
+            </Modal.Footer>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal>
+
+      {/* Export Preview Modal */}
+      <Modal isOpen={showExportPreview} onOpenChange={(open) => { if (!open) setShowExportPreview(false); }}>
+        <Modal.Backdrop />
+        <Modal.Container>
+          <Modal.Dialog className="sm:max-w-[800px] max-h-[80vh]">
+            <Modal.CloseTrigger />
+            <Modal.Header>
+              <Modal.Heading>{t("ctxMgr.exportPreviewTitle")}</Modal.Heading>
+            </Modal.Header>
+            <Modal.Body className="overflow-auto">
+              <pre className="font-mono text-xs bg-muted/30 rounded-xl p-4 overflow-auto max-h-[500px] whitespace-pre-wrap break-words border border-divider">
+                {exportForAI({ stripComments }) || ""}
+              </pre>
+            </Modal.Body>
+            <Modal.Footer>
+              <CopyButton
+                getText={() => exportForAI({ stripComments }) || ""}
+                label={t("ctxMgr.copyAiReady")}
+                className="font-bold"
+              />
+              <Button slot="close" variant="ghost">{t("common.cancel")}</Button>
+            </Modal.Footer>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal>
     </div>
   );
 }

@@ -141,11 +141,11 @@ export function DataTable<T extends { id: string | number }>({
             className="w-full sm:max-w-[44%]"
             aria-label={placeholder ?? t("tools.search")}
           >
-            <SearchField.Group className="h-10 rounded-xl bg-default-100">
+            <SearchField.Group className="h-10 rounded-xl bg-default-100 outline-none focus-within:ring-2 focus-within:ring-primary/30 transition-shadow">
               <SearchField.SearchIcon />
               <SearchField.Input
                 placeholder={placeholder ?? t("tools.search")}
-                className="text-sm"
+                className="text-sm outline-none"
               />
               <SearchField.ClearButton />
             </SearchField.Group>
@@ -210,7 +210,7 @@ export function DataTable<T extends { id: string | number }>({
           <label className="flex items-center text-default-400 text-small gap-1.5">
             {t("table.rowsPerPage")}
             <select
-              className="bg-default-100 outline-none text-default-400 text-small font-medium cursor-pointer rounded-lg px-2 py-1 border-none"
+              className="bg-default-100 outline-none text-default-400 text-small font-medium cursor-pointer rounded-lg px-2 py-1 border-none dark:[color-scheme:dark] dark:[&_option]:bg-default-100 dark:[&_option]:text-foreground"
               onChange={(e) => { setRowsPerPage(Number(e.target.value)); setPage(1); }}
               value={rowsPerPage}
             >

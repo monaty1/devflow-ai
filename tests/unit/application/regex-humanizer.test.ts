@@ -340,9 +340,23 @@ describe("Regex Humanizer", () => {
       expect(isValidRegex(regex)).toBe(true);
     });
 
-    it("should return generic phone pattern for description with teléfono without español", () => {
-      // Use a description that contains "teléfono" but NOT "español", "espanol", or "es"
+    it("should return Spanish phone pattern for description with teléfono (inherently Spanish)", () => {
+      // "teléfono" is a Spanish word, so it should trigger the Spanish phone pattern
       const regex = generateRegex("validar teléfono global");
+      const phoneEs = COMMON_PATTERNS.find((p) => p.id === "phone-es")!.pattern;
+      expect(regex).toBe(phoneEs);
+      expect(isValidRegex(regex)).toBe(true);
+    });
+
+    it("should return Spanish phone pattern for 'para movil'", () => {
+      const regex = generateRegex("para movil");
+      const phoneEs = COMMON_PATTERNS.find((p) => p.id === "phone-es")!.pattern;
+      expect(regex).toBe(phoneEs);
+      expect(isValidRegex(regex)).toBe(true);
+    });
+
+    it("should return generic phone pattern for English-only phone description", () => {
+      const regex = generateRegex("phone number");
       expect(regex).toBe("^\\+?[\\d\\s\\-\\(\\)]+$");
       expect(isValidRegex(regex)).toBe(true);
     });

@@ -452,7 +452,7 @@ export default function VariableNameWizardPage() {
                     aria-label={t("varName.batchRename")}
                   />
                   <div className="flex gap-2 mb-4 flex-wrap" role="radiogroup" aria-label={t("varName.batchTarget")}>
-                    {(["camelCase", "snake_case", "PascalCase", "kebab-case", "SCREAMING_SNAKE"] as NamingConvention[]).map(c => (
+                    {(["camelCase", "snake_case", "PascalCase", "kebab-case", "SCREAMING_SNAKE_CASE"] as NamingConvention[]).map(c => (
                       <Button
                         key={c}
                         size="sm"

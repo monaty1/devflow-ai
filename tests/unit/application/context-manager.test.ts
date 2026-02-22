@@ -459,4 +459,146 @@ describe("Context Manager", () => {
       expect(doc.tokenCount).toBeGreaterThan(0);
     });
   });
+
+  describe("addDocumentToWindow - batch accumulation", () => {
+    it("should accumulate 3+ documents correctly", () => {
+      let win = createContextWindow("Batch Test");
+      const doc1 = createDocument("A", "content alpha", "code", "high", [], "src/a.ts");
+      const doc2 = createDocument("B", "content beta", "code", "medium", [], "src/b.ts");
+      const doc3 = createDocument("C", "content gamma", "api", "low", [], "src/c.ts");
+
+      win = addDocumentToWindow(win, doc1);
+      win = addDocumentToWindow(win, doc2);
+      win = addDocumentToWindow(win, doc3);
+
+      expect(win.documents).toHaveLength(3);
+      expect(win.totalTokens).toBe(doc1.tokenCount + doc2.tokenCount + doc3.tokenCount);
+      expect(win.utilizationPercentage).toBeGreaterThanOrEqual(0);
+    });
+
+    it("should accumulate 5 documents and recalculate utilization", () => {
+      let win = createContextWindow("Five Docs", 1000);
+      const docs = Array.from({ length: 5 }, (_, i) =>
+        createDocument(`Doc${i}`, `Content for document number ${i} with some text`, "code", "medium", [])
+      );
+
+      for (const doc of docs) {
+        win = addDocumentToWindow(win, doc);
+      }
+
+      expect(win.documents).toHaveLength(5);
+      const expectedTotal = docs.reduce((sum, d) => sum + d.tokenCount, 0);
+      expect(win.totalTokens).toBe(expectedTotal);
+      expect(win.utilizationPercentage).toBe(Math.round((expectedTotal / 1000) * 100));
+    });
+  });
+
+  describe("stripComments - URL preservation", () => {
+    it("should preserve URLs with // in code", () => {
+      const code = 'const url = "https://example.com/api";\nconst x = 1;';
+      const result = stripComments(code, "code");
+      expect(result).toContain("https://example.com/api");
+      expect(result).toContain("const x = 1;");
+    });
+
+    it("should preserve URLs with http:// in code", () => {
+      const code = 'const url = "http://localhost:3000";\n// remove this\nconst y = 2;';
+      const result = stripComments(code, "code");
+      expect(result).toContain("http://localhost:3000");
+      expect(result).not.toContain("remove this");
+      expect(result).toContain("const y = 2;");
+    });
+
+    it("should handle mixed URLs and comments", () => {
+      const code = `const base = "https://api.dev/v1"; // endpoint URL
+// fetch data
+const data = fetch(base);`;
+      const result = stripComments(code, "code");
+      expect(result).toContain("https://api.dev/v1");
+      expect(result).not.toContain("fetch data");
+      expect(result).toContain("const data = fetch(base);");
+    });
+  });
+
+  describe("exportForAI - multiple documents", () => {
+    it("should export multiple documents with correct structure", () => {
+      let win = createContextWindow("Multi Export");
+      const doc1 = createDocument("App", "const app = 1;", "code", "high", [], "src/app.ts");
+      const doc2 = createDocument("Utils", "export function helper() {}", "code", "medium", [], "src/utils.ts");
+      const doc3 = createDocument("README", "# Project Info", "documentation", "low", [], "README.md");
+
+      win = addDocumentToWindow(win, doc1);
+      win = addDocumentToWindow(win, doc2);
+      win = addDocumentToWindow(win, doc3);
+
+      const result = exportForAI(win);
+      expect(result).toContain("src/app.ts");
+      expect(result).toContain("src/utils.ts");
+      expect(result).toContain("README.md");
+      expect(result).toContain("const app = 1;");
+      expect(result).toContain("export function helper() {}");
+      expect(result).toContain("# Project Info");
+      // Should have project hierarchy
+      expect(result).toContain("<project_hierarchy>");
+      // Should contain all three files in context_documents
+      expect(result).toContain('<file path="src/app.ts"');
+      expect(result).toContain('<file path="src/utils.ts"');
+      expect(result).toContain('<file path="README.md"');
+    });
+
+    it("should strip comments only from code type documents", () => {
+      let win = createContextWindow("Strip Test");
+      const codeDoc = createDocument("Code", "const x = 1; // inline\nconst y = 2;", "code", "high", [], "app.ts");
+      const docDoc = createDocument("Docs", "// This should stay\nSome docs", "documentation", "medium", [], "notes.md");
+
+      win = addDocumentToWindow(win, codeDoc);
+      win = addDocumentToWindow(win, docDoc);
+
+      const result = exportForAI(win, { stripComments: true });
+      expect(result).not.toContain("// inline");
+      expect(result).toContain("// This should stay");
+    });
+  });
+
+  describe("generateTree - nested paths", () => {
+    it("should generate tree with deeply nested paths", () => {
+      const docs = [
+        createDocument("A", "c", "code", "high", [], "src/components/ui/button.tsx"),
+        createDocument("B", "c", "code", "high", [], "src/components/ui/card.tsx"),
+        createDocument("C", "c", "code", "high", [], "src/hooks/use-auth.ts"),
+        createDocument("D", "c", "code", "high", [], "src/lib/utils.ts"),
+      ];
+      const tree = generateTree(docs);
+      expect(tree).toContain("src");
+      expect(tree).toContain("components");
+      expect(tree).toContain("ui");
+      expect(tree).toContain("button.tsx");
+      expect(tree).toContain("card.tsx");
+      expect(tree).toContain("hooks");
+      expect(tree).toContain("use-auth.ts");
+      expect(tree).toContain("lib");
+      expect(tree).toContain("utils.ts");
+    });
+
+    it("should handle single-level paths", () => {
+      const docs = [
+        createDocument("A", "c", "code", "high", [], "package.json"),
+        createDocument("B", "c", "code", "high", [], "tsconfig.json"),
+      ];
+      const tree = generateTree(docs);
+      expect(tree).toContain("package.json");
+      expect(tree).toContain("tsconfig.json");
+    });
+
+    it("should merge common prefixes in tree", () => {
+      const docs = [
+        createDocument("A", "c", "code", "high", [], "src/a.ts"),
+        createDocument("B", "c", "code", "high", [], "src/b.ts"),
+      ];
+      const tree = generateTree(docs);
+      // "src" should appear exactly once as a branch
+      const srcMatches = tree.match(/src/g);
+      expect(srcMatches).toHaveLength(1);
+    });
+  });
 });

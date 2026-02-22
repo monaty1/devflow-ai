@@ -63,7 +63,7 @@ function MiniCalendar({ executions }: { executions: NextExecution[] }) {
             className={cn(
               "text-center text-[10px] font-bold py-1 rounded-md transition-colors",
               isActive ? "bg-orange-500 text-white" : "text-muted-foreground",
-              isToday && !isActive && "ring-1 ring-primary"
+              isToday && "ring-1 ring-primary"
             )}
           >
             {day}

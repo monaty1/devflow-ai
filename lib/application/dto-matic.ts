@@ -815,7 +815,7 @@ function getTsType(
       baseType = "boolean";
       break;
     case "date":
-      baseType = config.detectDates ? "string" : "string"; // DTOs keep dates as strings
+      baseType = "string"; // DTOs keep dates as strings
       break;
     case "null":
       baseType = "null";

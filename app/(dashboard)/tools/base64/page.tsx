@@ -269,7 +269,7 @@ export default function Base64Page() {
                       <Button size="md" variant="primary" className="mt-8 font-black shadow-lg" onPress={() => {
                         const a = document.createElement("a");
                         a.href = mode === "decode" ? `data:image/*;base64,${result.input}` : `data:image/*;base64,${result.output}`;
-                        a.download = "devflow-decoded"; a.click();
+                        a.download = mode === "decode" ? "devflow-decoded" : "devflow-encoded"; a.click();
                       }}>
                         <Download className="size-4 mr-2" /> {t("base64.downloadResource")}
                       </Button>

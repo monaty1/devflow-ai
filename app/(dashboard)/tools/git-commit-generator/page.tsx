@@ -345,7 +345,7 @@ export default function GitCommitGeneratorPage() {
                     )}
                   </div>
                   <div className="p-4 border-t border-divider bg-muted/5 flex gap-2">
-                     <CopyButton text={`git commit -m "${(message || "").replace(/"/g, '\\"')}"`} label={t("gitCommit.copyCli")} className="flex-1 h-10 font-bold" />
+                     <CopyButton text={(message || "").includes("\n") ? `git commit -m "${(message || "").split("\n")[0]?.replace(/"/g, '\\"')}" -m "${(message || "").split("\n").slice(1).join("\n").replace(/"/g, '\\"')}"` : `git commit -m "${(message || "").replace(/"/g, '\\"')}"`} label={t("gitCommit.copyCli")} className="flex-1 h-10 font-bold" />
                   </div>
                 </Card>
 

@@ -37,7 +37,7 @@ interface UseContextManagerReturn {
   activeWindow: ContextWindow | null;
   activeWindowId: string | null;
   setActiveWindowId: (id: string | null) => void;
-  createWindow: (name: string) => void;
+  createWindow: (name: string) => string;
   deleteWindow: (id: string) => void;
   addDocument: (
     title: string,
@@ -46,7 +46,8 @@ interface UseContextManagerReturn {
     priority: Priority,
     tags: string[],
     filePath?: string,
-    instructions?: string
+    instructions?: string,
+    targetWindowId?: string
   ) => void;
   removeDocument: (documentId: string) => void;
   changePriority: (documentId: string, priority: Priority) => void;
@@ -59,14 +60,20 @@ export function useContextManager(): UseContextManagerReturn {
   const [windows, setWindows] = useState<ContextWindow[]>(getInitialWindows);
   const [activeWindowId, setActiveWindowId] = useState<string | null>(null);
 
-  const saveWindows = useCallback((newWindows: ContextWindow[]) => {
-    setWindows(newWindows);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newWindows));
-    } catch {
-      // Ignore storage errors
-    }
-  }, []);
+  const saveWindows = useCallback(
+    (updater: (prev: ContextWindow[]) => ContextWindow[]) => {
+      setWindows((prev) => {
+        const next = updater(prev);
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        } catch {
+          // Ignore storage errors
+        }
+        return next;
+      });
+    },
+    []
+  );
 
   const activeWindow = useMemo(
     () => windows.find((w) => w.id === activeWindowId) ?? null,
@@ -74,24 +81,26 @@ export function useContextManager(): UseContextManagerReturn {
   );
 
   const createWindowHandler = useCallback(
-    (name: string) => {
+    (name: string): string => {
       const newWindow = createContextWindow(name);
-      const updated = [...windows, newWindow];
-      saveWindows(updated);
+      saveWindows((prev) => [...prev, newWindow]);
       setActiveWindowId(newWindow.id);
+      return newWindow.id;
     },
-    [windows, saveWindows]
+    [saveWindows]
   );
 
   const deleteWindow = useCallback(
     (id: string) => {
-      const updated = windows.filter((w) => w.id !== id);
-      saveWindows(updated);
-      if (activeWindowId === id) {
-        setActiveWindowId(updated[0]?.id ?? null);
-      }
+      let fallbackId: string | null = null;
+      saveWindows((prev) => {
+        const next = prev.filter((w) => w.id !== id);
+        fallbackId = next[0]?.id ?? null;
+        return next;
+      });
+      setActiveWindowId((prevId) => (prevId === id ? fallbackId : prevId));
     },
-    [windows, activeWindowId, saveWindows]
+    [saveWindows]
   );
 
   const addDocument = useCallback(
@@ -102,58 +111,61 @@ export function useContextManager(): UseContextManagerReturn {
       priority: Priority,
       tags: string[],
       filePath?: string,
-      instructions?: string
+      instructions?: string,
+      targetWindowId?: string
     ) => {
-      if (!activeWindow) return;
-
       const doc = createDocument(title, content, type, priority, tags, filePath, instructions);
-      const updated = windows.map((w) =>
-        w.id === activeWindowId ? addDocumentToWindow(w, doc) : w
-      );
-      saveWindows(updated);
+      saveWindows((prev) => {
+        const wId = targetWindowId ?? activeWindowId;
+        if (!wId) return prev;
+        return prev.map((w) =>
+          w.id === wId ? addDocumentToWindow(w, doc) : w
+        );
+      });
     },
-    [activeWindow, activeWindowId, windows, saveWindows]
+    [activeWindowId, saveWindows]
   );
 
   const removeDocument = useCallback(
     (documentId: string) => {
-      if (!activeWindow) return;
-
-      const updated = windows.map((w) =>
-        w.id === activeWindowId ? removeDocumentFromWindow(w, documentId) : w
-      );
-      saveWindows(updated);
+      saveWindows((prev) => {
+        if (!activeWindowId) return prev;
+        return prev.map((w) =>
+          w.id === activeWindowId ? removeDocumentFromWindow(w, documentId) : w
+        );
+      });
     },
-    [activeWindow, activeWindowId, windows, saveWindows]
+    [activeWindowId, saveWindows]
   );
 
   const changePriority = useCallback(
     (documentId: string, priority: Priority) => {
-      if (!activeWindow) return;
-
-      const updated = windows.map((w) =>
-        w.id === activeWindowId ? reorderDocuments(w, documentId, priority) : w
-      );
-      saveWindows(updated);
+      saveWindows((prev) => {
+        if (!activeWindowId) return prev;
+        return prev.map((w) =>
+          w.id === activeWindowId ? reorderDocuments(w, documentId, priority) : w
+        );
+      });
     },
-    [activeWindow, activeWindowId, windows, saveWindows]
+    [activeWindowId, saveWindows]
   );
 
   const setMaxTokens = useCallback(
     (maxTokens: number) => {
-      if (!activeWindowId) return;
-      const updated = windows.map((w) => {
-        if (w.id !== activeWindowId) return w;
-        const totalTokens = w.documents.reduce((sum, d) => sum + d.tokenCount, 0);
-        return {
-          ...w,
-          maxTokens,
-          utilizationPercentage: Math.round((totalTokens / maxTokens) * 100),
-        };
+      saveWindows((prev) => {
+        if (!activeWindowId) return prev;
+        return prev.map((w) => {
+          if (w.id !== activeWindowId) return w;
+          const totalTokens = w.documents.reduce((sum, d) => sum + d.tokenCount, 0);
+          return {
+            ...w,
+            maxTokens,
+            utilizationPercentage: Math.round((totalTokens / maxTokens) * 100),
+          };
+        });
       });
-      saveWindows(updated);
     },
-    [activeWindowId, windows, saveWindows]
+    [activeWindowId, saveWindows]
   );
 
   const exportWindowHandler = useCallback(
@@ -164,10 +176,13 @@ export function useContextManager(): UseContextManagerReturn {
     [activeWindow]
   );
 
-  const exportForAIHandler = useCallback((options?: { stripComments?: boolean }): string | null => {
-    if (!activeWindow) return null;
-    return exportForAI(activeWindow, options);
-  }, [activeWindow]);
+  const exportForAIHandler = useCallback(
+    (options?: { stripComments?: boolean }): string | null => {
+      if (!activeWindow) return null;
+      return exportForAI(activeWindow, options);
+    },
+    [activeWindow]
+  );
 
   return {
     windows,
