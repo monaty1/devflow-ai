@@ -61,7 +61,6 @@ system_prompts_leaks-main/
 .vercel
 
 # Claude
-CLAUDE.md
 GEMINI.md
 AGENTS.md
 
