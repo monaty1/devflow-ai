@@ -800,9 +800,13 @@ _Largo plazo (6-12 meses):_
 
 ### Anexo A: Presentacion (Slides)
 
-[slides/presentation.md](../slides/presentation.md) — Ejecutar con `npx @slidev/cli slides/presentation.md`
+| Formato | Archivo | Uso |
+|---------|---------|-----|
+| **PDF** | [TFM-Slides.pdf](./TFM-Slides.pdf) | Abrir directamente, imprimir, enviar |
+| **PPTX** | [TFM-Slides.pptx](./TFM-Slides.pptx) | Editar en PowerPoint/Google Slides |
+| **Slidev** | [slides/presentation.md](../slides/presentation.md) | Presentar con animaciones: `npx @slidev/cli slides/presentation.md` |
 
-Ver [docs/SLIDES-GUIDE.md](./SLIDES-GUIDE.md) para instrucciones de ejecucion y exportacion a PDF.
+Ver [SLIDES-GUIDE.md](./SLIDES-GUIDE.md) para instrucciones de ejecucion, controles de teclado y regeneracion de exports.
 
 ### Anexo B: Repositorio
 

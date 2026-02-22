@@ -44,41 +44,36 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Claude Code context (competitive advantage)
+# Claude Code context
 .claude/
-docs/guidelines/
-docs/agents/
-docs/settings.md
 .mcp.json
 
-# Personal notes
-MEJORAS.md
-docs/GEMINI.md
-docs/FIX_FINAL.md
-system_prompts_leaks-main/
+# HeroUI agents-md
+.heroui-docs/
 
-# Vercel
-.vercel
-
-# Internal planning & personal notes
+# Personal notes & internal planning
 TODO.md
 ENTREGA_TFM.md
 MEJORAS.md
 NOTAS*.md
 TIPS*.md
 APUNTES*.md
-docs/Documentacion-TFM.pdf
-
 EBOOK_200_PROMPTS_MDEV1.pdf
+docs/Documentacion-TFM.pdf
+docs/guidelines/
+docs/agents/
+docs/settings.md
+docs/GEMINI.md
+docs/FIX_FINAL.md
+audit-report.md
+audit_report.md
+
+# External resources (local only)
+system_prompts_leaks-main/
+free-llm-api-resources-main/
 
 # Old slides (replaced by slides/presentation.md)
 docs/slides.md
-# heroui-agents-md
-.heroui-docs/
-
-free-llm-api-resources-main
-audit-report.md
-audit_report.md
 
 # Playwright artifacts
 /playwright-report/

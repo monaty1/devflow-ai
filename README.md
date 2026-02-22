@@ -15,7 +15,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Tailwind](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 
-**[English](#what-is-this)** &middot; **[Castellano](#para-que-sirve)** &middot; **[TFM Documento](./docs/TFM.md)** &middot; **[Presentacion Slidev](./slides/presentation.md)**
+**[English](#what-is-this)** &middot; **[Castellano](#para-que-sirve)** &middot; **[TFM Documento](./docs/TFM.md)** &middot; **[Slides PDF](./docs/TFM-Slides.pdf)**
 
 </div>
 
@@ -617,9 +617,10 @@ Este proyecto es el TFM del **Master Desarrollo con IA** (BIG School).
 
 | Documento | Enlace |
 | --------- | ------ |
-| Memoria completa (Markdown) | [docs/TFM.md](./docs/TFM.md) |
-| Enunciado / Assignment PDF | [docs/Documentacion-TFM.pdf](./docs/Documentacion-TFM.pdf) |
-| Presentacion (Slidev) | [slides/presentation.md](./slides/presentation.md) |
+| Memoria completa | [docs/TFM.md](./docs/TFM.md) |
+| Presentacion (PDF) | [docs/TFM-Slides.pdf](./docs/TFM-Slides.pdf) |
+| Presentacion (PPTX) | [docs/TFM-Slides.pptx](./docs/TFM-Slides.pptx) |
+| Presentacion (Slidev interactivo) | [slides/presentation.md](./slides/presentation.md) — `npx @slidev/cli slides/presentation.md` |
 | Guia de slides | [docs/SLIDES-GUIDE.md](./docs/SLIDES-GUIDE.md) |
 | Demo en produccion | https://devflowai.vercel.app |
 | Repositorio | https://github.com/albertoguinda/devflow-ai |

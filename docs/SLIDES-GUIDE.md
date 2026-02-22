@@ -1,36 +1,33 @@
-# Guia de Slides TFM — DevFlow AI
+# Presentacion TFM — DevFlow AI
 
-## Archivo de presentacion
+## Formatos disponibles
 
-La presentacion Slidev esta en `slides/presentation.md` (14 slides, ~15-20 min).
+| Formato | Archivo | Uso |
+|---------|---------|-----|
+| **PDF** (recomendado) | [docs/TFM-Slides.pdf](./TFM-Slides.pdf) | Abrir directamente, imprimir, enviar por email |
+| **PPTX** | [docs/TFM-Slides.pptx](./TFM-Slides.pptx) | Editar en PowerPoint/Google Slides |
+| **Slidev** (interactivo) | [slides/presentation.md](../slides/presentation.md) | Presentar con animaciones y transiciones |
+
+> Si el PDF o PPTX no se visualizan correctamente, la fuente de verdad es `slides/presentation.md`. Ejecuta el comando de abajo para regenerarlos.
 
 ---
 
-## Setup Slidev
-
-### Opcion A: Instalacion global (recomendada)
+## Ejecutar la presentacion interactiva (Slidev)
 
 ```bash
-# 1. Instalar Slidev globalmente
-npm install -g @slidev/cli
-
-# 2. Ejecutar la presentacion desde la raiz del proyecto
-slidev slides/presentation.md
-
-# 3. Abre http://localhost:3030
-```
-
-### Opcion B: Sin instalacion (npx)
-
-```bash
+# Opcion A: sin instalar nada
 npx @slidev/cli slides/presentation.md
+
+# Opcion B: instalacion global
+npm install -g @slidev/cli
+slidev slides/presentation.md
 ```
 
-> Necesitas Node.js 18+ instalado.
+Abre http://localhost:3030
 
 ---
 
-## Controles durante la presentacion
+## Controles de presentacion
 
 | Tecla | Accion |
 |-------|--------|
@@ -43,71 +40,41 @@ npx @slidev/cli slides/presentation.md
 
 ---
 
-## Exportar a PDF
+## Regenerar los exports
 
-Necesitas Playwright instalado para el export:
+### PDF
 
-```bash
-# Instalar Playwright si no lo tienes
-npx playwright install chromium
+Con el servidor Slidev corriendo (`npx @slidev/cli slides/presentation.md`):
 
-# Export basico a PDF
-slidev export slides/presentation.md --format pdf --output docs/TFM-Slides.pdf
+**Opcion 1 — Navegador:** Abre http://localhost:3030/export y haz click en "Export as Vector File"
 
-# Si el timeout falla con slides pesadas
-slidev export slides/presentation.md --format pdf --output docs/TFM-Slides.pdf --timeout 60000
-
-# Export a PPTX (editable en PowerPoint/Google Slides)
-slidev export slides/presentation.md --format pptx --output docs/TFM-Slides.pptx
-```
-
-Despues del export, commitea el PDF:
+**Opcion 2 — Script automatico:**
 
 ```bash
-git add docs/TFM-Slides.pdf
-git commit -m "docs: update TFM presentation slides PDF"
-git push
+node -e "
+const { chromium } = require('playwright');
+(async () => {
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+  await page.goto('http://localhost:3030/export', { waitUntil: 'networkidle', timeout: 30000 });
+  await page.waitForTimeout(3000);
+  await page.pdf({ path: 'docs/TFM-Slides.pdf', format: 'A4', landscape: true, printBackground: true });
+  await browser.close();
+  console.log('PDF exportado en docs/TFM-Slides.pdf');
+})();
+"
 ```
 
----
+### PPTX
 
-## Capturas de pantalla (opcionales)
-
-Para mejorar las slides con imagenes reales, crea la carpeta `docs/screenshots/` y toma estas capturas:
-
-### Obligatorias
-
-| # | Captura | Instrucciones |
-|---|---------|---------------|
-| 1 | `lighthouse-100.png` | Chrome incognito → DevTools → Lighthouse → Desktop → Analizar devflowai.vercel.app |
-| 2 | `demo-prompt-analyzer.png` | Analizar prompt con inyeccion → capturar score bajo + "Injection Detected" |
-| 3 | `demo-cost-calculator.png` | 10K input / 2K output / 100 req/day → capturar tabla comparativa |
-| 4 | `demo-code-review.png` | Pegar codigo con `eval()` + innerHTML → capturar issues criticos |
-| 5 | `tools-grid.png` | /tools → capturar grid de las 15 herramientas |
-
-### Recomendadas
-
-| # | Captura | Instrucciones |
-|---|---------|---------------|
-| 6 | `homepage-hero.png` | Landing page en dark mode |
-| 7 | `ci-cd-passing.png` | GitHub Actions → ultimo workflow verde |
-| 8 | `app-spanish.png` | Cualquier herramienta en espanol |
-
-Para insertar una imagen en una slide, usa el layout `image-right`:
-
-```yaml
----
-layout: image-right
-image: /screenshots/demo-prompt-analyzer.png
----
-```
+Abre http://localhost:3030/export y selecciona la opcion PPTX/images.
 
 ---
 
-## Estructura de la presentacion (14 slides)
+## Estructura (14 slides, ~15-20 min)
 
-| # | Slide | Tiempo estimado |
-|---|-------|-----------------|
+| # | Slide | Tiempo |
+|---|-------|--------|
 | 1 | Portada | 30s |
 | 2 | El Problema | 1.5min |
 | 3 | La Solucion | 1min |
@@ -123,14 +90,11 @@ image: /screenshots/demo-prompt-analyzer.png
 | 13 | Conclusiones | 1.5min |
 | 14 | Demo + Q&A | resto |
 
-**Total: ~16 min** presentacion + demo en vivo + preguntas
-
 ---
 
 ## Tips para la presentacion
 
 1. **Demo en vivo**: Abre https://devflowai.vercel.app antes de empezar. Muestra Prompt Analyzer con un prompt malicioso, Cost Calculator y Code Review
-2. **Dark mode**: La presentacion queda mejor en dark mode (`d` para toggle)
-3. **Tablet/portatil**: Slidev funciona en cualquier navegador moderno
-4. **Backup**: Ten el PDF exportado listo por si falla la conexion
-5. **Overview**: Usa `o` para mostrar todas las slides al tribunal si piden saltar a un tema
+2. **Dark mode**: Pulsa `d` para toggle — queda mejor en proyector oscuro
+3. **Backup**: Si falla la conexion, usa el PDF exportado
+4. **Overview**: Pulsa `o` para mostrar todas las slides al tribunal si piden saltar a un tema
