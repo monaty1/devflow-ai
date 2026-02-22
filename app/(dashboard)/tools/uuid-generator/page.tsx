@@ -174,6 +174,7 @@ export default function UuidGeneratorPage() {
                         value={config.quantity.toString()}
                         onChange={(e) => updateConfig("quantity", parseInt(e.target.value) || 1)}
                         variant="primary"
+                        aria-label={t("uuid.quantityLabel")}
                       />
                     </div>
                     <div className="space-y-2">

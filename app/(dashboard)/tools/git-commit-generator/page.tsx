@@ -5,9 +5,7 @@ import {
   Tabs,
   Chip,
   Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
+  Label,
   TextArea,
   Input,
   Checkbox,
@@ -142,34 +140,38 @@ export default function GitCommitGeneratorPage() {
                 <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("gitCommit.typeLabel")}</label>
                   <Dropdown>
-                    <DropdownTrigger>
-                      <Button variant="outline" className="w-full justify-between h-10 font-bold uppercase text-[10px]">
-                        {config.type ? (
-                          <span className="flex items-center gap-2">
-                            {getCommitTypeInfo(config.type).emoji} {config.type}
-                          </span>
-                        ) : t("gitCommit.selectType")}
-                        <ChevronRight className="size-3 rotate-90 opacity-40" />
-                      </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu 
-                      selectionMode="single"
-                      selectedKeys={new Set([config.type])}
-                      onSelectionChange={(k) => updateConfig("type", Array.from(k)[0] as CommitType)}
-                      className="max-h-64 overflow-auto"
-                    >
-                      {commitTypes.map(commitType => (
-                        <DropdownItem key={commitType.type}>
-                          <div className="flex items-center gap-2">
-                            <span className="mr-2">{commitType.emoji}</span>
-                            <div className="flex flex-col">
-                              <span className="font-bold">{commitType.label}</span>
-                              <span className="text-[10px] opacity-60">{commitType.description}</span>
-                            </div>
-                          </div>
-                        </DropdownItem>
-                      ))}
-                    </DropdownMenu>
+                    <Button variant="outline" className="w-full justify-between h-10 font-bold uppercase text-[10px]">
+                      {config.type ? (
+                        <span className="flex items-center gap-2">
+                          {getCommitTypeInfo(config.type).emoji} {config.type}
+                        </span>
+                      ) : t("gitCommit.selectType")}
+                      <ChevronRight className="size-3 rotate-90 opacity-40" />
+                    </Button>
+                    <Dropdown.Popover>
+                      <Dropdown.Menu
+                        selectionMode="single"
+                        selectedKeys={new Set([config.type])}
+                        onSelectionChange={(k) => updateConfig("type", Array.from(k)[0] as CommitType)}
+                        className="max-h-64 overflow-auto"
+                        aria-label={t("gitCommit.typeLabel")}
+                      >
+                        {commitTypes.map(commitType => (
+                          <Dropdown.Item key={commitType.type} id={commitType.type} textValue={commitType.label}>
+                            <Dropdown.ItemIndicator />
+                            <Label>
+                              <div className="flex items-center gap-2">
+                                <span className="mr-2">{commitType.emoji}</span>
+                                <div className="flex flex-col">
+                                  <span className="font-bold">{commitType.label}</span>
+                                  <span className="text-[10px] opacity-60">{commitType.description}</span>
+                                </div>
+                              </div>
+                            </Label>
+                          </Dropdown.Item>
+                        ))}
+                      </Dropdown.Menu>
+                    </Dropdown.Popover>
                   </Dropdown>
                 </div>
                 <div className="space-y-1">
