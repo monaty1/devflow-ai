@@ -60,13 +60,10 @@ system_prompts_leaks-main/
 # Vercel
 .vercel
 
-# Claude
-GEMINI.md
-AGENTS.md
-
 # Internal planning
 TODO.md
 ENTREGA_TFM.md
+docs/Documentacion-TFM.pdf
 
 EBOOK_200_PROMPTS_MDEV1.pdf
 # heroui-agents-md
