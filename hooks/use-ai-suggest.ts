@@ -8,7 +8,7 @@ interface SuggestArgs {
   context: string;
   type?: string | undefined;
   language?: string | undefined;
-  mode: "variable-name" | "regex-generate";
+  mode: "variable-name" | "regex-generate" | "commit-message" | "cron-generate" | "json-explain";
 }
 
 async function suggestFetcher(
@@ -29,6 +29,12 @@ export function useAISuggest() {
       trigger({ context, type, language, mode: "variable-name" }),
     generateRegexWithAI: (description: string) =>
       trigger({ context: description, mode: "regex-generate" }),
+    generateCommitWithAI: (description: string) =>
+      trigger({ context: description, mode: "commit-message" }),
+    generateCronWithAI: (description: string) =>
+      trigger({ context: description, mode: "cron-generate" }),
+    explainJsonWithAI: (json: string) =>
+      trigger({ context: json, mode: "json-explain" }),
     aiResult: data ?? null,
     aiError: error as Error | null,
     isAILoading: isMutating,

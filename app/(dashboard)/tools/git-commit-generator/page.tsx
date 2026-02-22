@@ -24,10 +24,13 @@ import {
   History,
   ListPlus,
   AlertTriangle,
+  Bot,
 } from "lucide-react";
 import { useGitCommitGenerator } from "@/hooks/use-git-commit-generator";
 import { useTranslation } from "@/hooks/use-translation";
 import { useToast } from "@/hooks/use-toast";
+import { useAISuggest } from "@/hooks/use-ai-suggest";
+import { useAISettingsStore } from "@/lib/stores/ai-settings-store";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
 import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
@@ -39,6 +42,8 @@ import { getCommitTypeInfo } from "@/lib/application/git-commit-generator";
 export default function GitCommitGeneratorPage() {
   const { t } = useTranslation();
   const { addToast } = useToast();
+  const { generateCommitWithAI, aiResult: aiCommitResult, isAILoading: isAIGenerating } = useAISuggest();
+  const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
   const {
     config,
     message,
@@ -264,7 +269,15 @@ export default function GitCommitGeneratorPage() {
                   </div>
                 )}
 
-                <Button onPress={generate} variant="primary" className="w-full h-12 font-black shadow-xl shadow-primary/20 text-md" isDisabled={!validation.isValid}>
+                <Button onPress={() => {
+                  generate();
+                  if (isAIEnabled) {
+                    const aiContext = `${config.type}${config.scope ? `(${config.scope})` : ""}: ${config.description}${config.body ? `\n\n${config.body}` : ""}`;
+                    generateCommitWithAI(aiContext).catch(() => {
+                      addToast(t("ai.unavailable"), "warning");
+                    });
+                  }
+                }} variant="primary" className="w-full h-12 font-black shadow-xl shadow-primary/20 text-md" isDisabled={!validation.isValid}>
                   <Sparkles className="size-4 mr-2" /> {t("gitCommit.forgeMessage")}
                 </Button>
             </div>
@@ -375,6 +388,36 @@ export default function GitCommitGeneratorPage() {
                     </div>
                   </div>
                 </Card>
+
+                {/* AI-Generated Commit Suggestions */}
+                {isAIEnabled && (isAIGenerating || aiCommitResult) && (
+                  <Card className="p-6 border-violet-500/20 bg-violet-500/5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Bot className="size-4 text-violet-500" aria-hidden="true" />
+                      <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">{t("ai.suggestions")}</span>
+                      {isAIGenerating && (
+                        <span className="text-xs text-muted-foreground animate-pulse ml-auto">{t("ai.generating")}</span>
+                      )}
+                    </div>
+                    {aiCommitResult && aiCommitResult.suggestions.map((s, i) => (
+                      <div key={i} className="p-3 bg-violet-500/5 border border-violet-500/10 rounded-xl space-y-2 mb-3 last:mb-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <code className="font-mono text-sm font-bold text-violet-600 dark:text-violet-400 truncate">{s.value}</code>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <StatusBadge variant="purple">{t("ai.score")}: {s.score}</StatusBadge>
+                            <CopyButton text={s.value} size="sm" variant="ghost" />
+                            <Button size="sm" variant="ghost" onPress={() => {
+                              updateConfig("description", s.value.split(":").slice(1).join(":").trim().split("\n")[0] || s.value);
+                            }} className="text-violet-600 dark:text-violet-400 font-bold">
+                              {t("gitCommit.aiUseBtn")}
+                            </Button>
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{s.reasoning}</p>
+                      </div>
+                    ))}
+                  </Card>
+                )}
               </div>
             </Tabs.Panel>
 

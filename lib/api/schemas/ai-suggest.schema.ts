@@ -32,7 +32,7 @@ export const aiSuggestSchema = z.object({
       "csharp",
     ])
     .optional(),
-  mode: z.enum(["variable-name", "regex-generate"]),
+  mode: z.enum(["variable-name", "regex-generate", "commit-message", "cron-generate", "json-explain"]),
 });
 
 export type AISuggestInput = z.infer<typeof aiSuggestSchema>;

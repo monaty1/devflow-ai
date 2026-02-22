@@ -18,14 +18,19 @@ import {
   Box,
   Globe,
   AlertTriangle,
+  Bot,
 } from "lucide-react";
 import { useCronBuilder } from "@/hooks/use-cron-builder";
+import { useAISuggest } from "@/hooks/use-ai-suggest";
+import { useAISettingsStore } from "@/lib/stores/ai-settings-store";
+import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
 import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
 import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { cn } from "@/lib/utils";
+import { parseExpression } from "@/lib/application/cron-builder";
 import type { ConfigFormat, NextExecution } from "@/types/cron-builder";
 
 function MiniCalendar({ executions }: { executions: NextExecution[] }) {
@@ -86,8 +91,23 @@ export default function CronBuilderPage() {
     reset,
   } = useCronBuilder();
 
+  const { generateCronWithAI, aiResult: aiCronResult, isAILoading: isAICronLoading } = useAISuggest();
+  const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
+  const { addToast } = useToast();
+  const [naturalLanguageInput, setNaturalLanguageInput] = useState("");
+
   const [activeTab, setActiveTab] = useState<"builder" | "infra" | string>("builder");
   const [configFormat, setConfigFormat] = useState<ConfigFormat>("kubernetes");
+
+  const applyCronFromAI = useCallback((cronString: string) => {
+    try {
+      const parsed = parseExpression(cronString.trim());
+      setExpression(parsed);
+      addToast(t("cron.aiApplied"), "success");
+    } catch {
+      addToast(t("cron.aiParseError"), "error");
+    }
+  }, [setExpression, addToast, t]);
 
   const executionColumns: ColumnConfig[] = [
     { name: t("table.colLocalTime"), uid: "formatted", sortable: true },
@@ -165,6 +185,78 @@ export default function CronBuilderPage() {
 
               <Tabs.Panel id="builder">
                 <div className="space-y-6 mt-6">
+                  {/* AI Cron Generator */}
+                  {isAIEnabled && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Bot className="size-4 text-violet-500" aria-hidden="true" />
+                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t("cron.aiSection")}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <Input
+                          variant="primary"
+                          value={naturalLanguageInput}
+                          onChange={(e) => setNaturalLanguageInput(e.target.value)}
+                          onKeyDown={(e: React.KeyboardEvent) => {
+                            if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                              e.preventDefault();
+                              if (naturalLanguageInput.trim()) {
+                                generateCronWithAI(naturalLanguageInput).catch(() => {
+                                  addToast(t("ai.unavailableLocal"), "info");
+                                });
+                              }
+                            }
+                          }}
+                          placeholder={t("cron.aiPlaceholder")}
+                          className="flex-1 font-medium"
+                          aria-label={t("cron.aiPlaceholder")}
+                        />
+                        <Button
+                          variant="primary"
+                          isLoading={isAICronLoading}
+                          isDisabled={!naturalLanguageInput.trim()}
+                          onPress={() => {
+                            generateCronWithAI(naturalLanguageInput).catch(() => {
+                              addToast(t("ai.unavailableLocal"), "info");
+                            });
+                          }}
+                          className="bg-violet-600 hover:bg-violet-700 text-white shadow-lg shadow-violet-500/20 gap-2 shrink-0"
+                        >
+                          <Bot className="size-4" />
+                          {t("cron.aiGenerateBtn")}
+                        </Button>
+                      </div>
+
+                      {/* AI Results */}
+                      {(isAICronLoading || aiCronResult) && (
+                        <div className="space-y-2">
+                          {isAICronLoading && (
+                            <span className="text-xs text-muted-foreground animate-pulse">{t("ai.generating")}</span>
+                          )}
+                          {aiCronResult && aiCronResult.suggestions.map((s, i) => (
+                            <div key={i} className="p-3 bg-violet-500/5 border border-violet-500/10 rounded-xl space-y-2">
+                              <div className="flex items-center justify-between">
+                                <code className="font-mono text-sm font-bold text-violet-600 dark:text-violet-400">{s.value}</code>
+                                <div className="flex gap-2">
+                                  <CopyButton text={s.value} size="sm" variant="ghost" />
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onPress={() => applyCronFromAI(s.value)}
+                                    className="text-violet-600 dark:text-violet-400 font-bold"
+                                  >
+                                    {t("cron.aiApplyBtn")}
+                                  </Button>
+                                </div>
+                              </div>
+                              <p className="text-xs text-muted-foreground">{s.reasoning}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <div className="bg-muted/50 p-6 rounded-2xl border border-divider text-center shadow-inner relative overflow-hidden group">
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                     <p className="text-4xl font-black tracking-widest text-primary font-mono select-all">

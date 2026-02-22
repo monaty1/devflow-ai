@@ -15,7 +15,25 @@ import { getServerEnv } from "@/infrastructure/config/env";
 import {
   SUGGEST_VARIABLE_NAME_SYSTEM_PROMPT,
   SUGGEST_REGEX_SYSTEM_PROMPT,
+  SUGGEST_COMMIT_MESSAGE_SYSTEM_PROMPT,
+  SUGGEST_CRON_SYSTEM_PROMPT,
+  SUGGEST_JSON_EXPLAIN_SYSTEM_PROMPT,
 } from "@/lib/api/prompts";
+
+function getPromptForMode(mode: string, context: string, type?: string, language?: string): { systemPrompt: string; userPrompt: string } {
+  switch (mode) {
+    case "regex-generate":
+      return { systemPrompt: SUGGEST_REGEX_SYSTEM_PROMPT, userPrompt: `Generate a regex for: ${context}` };
+    case "commit-message":
+      return { systemPrompt: SUGGEST_COMMIT_MESSAGE_SYSTEM_PROMPT, userPrompt: `Generate commit messages for these changes: ${context}` };
+    case "cron-generate":
+      return { systemPrompt: SUGGEST_CRON_SYSTEM_PROMPT, userPrompt: `Generate a cron expression for: ${context}` };
+    case "json-explain":
+      return { systemPrompt: SUGGEST_JSON_EXPLAIN_SYSTEM_PROMPT, userPrompt: `Analyze this JSON structure:\n${context}` };
+    default:
+      return { systemPrompt: SUGGEST_VARIABLE_NAME_SYSTEM_PROMPT, userPrompt: `Suggest names for a ${type ?? "variable"} in ${language ?? "typescript"}: ${context}` };
+  }
+}
 
 export async function POST(request: NextRequest) {
   const byok = extractBYOK(request);
@@ -33,14 +51,7 @@ export async function POST(request: NextRequest) {
     return errorResponse("AI is not configured on this server", 503);
   }
 
-  const isRegex = mode === "regex-generate";
-  const systemPrompt = isRegex
-    ? SUGGEST_REGEX_SYSTEM_PROMPT
-    : SUGGEST_VARIABLE_NAME_SYSTEM_PROMPT;
-
-  const userPrompt = isRegex
-    ? `Generate a regex for: ${context}`
-    : `Suggest names for a ${type ?? "variable"} in ${language ?? "typescript"}: ${context}`;
+  const { systemPrompt, userPrompt } = getPromptForMode(mode, context, type, language);
 
   try {
     const response = await provider.generateText(userPrompt, systemPrompt);

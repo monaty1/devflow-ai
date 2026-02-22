@@ -21,8 +21,12 @@ import {
   Copy,
   Plus,
   Minus,
+  Bot,
 } from "lucide-react";
 import { useJsonFormatter } from "@/hooks/use-json-formatter";
+import { useAISuggest } from "@/hooks/use-ai-suggest";
+import { useAISettingsStore } from "@/lib/stores/ai-settings-store";
+import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
 import { useSmartNavigation } from "@/hooks/use-smart-navigation";
 import { CopyButton } from "@/components/shared/copy-button";
@@ -56,6 +60,10 @@ export default function JsonFormatterPage() {
     applyOutput,
     fix,
   } = useJsonFormatter();
+
+  const { explainJsonWithAI, aiResult: aiJsonResult, isAILoading: isAIAnalyzing } = useAISuggest();
+  const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
+  const { addToast } = useToast();
 
   const [activeTab, setActiveTab] = useState<"output" | "paths" | "typescript" | "compare">("output");
   const [copiedPath, setCopiedPath] = useState<string | null>(null);
@@ -192,6 +200,21 @@ export default function JsonFormatterPage() {
                 <Minimize2 className="size-4 mr-2" /> {t("jsonFmt.minifyBtn")}
               </Button>
             </div>
+            {isAIEnabled && (
+              <Button
+                variant="ghost"
+                className="w-full mt-3 font-bold text-violet-600 dark:text-violet-400 border border-violet-500/20 hover:bg-violet-500/10"
+                isLoading={isAIAnalyzing}
+                isDisabled={!inputValidation.isValid || !input.trim()}
+                onPress={() => {
+                  explainJsonWithAI(input).catch(() => {
+                    addToast(t("ai.unavailableLocal"), "info");
+                  });
+                }}
+              >
+                <Bot className="size-4 mr-2" /> {t("jsonFmt.aiAnalyzeBtn")}
+              </Button>
+            )}
             <p className="text-[9px] text-muted-foreground text-center mt-2 font-medium">
               Ctrl+Enter → {t("jsonFmt.formatBtn")}
             </p>
@@ -234,6 +257,28 @@ export default function JsonFormatterPage() {
                </div>
             </div>
           </Card>
+
+          {/* AI Analysis Results */}
+          {isAIEnabled && (isAIAnalyzing || aiJsonResult) && (
+            <Card className="p-6 bg-gradient-to-br from-violet-500/10 to-purple-500/10 dark:from-violet-500/15 dark:to-purple-500/15 shadow-xl shadow-violet-500/5 border border-violet-500/20">
+              <div className="flex items-center gap-2 mb-4">
+                <Bot className="size-4 text-violet-500" aria-hidden="true" />
+                <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">{t("jsonFmt.aiAnalysis")}</span>
+                {isAIAnalyzing && (
+                  <span className="text-xs text-muted-foreground animate-pulse ml-auto">{t("ai.generating")}</span>
+                )}
+              </div>
+              {aiJsonResult && aiJsonResult.suggestions.map((s, i) => (
+                <div key={i} className="p-3 bg-violet-500/5 border border-violet-500/10 rounded-xl space-y-2 mb-3 last:mb-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-sm font-bold text-violet-600 dark:text-violet-400">{s.value}</p>
+                    <CopyButton text={s.value} size="sm" variant="ghost" />
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{s.reasoning}</p>
+                </div>
+              ))}
+            </Card>
+          )}
         </div>
 
         {/* Results View */}
