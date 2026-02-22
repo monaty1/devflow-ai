@@ -28,10 +28,13 @@ import {
   Search,
   Bug,
   Blocks,
+  Bot,
 } from "lucide-react";
 import { useContextManager } from "@/hooks/use-context-manager";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/hooks/use-translation";
+import { useAISuggest } from "@/hooks/use-ai-suggest";
+import { useAISettingsStore } from "@/lib/stores/ai-settings-store";
 import { useSmartNavigation } from "@/hooks/use-smart-navigation";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
@@ -47,6 +50,8 @@ export default function ContextManagerPage() {
   const { t } = useTranslation();
   const { addToast } = useToast();
   const { navigateTo } = useSmartNavigation();
+  const { optimizeContextWithAI, aiResult, isAILoading } = useAISuggest();
+  const { isAIEnabled } = useAISettingsStore();
   const {
     windows,
     activeWindowId,
@@ -603,6 +608,62 @@ export default function ContextManagerPage() {
                   )}
                 </Card>
               </div>
+
+              {/* AI Context Advisor */}
+              {isAIEnabled && activeWindow.documents.length > 0 && (
+                <Card className="p-5 border-violet-500/20 bg-violet-500/5">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 bg-violet-500/10 rounded-lg">
+                        <Bot className="size-4 text-violet-500" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-black text-violet-600 dark:text-violet-400">{t("ctxMgr.aiAdvisor")}</h3>
+                        <p className="text-[10px] text-muted-foreground">{t("ctxMgr.aiAdvisorDesc")}</p>
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="font-bold text-xs text-violet-600 dark:text-violet-400 border border-violet-500/30 hover:bg-violet-500/10"
+                      isLoading={isAILoading}
+                      onPress={() => {
+                        const summary = activeWindow.documents.map(d =>
+                          `- "${d.title}" (${d.type}, ${d.priority} priority, ${d.tokenCount} tokens)${d.filePath ? ` [${d.filePath}]` : ""}`
+                        ).join("\n");
+                        const contextSummary = `Model: ${MODEL_PRESETS.find(m => m.maxTokens === activeWindow.maxTokens)?.name ?? "Custom"} (${activeWindow.maxTokens.toLocaleString()} max tokens)\nTotal tokens used: ${activeWindow.totalTokens.toLocaleString()} (${activeWindow.utilizationPercentage}% utilization)\nDocuments (${activeWindow.documents.length}):\n${summary}`;
+                        void optimizeContextWithAI(contextSummary);
+                      }}
+                    >
+                      <Bot className="size-3.5 mr-1" /> {t("ctxMgr.aiOptimizeBtn")}
+                    </Button>
+                  </div>
+
+                  {isAILoading && (
+                    <div className="flex items-center gap-2 text-xs text-violet-500 animate-pulse">
+                      <div className="size-2 rounded-full bg-violet-500 animate-bounce" />
+                      {t("ctxMgr.aiAnalyzing")}
+                    </div>
+                  )}
+
+                  {aiResult && !isAILoading && aiResult.suggestions.length > 0 && (
+                    <div className="space-y-3">
+                      {aiResult.suggestions.map((s, i) => (
+                        <div key={i} className="p-3 bg-background/80 rounded-lg border border-violet-500/10">
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-[10px] font-bold text-violet-500 uppercase tracking-wider">{t("ctxMgr.aiInsight")} #{i + 1}</span>
+                            <Chip size="sm" variant="soft" className="text-[10px] font-bold bg-violet-500/10 text-violet-600 dark:text-violet-400">{s.score}/100</Chip>
+                          </div>
+                          <p className="text-xs text-foreground/90 leading-relaxed mb-1.5">{s.value}</p>
+                          {s.reasoning && (
+                            <p className="text-[10px] text-muted-foreground italic leading-relaxed">{s.reasoning}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </Card>
+              )}
             </>
           ) : (
             /* Empty state — redesigned with value proposition */
@@ -661,7 +722,7 @@ export default function ContextManagerPage() {
               </AlertDialog.Heading>
             </AlertDialog.Header>
             <AlertDialog.Body>
-              <p className="text-white">
+              <p className="text-foreground">
                 {deleteConfirm?.type === "window"
                   ? t("ctxMgr.confirmDeleteWindowDesc", { name: deleteConfirm.name })
                   : t("ctxMgr.confirmDeleteDesc", { name: deleteConfirm?.name ?? "" })}

@@ -23,6 +23,7 @@ import {
   SUGGEST_HTTP_EXPLAIN_SYSTEM_PROMPT,
   SUGGEST_TAILWIND_OPTIMIZE_SYSTEM_PROMPT,
   SUGGEST_COST_ADVISE_SYSTEM_PROMPT,
+  SUGGEST_CONTEXT_OPTIMIZE_SYSTEM_PROMPT,
 } from "@/lib/api/prompts";
 
 function getPromptForMode(mode: string, context: string, type?: string, language?: string): { systemPrompt: string; userPrompt: string } {
@@ -45,6 +46,8 @@ function getPromptForMode(mode: string, context: string, type?: string, language
       return { systemPrompt: SUGGEST_TAILWIND_OPTIMIZE_SYSTEM_PROMPT, userPrompt: `Optimize these Tailwind CSS classes:\n${context}` };
     case "cost-advise":
       return { systemPrompt: SUGGEST_COST_ADVISE_SYSTEM_PROMPT, userPrompt: `Provide cost optimization advice for this scenario: ${context}` };
+    case "context-optimize":
+      return { systemPrompt: SUGGEST_CONTEXT_OPTIMIZE_SYSTEM_PROMPT, userPrompt: `Analyze this context window and suggest optimizations:\n${context}` };
     default:
       return { systemPrompt: SUGGEST_VARIABLE_NAME_SYSTEM_PROMPT, userPrompt: `Suggest names for a ${type ?? "variable"} in ${language ?? "typescript"}: ${context}` };
   }
