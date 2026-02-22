@@ -65,7 +65,6 @@ export default function DtoMaticPage() {
   const [view, setView] = useState<"code" | "schema" | "mock" | string>("code");
   const [mockCount, setMockCount] = useState(5);
 
-
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <ToolHeader
@@ -186,30 +185,22 @@ export default function DtoMaticPage() {
               <div className="space-y-1.5 pt-2 border-t border-divider">
                 <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest ml-1">{t("dtoMatic.outputModeLabel")}</label>
                 <div className="flex gap-2" role="radiogroup" aria-label={t("dtoMatic.outputModeLabel")}>
-                  <Chip
-                    size="sm"
-                    variant={config.mode === "clean-arch" ? "primary" : "soft"}
-                    className="cursor-pointer font-bold h-8"
-                    onClick={() => setMode("clean-arch")}
-                    role="radio"
-                    aria-checked={config.mode === "clean-arch"}
-                  >{t("dtoMatic.cleanArch")}</Chip>
-                  <Chip
-                    size="sm"
-                    variant={config.mode === "zod" ? "primary" : "soft"}
-                    className="cursor-pointer font-bold h-8"
-                    onClick={() => setMode("zod")}
-                    role="radio"
-                    aria-checked={config.mode === "zod"}
-                  >{t("dtoMatic.zodSchemaLabel")}</Chip>
-                  <Chip
-                    size="sm"
-                    variant={config.mode === "quick" ? "primary" : "soft"}
-                    className="cursor-pointer font-bold h-8"
-                    onClick={() => setMode("quick")}
-                    role="radio"
-                    aria-checked={config.mode === "quick"}
-                  >{t("dtoMatic.dtoOnlyLabel")}</Chip>
+                  {([
+                    { val: "clean-arch" as const, label: t("dtoMatic.cleanArch") },
+                    { val: "zod" as const, label: t("dtoMatic.zodSchemaLabel") },
+                    { val: "quick" as const, label: t("dtoMatic.dtoOnlyLabel") },
+                  ] as const).map(opt => (
+                    <Button
+                      key={opt.val}
+                      size="sm"
+                      variant={config.mode === opt.val ? "primary" : "ghost"}
+                      onPress={() => setMode(opt.val)}
+                      aria-label={opt.label}
+                      className="font-bold text-xs"
+                    >
+                      {opt.label}
+                    </Button>
+                  ))}
                 </div>
                 <p className="text-[10px] text-muted-foreground/70 ml-1 mt-1">
                   {config.mode === "clean-arch" && t("dtoMatic.cleanArchDescLong")}
@@ -290,7 +281,10 @@ export default function DtoMaticPage() {
               {/* Main Content Tabs */}
               <Tabs
                 selectedKey={view as string}
-                onSelectionChange={(k) => setView(k as string)}
+                onSelectionChange={(k) => {
+                  setView(k as string);
+                  if (k === "mock" && !mockData) generateMock(mockCount);
+                }}
                 variant="primary"
               >
                 <div className="flex justify-between items-end">
@@ -384,7 +378,7 @@ export default function DtoMaticPage() {
                     <div className="lg:col-span-8 h-full">
                       <Card className="h-full p-0 border-primary/20 shadow-lg overflow-hidden bg-muted/30 dark:bg-muted/50 flex flex-col border-none">
                         <div className="p-3 bg-muted/50 border-b border-divider flex justify-between items-center">
-                          <span className="text-xs font-mono font-bold text-primary ml-2">{selectedFile?.name}</span>
+                          <span className="text-xs font-mono font-bold text-primary ml-2">{selectedFile?.name ?? t("dtoMatic.noFileSelected")}</span>
                           <div className="flex gap-1">
                             <Button
                               isIconOnly

@@ -1187,6 +1187,7 @@
   "dtoMatic.rerollData": "Re-roll Data",
   "dtoMatic.generatedJsonResponse": "Generated JSON Response",
   "dtoMatic.downloadAll": "Download all files",
+  "dtoMatic.noFileSelected": "Select a file",
   "dtoMatic.architecturalEngine": "Architectural Engine",
   "dtoMatic.architecturalEngineDesc": "Transform raw JSON into production-ready Clean Architecture layers. Supports TS, Java, Python, Go & C#.",
   "dtoMatic.pasteJsonHint": "Paste JSON here (e.g. {\"id\": 1, \"name\": \"User\"})",

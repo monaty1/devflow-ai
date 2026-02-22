@@ -1209,6 +1209,7 @@
   "dtoMatic.rerollData": "Regenerar Datos",
   "dtoMatic.generatedJsonResponse": "Respuesta JSON Generada",
   "dtoMatic.downloadAll": "Descargar todos los archivos",
+  "dtoMatic.noFileSelected": "Selecciona un archivo",
   "dtoMatic.architecturalEngine": "Motor Arquitectónico",
   "dtoMatic.architecturalEngineDesc": "Transforma JSON crudo en capas de Clean Architecture listas para producción. Soporta TS, Java, Python, Go y C#.",
   "dtoMatic.pasteJsonHint": "Pega JSON aquí (ej. {\"id\": 1, \"name\": \"User\"})",
