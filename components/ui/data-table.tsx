@@ -232,13 +232,18 @@ export function DataTable<T extends { id: string | number }>({
             ? t("table.allSelected")
             : t("table.selectedOf", { selected: (selectedKeys as Set<string>).size, total: filteredItems.length })}
         </span>
-        <Pagination
-          showControls
-          color="primary"
-          page={page}
-          total={pages}
-          onChange={setPage}
-        />
+        <nav aria-label={t("table.pagination")} ref={(el) => {
+          const ul = el?.querySelector('ul[data-slot="wrapper"]');
+          if (ul && ul.getAttribute("role") !== "toolbar") ul.setAttribute("role", "toolbar");
+        }}>
+          <Pagination
+            showControls
+            color="primary"
+            page={page}
+            total={pages}
+            onChange={setPage}
+          />
+        </nav>
         <div className="hidden sm:flex w-[30%] justify-end gap-2">
           <Button isDisabled={pages === 1} size="sm" variant="outline" onPress={() => setPage(p => Math.max(1, p - 1))}>
             {t("table.previous")}

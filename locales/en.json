@@ -1381,6 +1381,7 @@
   "table.previous": "Previous",
   "table.next": "Next",
   "table.ariaLabel": "Data table",
+  "table.pagination": "Pagination",
   "favorites.add": "Add to favorites",
   "favorites.remove": "Remove from favorites",
   "cron.infrastructure": "Infrastructure",
