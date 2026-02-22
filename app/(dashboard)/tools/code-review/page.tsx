@@ -4,9 +4,6 @@ import { useState, useCallback, useMemo } from "react";
 import {
   Chip,
   Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
   TextArea,
   Select,
   Label,
@@ -164,22 +161,24 @@ export default function CodeReviewPage() {
       case "actions":
         return (
           <Dropdown>
-            <DropdownTrigger>
+            <Dropdown.Trigger>
               <Button isIconOnly size="sm" variant="ghost" aria-label={t("codeReview.issueActions")}>
                 <MoreVertical className="size-4 text-default-300" />
               </Button>
-            </DropdownTrigger>
-            <DropdownMenu aria-label={t("codeReview.ariaIssueActions")}>
-              <DropdownItem 
-                key="wizard" 
-                onPress={() => navigateTo("variable-name-wizard" as ToolRoute, issue.message)}
-              >
-                <div className="flex items-center gap-2">
-                  <Wand2 className="size-3" />
-                  <span>{t("codeReview.improveNames")}</span>
-                </div>
-              </DropdownItem>
-            </DropdownMenu>
+            </Dropdown.Trigger>
+            <Dropdown.Popover>
+              <Dropdown.Menu aria-label={t("codeReview.ariaIssueActions")}>
+                <Dropdown.Item
+                  id="wizard"
+                  onAction={() => navigateTo("variable-name-wizard" as ToolRoute, issue.message)}
+                >
+                  <div className="flex items-center gap-2">
+                    <Wand2 className="size-3" />
+                    <span>{t("codeReview.improveNames")}</span>
+                  </div>
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown.Popover>
           </Dropdown>
         );
       default:

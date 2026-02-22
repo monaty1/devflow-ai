@@ -20,6 +20,7 @@ import {
   History,
   LayoutGrid,
   List,
+  Bot,
 } from "lucide-react";
 import { useHttpStatusFinder } from "@/hooks/use-http-status-finder";
 import { useTranslation } from "@/hooks/use-translation";
@@ -30,6 +31,8 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { getCategoryInfo } from "@/lib/application/http-status-finder";
 import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { cn } from "@/lib/utils";
+import { useAISuggest } from "@/hooks/use-ai-suggest";
+import { useAISettingsStore } from "@/lib/stores/ai-settings-store";
 import type { HttpStatusCode, HttpStatusCategory } from "@/types/http-status-finder";
 
 const CATEGORY_COLORS: Record<HttpStatusCategory, string> = {
@@ -56,6 +59,8 @@ export default function HttpStatusFinderPage() {
 
   const [searchInput, setSearchInput] = useState(query);
   const [activeView, setActiveView] = useState<"grid" | "table">("grid");
+  const { explainHttpStatusWithAI, aiResult, isAILoading } = useAISuggest();
+  const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
 
   // Debounce search by 300ms
   useEffect(() => {
@@ -324,6 +329,44 @@ export default function HttpStatusFinderPage() {
                   )}
                 </div>
               </Card>
+
+              {isAIEnabled && (
+                <Card className="p-6 bg-gradient-to-br from-violet-500/10 to-purple-500/10 dark:from-violet-500/15 dark:to-purple-500/15 border border-violet-500/20 dark:border-violet-500/10">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xs font-black uppercase text-violet-600 dark:text-violet-400 flex items-center gap-2 tracking-widest">
+                      <Bot className="size-3" /> {t("httpStatus.aiExpert")}
+                    </h3>
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      className="font-bold bg-violet-600 hover:bg-violet-700 border-none shadow-lg shadow-violet-500/20"
+                      onPress={() => {
+                        void explainHttpStatusWithAI(`${selectedCode.code} ${selectedCode.name}: ${selectedCode.description}. When to use: ${selectedCode.whenToUse}`);
+                      }}
+                      isLoading={isAILoading}
+                    >
+                      <Bot className="size-4 mr-2" /> {t("httpStatus.aiAskExpert")}
+                    </Button>
+                  </div>
+                  {isAILoading && (
+                    <div className="space-y-2 animate-pulse">
+                      <div className="h-3 bg-violet-500/20 rounded w-3/4" />
+                      <div className="h-3 bg-violet-500/20 rounded w-1/2" />
+                      <div className="h-3 bg-violet-500/20 rounded w-2/3" />
+                    </div>
+                  )}
+                  {aiResult?.suggestions && aiResult.suggestions.length > 0 && !isAILoading && (
+                    <div className="space-y-3">
+                      {aiResult.suggestions.map((s, i) => (
+                        <div key={i} className="p-4 bg-background/80 rounded-xl border border-violet-500/10">
+                          <p className="text-sm font-medium leading-relaxed">{s.value}</p>
+                          <p className="text-[10px] text-muted-foreground mt-2 italic">{s.reasoning}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </Card>
+              )}
             </div>
           ) : (
             <div className="space-y-6">

@@ -8,7 +8,7 @@ interface SuggestArgs {
   context: string;
   type?: string | undefined;
   language?: string | undefined;
-  mode: "variable-name" | "regex-generate" | "commit-message" | "cron-generate" | "json-explain";
+  mode: "variable-name" | "regex-generate" | "commit-message" | "cron-generate" | "json-explain" | "base64-explain" | "dto-optimize" | "http-explain" | "tailwind-optimize" | "cost-advise";
 }
 
 async function suggestFetcher(
@@ -35,6 +35,16 @@ export function useAISuggest() {
       trigger({ context: description, mode: "cron-generate" }),
     explainJsonWithAI: (json: string) =>
       trigger({ context: json, mode: "json-explain" }),
+    explainBase64WithAI: (content: string) =>
+      trigger({ context: content, mode: "base64-explain" }),
+    optimizeDtoWithAI: (code: string) =>
+      trigger({ context: code, mode: "dto-optimize" }),
+    explainHttpStatusWithAI: (description: string) =>
+      trigger({ context: description, mode: "http-explain" }),
+    optimizeTailwindWithAI: (classes: string) =>
+      trigger({ context: classes, mode: "tailwind-optimize" }),
+    adviseCostWithAI: (scenario: string) =>
+      trigger({ context: scenario, mode: "cost-advise" }),
     aiResult: data ?? null,
     aiError: error as Error | null,
     isAILoading: isMutating,

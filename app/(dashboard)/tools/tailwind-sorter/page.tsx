@@ -19,8 +19,11 @@ import {
   Zap,
   Activity,
   GitCompareArrows,
+  Bot,
 } from "lucide-react";
 import { useTailwindSorter } from "@/hooks/use-tailwind-sorter";
+import { useAISuggest } from "@/hooks/use-ai-suggest";
+import { useAISettingsStore } from "@/lib/stores/ai-settings-store";
 import { useTranslation } from "@/hooks/use-translation";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { CopyButton } from "@/components/shared/copy-button";
@@ -42,6 +45,9 @@ export default function TailwindSorterPage() {
     reset,
     loadExample,
   } = useTailwindSorter();
+
+  const { optimizeTailwindWithAI, aiResult, isAILoading } = useAISuggest();
+  const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
 
   const [activeView, setActiveView] = useState<"result" | "audit" | "diff" | "breakpoints" | string>("result");
 
@@ -168,6 +174,41 @@ export default function TailwindSorterPage() {
             </div>
             <p className="text-[10px] text-center mt-4 text-muted-foreground/60 italic relative z-10">{t("tailwind.sandboxNote")}</p>
           </Card>
+
+          {result && isAIEnabled && (
+            <Card className="p-6 bg-gradient-to-br from-violet-500/10 to-purple-500/10 dark:from-violet-500/15 dark:to-purple-500/15 border border-violet-500/20 dark:border-violet-500/10">
+              <h3 className="text-xs font-black uppercase text-violet-600 dark:text-violet-400 mb-4 flex items-center gap-2 tracking-widest">
+                <Bot className="size-3" /> {t("tailwind.aiOptimizer")}
+              </h3>
+              <Button
+                size="sm"
+                variant="primary"
+                className="w-full font-bold bg-violet-600 hover:bg-violet-700 border-none shadow-lg shadow-violet-500/20 mb-4"
+                onPress={() => {
+                  void optimizeTailwindWithAI(result.output);
+                }}
+                isLoading={isAILoading}
+              >
+                <Bot className="size-4 mr-2" /> {t("tailwind.aiOptimizeBtn")}
+              </Button>
+              {isAILoading && (
+                <div className="space-y-2 animate-pulse">
+                  <div className="h-3 bg-violet-500/20 rounded w-3/4" />
+                  <div className="h-3 bg-violet-500/20 rounded w-1/2" />
+                </div>
+              )}
+              {aiResult?.suggestions && aiResult.suggestions.length > 0 && !isAILoading && (
+                <div className="space-y-3">
+                  {aiResult.suggestions.map((s, i) => (
+                    <div key={i} className="p-3 bg-background/80 rounded-xl border border-violet-500/10">
+                      <p className="text-xs font-medium leading-relaxed">{s.value}</p>
+                      <p className="text-[10px] text-muted-foreground mt-2 italic">{s.reasoning}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          )}
         </div>
 
         {/* Results Column */}

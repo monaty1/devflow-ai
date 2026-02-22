@@ -19,6 +19,7 @@ import {
   Search,
   Cpu,
   Upload,
+  Bot,
 } from "lucide-react";
 import { useBase64 } from "@/hooks/use-base64";
 import { useTranslation } from "@/hooks/use-translation";
@@ -28,7 +29,8 @@ import { ToolHeader } from "@/components/shared/tool-header";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { DataTable, Button, Card, type ColumnConfig } from "@/components/ui";
-
+import { useAISuggest } from "@/hooks/use-ai-suggest";
+import { useAISettingsStore } from "@/lib/stores/ai-settings-store";
 export default function Base64Page() {
   const { t } = useTranslation();
   const { navigateTo } = useSmartNavigation();
@@ -44,6 +46,9 @@ export default function Base64Page() {
     reset,
     loadExample,
   } = useBase64();
+
+  const { explainBase64WithAI, aiResult, isAILoading } = useAISuggest();
+  const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
 
   const [activeView, setActiveView] = useState<"text" | "preview" | "inspector">("text");
 
@@ -202,6 +207,42 @@ export default function Base64Page() {
                   <StatusBadge variant="info">{t("base64.detectedBadge", { type: result.detectedType?.toUpperCase() || "" })}</StatusBadge>
                 </div>
               </div>
+            </Card>
+          )}
+
+          {result && isAIEnabled && (
+            <Card className="p-6 bg-gradient-to-br from-violet-500/10 to-purple-500/10 dark:from-violet-500/15 dark:to-purple-500/15 border border-violet-500/20 dark:border-violet-500/10">
+              <h3 className="text-xs font-black uppercase text-violet-600 dark:text-violet-400 mb-4 flex items-center gap-2 tracking-widest">
+                <Bot className="size-3" /> {t("base64.aiAnalysis")}
+              </h3>
+              <Button
+                size="sm"
+                variant="primary"
+                className="w-full font-bold bg-violet-600 hover:bg-violet-700 border-none shadow-lg shadow-violet-500/20 mb-4"
+                onPress={() => {
+                  const content = result.output.slice(0, 2000);
+                  void explainBase64WithAI(`Type: ${result.detectedType || "unknown"}, Mode: ${mode}, Content (first 2000 chars): ${content}`);
+                }}
+                isLoading={isAILoading}
+              >
+                <Bot className="size-4 mr-2" /> {t("base64.aiAnalyzeBtn")}
+              </Button>
+              {isAILoading && (
+                <div className="space-y-2 animate-pulse">
+                  <div className="h-3 bg-violet-500/20 rounded w-3/4" />
+                  <div className="h-3 bg-violet-500/20 rounded w-1/2" />
+                </div>
+              )}
+              {aiResult?.suggestions && aiResult.suggestions.length > 0 && !isAILoading && (
+                <div className="space-y-3">
+                  {aiResult.suggestions.map((s, i) => (
+                    <div key={i} className="p-3 bg-background/80 rounded-xl border border-violet-500/10">
+                      <p className="text-xs font-medium leading-relaxed">{s.value}</p>
+                      <p className="text-[10px] text-muted-foreground mt-2 italic">{s.reasoning}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </Card>
           )}
         </div>

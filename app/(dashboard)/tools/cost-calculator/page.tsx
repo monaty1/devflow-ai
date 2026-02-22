@@ -18,8 +18,11 @@ import {
   Cpu,
   Zap,
   BarChart3,
+  Bot,
 } from "lucide-react";
 import { useCostCalculator } from "@/hooks/use-cost-calculator";
+import { useAISuggest } from "@/hooks/use-ai-suggest";
+import { useAISettingsStore } from "@/lib/stores/ai-settings-store";
 
 const CostProjectionChart = dynamic(
   () => import("@/components/tools/cost-projection-chart").then(m => m.CostProjectionChart),
@@ -59,6 +62,9 @@ export default function CostCalculatorPage() {
     lastSync,
     syncPrices,
   } = useCostCalculator();
+
+  const { adviseCostWithAI, aiResult, isAILoading } = useAISuggest();
+  const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
 
   const [detailModel, setDetailModel] = useState<CostCalculation | null>(null);
 
@@ -362,6 +368,47 @@ export default function CostCalculatorPage() {
             </div>
             {lastSync && <span>{t("costCalc.lastSyncLabel")} {new Date(lastSync).toLocaleDateString()}</span>}
           </div>
+
+          {isAIEnabled && (
+            <Card className="p-6 bg-gradient-to-br from-violet-500/10 to-purple-500/10 dark:from-violet-500/15 dark:to-purple-500/15 border border-violet-500/20 dark:border-violet-500/10">
+              <h3 className="text-xs font-black uppercase text-violet-600 dark:text-violet-400 mb-4 flex items-center gap-2 tracking-widest">
+                <Bot className="size-3" /> {t("costCalc.aiAdvisor")}
+              </h3>
+              <Button
+                size="sm"
+                variant="primary"
+                className="w-full font-bold bg-violet-600 hover:bg-violet-700 border-none shadow-lg shadow-violet-500/20 mb-4"
+                onPress={() => {
+                  const cheapest = comparison?.results[0];
+                  const scenario = `Input tokens: ${inputTokens}, Output tokens: ${outputTokens}, Daily requests: ${dailyRequests}, Monthly cost estimate: $${monthlyCost.toFixed(4)}, Cheapest model: ${cheapest?.model.displayName ?? "unknown"} at $${cheapest?.totalCost.toFixed(6) ?? "?"}/req`;
+                  void adviseCostWithAI(scenario);
+                }}
+                isLoading={isAILoading}
+              >
+                <Bot className="size-4 mr-2" /> {t("costCalc.aiAdviseBtn")}
+              </Button>
+              {isAILoading && (
+                <div className="space-y-2 animate-pulse">
+                  <div className="h-3 bg-violet-500/20 rounded w-3/4" />
+                  <div className="h-3 bg-violet-500/20 rounded w-1/2" />
+                </div>
+              )}
+              {aiResult?.suggestions && aiResult.suggestions.length > 0 && !isAILoading && (
+                <div className="space-y-3">
+                  {aiResult.suggestions.map((s, i) => (
+                    <div key={i} className="p-3 bg-background/80 rounded-xl border border-violet-500/10">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[10px] font-black uppercase text-violet-500">{t("costCalc.aiStrategy")} #{i + 1}</span>
+                        <span className="text-[10px] font-bold text-violet-400">{s.score}/100</span>
+                      </div>
+                      <p className="text-xs font-medium leading-relaxed">{s.value}</p>
+                      <p className="text-[10px] text-muted-foreground mt-2 italic">{s.reasoning}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          )}
         </div>
 
         {/* Comparison Table */}

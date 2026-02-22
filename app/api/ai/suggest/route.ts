@@ -18,6 +18,11 @@ import {
   SUGGEST_COMMIT_MESSAGE_SYSTEM_PROMPT,
   SUGGEST_CRON_SYSTEM_PROMPT,
   SUGGEST_JSON_EXPLAIN_SYSTEM_PROMPT,
+  SUGGEST_BASE64_EXPLAIN_SYSTEM_PROMPT,
+  SUGGEST_DTO_OPTIMIZE_SYSTEM_PROMPT,
+  SUGGEST_HTTP_EXPLAIN_SYSTEM_PROMPT,
+  SUGGEST_TAILWIND_OPTIMIZE_SYSTEM_PROMPT,
+  SUGGEST_COST_ADVISE_SYSTEM_PROMPT,
 } from "@/lib/api/prompts";
 
 function getPromptForMode(mode: string, context: string, type?: string, language?: string): { systemPrompt: string; userPrompt: string } {
@@ -30,6 +35,16 @@ function getPromptForMode(mode: string, context: string, type?: string, language
       return { systemPrompt: SUGGEST_CRON_SYSTEM_PROMPT, userPrompt: `Generate a cron expression for: ${context}` };
     case "json-explain":
       return { systemPrompt: SUGGEST_JSON_EXPLAIN_SYSTEM_PROMPT, userPrompt: `Analyze this JSON structure:\n${context}` };
+    case "base64-explain":
+      return { systemPrompt: SUGGEST_BASE64_EXPLAIN_SYSTEM_PROMPT, userPrompt: `Analyze this decoded/encoded content:\n${context}` };
+    case "dto-optimize":
+      return { systemPrompt: SUGGEST_DTO_OPTIMIZE_SYSTEM_PROMPT, userPrompt: `Suggest improvements for this generated code:\n${context}` };
+    case "http-explain":
+      return { systemPrompt: SUGGEST_HTTP_EXPLAIN_SYSTEM_PROMPT, userPrompt: `Explain this HTTP status code and provide guidance: ${context}` };
+    case "tailwind-optimize":
+      return { systemPrompt: SUGGEST_TAILWIND_OPTIMIZE_SYSTEM_PROMPT, userPrompt: `Optimize these Tailwind CSS classes:\n${context}` };
+    case "cost-advise":
+      return { systemPrompt: SUGGEST_COST_ADVISE_SYSTEM_PROMPT, userPrompt: `Provide cost optimization advice for this scenario: ${context}` };
     default:
       return { systemPrompt: SUGGEST_VARIABLE_NAME_SYSTEM_PROMPT, userPrompt: `Suggest names for a ${type ?? "variable"} in ${language ?? "typescript"}: ${context}` };
   }

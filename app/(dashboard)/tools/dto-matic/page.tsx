@@ -23,6 +23,7 @@ import {
   Box,
   FileCode,
   Download,
+  Bot,
 } from "lucide-react";
 import { ToolHeader } from "@/components/shared/tool-header";
 import { useDtoMatic } from "@/hooks/use-dto-matic";
@@ -31,6 +32,8 @@ import { CopyButton } from "@/components/shared/copy-button";
 import { Button, Card } from "@/components/ui";
 import { ToolSuggestions } from "@/components/shared/tool-suggestions";
 import { cn } from "@/lib/utils";
+import { useAISuggest } from "@/hooks/use-ai-suggest";
+import { useAISettingsStore } from "@/lib/stores/ai-settings-store";
 import type { TargetLanguage } from "@/types/dto-matic";
 
 export default function DtoMaticPage() {
@@ -55,6 +58,9 @@ export default function DtoMaticPage() {
     reset,
     isValidJson,
   } = useDtoMatic();
+
+  const { optimizeDtoWithAI, aiResult, isAILoading } = useAISuggest();
+  const isAIEnabled = useAISettingsStore((s) => s.isAIEnabled);
 
   const [view, setView] = useState<"code" | "schema" | "mock" | string>("code");
   const [mockCount, setMockCount] = useState(5);
@@ -238,6 +244,48 @@ export default function DtoMaticPage() {
                   <p className="text-2xl font-black text-purple-700 dark:text-purple-400">{result.files.length}</p>
                 </Card>
               </div>
+
+              {isAIEnabled && (
+                <Card className="p-6 bg-gradient-to-br from-violet-500/10 to-purple-500/10 dark:from-violet-500/15 dark:to-purple-500/15 border border-violet-500/20 dark:border-violet-500/10">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xs font-black uppercase text-violet-600 dark:text-violet-400 flex items-center gap-2 tracking-widest">
+                      <Bot className="size-3" /> {t("dtoMatic.aiOptimizer")}
+                    </h3>
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      className="font-bold bg-violet-600 hover:bg-violet-700 border-none shadow-lg shadow-violet-500/20"
+                      onPress={() => {
+                        const code = selectedFile?.content || result.files.map(f => f.content).join("\n").slice(0, 3000);
+                        void optimizeDtoWithAI(`Language: ${config.targetLanguage}, Mode: ${config.mode}\n\n${code}`);
+                      }}
+                      isLoading={isAILoading}
+                    >
+                      <Bot className="size-4 mr-2" /> {t("dtoMatic.aiOptimizeBtn")}
+                    </Button>
+                  </div>
+                  {isAILoading && (
+                    <div className="space-y-2 animate-pulse">
+                      <div className="h-3 bg-violet-500/20 rounded w-3/4" />
+                      <div className="h-3 bg-violet-500/20 rounded w-1/2" />
+                    </div>
+                  )}
+                  {aiResult?.suggestions && aiResult.suggestions.length > 0 && !isAILoading && (
+                    <div className="space-y-3">
+                      {aiResult.suggestions.map((s, i) => (
+                        <div key={i} className="p-4 bg-background/80 rounded-xl border border-violet-500/10">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[10px] font-black uppercase text-violet-500">{t("dtoMatic.aiSuggestion")} #{i + 1}</span>
+                            <span className="text-[10px] font-bold text-violet-400">{s.score}/100</span>
+                          </div>
+                          <p className="text-xs font-medium leading-relaxed">{s.value}</p>
+                          <p className="text-[10px] text-muted-foreground mt-2 italic">{s.reasoning}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </Card>
+              )}
 
               {/* Main Content Tabs */}
               <Tabs

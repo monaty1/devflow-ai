@@ -1565,5 +1565,17 @@
   "pwa.installTitle": "Instalar DevFlow AI",
   "pwa.installDescription": "Agrega a tu pantalla de inicio para acceso rapido y uso offline.",
   "pwa.install": "Instalar",
-  "pwa.notNow": "Ahora no"
+  "pwa.notNow": "Ahora no",
+  "base64.aiAnalysis": "Analisis IA del Contenido",
+  "base64.aiAnalyzeBtn": "Analizar con IA",
+  "costCalc.aiAdvisor": "Asesor IA de Costes",
+  "costCalc.aiAdviseBtn": "Consultar IA",
+  "costCalc.aiStrategy": "Estrategia",
+  "httpStatus.aiExpert": "Experto IA en HTTP",
+  "httpStatus.aiAskExpert": "Consultar Experto IA",
+  "tailwind.aiOptimizer": "Optimizador IA de Clases",
+  "tailwind.aiOptimizeBtn": "Optimizar con IA",
+  "dtoMatic.aiOptimizer": "Optimizador IA de Tipos",
+  "dtoMatic.aiOptimizeBtn": "Optimizar con IA",
+  "dtoMatic.aiSuggestion": "Sugerencia"
 }

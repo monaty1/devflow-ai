@@ -5,9 +5,6 @@ import {
   Tabs,
   Input,
   Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
   TextArea,
   Select,
   Label,
@@ -308,20 +305,22 @@ export default function UuidGeneratorPage() {
                 </h3>
                 <div className="flex gap-2 w-full sm:w-auto">
                   <Dropdown>
-                    <DropdownTrigger>
+                    <Dropdown.Trigger>
                       <Button size="sm" variant="ghost" className="font-black flex-1 sm:flex-none border border-divider">
                         <div className="flex items-center gap-2">
                           {exportFormat.toUpperCase()}
                           <ChevronDown className="size-3" />
                         </div>
                       </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu onAction={(k) => setExportFormat(k as "text" | "json" | "csv" | "sql")}>
-                      <DropdownItem key="text">{t("uuid.plainText")}</DropdownItem>
-                      <DropdownItem key="json">{t("uuid.jsonArray")}</DropdownItem>
-                      <DropdownItem key="csv">{t("uuid.csvTable")}</DropdownItem>
-                      <DropdownItem key="sql">{t("uuid.sqlInsert")}</DropdownItem>
-                    </DropdownMenu>
+                    </Dropdown.Trigger>
+                    <Dropdown.Popover>
+                      <Dropdown.Menu onAction={(k) => setExportFormat(k as "text" | "json" | "csv" | "sql")}>
+                        <Dropdown.Item id="text">{t("uuid.plainText")}</Dropdown.Item>
+                        <Dropdown.Item id="json">{t("uuid.jsonArray")}</Dropdown.Item>
+                        <Dropdown.Item id="csv">{t("uuid.csvTable")}</Dropdown.Item>
+                        <Dropdown.Item id="sql">{t("uuid.sqlInsert")}</Dropdown.Item>
+                      </Dropdown.Menu>
+                    </Dropdown.Popover>
                   </Dropdown>
                   <Button size="sm" variant="primary" onPress={handleExport} className="font-black">
                     <Download className="size-3 mr-1" /> {t("uuid.saveBtn")}
