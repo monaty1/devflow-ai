@@ -89,7 +89,7 @@ export interface RateLimitInfo {
 /** AI service health status */
 export interface AIStatusResult {
   configured: boolean;
-  provider: AIProviderType | null;
+  provider: AIProviderType;
   /** Whether a premium (paid) AI provider is configured (Gemini/Groq/OpenRouter) */
   premiumConfigured: boolean;
   limits: {

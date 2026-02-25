@@ -210,6 +210,7 @@ export function DataTable<T extends { id: string | number }>({
           <label className="flex items-center text-default-400 text-small gap-1.5">
             {t("table.rowsPerPage")}
             <select
+              aria-label={t("table.rowsPerPage")}
               className="bg-default-100 outline-none text-default-400 text-small font-medium cursor-pointer rounded-lg px-2 py-1 border-none dark:[color-scheme:dark] dark:[&_option]:bg-default-100 dark:[&_option]:text-foreground"
               onChange={(e) => { setRowsPerPage(Number(e.target.value)); setPage(1); }}
               value={rowsPerPage}

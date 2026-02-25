@@ -27,12 +27,13 @@ function HtmlLangSync() {
 
 function ConsoleEasterEgg() {
   useEffect(() => {
-    console.log(
+    // console.info is excluded from removeConsole in next.config.ts
+    console.info(
       "%c DevFlow AI %c PARA VOSOTROS, DEVELOPERS ",
       "background:#2563eb;color:#fff;font-size:20px;font-weight:bold;padding:8px 12px;border-radius:6px 0 0 6px;",
       "background:#7c3aed;color:#fff;font-size:20px;font-weight:bold;padding:8px 12px;border-radius:0 6px 6px 0;",
     );
-    console.log(
+    console.info(
       "%cContribute → https://github.com/albertoguinda/devflow-ai",
       "color:#94a3b8;font-size:13px;padding:4px 0;",
     );

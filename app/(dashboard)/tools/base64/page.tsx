@@ -248,9 +248,9 @@ export default function Base64Page() {
           )}
 
           {isAIEnabled && aiError && (
-            <Card className="p-3 border-danger/30 bg-danger/5">
+            <Card className="p-3 border-danger/30 bg-danger/5" role="alert">
               <p className="text-xs text-danger font-bold flex items-center gap-2">
-                <AlertTriangle className="size-3.5 shrink-0" />
+                <AlertTriangle className="size-3.5 shrink-0" aria-hidden="true" />
                 {t("ai.errorOccurred", { message: aiError.message })}
               </p>
             </Card>
@@ -324,6 +324,7 @@ export default function Base64Page() {
 
                   {result?.detectedType === "image" && (
                     <Card className="p-12 flex flex-col items-center justify-center bg-muted/10 border-dashed border-2">
+                      {/* eslint-disable-next-line @next/next/no-img-element -- data URI from user input, next/image cannot optimize */}
                       <img src={mode === "decode" ? `data:image/*;base64,${result.input}` : `data:image/*;base64,${result.output}`} alt="Preview" className="max-w-full max-h-[350px] rounded-2xl shadow-2xl border-4 border-white dark:border-slate-800" />
                       <Button size="md" variant="primary" className="mt-8 font-black shadow-lg" onPress={() => {
                         const a = document.createElement("a");

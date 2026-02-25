@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { InputGroup } from "@heroui/react";
 import { Button } from "@/components/ui";
 import { Eye, EyeOff, ExternalLink, Check, Sparkles } from "lucide-react";
@@ -74,13 +74,13 @@ export function ApiKeyGuide({ open, onClose }: ApiKeyGuideProps) {
     handleClose();
   }
 
-  function handleClose() {
+  const handleClose = useCallback(() => {
     setStep(0);
     setProvider("pollinations");
     setApiKey("");
     setShowKey(false);
     onClose();
-  }
+  }, [onClose]);
 
   function handleNext() {
     if (step === 0 && !needsKey) {
@@ -99,6 +99,15 @@ export function ApiKeyGuide({ open, onClose }: ApiKeyGuideProps) {
     }
   }
 
+  useEffect(() => {
+    if (!open) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") handleClose();
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open, handleClose]);
+
   if (!open) return null;
 
   return (
@@ -111,14 +120,19 @@ export function ApiKeyGuide({ open, onClose }: ApiKeyGuideProps) {
       />
 
       {/* Modal */}
-      <div className="relative z-10 w-full max-w-lg rounded-2xl border border-border bg-card shadow-2xl">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="api-key-guide-title"
+        className="relative z-10 w-full max-w-lg rounded-2xl border border-border bg-card shadow-2xl"
+      >
         {/* Header */}
         <div className="flex items-center gap-3 border-b border-border p-6 pb-4">
           <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
-            <Sparkles className="size-5 text-primary" />
+            <Sparkles className="size-5 text-primary" aria-hidden="true" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-foreground">
+            <h2 id="api-key-guide-title" className="text-lg font-semibold text-foreground">
               {t("guide.ai.title")}
             </h2>
             <p className="text-sm text-muted-foreground">

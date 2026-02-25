@@ -5,6 +5,30 @@ All notable changes to DevFlow AI will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.10.0] - 2026-02-25
+
+### Deep Audit & Hardening Sprint
+
+Exhaustive codebase audit: bug fixes, accessibility hardening, ESLint zero-warning policy, and code quality improvements across all 15 tools.
+
+#### Fixed
+- **Easter egg invisible in production** — `removeConsole: true` was stripping all `console.*`; changed to exclude `info/error/warn`, switched easter egg to `console.info`
+- **API status route missing error handling** — Added try-catch + `errorResponse()` wrapper
+- **AIStatusResult.provider incorrectly nullable** — Changed to non-nullable `AIProviderType` (Pollinations is always available)
+- **Pollinations client missing top_p** — Added `top_p: options?.topP ?? 0.95` for consistency with other providers
+- **Code review page division by zero** — Added `totalLines > 0` guard for comment percentage
+- **dto-matic hardcoded Spanish error** — Changed to English in logic layer (UI handles i18n)
+
+#### Accessibility (WCAG AAA)
+- **API Key Guide** — Added `role="dialog"`, `aria-modal="true"`, `aria-labelledby`, Escape key handler
+- **DataTable select** — Added `aria-label` to rows-per-page native select
+- **13 tool error cards** — Added `role="alert"` + `aria-hidden="true"` on decorative icons (base64, cost-calculator, cron-builder, git-commit-generator, json-formatter, context-manager, http-status-finder, token-visualizer, tailwind-sorter, prompt-analyzer, regex-humanizer, dto-matic, variable-name-wizard)
+
+#### Code Quality
+- **ESLint: 139 warnings → 0** — Config overhaul: disabled false-positive `detect-object-injection` (TS strict requires bracket notation), configured `argsIgnorePattern: "^_"`, added 25 targeted inline disables for legitimate patterns
+- **Rate limiter singleton** — Simplified to nullish coalescing assignment (`??=`)
+- **BYOK validation** — Replaced inline string literals with typed `VALID_PROVIDERS` array
+
 ## [4.9.0] - 2026-02-22
 
 ### Final Polish Sprint — TFM Submission

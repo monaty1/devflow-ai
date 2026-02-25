@@ -261,6 +261,7 @@ export function validateCommitMessage(message: string, config?: CommitConfig, lo
   const header = lines[0] ?? "";
 
   // Check header format: type(scope)?: description
+  // eslint-disable-next-line security/detect-unsafe-regex -- static conventional commit format
   const headerRegex = /^(feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert)(\(.+\))?!?:\s.+$/;
   if (!headerRegex.test(header)) {
     errors.push(v.invalidHeader);
@@ -318,6 +319,7 @@ export function parseCommitMessage(message: string): ParsedCommit | null {
   const header = lines[0] ?? "";
 
   // Parse header
+  // eslint-disable-next-line security/detect-unsafe-regex -- static header parser
   const headerRegex = /^(\w+)(?:\(([^)]*)\))?(!)?\s*:\s*(.*)$/;
   const match = headerRegex.exec(header);
 

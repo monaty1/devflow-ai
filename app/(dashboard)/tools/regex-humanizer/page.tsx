@@ -60,7 +60,7 @@ export default function RegexHumanizerPage() {
     if (!pattern.trim()) return true;
     try {
       const cleaned = pattern.replace(/^\//, "").replace(/\/[gimsuy]*$/, "");
-      new RegExp(cleaned);
+      new RegExp(cleaned); // eslint-disable-line security/detect-non-literal-regexp -- core tool: validates user regex
       return true;
     } catch {
       return false;
@@ -110,9 +110,9 @@ export default function RegexHumanizerPage() {
       <ToolSuggestions toolId="regex-humanizer" input={pattern} output={explanation?.explanation || ""} />
 
       {(regexError || aiError) && (
-        <Card className="p-3 border-danger/30 bg-danger/5">
+        <Card className="p-3 border-danger/30 bg-danger/5" role="alert" aria-live="assertive">
           <p className="text-xs text-danger font-bold flex items-center gap-2">
-            <AlertTriangle className="size-3.5 shrink-0" />
+            <AlertTriangle className="size-3.5 shrink-0" aria-hidden="true" />
             {regexError ?? aiError?.message}
           </p>
         </Card>

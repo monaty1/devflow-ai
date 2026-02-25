@@ -334,12 +334,12 @@ export default function CodeReviewPage() {
                   <div className="mt-4 space-y-2">
                     <div className="flex justify-between text-xs font-medium">
                       <span>{t("codeReview.docCoverage")}</span>
-                      <span>{Math.round((result.metrics.commentLines / result.metrics.totalLines) * 100)}%</span>
+                      <span>{result.metrics.totalLines > 0 ? Math.round((result.metrics.commentLines / result.metrics.totalLines) * 100) : 0}%</span>
                     </div>
                     <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-secondary" 
-                        style={{ width: `${Math.round((result.metrics.commentLines / result.metrics.totalLines) * 100)}%` }} 
+                      <div
+                        className="h-full bg-secondary"
+                        style={{ width: `${result.metrics.totalLines > 0 ? Math.round((result.metrics.commentLines / result.metrics.totalLines) * 100) : 0}%` }}
                       />
                     </div>
                   </div>

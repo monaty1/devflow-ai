@@ -420,9 +420,9 @@ export default function GitCommitGeneratorPage() {
                 )}
 
                 {isAIEnabled && aiError && (
-                  <Card className="p-3 border-danger/30 bg-danger/5">
+                  <Card className="p-3 border-danger/30 bg-danger/5" role="alert">
                     <p className="text-xs text-danger font-bold flex items-center gap-2">
-                      <AlertTriangle className="size-3.5 shrink-0" />
+                      <AlertTriangle className="size-3.5 shrink-0" aria-hidden="true" />
                       {t("ai.errorOccurred", { message: aiError.message })}
                     </p>
                   </Card>

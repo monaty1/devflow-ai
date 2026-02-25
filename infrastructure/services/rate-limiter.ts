@@ -148,8 +148,6 @@ export function getRateLimiter(
   rpm?: number,
   dailyTokens?: number,
 ): RateLimiter {
-  if (!instance) {
-    instance = new RateLimiter(rpm, dailyTokens);
-  }
+  instance ??= new RateLimiter(rpm, dailyTokens);
   return instance;
 }

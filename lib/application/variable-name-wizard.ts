@@ -60,8 +60,11 @@ const WIZARD_STRINGS = {
 const CONVENTION_PATTERNS: Record<NamingConvention, RegExp> = {
   camelCase: /^[a-z][a-zA-Z0-9]*$/,
   PascalCase: /^[A-Z][a-zA-Z0-9]*$/,
+  // eslint-disable-next-line security/detect-unsafe-regex -- bounded naming convention validators
   snake_case: /^[a-z][a-z0-9]*(_[a-z0-9]+)+$/,
+  // eslint-disable-next-line security/detect-unsafe-regex
   SCREAMING_SNAKE_CASE: /^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$/,
+  // eslint-disable-next-line security/detect-unsafe-regex
   "kebab-case": /^[a-z][a-z0-9]*(-[a-z0-9]+)+$/,
   flatcase: /^[a-z]+$/,
   UPPERCASE: /^[A-Z]+$/,

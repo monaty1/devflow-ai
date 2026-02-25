@@ -48,6 +48,7 @@ export class PollinationsClient implements AIProviderPort {
         ],
         max_tokens: options?.maxTokens ?? 4096,
         temperature: options?.temperature ?? 0.3,
+        top_p: options?.topP ?? 0.95,
       }),
     });
 

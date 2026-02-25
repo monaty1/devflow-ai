@@ -7,6 +7,7 @@ const INJECTION_PATTERNS: {
   description: string;
 }[] = [
   {
+    // eslint-disable-next-line security/detect-unsafe-regex -- static prompt injection detection
     pattern: /ignore\s+(all\s+)?(previous|above|prior)\s+(instructions?|prompts?)/i,
     type: "ignore_instruction",
     severity: "critical",
@@ -55,6 +56,7 @@ const INJECTION_PATTERNS: {
     description: "System tag injection detected",
   },
   {
+    // eslint-disable-next-line security/detect-unsafe-regex -- static jailbreak detection
     pattern: /act\s+as\s+(if|though)\s+you\s+(have\s+)?no\s+(restrictions?|rules?|limits?)/i,
     type: "jailbreak_attempt",
     severity: "critical",
@@ -85,6 +87,7 @@ const INJECTION_PATTERNS: {
     description: "Potential tracking pixel or exfiltration via Markdown link",
   },
   {
+    // eslint-disable-next-line security/detect-unsafe-regex -- bounded repetition for obfuscation detection
     pattern: /\b([a-z]\s+){5,}/i,
     type: "prompt_injection",
     severity: "warning",

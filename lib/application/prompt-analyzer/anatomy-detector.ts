@@ -58,6 +58,7 @@ function detectTask(prompt: string): PromptDimension {
   const taskPatterns: RegExp[] = [
     /<task>\s*([\s\S]*?)\s*<\/task>/i,
     /(?:task|objective|goal)\s*:\s*([^.\n]{5,})/i,
+    // eslint-disable-next-line security/detect-unsafe-regex -- static bounded alternation on short prompts
     /(?:please\s+)?(?:write|create|build|implement|design|develop|generate|analyze|explain|summarize|translate|convert|fix|debug|refactor|optimize|review|test|provide|list|describe|compare|evaluate)\s+([^.!?\n]{5,})/i,
     /(?:haz(?:me)?|escribe|crea|construye|implementa|dise[nñ]a|desarrolla|genera|analiza|explica|resume|traduce|convierte|arregla|realiza|elabora|prepara|configura|programa)\s+([^.!?\n]{5,})/i,
   ];
@@ -118,6 +119,7 @@ function detectContext(prompt: string): PromptDimension {
   const contextPatterns: RegExp[] = [
     /<context>\s*([\s\S]*?)\s*<\/context>/i,
     /(?:context|background)\s*:\s*([^\n]{5,})/i,
+    // eslint-disable-next-line security/detect-unsafe-regex -- static bounded context detection
     /(?:given\s+(?:that|the\s+context(?:\s+of)?|a|an))\s+([^.!?\n,]{3,})/i,
     /(?:in\s+the\s+context\s+of)\s+([^.!?\n,]{3,})/i,
     /(?:assuming|scenario|currently|dado\s+(?:que|el\s+contexto))\s*:?\s+([^.!?\n]{5,})/i,
@@ -264,6 +266,7 @@ function detectFormat(prompt: string): PromptDimension {
   }
 
   // Output instruction phrases
+  // eslint-disable-next-line security/detect-unsafe-regex -- static bounded output-format detection
   if (/\b(?:format\s+(?:the\s+)?(?:output|response|result)|respond\s+(?:in|with|as)|return\s+(?:as|in)|provide\s+(?:the\s+)?(?:output|result)\s+(?:as|in)|output\s+(?:as|in|format))\b/i.test(prompt)) {
     score = Math.max(score, 60);
     evidence = evidence ?? "Output instruction phrase detected";
@@ -297,6 +300,7 @@ function detectConstraints(prompt: string): PromptDimension {
   }
 
   // Limit constraints
+  // eslint-disable-next-line security/detect-unsafe-regex -- static bounded constraint detection
   const limitMatches = prompt.match(/\b(?:limit\s+to|maximum|at\s+most|no\s+more\s+than|within|keep\s+(?:it\s+)?(?:under|below)|máximo|como\s+máximo)\b/gi);
   if (limitMatches) {
     constraintSignals.push(...limitMatches.map(c => c.trim()));
@@ -344,6 +348,7 @@ function detectClarification(prompt: string): PromptDimension {
   let score = 0;
   let evidence: string | null = null;
 
+  /* eslint-disable security/detect-unsafe-regex -- static bounded clarification detection patterns */
   const clarificationPatterns: RegExp[] = [
     /(?:if\s+(?:anything|something)\s+is\s+unclear|if\s+(?:you(?:'re|\s+are)\s+)?(?:unsure|uncertain|not\s+sure))/i,
     /(?:feel\s+free\s+to\s+ask|ask\s+(?:me\s+)?(?:before|if)|don['']t\s+(?:hesitate|assume))/i,
@@ -352,6 +357,7 @@ function detectClarification(prompt: string): PromptDimension {
     /(?:if\s+you\s+need\s+(?:more\s+)?(?:information|details|context|clarification))/i,
     /(?:verify\s+(?:with\s+me|before)|check\s+with\s+me|confirm\s+before)/i,
   ];
+  /* eslint-enable security/detect-unsafe-regex */
 
   for (const pattern of clarificationPatterns) {
     const match = prompt.match(pattern);

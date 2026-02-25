@@ -74,6 +74,7 @@ export function detectDataTypes(text: string): DetectedDataType[] {
   }
 
   // Commit message pattern
+  // eslint-disable-next-line security/detect-unsafe-regex -- static conventional commit detection
   if (/^(feat|fix|docs|style|refactor|test|chore|ci|perf)(\(.+\))?:/.test(trimmed)) {
     types.push("commit-message");
   }

@@ -8,9 +8,24 @@ const eslintConfig = defineConfig([
   ...nextTs,
   security.configs.recommended,
   {
-    files: ["tests/**/*.{ts,tsx}"],
     rules: {
+      // TypeScript strict mode (noPropertyAccessFromIndexSignature) requires bracket
+      // notation for index signatures. This rule flags ALL bracket access as injection
+      // risk, but our keys are typed enums, config objects, and validated strings — not
+      // user-controlled input. Disabling globally to match TS architecture.
       "security/detect-object-injection": "off",
+
+      // Allow underscore-prefixed params to signal "intentionally unused" without
+      // triggering warnings. Common TS convention for interface-required params.
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+          destructuredArrayIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+        },
+      ],
     },
   },
   // Override default ignores of eslint-config-next.

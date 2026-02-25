@@ -55,7 +55,10 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
   },
   compiler: {
-    removeConsole: process.env.NODE_ENV === "production",
+    removeConsole:
+      process.env.NODE_ENV === "production"
+        ? { exclude: ["info", "error", "warn"] }
+        : false,
   },
   experimental: {
     viewTransition: true,

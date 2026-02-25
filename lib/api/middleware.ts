@@ -28,22 +28,21 @@ export function getClientIP(request: NextRequest): string {
  * Extract BYOK configuration from request headers.
  * Returns undefined if no BYOK headers present.
  */
+const VALID_PROVIDERS: readonly AIProviderType[] = [
+  "gemini",
+  "groq",
+  "openrouter",
+  "pollinations",
+] as const;
+
 export function extractBYOK(request: NextRequest): BYOKConfig | undefined {
   const key = request.headers.get("x-devflow-api-key");
-  const provider = request.headers.get("x-devflow-provider") as
-    | AIProviderType
-    | null;
+  const provider = request.headers.get("x-devflow-provider");
 
   if (!key || !provider) return undefined;
-  if (
-    provider !== "gemini" &&
-    provider !== "groq" &&
-    provider !== "openrouter" &&
-    provider !== "pollinations"
-  )
-    return undefined;
+  if (!VALID_PROVIDERS.includes(provider as AIProviderType)) return undefined;
 
-  return { key, provider };
+  return { key, provider: provider as AIProviderType };
 }
 
 /**

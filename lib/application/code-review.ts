@@ -82,6 +82,7 @@ export function detectIssues(code: string, language: SupportedLanguage): CodeIss
   const patterns = [...COMMON_PATTERNS, ...(LANGUAGE_PATTERNS[language] ?? [])];
 
   for (const patternDef of patterns) {
+    // eslint-disable-next-line security/detect-non-literal-regexp -- predefined COMMON_PATTERNS, not user input
     const regex = new RegExp(patternDef.pattern.source, patternDef.pattern.flags);
     let match;
 

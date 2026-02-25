@@ -45,7 +45,7 @@ export function parseJson(jsonString: string): ParsedJson {
     };
   }
 
-  throw new Error("El JSON debe ser un objeto o un array de objetos");
+  throw new Error("JSON must be an object or an array of objects");
 }
 
 function extractFields(obj: Record<string, unknown>): JsonField[] {
@@ -128,6 +128,7 @@ function analyzeValue(name: string, value: unknown): JsonField {
         semanticType = "email";
       } else if (/^https?:\/\//.test(value)) {
         semanticType = "url";
+      // eslint-disable-next-line security/detect-unsafe-regex -- simple IPv4 pattern, bounded {1,3}
       } else if (/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(value)) {
         semanticType = "ipv4";
       }

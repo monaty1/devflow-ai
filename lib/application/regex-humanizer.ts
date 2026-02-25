@@ -691,6 +691,7 @@ function explainGroup(group: string, locale: RegexLocale = "en"): string {
 
 function explainQuantifier(quantifier: string, locale: RegexLocale = "en"): string {
   const s = getStrings(locale);
+  // eslint-disable-next-line security/detect-unsafe-regex -- simple quantifier parser
   const match = quantifier.match(/\{(\d+)(?:,(\d*))?\}/);
   if (!match || !match[1]) return s.quantifierLabel(quantifier);
 
@@ -921,6 +922,7 @@ export function testRegex(patternInput: string, input: string, locale: RegexLoca
   }
 
   try {
+    // eslint-disable-next-line security/detect-non-literal-regexp -- core tool: compiles user regex for testing
     const regex = new RegExp(pattern, flags);
     const allMatches: TestMatch[] = [];
     const MAX_MATCHES = 500;
@@ -990,8 +992,10 @@ export function isValidRegex(pattern: string): boolean {
     // Handle /pattern/flags format
     const match = pattern.match(/^\/(.+)\/([gimsuy]*)$/);
     if (match && match[1]) {
+      // eslint-disable-next-line security/detect-non-literal-regexp -- validation of user regex
       new RegExp(match[1], match[2] ?? "");
     } else {
+      // eslint-disable-next-line security/detect-non-literal-regexp -- validation of user regex
       new RegExp(pattern);
     }
     return true;
