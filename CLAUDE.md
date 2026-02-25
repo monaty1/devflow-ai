@@ -2,6 +2,49 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Repository
+
+- **Repo**: https://github.com/albertoguinda/devflow-ai
+- **Live**: https://devflowai.vercel.app
+- **Default branch**: `main`
+- All commits and pushes go to `https://github.com/albertoguinda/devflow-ai`. Use Conventional Commits (`feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`).
+
+## Core Principles
+
+1. **SOLID Architecture**
+   - **S** — Single Responsibility: each `lib/application/*.ts` module handles one tool's logic. Hooks manage state only. Pages render only.
+   - **O** — Open/Closed: new tools are added by creating new files following the 5-layer pattern, not by modifying existing tool code.
+   - **L** — Liskov Substitution: all AI providers implement `AIProviderPort` and are interchangeable via the provider factory.
+   - **I** — Interface Segregation: types are scoped per tool (`types/<tool>.ts`), not in a monolithic file.
+   - **D** — Dependency Inversion: pages depend on hooks (abstractions), hooks depend on pure logic, never the reverse. AI route handlers depend on the `AIProviderPort` interface, not concrete providers.
+
+2. **Zero External Dependencies (if possible)** — Prefer native Web APIs (Regex, Intl, JSON, crypto) over npm packages. If it can be done with vanilla TS, do it that way.
+
+3. **Local-First** — Every tool MUST work 100% without AI. AI enhances, never blocks functionality.
+
+4. **No Barriers** — No login, no auth, no credit card. Free forever.
+
+5. **WCAG AAA Accessibility**
+   - All interactive elements must be keyboard-navigable (Tab, Enter, Escape, Arrow keys).
+   - Every interactive element needs an `aria-label` or visible label (use `t()` for i18n, never hardcode).
+   - Minimum 7:1 contrast ratio for text (AAA). Use `focus-visible:outline-2 outline-offset-2` on all focusable elements.
+   - Touch targets minimum 44px (WCAG 2.2 AA).
+   - Decorative icons get `aria-hidden="true"`. Functional icons get `aria-label`.
+   - Skip-to-content link on every layout. Error messages use `role="alert" aria-live="assertive"`.
+   - Test with axe-core: `npm run test:e2e` includes accessibility specs on all 19 pages.
+
+6. **HeroUI v3 Components** — Use HeroUI v3 beta compound components for ALL interactive elements (Button, Input, Modal, Tabs, etc.). No raw `<button>`, `<input>`, or `<select>` in production code. **Exception:** DataTable uses `@heroui/table` v2 + `@heroui/pagination` v2 (intentionally stays on v2). Before using any HeroUI component, check the docs in `.heroui-docs/react/`.
+
+7. **i18n Mandatory** — All user-facing text MUST use `useTranslation()` hook with keys from `locales/en.json` and `locales/es.json`. No hardcoded strings. Both locales must stay in parity.
+
+## Documentation Maintenance
+
+When making changes, keep these files in sync:
+
+- **`CHANGELOG.md`** — Add entries under the current version section following [Keep a Changelog](https://keepachangelog.com/) format. Group by Added/Changed/Fixed/Removed.
+- **`README.md`** — Update stats (test counts, i18n keys, tool count) and feature descriptions if they change. README is bilingual (EN + ES) — update both sections.
+- **`TODO.md`** — Track pending tasks and mark completed items.
+
 ## Commands
 
 ```bash
