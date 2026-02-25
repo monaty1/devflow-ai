@@ -195,7 +195,7 @@ Path aliases: `@/*` maps to project root (e.g., `@/lib/application/json-formatte
 - `experimental.viewTransition: true` — View Transitions API
 - `experimental.optimizePackageImports` for lucide-react, framer-motion, @heroui/react, @heroui/styles, gsap, zod, react-hook-form, recharts, js-tiktoken
 - Security headers on all routes; **CSP skipped in dev** (`NODE_ENV === 'production'` only) for Turbopack compatibility
-- `compiler.removeConsole` strips all `console.*` in production
+- `compiler.removeConsole` strips `console.*` in production except `info`, `error`, `warn` (easter egg uses `console.info`)
 - `images.formats: ["image/avif", "image/webp"]`
 - Sentry wrapping with `withSentryConfig` (silent, deletes sourcemaps after upload)
 
